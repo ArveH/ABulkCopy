@@ -27,7 +27,7 @@ public class ASqlCommandTests
     {
         var connectionString = _configuration.GetConnectionString("FromDb");
         connectionString.Should().NotBeNullOrWhiteSpace("because the connection string should be set in the user secrets file");
-        var sqlCmd = new ASqlCommand(_output)
+        IASqlCommand sqlCmd = new ASqlCommand(_output)
         {
             ConnectionString =  connectionString!
         };

@@ -1,6 +1,6 @@
 ﻿namespace ASqlServer;
 
-public class ASqlCommand
+public class ASqlCommand : IASqlCommand
 {
     private readonly ILogger _logger;
 
