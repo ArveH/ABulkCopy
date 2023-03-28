@@ -3,6 +3,7 @@ namespace ASqlServer.Test;
 public class ASqlCommandTests
 {
     private readonly ILogger _output;
+    private readonly IConfiguration _configuration;
 
     public ASqlCommandTests(ITestOutputHelper output)
     {
@@ -11,6 +12,8 @@ public class ASqlCommandTests
             .MinimumLevel.Verbose()
             .WriteTo.TestOutput(output)
             .CreateLogger();
+
+        _configuration = new ConfigHelper().GetConfiguration("128e015d-d8ef-4ca8-ba79-5390b26c675f");
     }
 
     [Theory]
@@ -22,7 +25,12 @@ public class ASqlCommandTests
     [InlineData("%Sec%", 2)]
     public async Task TestGetTableNames(string searchString, int expectedCount)
     {
-        var sqlCmd = new ASqlCommand(_output) { ConnectionString = "Server=.;Database=U4IDS4;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true" };
+        var connectionString = _configuration.GetConnectionString("FromDb");
+        connectionString.Should().NotBeNullOrWhiteSpace("because the connection string should be set in the user secrets file");
+        var sqlCmd = new ASqlCommand(_output)
+        {
+            ConnectionString =  connectionString!
+        };
         var tableNames = await sqlCmd.GetTableNames(searchString).ToListAsync();
         tableNames.Count.Should().Be(expectedCount, $"because there should be {expectedCount} tables returned");
     }
