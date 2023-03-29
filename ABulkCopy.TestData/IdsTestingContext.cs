@@ -7,6 +7,7 @@ public class IdsTestingContext : DbContext
     {
     }
 
+    public DbSet<AllTypes>? AllTypes { get; set; }
     public DbSet<Client>? ConfiguredClients { get; set; }
     public DbSet<ClientSecret>? ClientSecrets { get; set; }
     public DbSet<AllowedCorsOrigin>? AllowedCorsOrigins { get; set; }
