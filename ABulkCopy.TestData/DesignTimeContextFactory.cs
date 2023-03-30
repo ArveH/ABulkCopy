@@ -1,4 +1,5 @@
 ﻿using ABulkCopy.Common.Config;
+using ABulkCopy.TestData.Initialization;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 
@@ -16,6 +17,8 @@ public class DesignTimeContextFactory: IDesignTimeDbContextFactory<IdsTestingCon
 
         var builder = new DbContextOptionsBuilder<IdsTestingContext>();
         builder
+            .EnableSensitiveDataLogging()
+            .EnableDetailedErrors()
             .UseSqlServer(
                 connectionString,
                 options =>

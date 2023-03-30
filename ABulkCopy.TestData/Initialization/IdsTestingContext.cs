@@ -1,4 +1,8 @@
-﻿namespace ABulkCopy.TestData;
+﻿using ABulkCopy.TestData.Entities;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Security.Claims;
+
+namespace ABulkCopy.TestData.Initialization;
 
 public class IdsTestingContext : DbContext
 {
@@ -12,6 +16,7 @@ public class IdsTestingContext : DbContext
     public DbSet<ClientSecret>? ClientSecrets { get; set; }
     public DbSet<AllowedCorsOrigin>? AllowedCorsOrigins { get; set; }
     public DbSet<Scope>? ConfiguredScopes { get; set; }
+    public DbSet<ScopeClaim>? ScopeClaims { get; set; }
     public DbSet<ScopeSecret>? ScopeSecrets { get; set; }
     public DbSet<ScopeConsentOption>? ScopeConsentOptions { get; set; }
     public DbSet<ClientScope>? ClientScope { get; set; }
@@ -20,7 +25,7 @@ public class IdsTestingContext : DbContext
     public DbSet<Audit>? Audits { get; set; }
     public DbSet<PurgeSemaphore>? PurgeSemaphore { get; set; }
     public DbSet<UsageHistory>? UsageHistory { get; set; }
-    public DbSet<ScopeTitle>? ScopeTitles{ get; set; }
+    public DbSet<ScopeTitle>? ScopeTitles { get; set; }
     public DbSet<PersistedGrant>? PersistedGrants { get; set; }
     public DbSet<ExternalPersistedGrant>? ExternalPersistedGrants { get; set; }
     public DbSet<ExternalUserProfile>? ExternalUserProfiles { get; set; }
@@ -34,7 +39,7 @@ public class IdsTestingContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<ClientScope>()
-            .HasKey(cs => new {cs.ClientId, Name = cs.ScopeId});
+            .HasKey(cs => new { cs.ClientId, Name = cs.ScopeId });
 
         modelBuilder.Entity<Permission>()
             .HasKey(p => new { p.SubjectId, p.ClientId });
@@ -47,6 +52,35 @@ public class IdsTestingContext : DbContext
             .Property(p => p.Type)
             .HasConversion(enumConverter);
 
+        AddSeedDataForScope(modelBuilder);
+
         base.OnModelCreating(modelBuilder);
+    }
+
+    private static void AddSeedDataForScope(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<AllTypes>().HasData(TestData.AllTypes.Copy());
+
+        foreach (var testScope in TestData.StdScopes)
+        {
+            var scope = testScope.Copy();
+            scope.Claims = null;
+            scope.ConsentOptions = null;
+
+            modelBuilder.Entity<Scope>().HasData(scope);
+
+            if (testScope.Claims != null)
+            {
+                foreach (var claim in testScope.Claims)
+                {
+                    modelBuilder.Entity<ScopeClaim>().HasData(claim.Copy());
+                }
+            }
+
+            if (testScope.ConsentOptions != null)
+            {
+                modelBuilder.Entity<ScopeConsentOption>().HasData(testScope.ConsentOptions.Copy());
+            }
+        }
     }
 }

@@ -25,4 +25,6 @@ public class ScopeConsentOption
     /// </summary>
     [StringLength(Constants.Data.ValueLength)]
     public string? LinkDescription { get; set; }
+
+    public ScopeConsentOption Copy() => (ScopeConsentOption)MemberwiseClone();
 }

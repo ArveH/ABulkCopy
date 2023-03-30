@@ -1,6 +1,5 @@
 ﻿namespace ABulkCopy.TestData.Entities;
 
-[Table("ScopeClaims")]
 [DebuggerDisplay("{Name}")]
 public class ScopeClaim
 {
@@ -17,4 +16,6 @@ public class ScopeClaim
 
     [StringLength(Constants.Data.NameLength)]
     public string? Name { get; set; }
+
+    public ScopeClaim Copy() => (ScopeClaim)MemberwiseClone();
 }

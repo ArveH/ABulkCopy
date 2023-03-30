@@ -52,4 +52,6 @@ public class Scope : IIdentifiable, IAuditItem
     public ICollection<ClientScope>? ScopeClients { get; set; }
 
     public string GetId() => ScopeId;
+
+    public Scope Copy() => (Scope)MemberwiseClone();
 }

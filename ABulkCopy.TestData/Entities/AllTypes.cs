@@ -68,4 +68,9 @@ public class AllTypes
     public Guid OtherGuid { get; set; }
     [Column(TypeName = "xml")]
     public string? OtherXml { get; set; }
+
+    public AllTypes Copy()
+    {
+        return (AllTypes)MemberwiseClone();
+    }
 }
