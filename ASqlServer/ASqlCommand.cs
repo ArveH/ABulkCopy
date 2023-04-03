@@ -18,7 +18,7 @@ public class ASqlCommand : IASqlCommand
         await using var connection = new SqlConnection(ConnectionString);
         await connection.OpenAsync();
         await using var command = 
-            new SqlCommand("select name from sys.objects\r\n" +
+            new SqlCommand("select name from sys.objects with(nolock)\r\n" +
                            "where type = 'U'\r\n" +
                            "and name like @SearchString\r\n" +
                            "order by name", 
@@ -27,6 +27,7 @@ public class ASqlCommand : IASqlCommand
         await using var reader = await command.ExecuteReaderAsync();
         _logger.Information("Connected to '{dbName}'.", connection.Database);
         var counter = 0;
+
         while (await reader.ReadAsync())
         {
             yield return reader.GetString(0);

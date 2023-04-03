@@ -17,7 +17,7 @@ public class ASqlCommandTests
     }
 
     [Theory]
-    [InlineData("%", 37)]
+    [InlineData("%", 34)]
     [InlineData("does_not_exist", 0)]
     [InlineData("ConfiguredClients", 1)]
     [InlineData("CONFIGUREDCLIENTS", 1)]
