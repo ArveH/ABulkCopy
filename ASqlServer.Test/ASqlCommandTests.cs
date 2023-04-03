@@ -25,14 +25,41 @@ public class ASqlCommandTests
     [InlineData("%Sec%", 2)]
     public async Task TestGetTableNames(string searchString, int expectedCount)
     {
+        // Arrange
         var connectionString = _configuration.GetConnectionString("FromDb");
         connectionString.Should().NotBeNullOrWhiteSpace("because the connection string should be set in the user secrets file");
         IASqlCommand sqlCmd = new ASqlCommand(_output)
         {
             ConnectionString =  connectionString!
         };
+
+        // Act
         var tableNames = await sqlCmd.GetTableNames(searchString).ToListAsync();
+
+        // Assert
         tableNames.Count.Should().Be(expectedCount, $"because there should be {expectedCount} tables returned");
+    }
+
+    [Fact]
+    public async Task TestGetTableInfo()
+    {
+        // Arrange
+        var connectionString = _configuration.GetConnectionString("FromDb");
+        connectionString.Should().NotBeNullOrWhiteSpace("because the connection string should be set in the user secrets file");
+        IASqlCommand sqlCmd = new ASqlCommand(_output)
+        {
+            ConnectionString = connectionString!
+        };
+
+        // Act
+        var tableDef = await sqlCmd.GetTableInfo("AllTypes");
+
+        // Assert
+        tableDef.Should().NotBeNull();
+        tableDef!.Id.Should().BeGreaterThan(0);
+        tableDef.Name.Should().Be("AllTypes");
+        tableDef.Schema.Should().Be("dbo");
+        tableDef.Location.Should().Be("PRIMARY");
     }
 
 }
