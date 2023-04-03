@@ -26,12 +26,7 @@ public class ASqlCommandTests
     public async Task TestGetTableNames(string searchString, int expectedCount)
     {
         // Arrange
-        var connectionString = _configuration.GetConnectionString("FromDb");
-        connectionString.Should().NotBeNullOrWhiteSpace("because the connection string should be set in the user secrets file");
-        IASqlCommand sqlCmd = new ASqlCommand(_output)
-        {
-            ConnectionString =  connectionString!
-        };
+        var sqlCmd = CreateASqlCommand();
 
         // Act
         var tableNames = await sqlCmd.GetTableNames(searchString);
@@ -44,12 +39,7 @@ public class ASqlCommandTests
     public async Task TestGetTableInfo()
     {
         // Arrange
-        var connectionString = _configuration.GetConnectionString("FromDb");
-        connectionString.Should().NotBeNullOrWhiteSpace("because the connection string should be set in the user secrets file");
-        IASqlCommand sqlCmd = new ASqlCommand(_output)
-        {
-            ConnectionString = connectionString!
-        };
+        var sqlCmd = CreateASqlCommand();
 
         // Act
         var tableDef = await sqlCmd.GetTableInfo("AllTypes");
@@ -62,4 +52,42 @@ public class ASqlCommandTests
         tableDef.Location.Should().Be("PRIMARY");
     }
 
+    [Fact]
+    public async Task TestGetColumnInfo_When_AllTypes()
+    {
+        // Arrange
+        var sqlCmd = CreateASqlCommand();
+        var tableDef = await sqlCmd.GetTableInfo("AllTypes");
+        tableDef.Should().NotBeNull();
+
+        // Act
+        var columnInfo = (await sqlCmd.GetColumnInfo(tableDef!)).ToList();
+
+        // Assert
+        columnInfo.Should().NotBeNull();
+        columnInfo.Count.Should().Be(28);
+        columnInfo[0].Name.Should().Be("Id");
+        columnInfo[0].DataType.Should().Be("bigint");
+        columnInfo[0].IsNullable.Should().BeFalse();
+        columnInfo[0].IsIdentity.Should().BeTrue();
+        columnInfo[9].Precision.Should().Be(28, "because decimal column has precision 28");
+        columnInfo[9].Scale.Should().Be(3, "because decimal column has scale 3");
+        columnInfo[23].DataType.Should().Be("nvarchar");
+        columnInfo[23].Length.Should().Be(-1, "because we are dealing with nvarchar(max)");
+        columnInfo[23].Collation.Should().Be("SQL_Latin1_General_CP1_CI_AS");
+        columnInfo[23].IsNullable.Should().BeTrue("because column 23 is nullable");
+
+    }
+
+    private IASqlCommand CreateASqlCommand()
+    {
+        var connectionString = _configuration.GetConnectionString("FromDb");
+        connectionString.Should()
+            .NotBeNullOrWhiteSpace("because the connection string should be set in the user secrets file");
+        IASqlCommand sqlCmd = new ASqlCommand(_output)
+        {
+            ConnectionString = connectionString!
+        };
+        return sqlCmd;
+    }
 }

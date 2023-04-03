@@ -72,6 +72,65 @@ public class ASqlCommand : IASqlCommand
         return null;
     }
 
+    public async Task<IEnumerable<ColumnDefinition>> GetColumnInfo(TableDefinition tableDef)
+    {
+        var command =
+            new SqlCommand("SELECT c.column_id,\r\n" +
+                           "       c.name, \r\n" +
+                           "       t.name AS t_name, \r\n" +
+                           "       c.max_length AS [length], \r\n" +
+                           "       c.precision AS prec, \r\n" +
+                           "       c.scale AS scale, \r\n" +
+                           "       c.is_nullable, \r\n" +
+                           "       c.collation_name AS collation, \r\n" +
+                           "       OBJECT_NAME(c.default_object_id) AS default_name, \r\n" +
+                           "       OBJECT_DEFINITION(c.default_object_id) AS default_definition, \r\n" +
+                           "       c.is_identity \r\n" +
+                           "FROM   sys.columns c \r\n" +
+                           "       JOIN sys.types t \r\n" +
+                           "         ON c.user_type_id = t.user_type_id \r\n" +
+                           "WHERE  c.object_id = OBJECT_ID('AllTypes') \r\n" +
+                           "ORDER  BY c.column_id");
+        command.Parameters.AddWithValue("@TableName", tableDef.Name);
+
+        var columnDefinitions = new List<ColumnDefinition>();
+        await ExecuteReader(command, reader =>
+        {
+            DefaultDefinition? defaultDef = null;
+            if (!reader.IsDBNull(8))
+            {
+                defaultDef = new DefaultDefinition
+                {
+                    Name = reader.GetString(8),
+                    Definition = reader.GetString(9)
+                };
+            }
+
+            columnDefinitions.Add(new ColumnDefinition
+            {
+                Id = reader.GetInt32(0),
+                Name = reader.GetString(1),
+                DataType = reader.GetString(2),
+                Length = reader.GetInt16(3),
+                Precision = reader.GetByte(4),
+                Scale = reader.GetByte(5),
+                IsNullable = reader.GetBoolean(6),
+                Collation = reader.IsDBNull(7)?null: reader.GetString(7),
+                DefaultConstraint = defaultDef,
+                IsIdentity = reader.GetBoolean(10)
+
+            });
+
+            _logger.Verbose("Added column: {@columnDefinition}", 
+                columnDefinitions.Last());
+        });
+        _logger.Information(
+            "Retrieved column info for {colCount} columns on '{tableName}'",
+            columnDefinitions.Count,
+            tableDef.Name);
+        return columnDefinitions;
+    }
+
     public async Task ExecuteReader(
         SqlCommand command,
         Action<SqlDataReader> readFunc)
