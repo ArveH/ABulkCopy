@@ -34,10 +34,10 @@ public class ASqlCommandTests
         };
 
         // Act
-        var tableNames = await sqlCmd.GetTableNames(searchString).ToListAsync();
+        var tableNames = await sqlCmd.GetTableNames(searchString);
 
         // Assert
-        tableNames.Count.Should().Be(expectedCount, $"because there should be {expectedCount} tables returned");
+        tableNames.Count().Should().Be(expectedCount, $"because there should be {expectedCount} tables returned");
     }
 
     [Fact]
