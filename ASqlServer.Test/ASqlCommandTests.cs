@@ -50,6 +50,9 @@ public class ASqlCommandTests
         tableDef.Name.Should().Be("AllTypes");
         tableDef.Schema.Should().Be("dbo");
         tableDef.Location.Should().Be("PRIMARY");
+        tableDef.Identity.Should().NotBeNull();
+        tableDef.Identity!.Seed.Should().Be(1);
+        tableDef.Identity.Increment.Should().Be(1);
     }
 
     [Fact]
@@ -69,7 +72,9 @@ public class ASqlCommandTests
         columnInfo[0].Name.Should().Be("Id");
         columnInfo[0].DataType.Should().Be("bigint");
         columnInfo[0].IsNullable.Should().BeFalse();
-        columnInfo[0].IsIdentity.Should().BeTrue();
+        columnInfo[0].Identity.Should().NotBeNull();
+        columnInfo[0].Identity!.Seed.Should().Be(1);
+        columnInfo[0].Identity!.Increment.Should().Be(1);
         columnInfo[9].Precision.Should().Be(28, "because decimal column has precision 28");
         columnInfo[9].Scale.Should().Be(3, "because decimal column has scale 3");
         columnInfo[23].DataType.Should().Be("nvarchar");

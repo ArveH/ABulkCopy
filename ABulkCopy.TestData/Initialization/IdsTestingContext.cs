@@ -1,8 +1,4 @@
-﻿using ABulkCopy.TestData.Entities;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.Security.Claims;
-
-namespace ABulkCopy.TestData.Initialization;
+﻿namespace ABulkCopy.TestData.Initialization;
 
 public class IdsTestingContext : DbContext
 {

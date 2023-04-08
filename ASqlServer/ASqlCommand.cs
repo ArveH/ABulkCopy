@@ -35,7 +35,11 @@ public class ASqlCommand : IASqlCommand
     public async Task<TableDefinition?> GetTableInfo(string tableName)
     {
         var command =
-            new SqlCommand("SELECT o.object_id AS id, OBJECT_SCHEMA_NAME(o.object_id) AS [schema], f.name AS segname \r\n" +
+            new SqlCommand("SELECT o.object_id AS id, " +
+                           "       OBJECT_SCHEMA_NAME(o.object_id) AS [schema], " +
+                           "       f.name AS segname,\r\n" +
+                           "       IDENT_SEED(@TableName) AS seed,\r\n" +
+                           "       IDENT_INCR(@TableName) AS increment " +
                            "FROM   sys.objects o WITH(NOLOCK)\r\n" +
                            "INNER JOIN sys.indexes i WITH(NOLOCK)\r\n" +
                            "    ON i.object_id = o.object_id\r\n" +
@@ -49,12 +53,23 @@ public class ASqlCommand : IASqlCommand
         var tableDefinitions = new List<TableDefinition>();
         await ExecuteReader(command, reader =>
             {
+                Identity? identity = null;
+                if (!reader.IsDBNull(3))
+                {
+                    identity = new Identity
+                    {
+                        Seed = Convert.ToInt32(reader.GetDecimal(3)),
+                        Increment = Convert.ToInt32(reader.GetDecimal(4))
+                    };
+                }
+
                 tableDefinitions.Add(new TableDefinition
                 {
                     Id = reader.GetInt32(0),
                     Schema = reader.GetString(1),
                     Name = tableName,
-                    Location = reader.GetString(2)
+                    Location = reader.GetString(2),
+                    Identity = identity
                 });
             });
         if (tableDefinitions.Count == 1)
@@ -106,7 +121,7 @@ public class ASqlCommand : IASqlCommand
                 };
             }
 
-            columnDefinitions.Add(new ColumnDefinition
+            var columnDef = new ColumnDefinition
             {
                 Id = reader.GetInt32(0),
                 Name = reader.GetString(1),
@@ -115,11 +130,11 @@ public class ASqlCommand : IASqlCommand
                 Precision = reader.GetByte(4),
                 Scale = reader.GetByte(5),
                 IsNullable = reader.GetBoolean(6),
-                Collation = reader.IsDBNull(7)?null: reader.GetString(7),
+                Collation = reader.IsDBNull(7) ? null : reader.GetString(7),
                 DefaultConstraint = defaultDef,
-                IsIdentity = reader.GetBoolean(10)
-
-            });
+                Identity = tableDef.Identity
+            };
+            columnDefinitions.Add(columnDef);
 
             _logger.Verbose("Added column: {@columnDefinition}", 
                 columnDefinitions.Last());
