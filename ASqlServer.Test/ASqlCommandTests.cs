@@ -108,24 +108,60 @@ public class ASqlCommandTests
         var columnInfo = (await sqlCmd.GetColumnInfo(tableDef!)).ToList();
 
         // Assert
-        columnInfo.Should().NotBeNull();
+        columnInfo.Should().NotBeNull("because ColumnInfo shouldn't be null");
         columnInfo.Count.Should().Be(5);
-        columnInfo[1].DefaultConstraint.Should().NotBeNull();
+        columnInfo[1].DefaultConstraint.Should().NotBeNull("because DefaultConstraint for first column shouldn't be null");
         columnInfo[1].DefaultConstraint!.Name.Should().StartWith("DF__");
         columnInfo[1].DefaultConstraint!.IsSystemNamed.Should().BeTrue();
         columnInfo[1].DefaultConstraint!.Definition.Should().Be("((0))");
-        columnInfo[2].DefaultConstraint.Should().NotBeNull();
+        columnInfo[2].DefaultConstraint.Should().NotBeNull("because DefaultConstraint for second column shouldn't be null");
         columnInfo[2].DefaultConstraint!.Name.Should().Be("df_bulkcopy_int");
         columnInfo[2].DefaultConstraint!.IsSystemNamed.Should().BeFalse();
         columnInfo[2].DefaultConstraint!.Definition.Should().Be("((0))");
-        columnInfo[3].DefaultConstraint.Should().NotBeNull();
+        columnInfo[3].DefaultConstraint.Should().NotBeNull("because DefaultConstraint for third column shouldn't be null");
         columnInfo[3].DefaultConstraint!.Name.Should().Be("df_num_default");
         columnInfo[3].DefaultConstraint!.IsSystemNamed.Should().BeFalse();
         columnInfo[3].DefaultConstraint!.Definition.Should().StartWith("CREATE DEFAULT");
-        columnInfo[4].DefaultConstraint.Should().NotBeNull();
+        columnInfo[4].DefaultConstraint.Should().NotBeNull("because DefaultConstraint for fourth column shouldn't be null");
         columnInfo[4].DefaultConstraint!.Name.Should().StartWith("DF__");
         columnInfo[4].DefaultConstraint!.IsSystemNamed.Should().BeTrue();
         columnInfo[4].DefaultConstraint!.Definition.Should().Contain("getdate");
+    }
+
+    [Fact]
+    public async Task TestGetPrimaryKey_When_Exists()
+    {
+        // Arrange
+        var sqlCmd = CreateASqlCommand();
+        var tableDef = await sqlCmd.GetTableInfo("ClientScope");
+        tableDef.Should().NotBeNull();
+
+        // Act
+        var pk = await sqlCmd.GetPrimaryKey(tableDef!);
+
+        // Assert
+        pk.Should().NotBeNull();
+        pk!.Name.Should().Be("PK_ClientScope");
+        pk.ColumnNames.Count.Should().Be(2);
+        pk.ColumnNames[0].Name.Should().Be("ClientId");
+        pk.ColumnNames[0].Direction.Should().Be(Direction.Ascending);
+        pk.ColumnNames[1].Name.Should().Be("ScopeId");
+        pk.ColumnNames[1].Direction.Should().Be(Direction.Ascending);
+    }
+
+    [Fact]
+    public async Task TestGetPrimaryKey_When_NotExist()
+    {
+        // Arrange
+        var sqlCmd = CreateASqlCommand();
+        var tableDef = await sqlCmd.GetTableInfo("TestDefaults");
+        tableDef.Should().NotBeNull();
+
+        // Act
+        var pk = await sqlCmd.GetPrimaryKey(tableDef!);
+
+        // Assert
+        pk.Should().BeNull("because TestDefaults doesn't have a primary key");
     }
 
     private IASqlCommand CreateASqlCommand()

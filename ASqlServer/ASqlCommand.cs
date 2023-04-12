@@ -161,6 +161,37 @@ public class ASqlCommand : IASqlCommand
         return columnDefinitions;
     }
 
+    public async Task<PrimaryKey?> GetPrimaryKey(TableDefinition tableDef)
+    {
+        var command =
+            new SqlCommand("SELECT c.name, \r\n" +
+                           "       index_col(@TableName, ic.index_id, index_column_id) as col_name,\r\n" +
+                           "       ic.is_descending_key\r\n" +
+                           "FROM sys.key_constraints c\r\n" +
+                           "JOIN sys.index_columns ic ON (ic.object_id = c.parent_object_id AND ic.index_id = c.unique_index_id)\r\n" +
+                           "WHERE ic.object_id = @TableId\r\n" +
+                           "AND c.[type] = 'PK'\r\n" +
+                           "ORDER BY ic.index_id, ic.index_column_id");
+        command.Parameters.AddWithValue("@TableName", tableDef.Name);
+        command.Parameters.AddWithValue("@TableId", tableDef.Id);
+
+        PrimaryKey? pk = null;
+        await ExecuteReader(command, reader =>
+        {
+            pk ??= new PrimaryKey { Name = reader.GetString(0) };
+
+            pk.ColumnNames.Add(new OrderColumn
+            {
+                Name = reader.GetString(1), 
+                Direction = reader.GetBoolean(2) ? Direction.Descending: Direction.Ascending
+            });
+        });
+        _logger.Information(
+            "Retrieved primary key {@PrimaryKey} for '{tableName}'",
+            pk, tableDef.Name);
+        return pk;
+    }
+
     public async Task ExecuteReader(
         SqlCommand command,
         Action<SqlDataReader> readFunc)
