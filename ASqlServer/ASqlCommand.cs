@@ -90,7 +90,8 @@ public class ASqlCommand : IASqlCommand
     public async Task<IEnumerable<ColumnDefinition>> GetColumnInfo(TableDefinition tableDef)
     {
         var command =
-            new SqlCommand("SELECT c.column_id,\r\n" +
+            new SqlCommand("WITH cte AS (\r\n" +
+                           "SELECT c.column_id,\r\n" +
                            "       c.name, \r\n" +
                            "       t.name AS t_name, \r\n" +
                            "       c.max_length AS [length], \r\n" +
@@ -98,26 +99,40 @@ public class ASqlCommand : IASqlCommand
                            "       c.scale AS scale, \r\n" +
                            "       c.is_nullable, \r\n" +
                            "       c.collation_name AS collation, \r\n" +
-                           "       OBJECT_NAME(c.default_object_id) AS default_name, \r\n" +
-                           "       OBJECT_DEFINITION(c.default_object_id) AS default_definition, \r\n" +
+                           "       c.default_object_id, \r\n" +
                            "       c.is_identity \r\n" +
-                           "FROM   sys.columns c \r\n" +
-                           "       JOIN sys.types t \r\n" +
-                           "         ON c.user_type_id = t.user_type_id \r\n" +
-                           "WHERE  c.object_id = OBJECT_ID('AllTypes') \r\n" +
-                           "ORDER  BY c.column_id");
+                           "FROM   sys.columns c WITH(NOLOCK)\r\n" +
+                           "JOIN   sys.types t WITH(NOLOCK) ON c.user_type_id = t.user_type_id \r\n" +
+                           "WHERE  c.object_id = OBJECT_ID(@TableName) \r\n" +
+                           ")\r\n" +
+                           "SELECT c.column_id,\r\n" +
+                           "       c.name, \r\n" +
+                           "       c.t_name, \r\n" +
+                           "       c.[length], \r\n" +
+                           "       c.prec, \r\n" +
+                           "       c.scale, \r\n" +
+                           "       c.is_nullable, \r\n" +
+                           "       c.collation,\r\n" +
+                           "       c.is_identity, \r\n" + // Field no 8
+                           "       o.name AS def_name,\r\n" +
+                           "       OBJECT_DEFINITION(c.default_object_id) AS [definition],\r\n" +
+                           "       d.is_system_named\r\n" +
+                           "FROM cte c \r\n" +
+                           "LEFT JOIN sys.objects o WITH(NOLOCK) ON (c.default_object_id = o.object_id)\r\n" +
+                           "LEFT JOIN sys.default_constraints d WITH(NOLOCK) ON (d.object_id = c.default_object_id)");
         command.Parameters.AddWithValue("@TableName", tableDef.Name);
 
         var columnDefinitions = new List<ColumnDefinition>();
         await ExecuteReader(command, reader =>
         {
             DefaultDefinition? defaultDef = null;
-            if (!reader.IsDBNull(8))
+            if (!reader.IsDBNull(9))
             {
                 defaultDef = new DefaultDefinition
                 {
-                    Name = reader.GetString(8),
-                    Definition = reader.GetString(9)
+                    Name = reader.GetString(9),
+                    Definition = reader.GetString(10),
+                    IsSystemNamed = reader.IsDBNull(11) ? false: reader.GetBoolean(11)
                 };
             }
 
@@ -132,7 +147,7 @@ public class ASqlCommand : IASqlCommand
                 IsNullable = reader.GetBoolean(6),
                 Collation = reader.IsDBNull(7) ? null : reader.GetString(7),
                 DefaultConstraint = defaultDef,
-                Identity = tableDef.Identity
+                Identity = reader.GetBoolean(8) ? tableDef.Identity: null
             };
             columnDefinitions.Add(columnDef);
 

@@ -17,7 +17,7 @@ public class ASqlCommandTests
     }
 
     [Theory]
-    [InlineData("%", 34)]
+    [InlineData("%", 35)]
     [InlineData("does_not_exist", 0)]
     [InlineData("ConfiguredClients", 1)]
     [InlineData("CONFIGUREDCLIENTS", 1)]
@@ -82,6 +82,38 @@ public class ASqlCommandTests
         columnInfo[23].Collation.Should().Be("SQL_Latin1_General_CP1_CI_AS");
         columnInfo[23].IsNullable.Should().BeTrue("because column 23 is nullable");
 
+    }
+
+    [Fact]
+    public async Task TestGetColumnInfo_When_DefaultValues()
+    {
+        // Arrange
+        var sqlCmd = CreateASqlCommand();
+        var tableDef = await sqlCmd.GetTableInfo("TestDefaults");
+        tableDef.Should().NotBeNull();
+
+        // Act
+        var columnInfo = (await sqlCmd.GetColumnInfo(tableDef!)).ToList();
+
+        // Assert
+        columnInfo.Should().NotBeNull();
+        columnInfo.Count.Should().Be(5);
+        columnInfo[1].DefaultConstraint.Should().NotBeNull();
+        columnInfo[1].DefaultConstraint!.Name.Should().StartWith("DF__");
+        columnInfo[1].DefaultConstraint!.IsSystemNamed.Should().BeTrue();
+        columnInfo[1].DefaultConstraint!.Definition.Should().Be("((0))");
+        columnInfo[2].DefaultConstraint.Should().NotBeNull();
+        columnInfo[2].DefaultConstraint!.Name.Should().Be("df_bulkcopy_int");
+        columnInfo[2].DefaultConstraint!.IsSystemNamed.Should().BeFalse();
+        columnInfo[2].DefaultConstraint!.Definition.Should().Be("((0))");
+        columnInfo[3].DefaultConstraint.Should().NotBeNull();
+        columnInfo[3].DefaultConstraint!.Name.Should().Be("df_num_default");
+        columnInfo[3].DefaultConstraint!.IsSystemNamed.Should().BeFalse();
+        columnInfo[3].DefaultConstraint!.Definition.Should().StartWith("CREATE DEFAULT");
+        columnInfo[4].DefaultConstraint.Should().NotBeNull();
+        columnInfo[4].DefaultConstraint!.Name.Should().StartWith("DF__");
+        columnInfo[4].DefaultConstraint!.IsSystemNamed.Should().BeTrue();
+        columnInfo[4].DefaultConstraint!.Definition.Should().Contain("getdate");
     }
 
     private IASqlCommand CreateASqlCommand()
