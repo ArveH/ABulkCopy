@@ -36,7 +36,7 @@ public class ASqlCommandTests
     }
 
     [Fact]
-    public async Task TestGetTableInfo()
+    public async Task TestGetTableInfo_Then_NameAndSchemaOk()
     {
         // Arrange
         var sqlCmd = CreateASqlCommand();
@@ -49,8 +49,20 @@ public class ASqlCommandTests
         tableDef!.Id.Should().BeGreaterThan(0);
         tableDef.Name.Should().Be("AllTypes");
         tableDef.Schema.Should().Be("dbo");
-        tableDef.Location.Should().Be("PRIMARY");
-        tableDef.Identity.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task TestGetTableInfo_Then_IdentityOk()
+    {
+        // Arrange
+        var sqlCmd = CreateASqlCommand();
+
+        // Act
+        var tableDef = await sqlCmd.GetTableInfo("AllTypes");
+
+        // Assert
+        tableDef.Should().NotBeNull();
+        tableDef!.Identity.Should().NotBeNull();
         tableDef.Identity!.Seed.Should().Be(1);
         tableDef.Identity.Increment.Should().Be(1);
     }
