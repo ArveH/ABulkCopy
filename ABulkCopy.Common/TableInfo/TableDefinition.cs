@@ -2,11 +2,7 @@
 
 public class TableDefinition
 {
-    public int Id { get; set; }
-    public required string Name { get; set; }
-    public required string Schema { get; set; }
-    public required string Location { get; set; }
-    public Identity? Identity { get; set; }
+    public required TableHeader  Header { get; set; }
 
     public List<ColumnDefinition> Columns { get; set; } = new();
     public PrimaryKey? PrimaryKey { get; set; }

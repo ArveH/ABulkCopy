@@ -1,6 +1,4 @@
-﻿using ABulkCopy.Common.TableInfo;
-
-namespace ASqlServer;
+﻿namespace ASqlServer;
 
 public class ASqlCommand : IASqlCommand
 {
@@ -8,7 +6,7 @@ public class ASqlCommand : IASqlCommand
 
     public ASqlCommand(ILogger logger)
     {
-        _logger = logger;
+        _logger = logger.ForContext<ASqlCommand>();
     }
 
     public required string ConnectionString { get; init; }
@@ -34,7 +32,7 @@ public class ASqlCommand : IASqlCommand
         return tableNames;
     }
 
-    public async Task<TableDefinition?> GetTableInfo(string tableName)
+    public async Task<TableHeader?> GetTableHeader(string tableName)
     {
         var command =
             new SqlCommand("SELECT o.object_id AS id, " +
@@ -52,7 +50,7 @@ public class ASqlCommand : IASqlCommand
                            "  AND o.name = @TableName\r\n");
         command.Parameters.AddWithValue("@TableName", tableName);
 
-        var tableDefinitions = new List<TableDefinition>();
+        var tableHeaders = new List<TableHeader>();
         await ExecuteReader(command, reader =>
             {
                 Identity? identity = null;
@@ -65,7 +63,7 @@ public class ASqlCommand : IASqlCommand
                     };
                 }
 
-                tableDefinitions.Add(new TableDefinition
+                tableHeaders.Add(new TableHeader
                 {
                     Id = reader.GetInt32(0),
                     Schema = reader.GetString(1),
@@ -74,22 +72,22 @@ public class ASqlCommand : IASqlCommand
                     Identity = identity
                 });
             });
-        if (tableDefinitions.Count == 1)
+        if (tableHeaders.Count == 1)
         {
             _logger.Information(
                 "Retrieved table info for '{tableName}': Id={id}, Schema='{schema}', Location='{location}'",
                 tableName,
-                tableDefinitions[0].Id,
-                tableDefinitions[0].Schema,
-                tableDefinitions[0].Location);
-            return tableDefinitions[0];
+                tableHeaders[0].Id,
+                tableHeaders[0].Schema,
+                tableHeaders[0].Location);
+            return tableHeaders[0];
         }
 
         _logger.Warning($"Table information for table '{tableName}' was not found");
         return null;
     }
 
-    public async Task<IEnumerable<ColumnDefinition>> GetColumnInfo(TableDefinition tableDef)
+    public async Task<IEnumerable<ColumnDefinition>> GetColumnInfo(TableHeader tableHeader)
     {
         var command =
             new SqlCommand("WITH cte AS (\r\n" +
@@ -122,7 +120,7 @@ public class ASqlCommand : IASqlCommand
                            "FROM cte c \r\n" +
                            "LEFT JOIN sys.objects o WITH(NOLOCK) ON (c.default_object_id = o.object_id)\r\n" +
                            "LEFT JOIN sys.default_constraints d WITH(NOLOCK) ON (d.object_id = c.default_object_id)");
-        command.Parameters.AddWithValue("@TableName", tableDef.Name);
+        command.Parameters.AddWithValue("@TableName", tableHeader.Name);
 
         var columnDefinitions = new List<ColumnDefinition>();
         await ExecuteReader(command, reader =>
@@ -134,7 +132,7 @@ public class ASqlCommand : IASqlCommand
                 {
                     Name = reader.GetString(9),
                     Definition = reader.GetString(10),
-                    IsSystemNamed = reader.IsDBNull(11) ? false: reader.GetBoolean(11)
+                    IsSystemNamed = reader.IsDBNull(11) ? false : reader.GetBoolean(11)
                 };
             }
 
@@ -149,21 +147,21 @@ public class ASqlCommand : IASqlCommand
                 IsNullable = reader.GetBoolean(6),
                 Collation = reader.IsDBNull(7) ? null : reader.GetString(7),
                 DefaultConstraint = defaultDef,
-                Identity = reader.GetBoolean(8) ? tableDef.Identity: null
+                Identity = reader.GetBoolean(8) ? tableHeader.Identity : null
             };
             columnDefinitions.Add(columnDef);
 
-            _logger.Verbose("Added column: {@columnDefinition}", 
+            _logger.Verbose("Added column: {@columnDefinition}",
                 columnDefinitions.Last());
         });
         _logger.Information(
             "Retrieved column info for {colCount} columns on '{tableName}'",
             columnDefinitions.Count,
-            tableDef.Name);
+            tableHeader.Name);
         return columnDefinitions;
     }
 
-    public async Task<PrimaryKey?> GetPrimaryKey(TableDefinition tableDef)
+    public async Task<PrimaryKey?> GetPrimaryKey(TableHeader tableHeader)
     {
         var command =
             new SqlCommand("SELECT c.name, \r\n" +
@@ -174,8 +172,8 @@ public class ASqlCommand : IASqlCommand
                            "WHERE ic.object_id = @TableId\r\n" +
                            "AND c.[type] = 'PK'\r\n" +
                            "ORDER BY ic.index_id, ic.index_column_id");
-        command.Parameters.AddWithValue("@TableName", tableDef.Name);
-        command.Parameters.AddWithValue("@TableId", tableDef.Id);
+        command.Parameters.AddWithValue("@TableName", tableHeader.Name);
+        command.Parameters.AddWithValue("@TableId", tableHeader.Id);
 
         PrimaryKey? pk = null;
         await ExecuteReader(command, reader =>
@@ -184,17 +182,17 @@ public class ASqlCommand : IASqlCommand
 
             pk.ColumnNames.Add(new OrderColumn
             {
-                Name = reader.GetString(1), 
-                Direction = reader.GetBoolean(2) ? Direction.Descending: Direction.Ascending
+                Name = reader.GetString(1),
+                Direction = reader.GetBoolean(2) ? Direction.Descending : Direction.Ascending
             });
         });
         _logger.Information(
             "Retrieved primary key {@PrimaryKey} for '{tableName}'",
-            pk, tableDef.Name);
+            pk, tableHeader.Name);
         return pk;
     }
 
-    public async Task<IEnumerable<ForeignKey>> GetForeignKeys(TableDefinition tableDef)
+    public async Task<IEnumerable<ForeignKey>> GetForeignKeys(TableHeader tableHeader)
     {
         var command =
             new SqlCommand("SELECT   \r\n" +
@@ -209,7 +207,7 @@ public class ASqlCommand : IASqlCommand
                            "   ON f.object_id = fc.constraint_object_id   \r\n" +
                            "WHERE f.parent_object_id = @TableId\r\n" +
                            "ORDER BY f.name");
-        command.Parameters.AddWithValue("@TableId", tableDef.Id);
+        command.Parameters.AddWithValue("@TableId", tableHeader.Id);
 
         var foreignKeys = new List<ForeignKey>();
         await ExecuteReader(command, reader =>
@@ -229,7 +227,7 @@ public class ASqlCommand : IASqlCommand
 
         _logger.Information(
             "Retrieved {foreignKeyCount} foreign keys for table '{tableName}'",
-            foreignKeys.Capacity, tableDef.Name);
+            foreignKeys.Capacity, tableHeader.Name);
 
         return foreignKeys;
     }

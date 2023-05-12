@@ -36,35 +36,35 @@ public class ASqlCommandTests
     }
 
     [Fact]
-    public async Task TestGetTableInfo_Then_NameAndSchemaOk()
+    public async Task TestGetTableHeader_Then_NameAndSchemaOk()
     {
         // Arrange
         var sqlCmd = CreateASqlCommand();
 
         // Act
-        var tableDef = await sqlCmd.GetTableInfo("AllTypes");
+        var tableHeader = await sqlCmd.GetTableHeader("AllTypes");
 
         // Assert
-        tableDef.Should().NotBeNull();
-        tableDef!.Id.Should().BeGreaterThan(0);
-        tableDef.Name.Should().Be("AllTypes");
-        tableDef.Schema.Should().Be("dbo");
+        tableHeader.Should().NotBeNull();
+        tableHeader!.Id.Should().BeGreaterThan(0);
+        tableHeader.Name.Should().Be("AllTypes");
+        tableHeader.Schema.Should().Be("dbo");
     }
 
     [Fact]
-    public async Task TestGetTableInfo_Then_IdentityOk()
+    public async Task TestGetTableHeader_Then_IdentityOk()
     {
         // Arrange
         var sqlCmd = CreateASqlCommand();
 
         // Act
-        var tableDef = await sqlCmd.GetTableInfo("AllTypes");
+        var tableHeader = await sqlCmd.GetTableHeader("AllTypes");
 
         // Assert
-        tableDef.Should().NotBeNull();
-        tableDef!.Identity.Should().NotBeNull();
-        tableDef.Identity!.Seed.Should().Be(1);
-        tableDef.Identity.Increment.Should().Be(1);
+        tableHeader.Should().NotBeNull();
+        tableHeader!.Identity.Should().NotBeNull();
+        tableHeader.Identity!.Seed.Should().Be(1);
+        tableHeader.Identity.Increment.Should().Be(1);
     }
 
     [Fact]
@@ -72,11 +72,11 @@ public class ASqlCommandTests
     {
         // Arrange
         var sqlCmd = CreateASqlCommand();
-        var tableDef = await sqlCmd.GetTableInfo("AllTypes");
-        tableDef.Should().NotBeNull();
+        var tableHeader = await sqlCmd.GetTableHeader("AllTypes");
+        tableHeader.Should().NotBeNull();
 
         // Act
-        var columnInfo = (await sqlCmd.GetColumnInfo(tableDef!)).ToList();
+        var columnInfo = (await sqlCmd.GetColumnInfo(tableHeader!)).ToList();
 
         // Assert
         columnInfo.Should().NotBeNull();
@@ -101,11 +101,11 @@ public class ASqlCommandTests
     {
         // Arrange
         var sqlCmd = CreateASqlCommand();
-        var tableDef = await sqlCmd.GetTableInfo("TestDefaults");
-        tableDef.Should().NotBeNull();
+        var tableHeader = await sqlCmd.GetTableHeader("TestDefaults");
+        tableHeader.Should().NotBeNull();
 
         // Act
-        var columnInfo = (await sqlCmd.GetColumnInfo(tableDef!)).ToList();
+        var columnInfo = (await sqlCmd.GetColumnInfo(tableHeader!)).ToList();
 
         // Assert
         columnInfo.Should().NotBeNull("because ColumnInfo shouldn't be null");
@@ -133,11 +133,11 @@ public class ASqlCommandTests
     {
         // Arrange
         var sqlCmd = CreateASqlCommand();
-        var tableDef = await sqlCmd.GetTableInfo("ClientScope");
-        tableDef.Should().NotBeNull();
+        var tableHeader = await sqlCmd.GetTableHeader("ClientScope");
+        tableHeader.Should().NotBeNull();
 
         // Act
-        var pk = await sqlCmd.GetPrimaryKey(tableDef!);
+        var pk = await sqlCmd.GetPrimaryKey(tableHeader!);
 
         // Assert
         pk.Should().NotBeNull();
@@ -154,11 +154,11 @@ public class ASqlCommandTests
     {
         // Arrange
         var sqlCmd = CreateASqlCommand();
-        var tableDef = await sqlCmd.GetTableInfo("TestDefaults");
-        tableDef.Should().NotBeNull();
+        var tableHeader = await sqlCmd.GetTableHeader("TestDefaults");
+        tableHeader.Should().NotBeNull();
 
         // Act
-        var pk = await sqlCmd.GetPrimaryKey(tableDef!);
+        var pk = await sqlCmd.GetPrimaryKey(tableHeader!);
 
         // Assert
         pk.Should().BeNull("because TestDefaults doesn't have a primary key");
@@ -169,11 +169,11 @@ public class ASqlCommandTests
     {
         // Arrange
         var sqlCmd = CreateASqlCommand();
-        var tableDef = await sqlCmd.GetTableInfo("ClientScope");
-        tableDef.Should().NotBeNull();
+        var tableHeader = await sqlCmd.GetTableHeader("ClientScope");
+        tableHeader.Should().NotBeNull();
 
         // Act
-        var fks = await sqlCmd.GetForeignKeys(tableDef!);
+        var fks = await sqlCmd.GetForeignKeys(tableHeader!);
 
         // Assert
         var foreignKeys = fks.ToList();
