@@ -1,4 +1,6 @@
-﻿namespace ASqlServer;
+﻿using ABulkCopy.Common.TableInfo;
+
+namespace ASqlServer;
 
 public class ASqlCommand : IASqlCommand
 {
@@ -190,6 +192,46 @@ public class ASqlCommand : IASqlCommand
             "Retrieved primary key {@PrimaryKey} for '{tableName}'",
             pk, tableDef.Name);
         return pk;
+    }
+
+    public async Task<IEnumerable<ForeignKey>> GetForeignKeys(TableDefinition tableDef)
+    {
+        var command =
+            new SqlCommand("SELECT   \r\n" +
+                           "    f.name AS foreign_key_name,  \r\n" +
+                           "    COL_NAME(fc.parent_object_id, fc.parent_column_id) AS constraint_column_name,  \r\n" +
+                           "    OBJECT_NAME (f.referenced_object_id) AS referenced_object,  \r\n" +
+                           "    COL_NAME(fc.referenced_object_id, fc.referenced_column_id) AS referenced_column_name,  \r\n" +
+                           "    f.delete_referential_action_desc,  \r\n" +
+                           "    f.update_referential_action_desc  \r\n" +
+                           "FROM sys.foreign_keys AS f  \r\n" +
+                           "INNER JOIN sys.foreign_key_columns AS fc   \r\n" +
+                           "   ON f.object_id = fc.constraint_object_id   \r\n" +
+                           "WHERE f.parent_object_id = @TableId\r\n" +
+                           "ORDER BY f.name");
+        command.Parameters.AddWithValue("@TableId", tableDef.Id);
+
+        var foreignKeys = new List<ForeignKey>();
+        await ExecuteReader(command, reader =>
+        {
+            var fk = new ForeignKey
+            {
+                Name = reader.GetString(0),
+                ColName = reader.GetString(1),
+                TableReference = reader.GetString(2),
+                ColumnReference = reader.GetString(3),
+                DeleteAction = (DeleteAction)Enum.Parse(typeof(DeleteAction), reader.GetString(4).Replace("_", ""), true),
+                UpdateAction = (UpdateAction)Enum.Parse(typeof(UpdateAction), reader.GetString(5).Replace("_", ""), true)
+            };
+            foreignKeys.Add(fk);
+            _logger.Verbose("Added foreign key: {ForeignKey}", fk.Name);
+        });
+
+        _logger.Information(
+            "Retrieved {foreignKeyCount} foreign keys for table '{tableName}'",
+            foreignKeys.Capacity, tableDef.Name);
+
+        return foreignKeys;
     }
 
     public async Task ExecuteReader(

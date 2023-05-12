@@ -7,4 +7,5 @@ public interface IASqlCommand
     Task<TableDefinition?> GetTableInfo(string tableName);
     Task<IEnumerable<ColumnDefinition>> GetColumnInfo(TableDefinition tableDef);
     Task<PrimaryKey?> GetPrimaryKey(TableDefinition tableDef);
+    Task<IEnumerable<ForeignKey>> GetForeignKeys(TableDefinition tableDef);
 }

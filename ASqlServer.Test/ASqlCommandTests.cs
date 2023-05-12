@@ -17,7 +17,7 @@ public class ASqlCommandTests
     }
 
     [Theory]
-    [InlineData("%", 35)]
+    [InlineData("%", 36)]
     [InlineData("does_not_exist", 0)]
     [InlineData("ConfiguredClients", 1)]
     [InlineData("CONFIGUREDCLIENTS", 1)]
@@ -162,6 +162,28 @@ public class ASqlCommandTests
 
         // Assert
         pk.Should().BeNull("because TestDefaults doesn't have a primary key");
+    }
+
+    [Fact]
+    public async Task TestGetForeignKey_WhenExists()
+    {
+        // Arrange
+        var sqlCmd = CreateASqlCommand();
+        var tableDef = await sqlCmd.GetTableInfo("ClientScope");
+        tableDef.Should().NotBeNull();
+
+        // Act
+        var fks = await sqlCmd.GetForeignKeys(tableDef!);
+
+        // Assert
+        var foreignKeys = fks.ToList();
+        foreignKeys.Should().NotBeNull();
+        foreignKeys.Count.Should().Be(2);
+        foreignKeys[0].Name.Should().Be("FK_ClientScope_ConfiguredClients_ClientId");
+        foreignKeys[0].ColName.Should().Be("ClientId");
+        foreignKeys[0].ColumnReference.Should().Be("ClientId");
+        foreignKeys[0].DeleteAction.Should().Be(DeleteAction.Cascade);
+        foreignKeys[0].UpdateAction.Should().Be(UpdateAction.NoAction);
     }
 
     private IASqlCommand CreateASqlCommand()
