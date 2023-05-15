@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
@@ -14,6 +14,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ABulkCopy.Common\ABulkCopy.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ColumnTypes\" />
   </ItemGroup>
 
 </Project>
