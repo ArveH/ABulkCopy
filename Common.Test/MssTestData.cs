@@ -49,6 +49,76 @@
             };
         }
 
+        public static TableDefinition GetTableDefaults()
+        {
+            return new TableDefinition
+            {
+                Header = new TableHeader
+                {
+                    Id = 1,
+                    Identity = new Identity(),
+                    Location = "default",
+                    Name = "MssDefaults",
+                    Schema = "dbo"
+                },
+                Columns = new List<ColumnDefinition>
+                {
+                    GetIdColDefinition(101, "Id"),
+                    new ColumnDefinition
+                    {
+                        Id = 101,
+                        Name = "intdef",
+                        DataType = "int",
+                        Collation = null,
+                        IsNullable = false,
+                        Length = 4,
+                        Precision = 10,
+                        DefaultConstraint = new DefaultDefinition
+                        {
+                            Name = "df_bulkcopy_int",
+                            Definition = "((0))",
+                            IsSystemNamed = false
+                        },
+                        ComputedDefinition = null
+                    },
+                    new ColumnDefinition
+                    {
+                        Id = 102,
+                        Name = "strdef",
+                        DataType = "nvarchar",
+                        Collation = "SQL_Latin1_General_CP1_CI_AS",
+                        IsNullable = true,
+                        Length = 20,
+                        DefaultConstraint = new DefaultDefinition
+                        {
+                            Name = "DF__arveh__col1__531856C7",
+                            Definition = "('Norway')",
+                            IsSystemNamed = true
+                        },
+                        ComputedDefinition = null
+                    },
+                    new ColumnDefinition
+                    {
+                        Id = 103,
+                        Name = "datedef",
+                        DataType = "datetime2",
+                        Collation = null,
+                        IsNullable = true,
+                        Length = 8,
+                        Precision = 27,
+                        Scale = 7,
+                        DefaultConstraint = new DefaultDefinition
+                        {
+                            Name = "DF__arveh__col1__531856C8",
+                            Definition = "(getdate())",
+                            IsSystemNamed = true
+                        },
+                        ComputedDefinition = null
+                    }
+                }
+            };
+        }
+
         public static ColumnDefinition GetIdColDefinition(
             int id,
             string name)
@@ -66,8 +136,8 @@
             string name,
             string dataType,
             int length,
-            int precision=0,
-            int scale=0)
+            int precision = 0,
+            int scale = 0)
         {
             var colDef = GetColDefinition(id, name, dataType);
             colDef.Length = length;
