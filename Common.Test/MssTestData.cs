@@ -16,7 +16,7 @@
                 },
                 Columns = new List<ColumnDefinition>
                 {
-                    GetLengthColDefinition(101, "Id", "bigint", 8, 19),
+                    GetIdColDefinition(101, "Id"),
                     GetLengthColDefinition(102, "ExactNumBigInt", "bigint", 8, 19),
                     GetLengthColDefinition(103, "ExactNumInt", "int", 4, 10),
                     GetLengthColDefinition(104, "ExactNumSmallInt", "smallint", 2, 5),
@@ -47,6 +47,18 @@
                     GetOtherColDefinition(129, "OtherXml", "xml", -1, true)
                 }
             };
+        }
+
+        public static ColumnDefinition GetIdColDefinition(
+            int id,
+            string name)
+        {
+            var colDef = GetColDefinition(id, name, "bigint");
+            colDef.Identity = new Identity();
+            colDef.Length = 8;
+            colDef.Precision = 19;
+            colDef.Scale = 0;
+            return colDef;
         }
 
         public static ColumnDefinition GetLengthColDefinition(
@@ -106,7 +118,6 @@
                 DataType = dataType,
                 Collation = null,
                 IsNullable = false,
-                Identity = new Identity(),
                 DefaultConstraint = null,
                 ComputedDefinition = null
             };

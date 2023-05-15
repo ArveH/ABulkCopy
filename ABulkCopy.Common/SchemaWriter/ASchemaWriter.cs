@@ -1,4 +1,6 @@
-﻿namespace ABulkCopy.Common.SchemaWriter;
+﻿using System.Text.Json;
+
+namespace ABulkCopy.Common.SchemaWriter;
 
 public class ASchemaWriter : IASchemaWriter
 {
@@ -18,7 +20,7 @@ public class ASchemaWriter : IASchemaWriter
         string path)
     {
         await _fileSystem.File.WriteAllTextAsync(
-            path,
-            "some test json");
+            Path.Combine(path, tableDefinition.Header.Name + CommonConstants.SchemaSuffix),
+            JsonSerializer.Serialize(tableDefinition));
     }
 }

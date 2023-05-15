@@ -1,4 +1,6 @@
 global using System.IO.Abstractions.TestingHelpers;
+global using System.Text.Json;
+global using ABulkCopy.Common;
 global using ABulkCopy.Common.Config;
 global using ABulkCopy.Common.SchemaWriter;
 global using ABulkCopy.Common.TableInfo;
