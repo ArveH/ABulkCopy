@@ -38,10 +38,13 @@ public class MssReaderTests
 
         // Act
         await dataReader.PrepareReader(tableDefinition);
-        while (await dataReader.Read())
-        {
-
-        }
-
+        var rowWasRead = await dataReader.Read();
+        rowWasRead.Should().BeTrue("because there should be one row");
+        var value = dataReader.GetValue(0);
+        value.Should().NotBeNull("because value should be a bigint number");
+        value.Should().BeOfType<long>("because value should be a bigint number");
+        ((long)value!).Should().Be(AllTypes.SampleValues.BigInt);
+        rowWasRead = await dataReader.Read();
+        rowWasRead.Should().BeFalse("because there should be only one row");
     }
 }

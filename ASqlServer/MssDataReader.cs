@@ -37,6 +37,9 @@ public class MssDataReader : IDisposable, IMssDataReader
             _readerName, tableDefinition.Header.Name);
     }
 
+    public bool IsNull(int ordinal) => _reader?.IsDBNull(ordinal) ?? true;
+    public object? GetValue(int ordinal) => _reader?.GetValue(ordinal);
+
     public async Task<bool> Read()
     {
         if (_reader == null)

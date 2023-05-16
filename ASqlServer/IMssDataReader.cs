@@ -7,4 +7,6 @@ public interface IMssDataReader
     Task<bool> Read();
     void Close();
     void Dispose();
+    bool IsNull(int ordinal);
+    object? GetValue(int ordinal);
 }
