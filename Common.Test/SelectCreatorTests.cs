@@ -16,26 +16,7 @@ public class SelectCreatorTests
     [Fact]
     public void TestCreate_When_SingleColumn()
     {
-        // Arrange
-        var tableDefinition = new TableDefinition
-        {
-            Header = new TableHeader
-            {
-                Id = 1,
-                Identity = new Identity(),
-                Location = "default",
-                Name = "mytable",
-                Schema = "dbo"
-            },
-            Columns = new List<ColumnDefinition>
-            {
-                MssTestData.GetCharColDefinition(1, "col1", "nvarchar", 20)
-            }
-        };
-        ISelectCreator creator = new SelectCreator(_output);
-
-        // Act
-        var selectStatement = creator.CreateSelect(tableDefinition).ToLowerInvariant();
+        var selectStatement = TestCreate(1);
 
         // Assert
         selectStatement.Should().Be("select col1 from dbo.mytable");
@@ -44,7 +25,14 @@ public class SelectCreatorTests
     [Fact]
     public void TestCreate_When_3Columns()
     {
-        // Arrange
+        var selectStatement = TestCreate(3);
+
+        // Assert
+        selectStatement.Should().Be("select col1, col2, col3 from dbo.mytable");
+    }
+
+    private string TestCreate(int colCount)
+    {
         var tableDefinition = new TableDefinition
         {
             Header = new TableHeader
@@ -55,19 +43,15 @@ public class SelectCreatorTests
                 Name = "mytable",
                 Schema = "dbo"
             },
-            Columns = new List<ColumnDefinition>
-            {
-                MssTestData.GetCharColDefinition(1, "col1", "nvarchar", 20),
-                MssTestData.GetCharColDefinition(2, "col2", "nvarchar", 20),
-                MssTestData.GetCharColDefinition(3, "col3", "nvarchar", 20)
-            }
+            Columns = new List<ColumnDefinition>()
         };
+        for (var i = 0; i < colCount; i++)
+        {
+            tableDefinition.Columns.Add(
+                MssTestData.GetCharColDefinition(i + 1, $"col{i + 1}", "nvarchar", 20));
+        }
+
         ISelectCreator creator = new SelectCreator(_output);
-
-        // Act
-        var selectStatement = creator.CreateSelect(tableDefinition).ToLowerInvariant();
-
-        // Assert
-        selectStatement.Should().Be("select col1, col2, col3 from dbo.mytable");
+        return creator.CreateSelect(tableDefinition).ToLowerInvariant();
     }
 }
