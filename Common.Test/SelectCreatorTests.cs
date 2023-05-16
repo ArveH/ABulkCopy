@@ -31,6 +31,15 @@ public class SelectCreatorTests
         selectStatement.Should().Be("select col1, col2, col3 from dbo.mytable");
     }
 
+    [Fact]
+    public void TestCreate_When_NoColumns_Then_Exception()
+    {
+        var act = () => TestCreate(0);
+
+        act.Should().Throw<ArgumentException>()
+            .WithMessage("No columns in table definition*");
+    }
+
     private string TestCreate(int colCount)
     {
         var tableDefinition = new TableDefinition
