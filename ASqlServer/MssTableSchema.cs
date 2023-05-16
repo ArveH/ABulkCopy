@@ -2,11 +2,11 @@
 
 public class MssTableSchema : IMssTableSchema
 {
-    private readonly IASqlCommand _command;
+    private readonly IMssCommand _command;
     private readonly ILogger _logger;
 
     public MssTableSchema(
-        IASqlCommand command,
+        IMssCommand command,
         ILogger logger)
     {
         _command = command;

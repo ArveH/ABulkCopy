@@ -1,11 +1,11 @@
 namespace ASqlServer.Test;
 
-public class ASqlCommandTests
+public class MssCommandTests
 {
     private readonly ILogger _output;
     private readonly IConfiguration _configuration;
 
-    public ASqlCommandTests(ITestOutputHelper output)
+    public MssCommandTests(ITestOutputHelper output)
     {
         _output = new LoggerConfiguration()
             .Enrich.FromLogContext()
@@ -26,7 +26,7 @@ public class ASqlCommandTests
     public async Task TestGetTableNames(string searchString, int expectedCount)
     {
         // Arrange
-        var sqlCmd = CreateASqlCommand();
+        var sqlCmd = CreateMssCommand();
 
         // Act
         var tableNames = await sqlCmd.GetTableNames(searchString);
@@ -39,7 +39,7 @@ public class ASqlCommandTests
     public async Task TestGetTableHeader_Then_NameAndSchemaOk()
     {
         // Arrange
-        var sqlCmd = CreateASqlCommand();
+        var sqlCmd = CreateMssCommand();
 
         // Act
         var tableHeader = await sqlCmd.GetTableHeader("AllTypes");
@@ -55,7 +55,7 @@ public class ASqlCommandTests
     public async Task TestGetTableHeader_Then_IdentityOk()
     {
         // Arrange
-        var sqlCmd = CreateASqlCommand();
+        var sqlCmd = CreateMssCommand();
 
         // Act
         var tableHeader = await sqlCmd.GetTableHeader("AllTypes");
@@ -71,7 +71,7 @@ public class ASqlCommandTests
     public async Task TestGetColumnInfo_When_AllTypes()
     {
         // Arrange
-        var sqlCmd = CreateASqlCommand();
+        var sqlCmd = CreateMssCommand();
         var tableHeader = await sqlCmd.GetTableHeader("AllTypes");
         tableHeader.Should().NotBeNull();
 
@@ -100,7 +100,7 @@ public class ASqlCommandTests
     public async Task TestGetColumnInfo_When_DefaultValues()
     {
         // Arrange
-        var sqlCmd = CreateASqlCommand();
+        var sqlCmd = CreateMssCommand();
         var tableHeader = await sqlCmd.GetTableHeader("TestDefaults");
         tableHeader.Should().NotBeNull();
 
@@ -132,7 +132,7 @@ public class ASqlCommandTests
     public async Task TestGetPrimaryKey_When_Exists()
     {
         // Arrange
-        var sqlCmd = CreateASqlCommand();
+        var sqlCmd = CreateMssCommand();
         var tableHeader = await sqlCmd.GetTableHeader("ClientScope");
         tableHeader.Should().NotBeNull();
 
@@ -153,7 +153,7 @@ public class ASqlCommandTests
     public async Task TestGetPrimaryKey_When_NotExist()
     {
         // Arrange
-        var sqlCmd = CreateASqlCommand();
+        var sqlCmd = CreateMssCommand();
         var tableHeader = await sqlCmd.GetTableHeader("TestDefaults");
         tableHeader.Should().NotBeNull();
 
@@ -168,7 +168,7 @@ public class ASqlCommandTests
     public async Task TestGetForeignKey_WhenExists()
     {
         // Arrange
-        var sqlCmd = CreateASqlCommand();
+        var sqlCmd = CreateMssCommand();
         var tableHeader = await sqlCmd.GetTableHeader("ClientScope");
         tableHeader.Should().NotBeNull();
 
@@ -186,12 +186,12 @@ public class ASqlCommandTests
         foreignKeys[0].UpdateAction.Should().Be(UpdateAction.NoAction);
     }
 
-    private IASqlCommand CreateASqlCommand()
+    private IMssCommand CreateMssCommand()
     {
         var connectionString = _configuration.GetConnectionString("FromDb");
         connectionString.Should()
             .NotBeNullOrWhiteSpace("because the connection string should be set in the user secrets file");
-        IASqlCommand sqlCmd = new ASqlCommand(_output)
+        IMssCommand sqlCmd = new MssCommand(_output)
         {
             ConnectionString = connectionString!
         };

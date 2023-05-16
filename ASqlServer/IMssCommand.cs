@@ -1,6 +1,6 @@
 ﻿namespace ASqlServer;
 
-public interface IASqlCommand
+public interface IMssCommand
 {
     string ConnectionString { get; init; }
     Task<IEnumerable<string>> GetTableNames(string searchString);

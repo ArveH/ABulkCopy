@@ -1,12 +1,12 @@
 ﻿namespace ASqlServer;
 
-public class ASqlCommand : IASqlCommand
+public class MssCommand : IMssCommand
 {
     private readonly ILogger _logger;
 
-    public ASqlCommand(ILogger logger)
+    public MssCommand(ILogger logger)
     {
-        _logger = logger.ForContext<ASqlCommand>();
+        _logger = logger.ForContext<MssCommand>();
     }
 
     public required string ConnectionString { get; init; }
