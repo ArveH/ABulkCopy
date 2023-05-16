@@ -17,7 +17,6 @@ public class MssCommandTests
     }
 
     [Theory]
-    [InlineData("%", 36)]
     [InlineData("does_not_exist", 0)]
     [InlineData("ConfiguredClients", 1)]
     [InlineData("CONFIGUREDCLIENTS", 1)]

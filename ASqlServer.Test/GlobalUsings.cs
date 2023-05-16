@@ -1,7 +1,10 @@
 global using ABulkCopy.Common.Config;
 global using ABulkCopy.Common.TableInfo;
+global using ABulkCopy.Common.TestData;
+global using ABulkCopy.Common.Utils;
 global using FluentAssertions;
 global using Microsoft.Extensions.Configuration;
+global using Moq;
 global using Serilog;
 global using Xunit;
 global using Xunit.Abstractions;

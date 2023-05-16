@@ -48,7 +48,7 @@ public class IdsTestingContext : DbContext
             .Property(p => p.Type)
             .HasConversion(enumConverter);
 
-        modelBuilder.Entity<AllTypes>().HasData(TestData.AllTypes.Copy());
+        modelBuilder.Entity<AllTypes>().HasData(AllTypesData.Copy());
         AddSeedDataForScope(modelBuilder);
 
         base.OnModelCreating(modelBuilder);
@@ -56,7 +56,7 @@ public class IdsTestingContext : DbContext
 
     private static void AddSeedDataForScope(ModelBuilder modelBuilder)
     {
-        foreach (var testScope in TestData.StdScopes)
+        foreach (var testScope in ScopesData.StdScopes)
         {
             var scope = testScope.Copy();
             scope.Claims = null;

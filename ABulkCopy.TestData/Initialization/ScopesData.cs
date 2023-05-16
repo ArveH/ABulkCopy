@@ -1,39 +1,7 @@
 ﻿namespace ABulkCopy.TestData.Initialization;
 
-public static class TestData
+public static class ScopesData
 {
-    public static AllTypes AllTypes = new()
-    {
-        Id = 1,
-        ExactNumBigInt = 123456789012345,
-        ExactNumInt = 123456789,
-        ExactNumSmallInt = 123456,
-        ExactNumTinyInt = 123,
-        ExactNumBit = true,
-        ExactNumMoney = 1234567.12345m,
-        ExactNumSmallMoney = 123.123m,
-        ExactNumDecimal = 1234567.12345m,
-        ExactNumNumeric = 1234567.12345m,
-        ApproxNumFloat = 1234567.12345d,
-        ApproxNumReal = 123.123f,
-        DTDate = new DateTime(2023, 03, 31),
-        DTDateTime = new DateTime(2023, 03, 31),
-        DTDateTime2 = new DateTime(2023, 03, 31),
-        DTSmallDateTime = new DateTime(2023, 03, 31),
-        DTDateTimeOffset = new DateTimeOffset(new DateTime(2023, 03, 31), new TimeSpan(1, 0, 0)),
-        DTTime = new TimeSpan(1, 2, 3, 4),
-        CharStrChar20 = "12345678901234567890",
-        CharStrVarchar20 = "12345678901234567890",
-        CharStrVarchar10K = new string('a', 10000),
-        CharStrNChar20 = "123456789ﯵ1234567890",
-        CharStrNVarchar20 = "123456789ﯵ1234567890",
-        CharStrNVarchar10K = new string('ﯵ', 10000),
-        BinBinary5K = GetBytes(5000),
-        BinVarbinary10K = GetBytes(10000),
-        OtherGuid = new Guid("A17542D9-A61C-4E4C-8512-DAFFC1416142"),
-        OtherXml = "<?xml version=\"1.0\" encoding=\"utf-8\" ?> <SomeTag>A value</SomeTag>"
-    };
-
     public static IEnumerable<Scope> StdScopes { get; } = new List<Scope>
     {
         CreateNewScope("openid",
@@ -147,15 +115,5 @@ public static class TestData
     private static ScopeConsentOption CreateConsentOptions(int id, string scopeId)
     {
         return new ScopeConsentOption { Id = id, ScopeId = scopeId, RequireConsent = true };
-    }
-
-    private static byte[] GetBytes(int size)
-    {
-        var bytes = new byte[size];
-        for (var i = 0; i < bytes.Length; i++)
-        {
-            bytes[i] = (byte)(i % 256);
-        }
-        return bytes;
     }
 }
