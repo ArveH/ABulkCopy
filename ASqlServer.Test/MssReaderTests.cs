@@ -27,7 +27,7 @@ public class MssReaderTests
         selectCreatorMock
             .Setup(m => m.CreateSelect(It.IsAny<TableDefinition>()))
             .Returns("select ExactNumBigInt from dbo.AllTypes");
-        IMssDataReader dataReader = new MssDataReader(
+        IMssTableReader tableReader = new MssTableReader(
             selectCreatorMock.Object,
             _output)
         {
@@ -37,14 +37,14 @@ public class MssReaderTests
         var tableDefinition = MssTestData.GetTableDefinitionAllTypes();
 
         // Act
-        await dataReader.PrepareReader(tableDefinition);
-        var rowWasRead = await dataReader.Read();
+        await tableReader.PrepareReader(tableDefinition);
+        var rowWasRead = await tableReader.Read();
         rowWasRead.Should().BeTrue("because there should be one row");
-        var value = dataReader.GetValue(0);
+        var value = tableReader.GetValue(0);
         value.Should().NotBeNull("because value should be a bigint number");
         value.Should().BeOfType<long>("because value should be a bigint number");
         ((long)value!).Should().Be(AllTypes.SampleValues.BigInt);
-        rowWasRead = await dataReader.Read();
+        rowWasRead = await tableReader.Read();
         rowWasRead.Should().BeFalse("because there should be only one row");
     }
 }

@@ -1,12 +1,10 @@
-﻿namespace ASqlServer;
+﻿namespace ABulkCopy.Common.Reader;
 
-public interface IMssDataReader
+public interface ITableReader
 {
-    string ConnectionString { get; init; }
     Task PrepareReader(TableDefinition tableDefinition);
     Task<bool> Read();
-    void Close();
-    void Dispose();
     bool IsNull(int ordinal);
     object? GetValue(int ordinal);
+    void Close();
 }

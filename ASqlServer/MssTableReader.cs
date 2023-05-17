@@ -1,6 +1,6 @@
 ﻿namespace ASqlServer;
 
-public class MssDataReader : IDisposable, IMssDataReader
+public class MssTableReader : IDisposable, IMssTableReader
 {
     private readonly ISelectCreator _selectCreator;
     private readonly ILogger _logger;
@@ -10,7 +10,7 @@ public class MssDataReader : IDisposable, IMssDataReader
     private long _rowCount;
     private readonly string _readerName = Guid.NewGuid().ToString();
 
-    public MssDataReader(
+    public MssTableReader(
         ISelectCreator selectCreator,
         ILogger logger)
     {

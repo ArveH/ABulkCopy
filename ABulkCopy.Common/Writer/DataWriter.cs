@@ -1,11 +1,12 @@
 ﻿namespace ABulkCopy.Common.Writer;
 
-public class SchemaWriter : ISchemaWriter
+public class DataWriter
 {
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
 
-    public SchemaWriter(
+    public DataWriter(
+
         IFileSystem fileSystem,
         ILogger logger)
     {
