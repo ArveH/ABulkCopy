@@ -16,8 +16,4 @@
     <ProjectReference Include="..\ABulkCopy.Common\ABulkCopy.Common.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="ColumnTypes\" />
-  </ItemGroup>
-
 </Project>
