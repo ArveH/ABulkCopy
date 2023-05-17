@@ -1,5 +1,3 @@
-using ABulkCopy.Common.Writer;
-
 namespace Common.Test;
 
 public class ASchemaWriterTests

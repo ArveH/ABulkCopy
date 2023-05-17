@@ -1,8 +1,9 @@
 // Global using directives
 
-global using ABulkCopy.Common.TableInfo;
+global using ABulkCopy.Common.Reader;
+global using ABulkCopy.Common.Types.Column;
+global using ABulkCopy.Common.Types.Table;
 global using Microsoft.Extensions.Configuration;
 global using Serilog;
 global using System.IO.Abstractions;
 global using System.Text.Json;
-global using ABulkCopy.Common.Reader;

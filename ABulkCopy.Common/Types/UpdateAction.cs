@@ -1,4 +1,4 @@
-﻿namespace ABulkCopy.Common.TableInfo;
+﻿namespace ABulkCopy.Common.Types;
 
 public enum UpdateAction
 {

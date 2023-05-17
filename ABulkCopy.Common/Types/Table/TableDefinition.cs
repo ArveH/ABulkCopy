@@ -1,8 +1,8 @@
-﻿namespace ABulkCopy.Common.TableInfo;
+﻿namespace ABulkCopy.Common.Types.Table;
 
 public class TableDefinition
 {
-    public required TableHeader  Header { get; set; }
+    public required TableHeader Header { get; set; }
 
     public List<ColumnDefinition> Columns { get; set; } = new();
     public PrimaryKey? PrimaryKey { get; set; }

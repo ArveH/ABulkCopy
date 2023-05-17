@@ -1,7 +1,9 @@
 global using ABulkCopy.Common;
-global using ABulkCopy.Common.TableInfo;
 global using ABulkCopy.Common.TestData;
+global using ABulkCopy.Common.Types.Column;
+global using ABulkCopy.Common.Types.Table;
 global using ABulkCopy.Common.Utils;
+global using ABulkCopy.Common.Writer;
 global using FluentAssertions;
 global using Serilog;
 global using System.IO.Abstractions.TestingHelpers;

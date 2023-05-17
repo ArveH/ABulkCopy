@@ -1,6 +1,7 @@
 global using ABulkCopy.Common.Config;
-global using ABulkCopy.Common.TableInfo;
 global using ABulkCopy.Common.TestData;
+global using ABulkCopy.Common.Types;
+global using ABulkCopy.Common.Types.Table;
 global using ABulkCopy.Common.Utils;
 global using FluentAssertions;
 global using Microsoft.Extensions.Configuration;
