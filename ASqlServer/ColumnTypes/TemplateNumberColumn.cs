@@ -1,20 +1,14 @@
 ﻿namespace ASqlServer.ColumnTypes;
 
-public class TemplateNumberColumn : TemplateSqlServerColumn
+public abstract class TemplateNumberColumn : TemplateSqlServerColumn
 {
-    public TemplateNumberColumn(
+    internal TemplateNumberColumn(
         int id, string name, bool isNullable, int length, int precision=0, int scale=0)
-        : base(id, name)
+        : base(id, name, isNullable)
     {
-        IsNullable = isNullable;
         Length = length;
         Precision = precision;
         Scale = scale;
-    }
-
-    public override string InternalTypeName()
-    {
-        return "int";
     }
 
     public override string ToString(object value)

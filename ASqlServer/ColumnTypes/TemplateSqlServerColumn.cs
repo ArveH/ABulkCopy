@@ -2,10 +2,11 @@
 
 public abstract class TemplateSqlServerColumn : IColumn
 {
-    protected TemplateSqlServerColumn(int id, string name)
+    protected TemplateSqlServerColumn(int id, string name, bool isNullable)
     {
         Id = id;
         Name = name;
+        IsNullable = isNullable;
     }
 
     public int Id { get; set; }

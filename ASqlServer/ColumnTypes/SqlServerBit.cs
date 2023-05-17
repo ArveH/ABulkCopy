@@ -1,9 +1,10 @@
 ﻿namespace ASqlServer.ColumnTypes;
 
-public class TemplateSqlServerBitColumn : TemplateSqlServerIntColumn
+public class SqlServerBit : TemplateNumberColumn
 {
-    public TemplateSqlServerBitColumn(string name, bool isNullable)
-        : base(name, isNullable)
+    public SqlServerBit(
+        int id, string name, bool isNullable)
+        : base(id, name, isNullable, 1, 1)
     {
         Type = ColumnType.Bool;
     }
@@ -20,6 +21,7 @@ public class TemplateSqlServerBitColumn : TemplateSqlServerIntColumn
 
     public override object ToInternalType(string value)
     {
+        // TODO: Check if this is correct
         return value.Length == 1 ? value == "1" : Convert.ToBoolean(value);
     }
 

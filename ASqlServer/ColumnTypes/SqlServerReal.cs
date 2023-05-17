@@ -1,13 +1,13 @@
-﻿using System.Globalization;
+﻿namespace ASqlServer.ColumnTypes;
 
-namespace ASqlServer.ColumnTypes;
-
-public class TemplateSqlServerRealColumn : TemplateSqlServerIntColumn
+public class SqlServerReal : TemplateSqlServerColumn
 {
-    public TemplateSqlServerRealColumn(string name, bool isNullable, string def)
-        : base(name, isNullable, false, def)
+    public SqlServerReal(int id, string name, bool isNullable)
+        : base(id, name, isNullable)
     {
-        Type = ColumnType.BinaryFloat;
+        Type = ColumnType.SmallFloat;
+        Length = 4;
+        Precision = 24;
     }
 
     public override string InternalTypeName()
@@ -22,10 +22,6 @@ public class TemplateSqlServerRealColumn : TemplateSqlServerIntColumn
 
     public override object ToInternalType(string value)
     {
-        if (value == null)
-        {
-            return null;
-        }
         return decimal.Parse(value, CultureInfo.InvariantCulture);
     }
 
