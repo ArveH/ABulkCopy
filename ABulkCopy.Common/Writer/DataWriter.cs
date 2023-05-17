@@ -14,12 +14,27 @@ public class DataWriter
         _logger = logger;
     }
 
-    public async Task Write(
+    public async Task WriteTable(
+        ITableReader tableReader,
         TableDefinition tableDefinition,
         string path)
     {
-        await _fileSystem.File.WriteAllTextAsync(
-            Path.Combine(path, tableDefinition.Header.Name + CommonConstants.SchemaSuffix),
-            JsonSerializer.Serialize(tableDefinition));
+        var fileFullPath = Path.Combine(
+            path, tableDefinition.Header.Name + CommonConstants.DataSuffix);
+        await using var writeStream = _fileSystem.File.CreateText(fileFullPath);
+        await tableReader.PrepareReader(tableDefinition);
+        while (await tableReader.Read())
+        {
+            WriteRow(tableReader, tableDefinition, writeStream);
+            writeStream.WriteLine();
+        }
+    }
+
+    private void WriteRow(
+        ITableReader tableReader, 
+        TableDefinition tableDefinition, 
+        StreamWriter writeStream)
+    {
+        throw new NotImplementedException();
     }
 }
