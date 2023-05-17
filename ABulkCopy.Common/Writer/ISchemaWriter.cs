@@ -1,6 +1,6 @@
-﻿namespace ABulkCopy.Common.SchemaWriter;
+﻿namespace ABulkCopy.Common.Writer;
 
-public interface IASchemaWriter
+public interface ISchemaWriter
 {
     Task Write(
         TableDefinition tableDefinition,

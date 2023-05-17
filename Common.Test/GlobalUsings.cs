@@ -1,13 +1,10 @@
-global using System.IO.Abstractions.TestingHelpers;
-global using System.Text.Json;
 global using ABulkCopy.Common;
-global using ABulkCopy.Common.Config;
-global using ABulkCopy.Common.SchemaWriter;
 global using ABulkCopy.Common.TableInfo;
 global using ABulkCopy.Common.TestData;
 global using ABulkCopy.Common.Utils;
 global using FluentAssertions;
-global using Microsoft.Extensions.Configuration;
 global using Serilog;
+global using System.IO.Abstractions.TestingHelpers;
+global using System.Text.Json;
 global using Xunit;
 global using Xunit.Abstractions;

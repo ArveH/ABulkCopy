@@ -1,3 +1,5 @@
+using ABulkCopy.Common.Writer;
+
 namespace Common.Test;
 
 public class ASchemaWriterTests
@@ -11,7 +13,7 @@ public class ASchemaWriterTests
         var tableName = originalTableDefinition.Header.Name;
         var mockFileSystem = new MockFileSystem();
         mockFileSystem.AddDirectory(path);
-        IASchemaWriter schemaWriter = new ASchemaWriter(
+        ISchemaWriter schemaWriter = new SchemaWriter(
             mockFileSystem,
             new LoggerConfiguration().CreateLogger());
         
@@ -37,7 +39,7 @@ public class ASchemaWriterTests
         var tableName = originalTableDefinition.Header.Name;
         var mockFileSystem = new MockFileSystem();
         mockFileSystem.AddDirectory(path);
-        IASchemaWriter schemaWriter = new ASchemaWriter(
+        ISchemaWriter schemaWriter = new SchemaWriter(
             mockFileSystem,
             new LoggerConfiguration().CreateLogger());
         

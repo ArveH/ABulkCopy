@@ -1,13 +1,13 @@
 ﻿using System.Text.Json;
 
-namespace ABulkCopy.Common.SchemaWriter;
+namespace ABulkCopy.Common.Writer;
 
-public class ASchemaWriter : IASchemaWriter
+public class SchemaWriter : ISchemaWriter
 {
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
 
-    public ASchemaWriter(
+    public SchemaWriter(
         IFileSystem fileSystem,
         ILogger logger)
     {
