@@ -8,6 +8,7 @@ global using FluentAssertions;
 global using Serilog;
 global using System.IO.Abstractions.TestingHelpers;
 global using System.Text.Json;
+global using ASqlServer.Column.ColumnTypes;
 global using Testing.Shared;
 global using Xunit;
 global using Xunit.Abstractions;

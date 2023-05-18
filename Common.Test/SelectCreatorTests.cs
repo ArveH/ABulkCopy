@@ -1,6 +1,4 @@
-﻿using ASqlServer.Column.ColumnTypes;
-
-namespace Common.Test;
+﻿namespace Common.Test;
 
 public class SelectCreatorTests
 {

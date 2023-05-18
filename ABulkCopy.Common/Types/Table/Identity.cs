@@ -2,6 +2,11 @@
 
 public class Identity
 {
-    public int Seed { get; set; } = 1;
-    public int Increment { get; set; } = 1;
+    public Identity(int seed=1, int increment=1)
+    {
+        Seed = seed;
+        Increment = increment;
+    }
+    public int Seed { get; set; }
+    public int Increment { get; set; }
 }

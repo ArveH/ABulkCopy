@@ -2,6 +2,20 @@
 
 public static class MssTestData
 {
+    public static TableDefinition GetEmpty(string name)
+    {
+        return new TableDefinition
+        {
+            Header = new TableHeader
+            {
+                Id = 1,
+                Location = "default",
+                Name = name,
+                Schema = "dbo"
+            }
+        };
+    }
+
     public static TableDefinition GetTableDefinitionAllTypes()
     {
         return new TableDefinition
