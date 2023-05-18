@@ -1,6 +1,6 @@
-﻿namespace ASqlServer.ColumnTypes;
+﻿namespace ASqlServer.Column.ColumnTypes;
 
-public class SqlServerTinyInt: TemplateNumberColumn
+public class SqlServerTinyInt : TemplateNumberColumn
 {
     public SqlServerTinyInt(
         int id, string name, bool isNullable)

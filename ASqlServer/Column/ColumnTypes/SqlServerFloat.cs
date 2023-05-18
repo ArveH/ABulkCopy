@@ -1,10 +1,10 @@
-﻿namespace ASqlServer.ColumnTypes;
+﻿namespace ASqlServer.Column.ColumnTypes;
 
 public class SqlServerFloat : TemplateSqlServerColumn
 {
     private readonly string _typeName;
 
-    public SqlServerFloat(int id, string name, bool isNullable, int precision=53)
+    public SqlServerFloat(int id, string name, bool isNullable, int precision = 53)
         : base(id, name, isNullable)
     {
         if (precision < 25)

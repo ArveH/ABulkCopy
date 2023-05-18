@@ -1,9 +1,9 @@
-﻿namespace ASqlServer.ColumnTypes;
+﻿namespace ASqlServer.Column.ColumnTypes;
 
 public abstract class TemplateNumberColumn : TemplateSqlServerColumn
 {
     internal TemplateNumberColumn(
-        int id, string name, bool isNullable, int length, int precision=0, int scale=0)
+        int id, string name, bool isNullable, int length, int precision = 0, int scale = 0)
         : base(id, name, isNullable)
     {
         Length = length;

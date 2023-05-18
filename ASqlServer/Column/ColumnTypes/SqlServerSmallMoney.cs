@@ -1,17 +1,17 @@
-﻿namespace ASqlServer.ColumnTypes;
+﻿namespace ASqlServer.Column.ColumnTypes;
 
-public class SqlServerMoney : TemplateNumberColumn
+public class SqlServerSmallMoney : TemplateNumberColumn
 {
-    public SqlServerMoney(
+    public SqlServerSmallMoney(
         int id, string name, bool isNullable)
-        : base(id, name, isNullable, 8, 19, 4)
+        : base(id, name, isNullable, 4, 10, 4)
     {
-        Type = ColumnType.Money;
+        Type = ColumnType.SmallInt;
     }
 
     public override string InternalTypeName()
     {
-        return "money";
+        return "smallmoney";
     }
 
     public override string ToString(object value)

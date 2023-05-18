@@ -1,4 +1,4 @@
-﻿namespace ASqlServer.ColumnTypes;
+﻿namespace ASqlServer.Column.ColumnTypes;
 
 // NOTE: Decimal and Numeric are synonyms in SQL Server,
 // and can be used interchangeably.

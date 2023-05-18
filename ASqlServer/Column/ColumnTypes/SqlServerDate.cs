@@ -1,6 +1,6 @@
-﻿namespace ASqlServer.ColumnTypes;
+﻿namespace ASqlServer.Column.ColumnTypes;
 
-public class SqlServerDate: TemplateSqlServerColumn
+public class SqlServerDate : TemplateSqlServerColumn
 {
     public SqlServerDate(int id, string name, bool isNullable)
         : base(id, name, isNullable)

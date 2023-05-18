@@ -1,4 +1,4 @@
-﻿namespace ASqlServer;
+﻿namespace ASqlServer.Table;
 
 public interface IMssTableSchema
 {

@@ -1,4 +1,4 @@
-﻿namespace ASqlServer.ColumnTypes;
+﻿namespace ASqlServer.Column.ColumnTypes;
 
 public class SqlServerChar : TemplateStrColumn
 {

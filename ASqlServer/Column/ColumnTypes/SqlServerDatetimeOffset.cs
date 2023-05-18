@@ -1,11 +1,11 @@
-﻿namespace ASqlServer.ColumnTypes;
+﻿namespace ASqlServer.Column.ColumnTypes;
 
-public class SqlServerDatetime2: TemplateSqlServerColumn
+public class SqlServerDatetimeOffset : TemplateSqlServerColumn
 {
-    public SqlServerDatetime2(int id, string name, bool isNullable, int scale=7)
+    public SqlServerDatetimeOffset(int id, string name, bool isNullable, int scale = 7)
         : base(id, name, isNullable)
     {
-        Type = ColumnType.DateTime;
+        Type = ColumnType.DateTimeOffset;
         Scale = scale;
         SetPrecisionAndLength(scale);
     }
@@ -32,12 +32,12 @@ public class SqlServerDatetime2: TemplateSqlServerColumn
 
     private void SetPrecisionAndLength(int scale)
     {
-        Precision = 20 + scale;
+        Precision = 27 + scale;
         Length = Precision switch
         {
-            < 23 => 6,
-            < 25 => 7,
-            _ => 8
+            < 30 => 8,
+            < 32 => 9,
+            _ => 10
         };
     }
 }

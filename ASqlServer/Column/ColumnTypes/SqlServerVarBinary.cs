@@ -1,4 +1,4 @@
-﻿namespace ASqlServer.ColumnTypes;
+﻿namespace ASqlServer.Column.ColumnTypes;
 
 public class SqlServerVarBinary : TemplateSqlServerColumn
 {
@@ -22,7 +22,7 @@ public class SqlServerVarBinary : TemplateSqlServerColumn
     {
         throw new NotImplementedException("Raw column values can't be converted to strings");
     }
-        
+
     public override object ToInternalType(string value)
     {
         throw new NotImplementedException("Raw column values are never represented as strings");

@@ -1,4 +1,4 @@
-﻿namespace ASqlServer.ColumnTypes;
+﻿namespace ASqlServer.Column.ColumnTypes;
 
 public class SqlServerBinary : TemplateSqlServerColumn
 {
@@ -18,7 +18,7 @@ public class SqlServerBinary : TemplateSqlServerColumn
     {
         return Convert.ToBase64String((byte[])value);
     }
-        
+
     public override object ToInternalType(string value)
     {
         return Convert.FromBase64String(value);

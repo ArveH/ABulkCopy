@@ -1,17 +1,18 @@
-﻿namespace ASqlServer.ColumnTypes;
+﻿namespace ASqlServer.Column.ColumnTypes;
 
-public class SqlServerDatetime: TemplateSqlServerColumn
+public class SqlServerDatetime2 : TemplateSqlServerColumn
 {
-    public SqlServerDatetime(int id, string name, bool isNullable)
+    public SqlServerDatetime2(int id, string name, bool isNullable, int scale = 7)
         : base(id, name, isNullable)
     {
-        Type = ColumnType.DateTimeAlt;
-        Length = 8;
+        Type = ColumnType.DateTime;
+        Scale = scale;
+        SetPrecisionAndLength(scale);
     }
 
     public override string InternalTypeName()
     {
-        return "datetime";
+        return "datetime2";
     }
 
     public override string ToString(object value)
@@ -27,5 +28,16 @@ public class SqlServerDatetime: TemplateSqlServerColumn
     public override Type GetDotNetType()
     {
         return typeof(DateTime);
+    }
+
+    private void SetPrecisionAndLength(int scale)
+    {
+        Precision = 20 + scale;
+        Length = Precision switch
+        {
+            < 23 => 6,
+            < 25 => 7,
+            _ => 8
+        };
     }
 }

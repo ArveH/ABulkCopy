@@ -1,6 +1,6 @@
-﻿namespace ASqlServer.ColumnTypes;
+﻿namespace ASqlServer.Column.ColumnTypes;
 
-public class SqlServerTimestamp: TemplateSqlServerColumn
+public class SqlServerTimestamp : TemplateSqlServerColumn
 {
     public SqlServerTimestamp(int id, string name, bool isNullable)
         : base(id, name, isNullable)
