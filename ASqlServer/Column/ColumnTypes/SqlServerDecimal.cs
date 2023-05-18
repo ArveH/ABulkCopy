@@ -5,7 +5,7 @@
 public class SqlServerDecimal : DefaultColumn
 {
     public SqlServerDecimal(
-        int id, string name, bool isNullable, int precision, int scale)
+        int id, string name, bool isNullable, int precision, int? scale=0)
         : base(id, name, isNullable)
     {
         Type = ColumnType.Decimal;

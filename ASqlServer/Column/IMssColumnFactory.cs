@@ -6,11 +6,9 @@ public interface IMssColumnFactory
         int id,
         string name,
         string nativeType,
-        int? length = null,
+        int length,
         int? precision = null,
         int? scale = null,
         bool isNullable = false,
-        string? collation = null,
-        DefaultDefinition? defaultDefinition = null,
-        Identity? identity = null);
+        string? collation = null);
 }

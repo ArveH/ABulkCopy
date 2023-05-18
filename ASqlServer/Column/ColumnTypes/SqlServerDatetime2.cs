@@ -2,12 +2,12 @@
 
 public class SqlServerDatetime2 : DefaultColumn
 {
-    public SqlServerDatetime2(int id, string name, bool isNullable, int scale = 7)
+    public SqlServerDatetime2(int id, string name, bool isNullable, int? scale = 7)
         : base(id, name, isNullable)
     {
         Type = ColumnType.DateTime;
-        Scale = scale;
-        SetPrecisionAndLength(scale);
+        Scale = scale??7;
+        SetPrecisionAndLength(scale??7);
     }
 
     public override string InternalTypeName()

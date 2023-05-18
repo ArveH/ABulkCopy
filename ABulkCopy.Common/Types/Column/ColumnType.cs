@@ -27,5 +27,6 @@ public enum ColumnType
     Raw = 50,
     SmallRaw = 51,
     Guid = 60,
-    TimeStamp = 62
+    TimeStamp = 62,
+    Xml = 63,
 }

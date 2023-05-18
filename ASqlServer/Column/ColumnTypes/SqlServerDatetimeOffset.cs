@@ -2,12 +2,12 @@
 
 public class SqlServerDatetimeOffset : DefaultColumn
 {
-    public SqlServerDatetimeOffset(int id, string name, bool isNullable, int scale = 7)
+    public SqlServerDatetimeOffset(int id, string name, bool isNullable, int? scale = 7)
         : base(id, name, isNullable)
     {
         Type = ColumnType.DateTimeOffset;
-        Scale = scale;
-        SetPrecisionAndLength(scale);
+        Scale = scale??7;
+        SetPrecisionAndLength(scale??7);
     }
 
     public override string InternalTypeName()

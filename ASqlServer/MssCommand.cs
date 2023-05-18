@@ -132,17 +132,6 @@ public class MssCommand : IMssCommand
         var columnDefinitions = new List<IColumn>();
         await ExecuteReader(command, reader =>
         {
-            DefaultDefinition? defaultDef = null;
-            if (!reader.IsDBNull(9))
-            {
-                defaultDef = new DefaultDefinition
-                {
-                    Name = reader.GetString(9),
-                    Definition = reader.GetString(10),
-                    IsSystemNamed = reader.IsDBNull(11) ? false : reader.GetBoolean(11)
-                };
-            }
-
             var columnDef = _columnFactory.Create(
                 reader.GetInt32(0),
                 reader.GetString(1),
@@ -151,9 +140,30 @@ public class MssCommand : IMssCommand
                 reader.GetByte(4),
                 reader.GetByte(5),
                 reader.GetBoolean(6),
-                reader.IsDBNull(7) ? null : reader.GetString(7),
-                defaultDef,
-                reader.GetBoolean(8) ? tableHeader.Identity : null);
+                reader.IsDBNull(7) ? null : reader.GetString(7));
+
+            if (reader.GetBoolean(8))
+            {
+                if (tableHeader.Identity == null)
+                {
+                    _logger.Error("Table doesn't have an Identity, but column '{ColumnName}' is_identity = true",
+                        columnDef.Name);
+                    throw new ArgumentNullException(
+                        nameof(tableHeader.Identity),
+                        $"Table doesn't have an Identity, but column '{columnDef.Name}' is_identity = true");
+                }
+                columnDef.Identity = tableHeader.Identity.Clone();
+            }
+            if (!reader.IsDBNull(9))
+            {
+                columnDef.DefaultConstraint = new DefaultDefinition
+                {
+                    Name = reader.GetString(9),
+                    Definition = reader.GetString(10),
+                    IsSystemNamed = reader.IsDBNull(11) ? false : reader.GetBoolean(11)
+                };
+            }
+
             columnDefinitions.Add(columnDef);
 
             _logger.Verbose("Added column: {@columnDefinition}",

@@ -2,7 +2,7 @@
 
 public class SqlServerTime : DefaultColumn
 {
-    public SqlServerTime(int id, string name, bool isNullable, int scale = 7)
+    public SqlServerTime(int id, string name, bool isNullable, int? scale = 7)
         : base(id, name, isNullable)
     {
         Type = ColumnType.Time;
@@ -30,7 +30,7 @@ public class SqlServerTime : DefaultColumn
         return typeof(DateTime);
     }
 
-    private void SetPrecisionAndLength(int scale)
+    private void SetPrecisionAndLength(int? scale)
     {
         Precision = 9 + scale;
         Length = Precision switch

@@ -5,12 +5,12 @@ namespace ASqlServer.Test;
 
 public class MssCommandTests
 {
-    private readonly ILogger _output;
+    private readonly ILogger _logger;
     private readonly IConfiguration _configuration;
 
     public MssCommandTests(ITestOutputHelper output)
     {
-        _output = new LoggerConfiguration()
+        _logger = new LoggerConfiguration()
             .Enrich.FromLogContext()
             .MinimumLevel.Verbose()
             .WriteTo.TestOutput(output)
@@ -193,9 +193,9 @@ public class MssCommandTests
         var connectionString = _configuration.GetConnectionString("FromDb");
         connectionString.Should()
             .NotBeNullOrWhiteSpace("because the connection string should be set in the user secrets file");
-        IMssColumnFactory colFactory = new MssColumnFactory();
+        IMssColumnFactory colFactory = new MssColumnFactory(_logger);
         IMssCommand sqlCmd = new MssCommand(
-            colFactory, _output)
+            colFactory, _logger)
         {
             ConnectionString = connectionString!
         };
