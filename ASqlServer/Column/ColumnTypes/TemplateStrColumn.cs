@@ -1,6 +1,6 @@
 ﻿namespace ASqlServer.Column.ColumnTypes;
 
-public abstract class TemplateStrColumn : TemplateSqlServerColumn
+public abstract class TemplateStrColumn : DefaultColumn
 {
     protected TemplateStrColumn(int id, string name, bool isNullable, int length, string? collation = null)
         : base(id, name, isNullable)

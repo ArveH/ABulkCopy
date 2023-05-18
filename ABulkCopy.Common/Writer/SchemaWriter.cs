@@ -23,7 +23,9 @@ public class SchemaWriter : ISchemaWriter
         object columns = tableDefinition.Columns.Select(c => new
         {
             c.Name,
-            c.Type,
+            // We want the Type property to be the name of the enum value
+            // (not the value itself)
+            Type = c.Type.ToString(),
             c.IsNullable,
             c.Identity,
             c.ComputedDefinition,

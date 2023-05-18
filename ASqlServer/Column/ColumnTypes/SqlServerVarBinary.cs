@@ -1,6 +1,6 @@
 ﻿namespace ASqlServer.Column.ColumnTypes;
 
-public class SqlServerVarBinary : TemplateSqlServerColumn
+public class SqlServerVarBinary : DefaultColumn
 {
     public SqlServerVarBinary(int id, string name, bool isNullable, int length)
         : base(id, name, isNullable)
@@ -26,10 +26,5 @@ public class SqlServerVarBinary : TemplateSqlServerColumn
     public override object ToInternalType(string value)
     {
         throw new NotImplementedException("Raw column values are never represented as strings");
-    }
-
-    public override Type GetDotNetType()
-    {
-        return typeof(byte[]);
     }
 }

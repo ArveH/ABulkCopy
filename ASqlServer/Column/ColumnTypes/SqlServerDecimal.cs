@@ -2,7 +2,7 @@
 
 // NOTE: Decimal and Numeric are synonyms in SQL Server,
 // and can be used interchangeably.
-public class SqlServerDecimal : TemplateSqlServerColumn
+public class SqlServerDecimal : DefaultColumn
 {
     public SqlServerDecimal(
         int id, string name, bool isNullable, int precision, int scale)

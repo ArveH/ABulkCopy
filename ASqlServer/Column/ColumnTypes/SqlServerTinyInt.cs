@@ -23,9 +23,4 @@ public class SqlServerTinyInt : TemplateNumberColumn
     {
         return Convert.ToByte(value);
     }
-
-    public override Type GetDotNetType()
-    {
-        return typeof(byte);
-    }
 }

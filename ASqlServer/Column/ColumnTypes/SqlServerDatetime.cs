@@ -1,6 +1,6 @@
 ﻿namespace ASqlServer.Column.ColumnTypes;
 
-public class SqlServerDatetime : TemplateSqlServerColumn
+public class SqlServerDatetime : DefaultColumn
 {
     public SqlServerDatetime(int id, string name, bool isNullable)
         : base(id, name, isNullable)

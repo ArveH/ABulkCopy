@@ -9,3 +9,4 @@ global using Serilog;
 global using System.Data;
 global using System.Data.SqlClient;
 global using System.Globalization;
+global using System.Text.Json.Serialization;

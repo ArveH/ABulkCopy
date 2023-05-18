@@ -1,6 +1,6 @@
 ﻿namespace ASqlServer.Column.ColumnTypes;
 
-public class SqlServerBinary : TemplateSqlServerColumn
+public class SqlServerBinary : DefaultColumn
 {
     public SqlServerBinary(int id, string name, bool isNullable, int length)
         : base(id, name, isNullable)

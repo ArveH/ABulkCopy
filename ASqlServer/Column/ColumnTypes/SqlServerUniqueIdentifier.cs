@@ -1,8 +1,8 @@
 ﻿namespace ASqlServer.Column.ColumnTypes;
 
-public class SqlServerGuid : TemplateSqlServerColumn
+public class SqlServerUniqueIdentifier : DefaultColumn
 {
-    public SqlServerGuid(int id, string name, bool isNullable)
+    public SqlServerUniqueIdentifier(int id, string name, bool isNullable)
         : base(id, name, isNullable)
     {
         Type = ColumnType.Guid;
@@ -22,10 +22,5 @@ public class SqlServerGuid : TemplateSqlServerColumn
     public override object ToInternalType(string value)
     {
         return new Guid(value);
-    }
-
-    public override Type GetDotNetType()
-    {
-        return typeof(Guid);
     }
 }

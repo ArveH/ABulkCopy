@@ -56,7 +56,7 @@ public static class MssTestData
                 new SqlServerNVarChar(125, "CharStrNVarchar10K", false, -1),
                 new SqlServerBinary(126, "BinBinary5K", true, 5000),
                 new SqlServerVarBinary(127, "BinVarbinary10K", true, -1),
-                new SqlServerGuid(128, "OtherGuid", false)
+                new SqlServerUniqueIdentifier(128, "OtherGuid", false)
             }
         };
     }

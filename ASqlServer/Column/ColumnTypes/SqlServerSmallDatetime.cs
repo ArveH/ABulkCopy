@@ -1,6 +1,6 @@
 ﻿namespace ASqlServer.Column.ColumnTypes;
 
-public class SqlServerSmallDatetime : TemplateSqlServerColumn
+public class SqlServerSmallDatetime : DefaultColumn
 {
     public SqlServerSmallDatetime(int id, string name, bool isNullable)
         : base(id, name, isNullable)

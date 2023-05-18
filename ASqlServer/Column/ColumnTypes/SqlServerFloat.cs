@@ -1,6 +1,6 @@
 ﻿namespace ASqlServer.Column.ColumnTypes;
 
-public class SqlServerFloat : TemplateSqlServerColumn
+public class SqlServerFloat : DefaultColumn
 {
     private readonly string _typeName;
 

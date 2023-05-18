@@ -1,6 +1,6 @@
 ﻿namespace ASqlServer.Column.ColumnTypes;
 
-public class SqlServerReal : TemplateSqlServerColumn
+public class SqlServerReal : DefaultColumn
 {
     public SqlServerReal(int id, string name, bool isNullable)
         : base(id, name, isNullable)

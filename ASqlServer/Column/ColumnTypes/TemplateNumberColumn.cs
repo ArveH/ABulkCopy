@@ -1,6 +1,6 @@
 ﻿namespace ASqlServer.Column.ColumnTypes;
 
-public abstract class TemplateNumberColumn : TemplateSqlServerColumn
+public abstract class TemplateNumberColumn : DefaultColumn
 {
     protected TemplateNumberColumn(
         int id, string name, bool isNullable, int length, int precision = 0, int scale = 0)
@@ -19,10 +19,5 @@ public abstract class TemplateNumberColumn : TemplateSqlServerColumn
     public override object ToInternalType(string value)
     {
         return Convert.ToInt32(value);
-    }
-
-    public override Type GetDotNetType()
-    {
-        return typeof(int);
     }
 }

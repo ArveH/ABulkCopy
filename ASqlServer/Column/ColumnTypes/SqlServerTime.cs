@@ -1,6 +1,6 @@
 ﻿namespace ASqlServer.Column.ColumnTypes;
 
-public class SqlServerTime : TemplateSqlServerColumn
+public class SqlServerTime : DefaultColumn
 {
     public SqlServerTime(int id, string name, bool isNullable, int scale = 7)
         : base(id, name, isNullable)

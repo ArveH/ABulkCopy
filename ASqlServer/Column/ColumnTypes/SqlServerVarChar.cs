@@ -16,9 +16,4 @@ public class SqlServerVarChar : TemplateStrColumn
             Length = length;
         }
     }
-
-    public override string InternalTypeName()
-    {
-        return "varchar";
-    }
 }

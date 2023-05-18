@@ -2,27 +2,33 @@ namespace Common.Test;
 
 public class ASchemaWriterTests
 {
+    private const string TestPath = @"C:\testfiles";
+    private const string TestTableName = "TestTableForTestWrite";
+    private readonly TableDefinition _originalTableDefinition;
+    private readonly MockFileSystem _mockFileSystem;
+    private readonly ISchemaWriter _schemaWriter;
+
+    public ASchemaWriterTests()
+    {
+        _originalTableDefinition = MssTestData.GetEmpty(TestTableName);
+        _mockFileSystem = new MockFileSystem();
+        _mockFileSystem.AddDirectory(TestPath);
+        _schemaWriter = new SchemaWriter(
+            _mockFileSystem,
+            new LoggerConfiguration().CreateLogger());
+    }
+
     [Fact]
     public async Task TestWrite_When_NoIdentity()
     {
         // Arrange
-        var path = @"C:\backup";
-        var tableName = "TestTableForTestWrite";
-        var originalTableDefinition = MssTestData.GetEmpty(tableName);
-        originalTableDefinition.Columns.Add(new SqlServerBigInt(101, "Id", false));
-        var mockFileSystem = new MockFileSystem();
-        mockFileSystem.AddDirectory(path);
-        ISchemaWriter schemaWriter = new SchemaWriter(
-            mockFileSystem,
-            new LoggerConfiguration().CreateLogger());
+        _originalTableDefinition.Columns.Add(new SqlServerBigInt(101, "Id", false));
         
         // Act
-        await schemaWriter.Write(originalTableDefinition, path);
+        await _schemaWriter.Write(_originalTableDefinition, TestPath);
 
         // Assert
-        var fullPath = Path.Combine(path, tableName + CommonConstants.SchemaSuffix);
-        mockFileSystem.FileExists(fullPath).Should().BeTrue("because schema file should exist");
-        var jsonTxt = await mockFileSystem.File.ReadAllTextAsync(fullPath);
+        var jsonTxt = await GetJsonText();
         jsonTxt.Squeeze().Should().ContainEquivalentOf((
             "\"Header\": {\r\n" +
             "    \"Id\": 1,\r\n" +
@@ -37,27 +43,17 @@ public class ASchemaWriterTests
     public async Task TestWrite_When_Identity()
     {
         // Arrange
-        var path = @"C:\backup";
-        var tableName = "TestTableForTestWrite";
-        var originalTableDefinition = MssTestData.GetEmpty(tableName);
-        originalTableDefinition.Header.Identity = new Identity();
-        originalTableDefinition.Columns.Add(new SqlServerBigInt(101, "Id", false)
+        _originalTableDefinition.Header.Identity = new Identity();
+        _originalTableDefinition.Columns.Add(new SqlServerBigInt(101, "Id", false)
         {
-            Identity = originalTableDefinition.Header.Identity
+            Identity = _originalTableDefinition.Header.Identity
         });
-        var mockFileSystem = new MockFileSystem();
-        mockFileSystem.AddDirectory(path);
-        ISchemaWriter schemaWriter = new SchemaWriter(
-            mockFileSystem,
-            new LoggerConfiguration().CreateLogger());
         
         // Act
-        await schemaWriter.Write(originalTableDefinition, path);
+        await _schemaWriter.Write(_originalTableDefinition, TestPath);
 
         // Assert
-        var fullPath = Path.Combine(path, tableName + CommonConstants.SchemaSuffix);
-        mockFileSystem.FileExists(fullPath).Should().BeTrue("because schema file should exist");
-        var jsonTxt = await mockFileSystem.File.ReadAllTextAsync(fullPath);
+        var jsonTxt = await GetJsonText();
         jsonTxt.Squeeze().Should().ContainEquivalentOf((
             "\"Header\": {\r\n" +
             "    \"Id\": 1,\r\n" +
@@ -75,25 +71,56 @@ public class ASchemaWriterTests
     public async Task TestWrite_When_DefaultValues()
     {
         // Arrange
-        var path = @"C:\backup";
-        var originalTableDefinition = MssTestData.GetTableDefaults();
-        var tableName = originalTableDefinition.Header.Name;
-        var mockFileSystem = new MockFileSystem();
-        mockFileSystem.AddDirectory(path);
-        ISchemaWriter schemaWriter = new SchemaWriter(
-            mockFileSystem,
-            new LoggerConfiguration().CreateLogger());
+        _originalTableDefinition.Columns = new List<IColumn>
+        {
+            MssTestData.GetIdColDefinition(101, "Id"),
+            new SqlServerInt(101, "intdef", false)
+            {
+                DefaultConstraint = new DefaultDefinition
+                {
+                    Name = "df_bulkcopy_int",
+                    Definition = "((0))",
+                    IsSystemNamed = false
+                }
+            },
+            new SqlServerNVarChar(102, "strdef", true, 20, "SQL_Latin1_General_CP1_CI_AS")
+            {
+                DefaultConstraint = new DefaultDefinition
+                {
+                    Name = "DF__arveh__col1__531856C7",
+                    Definition = "('Norway')",
+                    IsSystemNamed = true
+                }
+            },
+            new SqlServerDatetime2(103, "datedef", true)
+            {
+                DefaultConstraint = new DefaultDefinition
+                {
+                    Name = "DF__arveh__col1__531856C8",
+                    Definition = "(getdate())",
+                    IsSystemNamed = true
+                }
+            }
+        };
         
         // Act
-        await schemaWriter.Write(originalTableDefinition, path);
+        await _schemaWriter.Write(_originalTableDefinition, TestPath);
 
         // Assert
-        var fullPath = Path.Combine(path, tableName + CommonConstants.SchemaSuffix);
-        mockFileSystem.FileExists(fullPath).Should().BeTrue("because schema file should exist");
-        var jsonTxt = await mockFileSystem.File.ReadAllTextAsync(fullPath);
+        var fullPath = Path.Combine(TestPath, TestTableName + CommonConstants.SchemaSuffix);
+        _mockFileSystem.FileExists(fullPath).Should().BeTrue("because schema file should exist");
+        var jsonTxt = await _mockFileSystem.File.ReadAllTextAsync(fullPath);
         var tableDefinition = JsonSerializer.Deserialize<TableDefinition>(jsonTxt);
         tableDefinition.Should().NotBeNull("because we should be able to deserialize the schema file");
-        tableDefinition.Should().BeEquivalentTo(originalTableDefinition);
-        tableDefinition!.Header.Name.Should().Be(tableName);
+        tableDefinition.Should().BeEquivalentTo(_originalTableDefinition);
+        tableDefinition!.Header.Name.Should().Be(TestTableName);
+    }
+
+    private async Task<string> GetJsonText()
+    {
+        var fullPath = Path.Combine(TestPath, TestTableName + CommonConstants.SchemaSuffix);
+        _mockFileSystem.FileExists(fullPath).Should().BeTrue("because schema file should exist");
+        var jsonTxt = await _mockFileSystem.File.ReadAllTextAsync(fullPath);
+        return jsonTxt;
     }
 }

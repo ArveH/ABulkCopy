@@ -1,6 +1,6 @@
 ﻿namespace ASqlServer.Column.ColumnTypes;
 
-public class SqlServerDatetimeOffset : TemplateSqlServerColumn
+public class SqlServerDatetimeOffset : DefaultColumn
 {
     public SqlServerDatetimeOffset(int id, string name, bool isNullable, int scale = 7)
         : base(id, name, isNullable)

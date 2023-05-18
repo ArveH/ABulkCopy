@@ -9,4 +9,9 @@ public class Identity
     }
     public int Seed { get; set; }
     public int Increment { get; set; }
+
+    public Identity Clone()
+    {
+        return new Identity(Seed, Increment);
+    }
 }
