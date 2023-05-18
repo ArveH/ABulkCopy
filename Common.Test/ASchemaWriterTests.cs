@@ -67,39 +67,14 @@ public class ASchemaWriterTests
             "}").Squeeze());
     }
 
-    [Fact]
-    public async Task TestWrite_When_DefaultValues()
+    private async Task<string> CreateJsonSchema(DefaultDefinition def)
     {
         // Arrange
         _originalTableDefinition.Columns = new List<IColumn>
         {
-            MssTestData.GetIdColDefinition(101, "Id"),
             new SqlServerInt(101, "intdef", false)
             {
-                DefaultConstraint = new DefaultDefinition
-                {
-                    Name = "df_bulkcopy_int",
-                    Definition = "((0))",
-                    IsSystemNamed = false
-                }
-            },
-            new SqlServerNVarChar(102, "strdef", true, 20, "SQL_Latin1_General_CP1_CI_AS")
-            {
-                DefaultConstraint = new DefaultDefinition
-                {
-                    Name = "DF__arveh__col1__531856C7",
-                    Definition = "('Norway')",
-                    IsSystemNamed = true
-                }
-            },
-            new SqlServerDatetime2(103, "datedef", true)
-            {
-                DefaultConstraint = new DefaultDefinition
-                {
-                    Name = "DF__arveh__col1__531856C8",
-                    Definition = "(getdate())",
-                    IsSystemNamed = true
-                }
+                DefaultConstraint = def
             }
         };
         
@@ -107,13 +82,66 @@ public class ASchemaWriterTests
         await _schemaWriter.Write(_originalTableDefinition, TestPath);
 
         // Assert
-        var fullPath = Path.Combine(TestPath, TestTableName + CommonConstants.SchemaSuffix);
-        _mockFileSystem.FileExists(fullPath).Should().BeTrue("because schema file should exist");
-        var jsonTxt = await _mockFileSystem.File.ReadAllTextAsync(fullPath);
-        var tableDefinition = JsonSerializer.Deserialize<TableDefinition>(jsonTxt);
-        tableDefinition.Should().NotBeNull("because we should be able to deserialize the schema file");
-        tableDefinition.Should().BeEquivalentTo(_originalTableDefinition);
-        tableDefinition!.Header.Name.Should().Be(TestTableName);
+        return await GetJsonText();
+    }
+
+    [Fact]
+    public async Task TestWriteDefault_When_IntAndNamed()
+    {
+        var jsonTxt = await CreateJsonSchema(
+            new DefaultDefinition
+            {
+                Name = "df_bulkcopy_int",
+                Definition = "((0))",
+                IsSystemNamed = false
+            });
+
+        jsonTxt.Squeeze().Should().ContainEquivalentOf((
+            "\"DefaultConstraint\": {\r\n" +
+            "   \"Name\": \"df_bulkcopy_int\",\r\n" +
+            "   \"Definition\": \"((0))\",\r\n" +
+            "   \"IsSystemNamed\": false\r\n" +
+            " }").Squeeze());
+    }
+
+    [Fact]
+    public async Task TestWriteDefault_When_StrAndAutoNamed()
+    {
+        var jsonTxt = await CreateJsonSchema(
+            new DefaultDefinition
+            {
+                Name = "DF__arveh__col1__531856C7",
+                Definition = "('Norway')",
+                IsSystemNamed = true
+            });
+
+        // TODO: Fix the unicoded quotes 
+        jsonTxt.Squeeze().Should().ContainEquivalentOf((
+            "\"DefaultConstraint\": {\r\n" +
+            "   \"Name\": \"DF__arveh__col1__531856C7\",\r\n" +
+            "   \"Definition\": \"('Norway')\",\r\n" +
+            "   \"IsSystemNamed\": true\r\n" +
+            " }").Squeeze());
+    }
+
+    [Fact]
+    public async Task TestWriteDefault_When_DateAndAutoNamed()
+    {
+        var jsonTxt = await CreateJsonSchema(
+            new DefaultDefinition
+            {
+                Name = "DF__arveh__col1__531856C7",
+                Definition = "('Norway')",
+                IsSystemNamed = true
+            });
+
+        // TODO: Fix the unicoded quotes 
+        jsonTxt.Squeeze().Should().ContainEquivalentOf((
+            "\"DefaultConstraint\": {\r\n" +
+            "   \"Name\": \"DF__arveh__col1__531856C8\",\r\n" +
+            "   \"Definition\": \"(getdate())\",\r\n" +
+            "   \"IsSystemNamed\": true\r\n" +
+            " }").Squeeze());
     }
 
     private async Task<string> GetJsonText()

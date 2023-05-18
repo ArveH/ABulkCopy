@@ -125,7 +125,7 @@ public class SchemaWriterMssTests
         expectedCol.Length = -1;
         await TestWriteColumn(expectedCol);
     }
-
+    
     private async Task TestWriteColumn_When_NoChange(IColumn col)
     {
         _originalTableDefinition.Columns.Add(col);
