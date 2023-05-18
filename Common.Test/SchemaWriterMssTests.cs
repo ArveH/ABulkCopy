@@ -61,14 +61,69 @@ public class SchemaWriterMssTests
     }
 
     [Fact]
-    public async Task TestWriteFloat_When_Scale14()
+    public async Task TestWriteFloat_When_Scale14_Then_SmallFloatAnd24()
     {
         var col = new SqlServerFloat(101, "MyTestCol", false, 14);
         _originalTableDefinition.Columns.Add(col);
         var expectedCol = col.Clone();
         expectedCol.Type = ColumnType.SmallFloat;
         expectedCol.Precision = 24;
-        await TestWriteColumn_When_NoChange(expectedCol);
+        await TestWriteColumn(expectedCol);
+    }
+
+    [Fact]
+    public async Task TestWriteFloat_When_Scale25_Then_Scale53()
+    {
+        var col = new SqlServerFloat(101, "MyTestCol", false, 25);
+        _originalTableDefinition.Columns.Add(col);
+        var expectedCol = col.Clone();
+        expectedCol.Type = ColumnType.Float;
+        expectedCol.Precision = 53;
+        await TestWriteColumn(expectedCol);
+    }
+
+    [Fact]
+    public async Task TestWriteNVarChar_When_Length4000_Then_Unchanged()
+    {
+        var col = new SqlServerNVarChar(101, "MyTestCol", false, 4000);
+        _originalTableDefinition.Columns.Add(col);
+        var expectedCol = col.Clone();
+        expectedCol.Type = ColumnType.NVarChar;
+        expectedCol.Length = 4000;
+        await TestWriteColumn(expectedCol);
+    }
+
+    [Fact]
+    public async Task TestWriteNVarChar_When_Length4001_Then_NLongText()
+    {
+        var col = new SqlServerNVarChar(101, "MyTestCol", false, 4001);
+        _originalTableDefinition.Columns.Add(col);
+        var expectedCol = col.Clone();
+        expectedCol.Type = ColumnType.NLongText;
+        expectedCol.Length = -1;
+        await TestWriteColumn(expectedCol);
+    }
+
+    [Fact]
+    public async Task TestWriteVarBinary_When_Length8000_Then_Unchanged()
+    {
+        var col = new SqlServerVarBinary(101, "MyTestCol", false, 8000);
+        _originalTableDefinition.Columns.Add(col);
+        var expectedCol = col.Clone();
+        expectedCol.Type = ColumnType.Raw;
+        expectedCol.Length = 8000;
+        await TestWriteColumn(expectedCol);
+    }
+
+    [Fact]
+    public async Task TestWriteVarBinary_When_Length8001_Then_MaxLength()
+    {
+        var col = new SqlServerVarBinary(101, "MyTestCol", false, 8001);
+        _originalTableDefinition.Columns.Add(col);
+        var expectedCol = col.Clone();
+        expectedCol.Type = ColumnType.Raw;
+        expectedCol.Length = -1;
+        await TestWriteColumn(expectedCol);
     }
 
     private async Task TestWriteColumn_When_NoChange(IColumn col)
