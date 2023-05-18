@@ -18,7 +18,7 @@ public class SchemaWriter : ISchemaWriter
         string path)
     {
         // JsonSerializer doesn't handle interfaces, so we need to use anonymous objects
-        _logger.Debug("Serializing table definition for '{TableName}'...", 
+        _logger.Debug("Serializing table definition for '{TableName}'...",
             tableDefinition.Header.Name);
         object columns = tableDefinition.Columns.Select(c => new
         {
@@ -43,16 +43,18 @@ public class SchemaWriter : ISchemaWriter
             { "ForeignKeys", tableDefinition.ForeignKeys }
         };
 
-        _logger.Debug("Writing table definition for '{TableName}' to file...", 
+        _logger.Debug("Writing table definition for '{TableName}' to file...",
             tableDefinition.Header.Name);
         var fullPath = Path.Combine(path, tableDefinition.Header.Name + CommonConstants.SchemaSuffix);
         await _fileSystem.File.WriteAllTextAsync(
             fullPath,
             JsonSerializer.Serialize(json, new JsonSerializerOptions
             {
+                // Contrast is going to have a field day with me allowing stuff like ' :-)
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
                 WriteIndented = true
             }));
-        _logger.Information("Table definition written to '{FullPath}'", 
+        _logger.Information("Table definition written to '{FullPath}'",
             fullPath);
     }
 }

@@ -130,8 +130,8 @@ public class ASchemaWriterTests
         var jsonTxt = await CreateJsonSchema(
             new DefaultDefinition
             {
-                Name = "DF__arveh__col1__531856C7",
-                Definition = "('Norway')",
+                Name = "DF__arveh__col1__531856C8",
+                Definition = "(getdate())",
                 IsSystemNamed = true
             });
 
