@@ -42,6 +42,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ASqlServer\ASqlServer.csproj" />
+    <ProjectReference Include="..\Testing.Shared\Testing.Shared.csproj" />
   </ItemGroup>
 
 </Project>

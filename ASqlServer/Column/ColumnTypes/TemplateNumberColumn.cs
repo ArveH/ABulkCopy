@@ -2,7 +2,7 @@
 
 public abstract class TemplateNumberColumn : TemplateSqlServerColumn
 {
-    internal TemplateNumberColumn(
+    protected TemplateNumberColumn(
         int id, string name, bool isNullable, int length, int precision = 0, int scale = 0)
         : base(id, name, isNullable)
     {

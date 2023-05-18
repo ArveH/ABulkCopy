@@ -10,8 +10,8 @@ public abstract class TemplateSqlServerColumn : IColumn
     }
 
     public int Id { get; set; }
-    public required string Name { get; set; }
-    public required ColumnType Type { get; set; }
+    public string Name { get; set; }
+    public ColumnType Type { get; set; }
     public bool IsNullable { get; set; }
     public int Length { get; set; }
 

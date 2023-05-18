@@ -29,6 +29,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ABulkCopy.Common\ABulkCopy.Common.csproj" />
+    <ProjectReference Include="..\Testing.Shared\Testing.Shared.csproj" />
   </ItemGroup>
 
 </Project>

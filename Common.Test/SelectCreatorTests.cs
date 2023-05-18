@@ -1,4 +1,6 @@
-﻿namespace Common.Test;
+﻿using ASqlServer.Column.ColumnTypes;
+
+namespace Common.Test;
 
 public class SelectCreatorTests
 {
@@ -52,12 +54,12 @@ public class SelectCreatorTests
                 Name = "mytable",
                 Schema = "dbo"
             },
-            Columns = new List<ColumnDefinition>()
+            Columns = new List<IColumn>()
         };
         for (var i = 0; i < colCount; i++)
         {
             tableDefinition.Columns.Add(
-                MssTestData.GetCharColDefinition(i + 1, $"col{i + 1}", "nvarchar", 20));
+                new SqlServerNVarChar(i + 1, $"col{i + 1}", true, 20));
         }
 
         ISelectCreator creator = new SelectCreator(_output);

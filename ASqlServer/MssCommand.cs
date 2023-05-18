@@ -1,11 +1,18 @@
-﻿namespace ASqlServer;
+﻿using ASqlServer.Column;
+using System.ComponentModel.DataAnnotations;
+
+namespace ASqlServer;
 
 public class MssCommand : IMssCommand
 {
+    private readonly IMssColumnFactory _columnFactory;
     private readonly ILogger _logger;
 
-    public MssCommand(ILogger logger)
+    public MssCommand(
+        IMssColumnFactory columnFactory,
+        ILogger logger)
     {
+        _columnFactory = columnFactory;
         _logger = logger.ForContext<MssCommand>();
     }
 
@@ -87,7 +94,7 @@ public class MssCommand : IMssCommand
         return null;
     }
 
-    public async Task<IEnumerable<ColumnDefinition>> GetColumnInfo(TableHeader tableHeader)
+    public async Task<IEnumerable<IColumn>> GetColumnInfo(TableHeader tableHeader)
     {
         var command =
             new SqlCommand("WITH cte AS (\r\n" +
@@ -122,7 +129,7 @@ public class MssCommand : IMssCommand
                            "LEFT JOIN sys.default_constraints d WITH(NOLOCK) ON (d.object_id = c.default_object_id)");
         command.Parameters.AddWithValue("@TableName", tableHeader.Name);
 
-        var columnDefinitions = new List<ColumnDefinition>();
+        var columnDefinitions = new List<IColumn>();
         await ExecuteReader(command, reader =>
         {
             DefaultDefinition? defaultDef = null;
@@ -136,19 +143,17 @@ public class MssCommand : IMssCommand
                 };
             }
 
-            var columnDef = new ColumnDefinition
-            {
-                Id = reader.GetInt32(0),
-                Name = reader.GetString(1),
-                DataType = reader.GetString(2),
-                Length = reader.GetInt16(3),
-                Precision = reader.GetByte(4),
-                Scale = reader.GetByte(5),
-                IsNullable = reader.GetBoolean(6),
-                Collation = reader.IsDBNull(7) ? null : reader.GetString(7),
-                DefaultConstraint = defaultDef,
-                Identity = reader.GetBoolean(8) ? tableHeader.Identity : null
-            };
+            var columnDef = _columnFactory.Create(
+                reader.GetInt32(0),
+                reader.GetString(1),
+                reader.GetString(2),
+                reader.GetInt16(3),
+                reader.GetByte(4),
+                reader.GetByte(5),
+                reader.GetBoolean(6),
+                reader.IsDBNull(7) ? null : reader.GetString(7),
+                defaultDef,
+                reader.GetBoolean(8) ? tableHeader.Identity : null);
             columnDefinitions.Add(columnDef);
 
             _logger.Verbose("Added column: {@columnDefinition}",
