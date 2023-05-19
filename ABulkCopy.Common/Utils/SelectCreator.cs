@@ -26,6 +26,6 @@ public class SelectCreator : ISelectCreator
             tableDefinition.Header.Name, columns.Count);
         return "SELECT " 
                + string.Join(", ", columns) 
-               + $" FROM {tableDefinition.Header.Schema}.{tableDefinition.Header.Name}";
+               + $" FROM [{tableDefinition.Header.Schema}].[{tableDefinition.Header.Name}]";
     }
 }
