@@ -1,9 +1,4 @@
-﻿using System.Data.SqlClient;
-using System.Text;
-using ABulkCopy.Common.Config;
-using Microsoft.Extensions.Configuration;
-
-namespace Testing.Shared.SqlServer;
+﻿namespace Testing.Shared.SqlServer;
 
 public class MssDbHelper
 {
@@ -49,7 +44,19 @@ public class MssDbHelper
         await ExecuteNonQuery(sqlString);
     }
 
-    private async Task ExecuteNonQuery(string sqlString)
+    public async Task InsertIntoSingleColumnTable(
+        string tableName,
+        object? value)
+    {
+        await using var sqlConnection = new SqlConnection(ConnectionString);
+        await sqlConnection.OpenAsync();
+        var sqlString = $"insert into [{tableName}] values (@Value);";
+        await using var sqlCommand = new SqlCommand(sqlString, sqlConnection);
+        sqlCommand.Parameters.AddWithValue("@Value", value);
+        await sqlCommand.ExecuteNonQueryAsync();
+    }
+
+    public async Task ExecuteNonQuery(string sqlString)
     {
         await using var sqlConnection = new SqlConnection(ConnectionString);
         await sqlConnection.OpenAsync();

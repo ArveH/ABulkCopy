@@ -33,7 +33,29 @@ public class DataWriter
     private void WriteRow(
         ITableReader tableReader, 
         TableDefinition tableDefinition, 
-        StreamWriter writeStream)
+        TextWriter dataWriter)
+    {
+        for (var i = 0; i < tableDefinition.Columns.Count; i++)
+        {
+            if (tableReader.IsNull(i))
+            {
+                dataWriter.Write("NULL,");
+                continue;
+            }
+
+            if (tableDefinition.Columns[i].Type == ColumnType.Raw)
+            {
+                WriteBlobColumn();
+            }
+            else
+            {
+                dataWriter.Write(tableDefinition.Columns[i].ToString(tableReader.GetValue(i)!));
+            }
+            dataWriter.Write(",");
+        }
+    }
+
+    private void WriteBlobColumn()
     {
         throw new NotImplementedException();
     }

@@ -1,20 +1,15 @@
-﻿using System.Data;
-using ABulkCopy.Common.Reader;
-using ASqlServer;
-using Testing.Shared.SqlServer;
+﻿namespace Common.Test;
 
-namespace Common.Test;
-
-public class DataWriterTests
+public class MssDataWriterTests
 {
     private const string TestPath = @"C:\testfiles";
-    private readonly string _testTableName = Environment.MachineName + "DataWriterTests";
+    private readonly string _testTableName = Environment.MachineName + "MssDataWriterTests";
     private readonly ILogger _logger;
     private readonly TableDefinition _originalTableDefinition;
     private readonly MockFileSystem _mockFileSystem;
     private readonly DataWriter _dataWriter;
 
-    public DataWriterTests(ITestOutputHelper output)
+    public MssDataWriterTests(ITestOutputHelper output)
     {
         _logger = new LoggerConfiguration()
             .Enrich.FromLogContext()
@@ -36,6 +31,8 @@ public class DataWriterTests
         _originalTableDefinition.Columns.Add(col);
         await MssDbHelper.Instance.DropTable(_testTableName);
         await MssDbHelper.Instance.CreateTable(_originalTableDefinition);
+        await MssDbHelper.Instance.InsertIntoSingleColumnTable(
+            _testTableName, AllTypes.SampleValues.BigInt);
         ITableReader tableReader = new MssTableReader(
             new SelectCreator(_logger), _logger)
         {
@@ -57,6 +54,41 @@ public class DataWriterTests
 
         // Assert
         var jsonTxt = await GetJsonText();
+        jsonTxt.TrimEnd().Should().Be(AllTypes.SampleValues.BigInt + ",");
+    }
+
+    [Fact]
+    public async Task TestWriteInt()
+    {
+        // Arrange
+        var col = new SqlServerInt(101, "MyTestCol", false);
+        _originalTableDefinition.Columns.Add(col);
+        await MssDbHelper.Instance.DropTable(_testTableName);
+        await MssDbHelper.Instance.CreateTable(_originalTableDefinition);
+        await MssDbHelper.Instance.InsertIntoSingleColumnTable(
+            _testTableName, AllTypes.SampleValues.Int);
+        ITableReader tableReader = new MssTableReader(
+            new SelectCreator(_logger), _logger)
+        {
+            ConnectionString = MssDbHelper.Instance.ConnectionString
+        };
+
+        // Act
+        try
+        {
+            await _dataWriter.WriteTable(
+                tableReader,
+                _originalTableDefinition,
+                TestPath);
+        }
+        finally
+        {
+            await MssDbHelper.Instance.DropTable(_testTableName);
+        }
+
+        // Assert
+        var jsonTxt = await GetJsonText();
+        jsonTxt.TrimEnd().Should().Be(AllTypes.SampleValues.Int + ",");
     }
 
     private async Task<string> GetJsonText()
