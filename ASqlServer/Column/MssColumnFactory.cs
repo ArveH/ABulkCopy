@@ -46,12 +46,12 @@ public class MssColumnFactory : IMssColumnFactory
 
         if (nativeType == "datetime")
         {
-            return new SqlServerDatetime(id, name, isNullable);
+            return new SqlServerDateTime(id, name, isNullable);
         }
 
         if (nativeType == "datetime2")
         {
-            return new SqlServerDatetime2(id, name, isNullable, scale);
+            return new SqlServerDateTime2(id, name, isNullable, scale);
         }
 
         if (nativeType == "datetimeoffset")

@@ -43,8 +43,8 @@ public static class MssTestData
                 new SqlServerFloat(111, "ApproxNumFloat", false),
                 new SqlServerReal(112, "ApproxNumReal", false),
                 new SqlServerDate(114, "DTDate", false),
-                new SqlServerDatetime(115, "DTDateTime", false),
-                new SqlServerDatetime2(116, "DTDateTime2", false),
+                new SqlServerDateTime(115, "DTDateTime", false),
+                new SqlServerDateTime2(116, "DTDateTime2", false),
                 new SqlServerSmallDatetime(117, "DTSmallDateTime", false),
                 new SqlServerDatetimeOffset(118, "DTDateTimeOffset", false, 7),
                 new SqlServerTime(119, "DTTime", false, 7),
@@ -94,7 +94,7 @@ public static class MssTestData
                         IsSystemNamed = true
                     }
                 },
-                new SqlServerDatetime2(103, "datedef", true)
+                new SqlServerDateTime2(103, "datedef", true)
                 {
                     DefaultConstraint = new DefaultDefinition
                     {

@@ -17,12 +17,12 @@ public class SqlServerDatetimeOffset : DefaultColumn
 
     public override string ToString(object value)
     {
-        return Convert.ToDateTime(value).ToString("yyyyMMdd HH:mm:ss.0000000", CultureInfo.InvariantCulture);
+        return ((DateTimeOffset)value).ToString("O");
     }
 
     public override object ToInternalType(string value)
     {
-        return DateTime.ParseExact(value, "yyyyMMdd HH:mm:ss.0000000", CultureInfo.InvariantCulture);
+        return DateTimeOffset.ParseExact(value, "O", CultureInfo.InvariantCulture);
     }
 
     public override Type GetDotNetType()

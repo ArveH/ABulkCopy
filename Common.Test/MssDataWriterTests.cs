@@ -1,4 +1,6 @@
-﻿namespace Common.Test;
+﻿using System.Data;
+
+namespace Common.Test;
 
 public class MssDataWriterTests
 {
@@ -23,14 +25,14 @@ public class MssDataWriterTests
         _dataWriter = new DataWriter(_mockFileSystem, _logger);
     }
 
-    private async Task TestWriteType(IColumn col, object? value)
+    private async Task<string> ArrangeAndAct(IColumn col, object? value, SqlDbType? dbType=null)
     {
         // Arrange
         _originalTableDefinition.Columns.Add(col);
         await MssDbHelper.Instance.DropTable(_testTableName);
         await MssDbHelper.Instance.CreateTable(_originalTableDefinition);
         await MssDbHelper.Instance.InsertIntoSingleColumnTable(
-            _testTableName, value);
+            _testTableName, value, dbType);
         ITableReader tableReader = new MssTableReader(
             new SelectCreator(_logger), _logger)
         {
@@ -50,8 +52,13 @@ public class MssDataWriterTests
             await MssDbHelper.Instance.DropTable(_testTableName);
         }
 
+        return await GetJsonText();
+    }
+
+    private async Task TestWriteType(IColumn col, object? value)
+    {
         // Assert
-        var jsonTxt = await GetJsonText();
+        var jsonTxt = await ArrangeAndAct(col, value);
         jsonTxt.TrimEnd().Should().Be(value + ",");
     }
 
@@ -69,6 +76,161 @@ public class MssDataWriterTests
         await TestWriteType(
             new SqlServerInt(101, "MyTestCol", false),
             AllTypes.SampleValues.Int);
+    }
+
+    [Fact]
+    public async Task TestWriteSmallInt()
+    {
+        await TestWriteType(
+            new SqlServerSmallInt(101, "MyTestCol", false),
+            AllTypes.SampleValues.SmallInt);
+    }
+
+    [Fact]
+    public async Task TestWriteTinyInt()
+    {
+        await TestWriteType(
+            new SqlServerTinyInt(101, "MyTestCol", false),
+            AllTypes.SampleValues.TinyInt);
+    }
+
+    [Fact]
+    public async Task TestWriteBit()
+    {
+        var jsonTxt = await ArrangeAndAct(
+            new SqlServerBit(101, "MyTestCol", false),
+            true);
+        jsonTxt.TrimEnd().Should().Be("1,");
+    }
+
+    [Fact]
+    public async Task TestWriteMoney()
+    {
+        await TestWriteType(
+            new SqlServerMoney(101, "MyTestCol", false),
+            AllTypes.SampleValues.Money);
+    }
+
+    [Fact]
+    public async Task TestWriteDecimal()
+    {
+        await TestWriteType(
+            new SqlServerDecimal(101, "MyTestCol", false, 28, 6),
+            12345678901234567890.123456m);
+    }
+
+    [Fact]
+    public async Task TestWriteDecimal_When_Scale0_Then_ValueTruncated()
+    {
+        var jsonTxt = await ArrangeAndAct(
+            new SqlServerDecimal(101, "MyTestCol", false, 28),
+            1234567.123);
+        jsonTxt.TrimEnd().Should().Be("1234567,");
+    }
+
+    [Fact]
+    public async Task TestWriteFloat()
+    {
+        await TestWriteType(
+            new SqlServerFloat(101, "MyTestCol", false),
+            AllTypes.SampleValues.Float);
+    }
+
+    [Fact]
+    public async Task TestWriteReal()
+    {
+        await TestWriteType(
+            new SqlServerReal(101, "MyTestCol", false),
+            12.25);
+    }
+
+    [Fact]
+    public async Task TestWriteDate()
+    {
+        var jsonTxt = await ArrangeAndAct(
+            new SqlServerDate(101, "MyTestCol", false),
+            new DateTime(2023, 5, 19));
+        
+        // Assert
+        jsonTxt.TrimEnd().Should().Be("2023-05-19,");
+    }
+
+    [Fact]
+    public async Task TestWriteDateTime_When_NoFraction()
+    {
+        var jsonTxt = await ArrangeAndAct(
+            new SqlServerDateTime(101, "MyTestCol", false),
+            new DateTime(2023, 5, 19, 11, 12, 13));
+        
+        // Assert
+        jsonTxt.TrimEnd().Should().Be("2023-05-19T11:12:13.0000000,");
+    }
+
+    [Fact]
+    public async Task TestWriteDateTime()
+    {
+        var jsonTxt = await ArrangeAndAct(
+            new SqlServerDateTime(101, "MyTestCol", false),
+            new DateTime(2023, 5, 19, 11, 12, 13, 233));
+        
+        // Assert
+        jsonTxt.TrimEnd().Should().Be("2023-05-19T11:12:13.2330000,");
+    }
+
+    [Fact]
+    public async Task TestWriteDateTime2()
+    {
+        var value = new DateTime(2023, 5, 19, 11, 12, 13, 55);
+
+        var jsonTxt = await ArrangeAndAct(
+            new SqlServerDateTime2(101, "MyTestCol", false),
+            value,
+            SqlDbType.DateTime2);
+        
+        // Assert
+        jsonTxt.TrimEnd().Should().Be("2023-05-19T11:12:13.0550000,");
+    }
+
+    [Fact]
+    public async Task TestWriteDateTime2_When_NanoSeconds()
+    {
+        var value = new DateTime(2023, 5, 19, 11, 12, 13, 233, 666).AddTicks(8);
+
+        var jsonTxt = await ArrangeAndAct(
+            new SqlServerDateTime2(101, "MyTestCol", false),
+            value,
+            SqlDbType.DateTime2);
+        
+        // Assert
+        jsonTxt.TrimEnd().Should().Be("2023-05-19T11:12:13.2336668,");
+    }
+
+    [Fact]
+    public async Task TestWriteDateTimeOffset()
+    {
+        var value = new DateTimeOffset(2023, 5, 19, 11, 12, 13, 233, 666, new TimeSpan(1, 0, 0)).AddTicks(8);
+
+        var jsonTxt = await ArrangeAndAct(
+            new SqlServerDatetimeOffset(101, "MyTestCol", false),
+            value,
+            SqlDbType.DateTimeOffset);
+        
+        // Assert
+        jsonTxt.TrimEnd().Should().Be("2023-05-19T11:12:13.2336668+01:00,");
+    }
+
+    [Fact]
+    public async Task TestWriteTime()
+    {
+        var value = new TimeSpan(11, 12, 13);
+
+        var jsonTxt = await ArrangeAndAct(
+            new SqlServerTime(101, "MyTestCol", false),
+            value,
+            SqlDbType.Time);
+        
+        // Assert
+        jsonTxt.TrimEnd().Should().Be("11:12:13,");
     }
 
     private async Task<string> GetJsonText()

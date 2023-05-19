@@ -1,8 +1,8 @@
 ﻿namespace ASqlServer.Column.ColumnTypes;
 
-public class SqlServerDatetime : DefaultColumn
+public class SqlServerDateTime : DefaultColumn
 {
-    public SqlServerDatetime(int id, string name, bool isNullable)
+    public SqlServerDateTime(int id, string name, bool isNullable)
         : base(id, name, isNullable)
     {
         Type = ColumnType.DateTimeAlt;
@@ -16,12 +16,12 @@ public class SqlServerDatetime : DefaultColumn
 
     public override string ToString(object value)
     {
-        return Convert.ToDateTime(value).ToString("yyyyMMdd HH:mm:ss.0000000", CultureInfo.InvariantCulture);
+        return Convert.ToDateTime(value).ToString("O", CultureInfo.InvariantCulture);
     }
 
     public override object ToInternalType(string value)
     {
-        return DateTime.ParseExact(value, "yyyyMMdd HH:mm:ss.0000000", CultureInfo.InvariantCulture);
+        return DateTime.ParseExact(value, "O", CultureInfo.InvariantCulture);
     }
 
     public override Type GetDotNetType()

@@ -17,12 +17,12 @@ public class SqlServerTime : DefaultColumn
 
     public override string ToString(object value)
     {
-        return Convert.ToDateTime(value).ToString("HH:mm:ss.0000000", CultureInfo.InvariantCulture);
+        return ((TimeSpan)value).ToString();
     }
 
     public override object ToInternalType(string value)
     {
-        return DateTime.ParseExact(value, "HH:mm:ss.0000000", CultureInfo.InvariantCulture);
+        return TimeSpan.ParseExact(value, "HH:mm:ss", CultureInfo.InvariantCulture);
     }
 
     public override Type GetDotNetType()

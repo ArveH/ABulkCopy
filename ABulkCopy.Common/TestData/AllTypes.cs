@@ -6,12 +6,12 @@ public static class AllTypes
     {
         public const long BigInt = 123456789012345;
         public const int Int = 123456789;
-        public const int SmallInt = 123456;
+        public const int SmallInt = 12345;
         public const int TinyInt = 123;
         public const bool Bool = true;
-        public const decimal Money = 1234567.12345m;
+        public const decimal Money = 1234567.1234m;
         public const decimal SmallMoney = 123.123m;
-        public const decimal Decimal = 1234567.12345m;
+        public const decimal Decimal = 1234567890123456789.123456m;
         public const decimal Numeric = 1234567.12345m;
         public const double Float = 1234567.12345d;
         public const double Real = 123.123f;

@@ -35,7 +35,7 @@ public class SchemaWriterMssTests
     [Fact]
     public async Task TestWriteDateTime()
     {
-        var col = new SqlServerDatetime2(101, "MyTestCol", false);
+        var col = new SqlServerDateTime2(101, "MyTestCol", false);
         await TestWriteColumn_When_NoChange(col);
     }
 

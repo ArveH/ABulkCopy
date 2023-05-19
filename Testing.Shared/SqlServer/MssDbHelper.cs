@@ -1,4 +1,6 @@
-﻿namespace Testing.Shared.SqlServer;
+﻿using System.Data;
+
+namespace Testing.Shared.SqlServer;
 
 public class MssDbHelper
 {
@@ -46,13 +48,26 @@ public class MssDbHelper
 
     public async Task InsertIntoSingleColumnTable(
         string tableName,
-        object? value)
+        object? value,
+        SqlDbType? dbType=null)
     {
         await using var sqlConnection = new SqlConnection(ConnectionString);
         await sqlConnection.OpenAsync();
         var sqlString = $"insert into [{tableName}] values (@Value);";
         await using var sqlCommand = new SqlCommand(sqlString, sqlConnection);
-        sqlCommand.Parameters.AddWithValue("@Value", value);
+        if (dbType == null)
+        {
+            sqlCommand.Parameters.AddWithValue("@Value", value);
+        }
+        else
+        {
+            // Note: Since dbType is nullable, we have to cast to non-nullable
+            // otherwise we get the wrong SqlParameter constructor
+            // and dbType is treated as the value instead of the SqlDbType
+            var sqlParameter = new SqlParameter("@Value", (SqlDbType)dbType);
+            sqlParameter.Value = value;
+            sqlCommand.Parameters.Add(sqlParameter);
+        }
         await sqlCommand.ExecuteNonQueryAsync();
     }
 
