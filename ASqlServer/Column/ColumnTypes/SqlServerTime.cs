@@ -6,13 +6,13 @@ public class SqlServerTime : DefaultColumn
         : base(id, name, isNullable)
     {
         Type = ColumnType.Time;
-        Scale = scale;
-        SetPrecisionAndLength(scale);
+        Scale = scale??7;
+        SetPrecisionAndLength(scale??7);
     }
 
-    public override string InternalTypeName()
+    public override string GetNativeType()
     {
-        return "time";
+        return Scale == 7 ? "time" : $"time({Scale})";
     }
 
     public override string ToString(object value)

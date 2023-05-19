@@ -9,7 +9,7 @@ public class SqlServerUniqueIdentifier : DefaultColumn
         Length = 16;
     }
 
-    public override string InternalTypeName()
+    public override string GetNativeType()
     {
         return "uniqueidentifier";
     }

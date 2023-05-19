@@ -14,9 +14,9 @@ public class SqlServerDecimal : DefaultColumn
         Length = CalculateLength(precision);
     }
 
-    public override string InternalTypeName()
+    public override string GetNativeType()
     {
-        return "decimal";
+        return Scale == 0 ? $"decimal({Precision})" : $"decimal({Precision}, {Scale})";
     }
 
     public override string ToString(object value)

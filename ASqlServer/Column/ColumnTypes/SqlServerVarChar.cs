@@ -16,4 +16,9 @@ public class SqlServerVarChar : TemplateStrColumn
             Length = length;
         }
     }
+
+    public override string GetNativeType()
+    {
+        return Length == -1 ? "varchar(max)" : $"varchar({Length})";
+    }
 }

@@ -7,7 +7,7 @@ public class SqlServerXml : DefaultColumn
     {
     }
 
-    public override string InternalTypeName()
+    public override string GetNativeType()
     {
         return "xml";
     }

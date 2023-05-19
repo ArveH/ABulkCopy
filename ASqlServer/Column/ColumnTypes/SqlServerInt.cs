@@ -9,7 +9,7 @@ public class SqlServerInt : TemplateNumberColumn
         Type = ColumnType.Int;
     }
 
-    public override string InternalTypeName()
+    public override string GetNativeType()
     {
         return "int";
     }

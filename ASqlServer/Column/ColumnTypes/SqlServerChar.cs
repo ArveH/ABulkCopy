@@ -8,8 +8,8 @@ public class SqlServerChar : TemplateStrColumn
         Type = ColumnType.Char;
     }
 
-    public override string InternalTypeName()
+    public override string GetNativeType()
     {
-        return "char";
+        return $"char({Length})";
     }
 }

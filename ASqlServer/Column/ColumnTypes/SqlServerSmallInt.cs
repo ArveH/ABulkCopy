@@ -9,7 +9,7 @@ public class SqlServerSmallInt : TemplateNumberColumn
         Type = ColumnType.SmallInt;
     }
 
-    public override string InternalTypeName()
+    public override string GetNativeType()
     {
         return "smallint";
     }

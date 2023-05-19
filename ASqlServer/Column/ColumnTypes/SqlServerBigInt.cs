@@ -9,7 +9,7 @@ public class SqlServerBigInt : TemplateNumberColumn
         Type = ColumnType.BigInt;
     }
 
-    public override string InternalTypeName()
+    public override string GetNativeType()
     {
         return "bigint";
     }

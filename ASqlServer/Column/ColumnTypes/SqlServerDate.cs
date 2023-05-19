@@ -10,7 +10,7 @@ public class SqlServerDate : DefaultColumn
         Precision = 10;
     }
 
-    public override string InternalTypeName()
+    public override string GetNativeType()
     {
         return "date";
     }

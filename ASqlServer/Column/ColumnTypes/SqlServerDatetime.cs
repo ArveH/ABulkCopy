@@ -9,7 +9,7 @@ public class SqlServerDatetime : DefaultColumn
         Length = 8;
     }
 
-    public override string InternalTypeName()
+    public override string GetNativeType()
     {
         return "datetime";
     }

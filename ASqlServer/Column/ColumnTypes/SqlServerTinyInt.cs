@@ -9,7 +9,7 @@ public class SqlServerTinyInt : TemplateNumberColumn
         Type = ColumnType.TinyInt;
     }
 
-    public override string InternalTypeName()
+    public override string GetNativeType()
     {
         return "tinyint";
     }

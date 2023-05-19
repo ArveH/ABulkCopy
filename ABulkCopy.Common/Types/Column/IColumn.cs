@@ -17,7 +17,8 @@ public interface IColumn
     string? Collation { get; set; }
 
     string ToString(object value);
-    string InternalTypeName();
+    string GetNativeType();
+    string GetNativeCreateClause();
     object ToInternalType(string value);
     Type GetDotNetType();
 }

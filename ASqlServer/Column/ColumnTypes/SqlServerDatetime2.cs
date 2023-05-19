@@ -10,9 +10,9 @@ public class SqlServerDatetime2 : DefaultColumn
         SetPrecisionAndLength(scale??7);
     }
 
-    public override string InternalTypeName()
+    public override string GetNativeType()
     {
-        return "datetime2";
+        return Scale == 7 ? "datetime2" : $"datetime2({Scale})";
     }
 
     public override string ToString(object value)

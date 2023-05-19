@@ -9,7 +9,7 @@ public class SqlServerMoney : TemplateNumberColumn
         Type = ColumnType.Money;
     }
 
-    public override string InternalTypeName()
+    public override string GetNativeType()
     {
         return "money";
     }

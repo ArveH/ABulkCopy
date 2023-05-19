@@ -10,9 +10,9 @@ public class SqlServerDatetimeOffset : DefaultColumn
         SetPrecisionAndLength(scale??7);
     }
 
-    public override string InternalTypeName()
+    public override string GetNativeType()
     {
-        return "datetime2";
+        return Scale == 7 ? "datetimeoffset" : $"datetimeoffset({Scale})";
     }
 
     public override string ToString(object value)

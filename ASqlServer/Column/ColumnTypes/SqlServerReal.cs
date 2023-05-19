@@ -10,7 +10,7 @@ public class SqlServerReal : DefaultColumn
         Precision = 24;
     }
 
-    public override string InternalTypeName()
+    public override string GetNativeType()
     {
         return "real";
     }

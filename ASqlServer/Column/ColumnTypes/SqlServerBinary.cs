@@ -9,9 +9,9 @@ public class SqlServerBinary : DefaultColumn
         Length = length;
     }
 
-    public override string InternalTypeName()
+    public override string GetNativeType()
     {
-        return "binary";
+        return $"binary({Length})";
     }
 
     public override string ToString(object value)

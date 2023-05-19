@@ -13,9 +13,9 @@ public class SqlServerVarBinary : DefaultColumn
         }
     }
 
-    public override string InternalTypeName()
+    public override string GetNativeType()
     {
-        return "varbinary";
+        return Length == -1 ? "varbinary(max)" : $"varbinary({Length})";
     }
 
     public override string ToString(object value)

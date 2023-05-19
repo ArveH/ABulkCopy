@@ -23,7 +23,7 @@ public class SqlServerFloat : DefaultColumn
         }
     }
 
-    public override string InternalTypeName()
+    public override string GetNativeType()
     {
         return _typeName;
     }

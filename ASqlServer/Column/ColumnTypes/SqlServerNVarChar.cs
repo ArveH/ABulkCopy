@@ -17,8 +17,8 @@ public class SqlServerNVarChar : TemplateStrColumn
         }
     }
 
-    public override string InternalTypeName()
+    public override string GetNativeType()
     {
-        return "nvarchar";
+        return Length == -1 ? "nvarchar(max)" : $"nvarchar({Length})";
     }
 }

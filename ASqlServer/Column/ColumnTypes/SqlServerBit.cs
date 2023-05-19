@@ -9,7 +9,7 @@ public class SqlServerBit : TemplateNumberColumn
         Type = ColumnType.Bool;
     }
 
-    public override string InternalTypeName()
+    public override string GetNativeType()
     {
         return "bit";
     }

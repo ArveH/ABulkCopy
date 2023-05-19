@@ -28,9 +28,14 @@ public class DefaultColumn : IColumn
         throw new NotImplementedException();
     }
 
-    public virtual string InternalTypeName()
+    public virtual string GetNativeType()
     {
         throw new NotImplementedException();
+    }
+
+    public string GetNativeCreateClause()
+    {
+        return GetNativeType() + GetIdentityClause() + GetNullableClause();
     }
 
     public virtual object ToInternalType(string value)
@@ -56,5 +61,14 @@ public class DefaultColumn : IColumn
             Precision = Precision,
             Scale = Scale
         };
+    }
+
+    protected string GetNullableClause()
+    {
+        return IsNullable ? " NULL" : " NOT NULL";
+    }
+
+    protected string GetIdentityClause() {
+        return Identity != null ? $" IDENTITY({Identity.Seed},{Identity.Increment})" : string.Empty;
     }
 }

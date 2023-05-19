@@ -8,7 +8,7 @@ public class SqlServerSmallDatetime : DefaultColumn
         Length = 4;
     }
 
-    public override string InternalTypeName()
+    public override string GetNativeType()
     {
         return "smalldatetime";
     }
