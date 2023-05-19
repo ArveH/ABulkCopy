@@ -135,7 +135,6 @@ public class SchemaWriterTests
                 IsSystemNamed = true
             });
 
-        // TODO: Fix the unicoded quotes 
         jsonTxt.Squeeze().Should().ContainEquivalentOf((
             "\"DefaultConstraint\": {\r\n" +
             "   \"Name\": \"DF__arveh__col1__531856C8\",\r\n" +
