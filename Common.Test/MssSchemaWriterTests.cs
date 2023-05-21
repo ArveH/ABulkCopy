@@ -1,6 +1,6 @@
 namespace Common.Test;
 
-public class SchemaWriterMssTests
+public class MssSchemaWriterTests
 {
     private const string TestPath = @"C:\testfiles";
     private const string TestTableName = "TestTableForTestWrite";
@@ -8,7 +8,7 @@ public class SchemaWriterMssTests
     private readonly MockFileSystem _mockFileSystem;
     private readonly ISchemaWriter _schemaWriter;
 
-    public SchemaWriterMssTests()
+    public MssSchemaWriterTests()
     {
         _originalTableDefinition = MssTestData.GetEmpty(TestTableName);
         _mockFileSystem = new MockFileSystem();
