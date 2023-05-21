@@ -8,6 +8,17 @@ public class SqlServerChar : TemplateStrColumn
         Type = ColumnType.Char;
     }
 
+    public override string ToString(object value)
+    {
+        var cleanValue = Convert.ToString(value)?.Replace("'", "''");
+        if (cleanValue == null)
+        {
+            return "NULL";
+        }
+
+        return "'" + cleanValue + "'";
+    }
+
     public override string GetNativeType()
     {
         return $"char({Length})";

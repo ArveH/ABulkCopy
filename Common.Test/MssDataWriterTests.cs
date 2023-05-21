@@ -25,7 +25,7 @@ public class MssDataWriterTests
         _dataWriter = new DataWriter(_mockFileSystem, _logger);
     }
 
-    private async Task<string> ArrangeAndAct(IColumn col, object? value, SqlDbType? dbType=null)
+    private async Task<string> ArrangeAndAct(IColumn col, object? value, SqlDbType? dbType = null)
     {
         // Arrange
         _originalTableDefinition.Columns.Add(col);
@@ -150,7 +150,7 @@ public class MssDataWriterTests
         var jsonTxt = await ArrangeAndAct(
             new SqlServerDate(101, "MyTestCol", false),
             new DateTime(2023, 5, 19));
-        
+
         // Assert
         jsonTxt.TrimEnd().Should().Be("2023-05-19,");
     }
@@ -161,7 +161,7 @@ public class MssDataWriterTests
         var jsonTxt = await ArrangeAndAct(
             new SqlServerDateTime(101, "MyTestCol", false),
             new DateTime(2023, 5, 19, 11, 12, 13));
-        
+
         // Assert
         jsonTxt.TrimEnd().Should().Be("2023-05-19T11:12:13.0000000,");
     }
@@ -172,7 +172,7 @@ public class MssDataWriterTests
         var jsonTxt = await ArrangeAndAct(
             new SqlServerDateTime(101, "MyTestCol", false),
             new DateTime(2023, 5, 19, 11, 12, 13, 233));
-        
+
         // Assert
         jsonTxt.TrimEnd().Should().Be("2023-05-19T11:12:13.2330000,");
     }
@@ -186,7 +186,7 @@ public class MssDataWriterTests
             new SqlServerDateTime2(101, "MyTestCol", false),
             value,
             SqlDbType.DateTime2);
-        
+
         // Assert
         jsonTxt.TrimEnd().Should().Be("2023-05-19T11:12:13.0550000,");
     }
@@ -200,7 +200,7 @@ public class MssDataWriterTests
             new SqlServerDateTime2(101, "MyTestCol", false),
             value,
             SqlDbType.DateTime2);
-        
+
         // Assert
         jsonTxt.TrimEnd().Should().Be("2023-05-19T11:12:13.2336668,");
     }
@@ -214,7 +214,7 @@ public class MssDataWriterTests
             new SqlServerDatetimeOffset(101, "MyTestCol", false),
             value,
             SqlDbType.DateTimeOffset);
-        
+
         // Assert
         jsonTxt.TrimEnd().Should().Be("2023-05-19T11:12:13.2336668+01:00,");
     }
@@ -228,9 +228,143 @@ public class MssDataWriterTests
             new SqlServerTime(101, "MyTestCol", false),
             value,
             SqlDbType.Time);
-        
+
         // Assert
         jsonTxt.TrimEnd().Should().Be("11:12:13,");
+    }
+
+    private async Task TestWriteString(
+        IColumn col,
+        string actual,
+        string expected)
+    {
+        var jsonTxt = await ArrangeAndAct(col, actual);
+
+        // Assert
+        jsonTxt.TrimEnd().Should().Be($"{expected},");
+    }
+
+    [Fact]
+    public async Task TestWriteChar()
+    {
+        await TestWriteString(
+            new SqlServerChar(101, "MyTestCol", false, 10),
+                "Arve",
+                "'Arve      '");
+    }
+
+    [Fact]
+    public async Task TestWriteChar_When_SingleQuote_Then_TwoQuotesInFile()
+    {
+        await TestWriteString(
+            new SqlServerChar(101, "MyTestCol", false, 15),
+            "Arve's vodka",
+            "'Arve''s vodka   '");
+    }
+
+    [Fact]
+    public async Task TestWriteChar_When_BackSlashLastCharacter()
+    {
+        await TestWriteString(
+            new SqlServerChar(101, "MyTestCol", false, 10),
+            "123456789\\",
+            "'123456789\\'");
+    }
+
+    [Fact]
+    public async Task TestWriteVarChar_When_SingleQuote_Then_TwoQuotesInFile()
+    {
+        await TestWriteString(
+            new SqlServerVarChar(101, "MyTestCol", false, 15),
+            "Arve's vodka",
+            "'Arve''s vodka'");
+    }
+
+    [Fact]
+    public async Task TestWriteVarChar_When_BackSlash()
+    {
+        await TestWriteString(
+            new SqlServerVarChar(101, "MyTestCol", false, 10),
+            "\\Arve",
+            "'\\Arve'");
+    }
+
+    private static readonly string String10K = new ('a', 10000);
+    [Fact]
+    public async Task TestWriteVarCharMax()
+    {
+        await TestWriteString(
+            new SqlServerVarChar(101, "MyTestCol", false, -1),
+            String10K,
+            "'" + String10K + "'");
+    }
+
+    [Fact]
+    public async Task TestWriteNChar()
+    {
+        await TestWriteString(
+            new SqlServerNChar(101, "MyTestCol", false, 10),
+            "Arveﯵ",
+            "'Arveﯵ'");
+    }
+
+    [Fact]
+    public async Task TestWriteNChar_When_SingleQuote_Then_TwoQuotesInFile()
+    {
+        await TestWriteString(
+            new SqlServerNChar(101, "MyTestCol", false, 15),
+            "Arveﯵ's vodka",
+            "'Arveﯵ''s vodka'");
+    }
+
+    [Fact]
+    public async Task TestWriteNChar_When_BackSlashLastCharacter()
+    {
+        await TestWriteString(
+            new SqlServerNChar(101, "MyTestCol", false, 10),
+            "12345678ﯵ\\",
+            "'12345678ﯵ\\'");
+    }
+
+    [Fact]
+    public async Task TestWriteNVarChar_When_SingleQuote_Then_TwoQuotesInFile()
+    {
+        await TestWriteString(
+            new SqlServerNVarChar(101, "MyTestCol", false, 15),
+            "Arveﯵ's vodka",
+            "'Arveﯵ''s vodka'");
+    }
+
+    [Fact]
+    public async Task TestWriteNVarChar_When_BackSlash()
+    {
+        await TestWriteString(
+            new SqlServerNVarChar(101, "MyTestCol", false, 10),
+            "\\ﯵArve",
+            "'\\ﯵArve'");
+    }
+
+    private static readonly string NString10K = new ('ﯵ', 10000);
+    [Fact]
+    public async Task TestWriteNVarCharMax()
+    {
+        await TestWriteString(
+            new SqlServerNVarChar(101, "MyTestCol", false, -1),
+            NString10K,
+            "'" + NString10K + "'");
+    }
+
+    [Fact]
+    public async Task TestWriteGuid()
+    {
+        var value = Guid.NewGuid();
+
+        var jsonTxt = await ArrangeAndAct(
+            new SqlServerUniqueIdentifier(101, "MyTestCol", false),
+            value);
+
+        // Assert
+        jsonTxt.TrimEnd().Should().Be(value + ",");
     }
 
     private async Task<string> GetJsonText()
