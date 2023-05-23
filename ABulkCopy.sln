@@ -15,7 +15,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ABulkCopy.TestData", "ABulk
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common.Test", "Common.Test\Common.Test.csproj", "{18C5753E-7D2A-4449-BAE9-92663FCEE07F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Testing.Shared", "Testing.Shared\Testing.Shared.csproj", "{476DDC45-1F27-4275-BF3E-98A0DB42C29D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Testing.Shared", "Testing.Shared\Testing.Shared.csproj", "{476DDC45-1F27-4275-BF3E-98A0DB42C29D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ABulkCopy.Cmd", "ABulkCopy.Cmd\ABulkCopy.Cmd.csproj", "{7F302965-8205-4D0D-A5AC-59F193CE9431}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,6 +49,10 @@ Global
 		{476DDC45-1F27-4275-BF3E-98A0DB42C29D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{476DDC45-1F27-4275-BF3E-98A0DB42C29D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{476DDC45-1F27-4275-BF3E-98A0DB42C29D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F302965-8205-4D0D-A5AC-59F193CE9431}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F302965-8205-4D0D-A5AC-59F193CE9431}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F302965-8205-4D0D-A5AC-59F193CE9431}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F302965-8205-4D0D-A5AC-59F193CE9431}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
