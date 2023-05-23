@@ -1,6 +1,6 @@
 ﻿namespace ABulkCopy.Common.Writer;
 
-public class DataWriter
+public class DataWriter : IDataWriter
 {
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;

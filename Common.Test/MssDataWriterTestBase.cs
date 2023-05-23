@@ -9,7 +9,7 @@ public abstract class MssDataWriterTestBase
     protected readonly ILogger _logger;
     protected readonly TableDefinition _originalTableDefinition;
     protected readonly MockFileSystem _mockFileSystem;
-    protected readonly DataWriter _dataWriter;
+    protected readonly IDataWriter _dataWriter;
 
     protected MssDataWriterTestBase(ITestOutputHelper output)
     {
