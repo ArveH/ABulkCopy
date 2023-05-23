@@ -188,17 +188,15 @@ public class MssCommandTests
         foreignKeys[0].UpdateAction.Should().Be(UpdateAction.NoAction);
     }
 
-    private IMssCommand CreateMssCommand()
+    private IMssSystemTables CreateMssCommand()
     {
         var connectionString = _configuration.GetConnectionString("FromDb");
         connectionString.Should()
             .NotBeNullOrWhiteSpace("because the connection string should be set in the user secrets file");
         IMssColumnFactory colFactory = new MssColumnFactory(_logger);
-        IMssCommand sqlCmd = new MssCommand(
-            colFactory, _logger)
-        {
-            ConnectionString = connectionString!
-        };
+        IMssSystemTables sqlCmd = new MssSystemTables(
+            new MssConnection() { ConnectionString = connectionString! },
+            colFactory, _logger);
         return sqlCmd;
     }
 }

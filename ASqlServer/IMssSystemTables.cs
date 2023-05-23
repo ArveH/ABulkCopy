@@ -1,8 +1,7 @@
 ﻿namespace ASqlServer;
 
-public interface IMssCommand
+public interface IMssSystemTables
 {
-    string ConnectionString { get; init; }
     Task<IEnumerable<string>> GetTableNames(string searchString);
     Task<TableHeader?> GetTableHeader(string tableName);
     Task<IEnumerable<IColumn>> GetColumnInfo(TableHeader tableHeader);

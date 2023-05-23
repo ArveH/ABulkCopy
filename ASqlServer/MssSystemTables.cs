@@ -1,22 +1,21 @@
 ﻿using ASqlServer.Column;
-using System.ComponentModel.DataAnnotations;
 
 namespace ASqlServer;
 
-public class MssCommand : IMssCommand
+public class MssSystemTables : MssCommandBase, IMssSystemTables
 {
     private readonly IMssColumnFactory _columnFactory;
     private readonly ILogger _logger;
 
-    public MssCommand(
+    public MssSystemTables(
+        IDbContext dbContext,
         IMssColumnFactory columnFactory,
         ILogger logger)
+        : base(dbContext)
     {
         _columnFactory = columnFactory;
-        _logger = logger.ForContext<MssCommand>();
+        _logger = logger.ForContext<MssSystemTables>();
     }
-
-    public required string ConnectionString { get; init; }
 
     public async Task<IEnumerable<string>> GetTableNames(string searchString)
     {
@@ -245,25 +244,5 @@ public class MssCommand : IMssCommand
             foreignKeys.Capacity, tableHeader.Name);
 
         return foreignKeys;
-    }
-
-    public async Task ExecuteReader(
-        SqlCommand command,
-        Action<SqlDataReader> readFunc)
-    {
-        var connection = new SqlConnection(ConnectionString);
-        await using (connection.ConfigureAwait(false))
-        {
-            command.Connection = connection;
-            await connection.OpenAsync().ConfigureAwait(false);
-            await using (command.ConfigureAwait(false))
-            {
-                await using var reader = await command.ExecuteReaderAsync().ConfigureAwait(false);
-                while (await reader.ReadAsync().ConfigureAwait(false))
-                {
-                    readFunc(reader);
-                }
-            }
-        }
     }
 }

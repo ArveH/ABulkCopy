@@ -37,7 +37,7 @@ internal class Program
             builder.Services.AddSingleton<ISchemaWriter, SchemaWriter>();
             builder.Services.AddSingleton<IDataWriter, DataWriter>();
             builder.Services.AddSingleton<ISelectCreator, SelectCreator>();
-            builder.Services.AddTransient<IMssCommand, MssCommand>();
+            builder.Services.AddTransient<IMssSystemTables, MssSystemTables>();
             builder.Services.AddSingleton<IMssTableReader, MssTableReader>();
             builder.Services.AddSingleton<IMssTableSchema, MssTableSchema>();
             builder.Services.AddSingleton<IMssColumnFactory, MssColumnFactory>();
