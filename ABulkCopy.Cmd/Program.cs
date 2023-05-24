@@ -1,16 +1,4 @@
-﻿using System.IO.Abstractions;
-using ABulkCopy.Common.Reader;
-using ABulkCopy.Common.Utils;
-using ABulkCopy.Common.Writer;
-using ASqlServer;
-using ASqlServer.Column;
-using ASqlServer.Table;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Serilog;
-
-namespace ABulkCopy.Cmd;
+﻿namespace ABulkCopy.Cmd;
 
 internal class Program
 {
@@ -23,7 +11,15 @@ internal class Program
             .AddEnvironmentVariables()
             .Build();
 
-        ConfigureLogger(configuration);
+        var result = Parser.Default.ParseArguments<CmdOptions>(args);
+        if (result.Tag == ParserResultType.NotParsed)
+        {
+            return;
+        }
+
+        var cmdParameters = result.Value;
+
+        ConfigureLogger(configuration, cmdParameters.LogFile);
 
         try
         {
@@ -31,16 +27,7 @@ internal class Program
             builder.Configuration.AddConfiguration(configuration);
             builder.Logging.AddSerilog();
 
-            builder.Services.AddSingleton(configuration);
-            builder.Services.AddSingleton(Log.Logger);
-            builder.Services.AddSingleton<IFileSystem>(new FileSystem());
-            builder.Services.AddSingleton<ISchemaWriter, SchemaWriter>();
-            builder.Services.AddSingleton<IDataWriter, DataWriter>();
-            builder.Services.AddSingleton<ISelectCreator, SelectCreator>();
-            builder.Services.AddTransient<IMssSystemTables, MssSystemTables>();
-            builder.Services.AddSingleton<IMssTableReader, MssTableReader>();
-            builder.Services.AddSingleton<IMssTableSchema, MssTableSchema>();
-            builder.Services.AddSingleton<IMssColumnFactory, MssColumnFactory>();
+            ConfigureServices(builder, configuration);
 
             var host = builder.Build();
             var logger = host.Services.GetRequiredService<ILogger>();
@@ -57,34 +44,35 @@ internal class Program
         }
     }
 
-    private static void ConfigureLogger(IConfigurationRoot configuration)
+    private static void ConfigureServices(HostApplicationBuilder builder, IConfigurationRoot configuration)
+    {
+        builder.Services.AddSingleton(configuration);
+        builder.Services.AddSingleton(Log.Logger);
+        builder.Services.AddSingleton<IFileSystem>(new FileSystem());
+        builder.Services.AddSingleton<ISchemaWriter, SchemaWriter>();
+        builder.Services.AddSingleton<IDataWriter, DataWriter>();
+        builder.Services.AddSingleton<ISelectCreator, SelectCreator>();
+        builder.Services.AddTransient<IMssSystemTables, MssSystemTables>();
+        builder.Services.AddSingleton<IMssTableReader, MssTableReader>();
+        builder.Services.AddSingleton<IMssTableSchema, MssTableSchema>();
+        builder.Services.AddSingleton<IMssColumnFactory, MssColumnFactory>();
+    }
+
+    private static void ConfigureLogger(
+        IConfigurationRoot configuration,
+        string fileFullPath)
     {
         const string outputTemplate =
             "{Timestamp:HH:mm:ss.fff} [{Level:u3}] {Message}    {Timestamp:yyyy-MM-dd }{Properties}{NewLine}{Exception}{NewLine}";
-        var filePath = GetLogStreamFullPath(configuration);
         var loggerConfig = new LoggerConfiguration()
             .ReadFrom.Configuration(configuration)
             .Enrich.FromLogContext()
             .Enrich.WithMachineName()
-            .WriteTo.File(filePath,
+            .WriteTo.File(fileFullPath,
                 outputTemplate: outputTemplate,
                 fileSizeLimitBytes: 10000000,
                 rollOnFileSizeLimit: true,
                 shared: true,
                 flushToDiskInterval: TimeSpan.FromSeconds(1));
         Log.Logger = loggerConfig.CreateLogger();    }
-
-    private static string GetLogStreamFullPath(IConfiguration configuration)
-    {
-        var path = configuration[CmdConstants.Config.LogPathKey];
-        var logFile = configuration[CmdConstants.Config.LogFileKey];
-
-        if (string.IsNullOrWhiteSpace(path) || 
-            string.IsNullOrWhiteSpace(logFile))
-        {
-            throw new InvalidOperationException(
-                "LogStreamPath or LogStreamFile is not configured");
-        }
-        return path.TrimEnd('\\', '/') + @"\" + logFile;
-    }
 }
