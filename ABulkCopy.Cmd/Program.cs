@@ -1,4 +1,6 @@
-﻿namespace ABulkCopy.Cmd;
+﻿using ABulkCopy.Cmd.Config;
+
+namespace ABulkCopy.Cmd;
 
 internal class Program
 {
@@ -58,10 +60,7 @@ internal class Program
         builder.Services.AddSingleton<ISchemaWriter, SchemaWriter>();
         builder.Services.AddSingleton<IDataWriter, DataWriter>();
         builder.Services.AddSingleton<ISelectCreator, SelectCreator>();
-        builder.Services.AddTransient<IMssSystemTables, MssSystemTables>();
-        builder.Services.AddSingleton<IMssTableReader, MssTableReader>();
-        builder.Services.AddSingleton<IMssTableSchema, MssTableSchema>();
-        builder.Services.AddSingleton<IMssColumnFactory, MssColumnFactory>();
+        builder.Services.AddMssServices();
     }
 
     private static void ConfigureLogger(
