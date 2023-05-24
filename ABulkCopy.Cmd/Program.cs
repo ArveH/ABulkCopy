@@ -11,9 +11,15 @@ internal class Program
             .AddEnvironmentVariables()
             .Build();
 
-        var result = Parser.Default.ParseArguments<CmdOptions>(args);
+        var parser = new Parser(cfg =>
+        {
+            cfg.CaseInsensitiveEnumValues = true;
+            cfg.HelpWriter = Console.Error;
+        });
+        var result = parser.ParseArguments<CmdOptions>(args);
         if (result.Tag == ParserResultType.NotParsed)
         {
+            // A usage message is written to Console.Error by the CommandLineParser
             return;
         }
 
