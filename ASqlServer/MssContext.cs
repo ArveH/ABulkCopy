@@ -1,8 +1,8 @@
 ﻿namespace ASqlServer;
 
-public class MssConnection : IDbContext
+public class MssContext : IDbContext
 {
-    public MssConnection()
+    public MssContext()
     {
         DbServer = DbServer.SqlServer;
     }

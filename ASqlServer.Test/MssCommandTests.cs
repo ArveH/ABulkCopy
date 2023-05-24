@@ -195,7 +195,7 @@ public class MssCommandTests
             .NotBeNullOrWhiteSpace("because the connection string should be set in the user secrets file");
         IMssColumnFactory colFactory = new MssColumnFactory(_logger);
         IMssSystemTables sqlCmd = new MssSystemTables(
-            new MssConnection() { ConnectionString = connectionString! },
+            new MssContext() { ConnectionString = connectionString! },
             colFactory, _logger);
         return sqlCmd;
     }
