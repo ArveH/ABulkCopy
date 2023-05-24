@@ -2,30 +2,31 @@
 
 public class DataWriter : IDataWriter
 {
+    private readonly ITableReader _tableReader;
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
 
     public DataWriter(
-
+        ITableReader tableReader,
         IFileSystem fileSystem,
         ILogger logger)
     {
+        _tableReader = tableReader;
         _fileSystem = fileSystem;
         _logger = logger;
     }
 
     public async Task WriteTable(
-        ITableReader tableReader,
         TableDefinition tableDefinition,
         string path)
     {
         var fileFullPath = Path.Combine(
             path, tableDefinition.Header.Name + CommonConstants.DataSuffix);
         await using var writeStream = _fileSystem.File.CreateText(fileFullPath);
-        await tableReader.PrepareReader(tableDefinition);
-        while (await tableReader.Read())
+        await _tableReader.PrepareReader(tableDefinition);
+        while (await _tableReader.Read())
         {
-            WriteRow(tableReader, tableDefinition, writeStream);
+            WriteRow(_tableReader, tableDefinition, writeStream);
             writeStream.WriteLine();
         }
     }

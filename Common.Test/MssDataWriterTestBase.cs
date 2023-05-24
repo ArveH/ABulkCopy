@@ -22,7 +22,12 @@ public abstract class MssDataWriterTestBase
         _originalTableDefinition = MssTestData.GetEmpty(_testTableName);
         _mockFileSystem = new MockFileSystem();
         _mockFileSystem.AddDirectory(TestPath);
-        _dataWriter = new DataWriter(_mockFileSystem, _logger);
+        ITableReader tableReader = new MssTableReader(
+            new SelectCreator(_logger), _logger)
+        {
+            ConnectionString = MssDbHelper.Instance.ConnectionString
+        };
+        _dataWriter = new DataWriter(tableReader, _mockFileSystem, _logger);
     }
 
     protected async Task<string> ArrangeAndAct(IColumn col, object? value, SqlDbType? dbType = null)
@@ -33,17 +38,11 @@ public abstract class MssDataWriterTestBase
         await MssDbHelper.Instance.CreateTable(_originalTableDefinition);
         await MssDbHelper.Instance.InsertIntoSingleColumnTable(
             _testTableName, value, dbType);
-        ITableReader tableReader = new MssTableReader(
-            new SelectCreator(_logger), _logger)
-        {
-            ConnectionString = MssDbHelper.Instance.ConnectionString
-        };
 
         // Act
         try
         {
             await _dataWriter.WriteTable(
-                tableReader,
                 _originalTableDefinition,
                 TestPath);
         }
