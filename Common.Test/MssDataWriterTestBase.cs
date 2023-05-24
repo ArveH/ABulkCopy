@@ -42,7 +42,7 @@ public abstract class MssDataWriterTestBase
         // Act
         try
         {
-            await _dataWriter.WriteTable(
+            await _dataWriter.Write(
                 _originalTableDefinition,
                 TestPath);
         }

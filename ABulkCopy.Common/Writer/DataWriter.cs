@@ -16,7 +16,7 @@ public class DataWriter : IDataWriter
         _logger = logger;
     }
 
-    public async Task WriteTable(
+    public async Task<long> Write(
         TableDefinition tableDefinition,
         string path)
     {
@@ -24,11 +24,15 @@ public class DataWriter : IDataWriter
             path, tableDefinition.Header.Name + CommonConstants.DataSuffix);
         await using var writeStream = _fileSystem.File.CreateText(fileFullPath);
         await _tableReader.PrepareReader(tableDefinition);
+        var rowCounter = 0;
         while (await _tableReader.Read())
         {
             WriteRow(_tableReader, tableDefinition, writeStream);
             writeStream.WriteLine();
+            rowCounter++;
         }
+
+        return rowCounter;
     }
 
     private void WriteRow(

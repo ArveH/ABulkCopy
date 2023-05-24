@@ -2,7 +2,6 @@
 
 public interface IDataWriter
 {
-    Task WriteTable(
-        TableDefinition tableDefinition,
+    Task<long> Write(TableDefinition tableDefinition,
         string path);
 }
