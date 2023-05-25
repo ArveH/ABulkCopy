@@ -7,11 +7,12 @@ public class DataWriter : IDataWriter
     private readonly ILogger _logger;
 
     public DataWriter(
-        ITableReader tableReader,
+        IDbContext dbContext,
+        ITableReaderFactory tableReaderFactory,
         IFileSystem fileSystem,
         ILogger logger)
     {
-        _tableReader = tableReader;
+        _tableReader = tableReaderFactory.GetTableReader(dbContext);
         _fileSystem = fileSystem;
         _logger = logger;
     }

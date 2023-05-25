@@ -1,4 +1,6 @@
 ﻿using System.Data;
+using ABulkCopy.Cmd.Factories;
+using ABulkCopy.Common.Database;
 
 namespace Common.Test;
 
@@ -22,12 +24,14 @@ public abstract class MssDataWriterTestBase
         _originalTableDefinition = MssTestData.GetEmpty(_testTableName);
         _mockFileSystem = new MockFileSystem();
         _mockFileSystem.AddDirectory(TestPath);
-        ITableReader tableReader = new MssTableReader(
-            new SelectCreator(_logger), _logger)
+        IDbContext dbContext = new MssContext()
         {
             ConnectionString = MssDbHelper.Instance.ConnectionString
         };
-        _dataWriter = new DataWriter(tableReader, _mockFileSystem, _logger);
+        _dataWriter = new DataWriter(
+            dbContext, 
+            new TableReaderFactory(new SelectCreator(_logger), _logger),
+            _mockFileSystem, _logger);
     }
 
     protected async Task<string> ArrangeAndAct(IColumn col, object? value, SqlDbType? dbType = null)

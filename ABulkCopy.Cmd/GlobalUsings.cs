@@ -1,6 +1,6 @@
 // Global using directives
 
-global using System.IO.Abstractions;
+global using ABulkCopy.Common.Database;
 global using ABulkCopy.Common.Reader;
 global using ABulkCopy.Common.Types;
 global using ABulkCopy.Common.Utils;
@@ -13,3 +13,4 @@ global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
 global using Serilog;
+global using System.IO.Abstractions;

@@ -1,6 +1,6 @@
 ﻿namespace ABulkCopy.Cmd;
 
-public class CmdOptions
+public class CmdArguments
 {
     [Option('d', "direction", Required = true, HelpText = "Copy direction. \"In\" to a database or \"Out\" from a database.")]
     public required CopyDirection Direction { get; set; }
@@ -14,8 +14,8 @@ public class CmdOptions
     [Option('l', "log", Required = false, Default = "\\.\\abulkcopy.log", HelpText = "Full path for log file.")]
     public string LogFile { get; set; } = "\\.\\abulkcopy.log";
 
-    [Option('t', "table", Required = false, Default = "%", HelpText = "Table name(s) search string.")]
-    public string TableName { get; set; } = "%";
+    [Option('s', "search-str", Required = false, Default = "%", HelpText = "Table name(s) search string.")]
+    public string SearchStr { get; set; } = "%";
 
     [Option('b', "batch", Required = false, Default = 1000, HelpText = "Batch size. Currently not used")]
     public int BatchSize { get; set; } = 1000;
