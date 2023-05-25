@@ -1,5 +1,3 @@
-using Microsoft.VisualStudio.TestPlatform.Common;
-
 namespace ASqlServer.Test;
 
 public class MssCommandTests
