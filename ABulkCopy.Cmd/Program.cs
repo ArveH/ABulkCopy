@@ -11,6 +11,7 @@ internal class Program
         var cmdParameters = GetArguments(args);
         if (cmdParameters == null) return;
         ConfigureLogger(configuration, cmdParameters.LogFile);
+        Log.Information("ABulkCopy.Cmd started.");
 
         try
         {
@@ -29,6 +30,7 @@ internal class Program
                 var copyOut = host.Services.GetRequiredService<ICopyOut>();
                 await copyOut.Run(cmdParameters.Folder, cmdParameters.SearchStr);
             }
+            Log.Information("ABulkCopy.Cmd finished.");
         }
         catch (Exception ex)
         {

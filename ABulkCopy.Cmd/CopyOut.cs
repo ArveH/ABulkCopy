@@ -24,21 +24,32 @@ public class CopyOut : ICopyOut
 
     public async Task Run(string folder, string searchStr)
     {
-        _logger.Information("ABulkCopy.Cmd started. Copy direction: Out");
+        _logger.Information("Copy direction: Out");
 
         var tableNames = await _systemTables.GetTableNames(searchStr);
         foreach (var tableName in tableNames)
         {
-            var tabDef = await _tableSchema.GetTableInfo(tableName);
-            if (tabDef == null)
+            try
             {
-                _logger.Warning("Table {SearchString} not found", tableName);
-                continue;
-            }
+                var tabDef = await _tableSchema.GetTableInfo(tableName);
+                if (tabDef == null)
+                {
+                    _logger.Warning("Table {SearchString} not found", tableName);
+                    continue;
+                }
 
-            await _schemaWriter.Write(tabDef, folder);
-            var rows = await _dataWriter.Write(tabDef, folder);
-            Console.WriteLine($"Table '{tableName}' with {rows} rows copied to disk");
+                await _schemaWriter.Write(tabDef, folder);
+                var rows = await _dataWriter.Write(tabDef, folder);
+                _logger.Information("Table '{TableName}' with {Rows} rows copied to disk",
+                    tableName, rows);
+                Console.WriteLine($"Table '{tableName}' with {rows} rows copied to disk");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Copy out from table '{TableName}' failed",
+                    tableName);
+                Console.WriteLine($"Copy out from table '{tableName}' failed");
+            }
         }
     }
 }
