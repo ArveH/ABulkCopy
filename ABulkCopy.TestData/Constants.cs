@@ -1,11 +1,12 @@
-﻿using Azure.Core;
-using System.Drawing;
-using System.Runtime.InteropServices;
-
-namespace ABulkCopy.TestData;
+﻿namespace ABulkCopy.TestData;
 
 public static class Constants
 {
+    public struct Config
+    {
+        public const string DbKey = "BulkCopy";
+    }
+
     public struct Data
     {
         public const int IdLength = 255;

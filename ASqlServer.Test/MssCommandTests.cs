@@ -1,3 +1,5 @@
+using Microsoft.VisualStudio.TestPlatform.Common;
+
 namespace ASqlServer.Test;
 
 public class MssCommandTests
@@ -187,7 +189,7 @@ public class MssCommandTests
 
     private IMssSystemTables CreateMssCommand()
     {
-        var connectionString = _configuration.GetConnectionString("FromDb");
+        var connectionString = _configuration.GetConnectionString(TestConstants.Config.DbKey);
         connectionString.Should()
             .NotBeNullOrWhiteSpace("because the connection string should be set in the user secrets file");
         IMssColumnFactory colFactory = new MssColumnFactory(_logger);
