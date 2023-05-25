@@ -1,4 +1,6 @@
-﻿namespace ABulkCopy.Cmd;
+﻿using ABulkCopy.Common.Extensions;
+
+namespace ABulkCopy.Cmd;
 
 public class CopyOut : ICopyOut
 {
@@ -24,9 +26,11 @@ public class CopyOut : ICopyOut
 
     public async Task Run(string folder, string searchStr)
     {
-        _logger.Information("Copy direction: Out");
-
-        var tableNames = await _systemTables.GetTableNames(searchStr);
+        var tableNames = (await _systemTables.GetTableNames(searchStr)).ToList();
+        _logger.Information($"Copy out {{TableCount}} {"table".Plural(tableNames.Count)}",
+            tableNames.Count);
+        Console.WriteLine($"Copy out {tableNames.Count} {"table".Plural(tableNames.Count)}.");
+        var errors = 0;
         foreach (var tableName in tableNames)
         {
             try
@@ -35,6 +39,7 @@ public class CopyOut : ICopyOut
                 if (tabDef == null)
                 {
                     _logger.Warning("Table {SearchString} not found", tableName);
+                    errors++;
                     continue;
                 }
 
@@ -49,7 +54,21 @@ public class CopyOut : ICopyOut
                 _logger.Error(ex, "Copy out from table '{TableName}' failed",
                     tableName);
                 Console.WriteLine($"Copy out from table '{tableName}' failed");
+                errors++;
             }
+        }
+
+        if (errors > 0)
+        {
+            _logger.Warning($"Copy out {{TableCount}} {"table".Plural(tableNames.Count)} finished with {{Errors}} {"error".Plural(errors)}", 
+                tableNames.Count, errors);
+            Console.WriteLine($"Copy out {tableNames.Count} {"table".Plural(tableNames.Count)} finished with {errors} {"error".Plural(errors)}");
+        }
+        else
+        {
+            _logger.Information($"Copy out {{TableCount}} {"table".Plural(tableNames.Count)} finished.", 
+                tableNames.Count);
+            Console.WriteLine($"Copy out {tableNames.Count} {"table".Plural(tableNames.Count)} finished.");
         }
     }
 }
