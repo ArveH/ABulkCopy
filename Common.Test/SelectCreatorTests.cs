@@ -19,7 +19,7 @@ public class SelectCreatorTests
         var selectStatement = TestCreate(1);
 
         // Assert
-        selectStatement.Should().Be("select col1 from [dbo].[mytable]");
+        selectStatement.Should().Be("select [col1] from [dbo].[mytable]");
     }
 
     [Fact]
@@ -28,7 +28,7 @@ public class SelectCreatorTests
         var selectStatement = TestCreate(3);
 
         // Assert
-        selectStatement.Should().Be("select col1, col2, col3 from [dbo].[mytable]");
+        selectStatement.Should().Be("select [col1], [col2], [col3] from [dbo].[mytable]");
     }
 
     [Fact]
