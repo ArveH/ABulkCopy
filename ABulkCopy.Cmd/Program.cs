@@ -14,16 +14,21 @@ internal class Program
 
         try
         {
-            var host = GetHost(configuration);
+            var builder = CreateAppBuilder(configuration);
 
             if (cmdParameters.Direction == CopyDirection.In)
             {
                 Log.Information("ABulkCopy.Cmd started. Copy direction: In");
                 throw new NotImplementedException("Copy In not implemented");
             }
-
-            var copyOut = host.Services.GetRequiredService<ICopyOut>();
-            await copyOut.Run(cmdParameters.Folder, cmdParameters.SearchStr);
+            else
+            {
+                builder.Services.AddSingleton(
+                    DbContextFactory.GetContext(cmdParameters.ConnectionString));
+                var host = builder.Build();
+                var copyOut = host.Services.GetRequiredService<ICopyOut>();
+                await copyOut.Run(cmdParameters.Folder, cmdParameters.SearchStr);
+            }
         }
         catch (Exception ex)
         {
@@ -91,10 +96,11 @@ internal class Program
         builder.Services.AddSingleton<IDataWriter, DataWriter>();
         builder.Services.AddSingleton<ITableReaderFactory, TableReaderFactory>();
         builder.Services.AddSingleton<ISelectCreator, SelectCreator>();
+        builder.Services.AddSingleton<ICopyOut, CopyOut>();
         builder.Services.AddMssServices();
     }
 
-    private static IHost GetHost(IConfigurationRoot configuration)
+    private static HostApplicationBuilder CreateAppBuilder(IConfigurationRoot configuration)
     {
         var builder = Host.CreateApplicationBuilder();
         builder.Configuration.AddConfiguration(configuration);
@@ -102,7 +108,6 @@ internal class Program
 
         ConfigureServices(builder, configuration);
 
-        var host = builder.Build();
-        return host;
+        return builder;
     }
 }

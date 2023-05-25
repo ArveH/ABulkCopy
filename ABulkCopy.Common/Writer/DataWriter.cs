@@ -51,7 +51,9 @@ public class DataWriter : IDataWriter
 
             if (tableDefinition.Columns[i].Type == ColumnType.Raw)
             {
-                WriteBlobColumn();
+                WriteBlobColumn(
+                    tableDefinition.Header.Name,
+                    tableDefinition.Columns[i].Name);
             }
             else
             {
@@ -61,8 +63,10 @@ public class DataWriter : IDataWriter
         }
     }
 
-    private void WriteBlobColumn()
+    private void WriteBlobColumn(string tabName, string colName)
     {
-        throw new NotImplementedException();
+        _logger.Error("Can't write blob column '{ColumnName}' for table '{TableName}'",
+            colName, tabName);
+        throw new NotImplementedException($"Can't write blob column '{colName}' for table '{tabName}'");
     }
 }
