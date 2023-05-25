@@ -1,6 +1,9 @@
+global using ABulkCopy.ASqlServer;
+global using ABulkCopy.ASqlServer.Column;
 global using ABulkCopy.Common.Config;
 global using ABulkCopy.Common.TestData;
 global using ABulkCopy.Common.Types;
+global using ABulkCopy.Common.Types.Column;
 global using ABulkCopy.Common.Types.Table;
 global using ABulkCopy.Common.Utils;
 global using FluentAssertions;

@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ASqlServer\ASqlServer.csproj" />
+    <ProjectReference Include="..\ABulkCopy.ASqlServer\ABulkCopy.ASqlServer.csproj" />
   </ItemGroup>
 
 </Project>

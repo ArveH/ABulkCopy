@@ -41,7 +41,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ASqlServer\ASqlServer.csproj" />
+    <ProjectReference Include="..\ABulkCopy.ASqlServer\ABulkCopy.ASqlServer.csproj" />
     <ProjectReference Include="..\Testing.Shared\Testing.Shared.csproj" />
   </ItemGroup>
 

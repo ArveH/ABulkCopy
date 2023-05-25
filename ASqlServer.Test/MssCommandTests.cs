@@ -1,6 +1,3 @@
-using ABulkCopy.Common.Types.Column;
-using ASqlServer.Column;
-
 namespace ASqlServer.Test;
 
 public class MssCommandTests
