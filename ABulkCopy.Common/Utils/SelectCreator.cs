@@ -19,9 +19,9 @@ public class SelectCreator : ISelectCreator
         }
         
         var columns = tableDefinition.Columns
-            .Select(c => c.Name).ToList();
+            .Select(c => $"[{c.Name}]").ToList();
 
-        _logger.Information(
+        _logger.Debug(
             "Created select statement for table '{TableName}' with '{ColumnCount}' columns",
             tableDefinition.Header.Name, columns.Count);
         return "SELECT " 
