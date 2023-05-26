@@ -15,11 +15,8 @@ public class MssSystemTablesTests : MssTestBase
     [InlineData("%Sec%", 2)]
     public async Task TestGetTableNames(string searchString, int expectedCount)
     {
-        // Arrange
-        var systemTables = CreateMssSystemTables();
-
         // Act
-        var tableNames = await systemTables.GetTableNames(searchString);
+        var tableNames = await MssSystemTables.GetTableNames(searchString);
 
         // Assert
         tableNames.Count().Should().Be(expectedCount, $"because there should be {expectedCount} tables returned");
@@ -28,11 +25,8 @@ public class MssSystemTablesTests : MssTestBase
     [Fact]
     public async Task TestGetTableHeader_Then_NameAndSchemaOk()
     {
-        // Arrange
-        var systemTables = CreateMssSystemTables();
-
         // Act
-        var tableHeader = await systemTables.GetTableHeader("AllTypes");
+        var tableHeader = await MssSystemTables.GetTableHeader("AllTypes");
 
         // Assert
         tableHeader.Should().NotBeNull();
@@ -44,11 +38,8 @@ public class MssSystemTablesTests : MssTestBase
     [Fact]
     public async Task TestGetTableHeader_Then_IdentityOk()
     {
-        // Arrange
-        var systemTables = CreateMssSystemTables();
-
         // Act
-        var tableHeader = await systemTables.GetTableHeader("AllTypes");
+        var tableHeader = await MssSystemTables.GetTableHeader("AllTypes");
 
         // Assert
         tableHeader.Should().NotBeNull();
@@ -61,12 +52,11 @@ public class MssSystemTablesTests : MssTestBase
     public async Task TestGetColumnInfo_When_AllTypes()
     {
         // Arrange
-        var systemTables = CreateMssSystemTables();
-        var tableHeader = await systemTables.GetTableHeader("AllTypes");
+        var tableHeader = await MssSystemTables.GetTableHeader("AllTypes");
         tableHeader.Should().NotBeNull();
 
         // Act
-        var columnInfo = (await systemTables.GetColumnInfo(tableHeader!)).ToList();
+        var columnInfo = (await MssSystemTables.GetColumnInfo(tableHeader!)).ToList();
 
         // Assert
         columnInfo.Should().NotBeNull();
@@ -90,12 +80,11 @@ public class MssSystemTablesTests : MssTestBase
     public async Task TestGetColumnInfo_When_DefaultValues()
     {
         // Arrange
-        var systemTables = CreateMssSystemTables();
-        var tableHeader = await systemTables.GetTableHeader("TestDefaults");
+        var tableHeader = await MssSystemTables.GetTableHeader("TestDefaults");
         tableHeader.Should().NotBeNull();
 
         // Act
-        var columnInfo = (await systemTables.GetColumnInfo(tableHeader!)).ToList();
+        var columnInfo = (await MssSystemTables.GetColumnInfo(tableHeader!)).ToList();
 
         // Assert
         columnInfo.Should().NotBeNull("because ColumnInfo shouldn't be null");
@@ -122,12 +111,11 @@ public class MssSystemTablesTests : MssTestBase
     public async Task TestGetPrimaryKey_When_Exists()
     {
         // Arrange
-        var systemTables = CreateMssSystemTables();
-        var tableHeader = await systemTables.GetTableHeader("ClientScope");
+        var tableHeader = await MssSystemTables.GetTableHeader("ClientScope");
         tableHeader.Should().NotBeNull();
 
         // Act
-        var pk = await systemTables.GetPrimaryKey(tableHeader!);
+        var pk = await MssSystemTables.GetPrimaryKey(tableHeader!);
 
         // Assert
         pk.Should().NotBeNull();
@@ -143,12 +131,11 @@ public class MssSystemTablesTests : MssTestBase
     public async Task TestGetPrimaryKey_When_NotExist()
     {
         // Arrange
-        var systemTables = CreateMssSystemTables();
-        var tableHeader = await systemTables.GetTableHeader("TestDefaults");
+        var tableHeader = await MssSystemTables.GetTableHeader("TestDefaults");
         tableHeader.Should().NotBeNull();
 
         // Act
-        var pk = await systemTables.GetPrimaryKey(tableHeader!);
+        var pk = await MssSystemTables.GetPrimaryKey(tableHeader!);
 
         // Assert
         pk.Should().BeNull("because TestDefaults doesn't have a primary key");
@@ -158,12 +145,11 @@ public class MssSystemTablesTests : MssTestBase
     public async Task TestGetForeignKey_WhenExists()
     {
         // Arrange
-        var systemTables = CreateMssSystemTables();
-        var tableHeader = await systemTables.GetTableHeader("ClientScope");
+        var tableHeader = await MssSystemTables.GetTableHeader("ClientScope");
         tableHeader.Should().NotBeNull();
 
         // Act
-        var fks = await systemTables.GetForeignKeys(tableHeader!);
+        var fks = await MssSystemTables.GetForeignKeys(tableHeader!);
 
         // Assert
         var foreignKeys = fks.ToList();

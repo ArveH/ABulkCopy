@@ -5,6 +5,7 @@ public abstract class MssTestBase
     protected readonly ILogger TestLogger;
     protected readonly IConfiguration TestConfiguration;
     protected readonly IDbContext MssDbContext;
+    protected readonly IMssSystemTables MssSystemTables;
 
     protected MssTestBase(ITestOutputHelper output)
     {
@@ -20,16 +21,18 @@ public abstract class MssTestBase
         {
             ConnectionString = MssDbHelper.Instance.ConnectionString
         };
+
+        MssSystemTables = CreateMssSystemTables();
     }
 
-    protected IMssSystemTables CreateMssSystemTables()
+    private IMssSystemTables CreateMssSystemTables()
     {
         var connectionString = TestConfiguration.GetConnectionString(TestConstants.Config.DbKey);
         connectionString.Should()
             .NotBeNullOrWhiteSpace("because the connection string should be set");
         IMssColumnFactory colFactory = new MssColumnFactory(TestLogger);
         IMssSystemTables systemTables = new MssSystemTables(
-            new MssContext() { ConnectionString = connectionString! },
+            MssDbContext,
             colFactory, TestLogger);
         return systemTables;
     }
