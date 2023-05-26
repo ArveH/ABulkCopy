@@ -189,7 +189,7 @@ public class MssCommandTests
     {
         var connectionString = _configuration.GetConnectionString(TestConstants.Config.DbKey);
         connectionString.Should()
-            .NotBeNullOrWhiteSpace("because the connection string should be set in the user secrets file");
+            .NotBeNullOrWhiteSpace("because the connection string should be set");
         IMssColumnFactory colFactory = new MssColumnFactory(_logger);
         IMssSystemTables sqlCmd = new MssSystemTables(
             new MssContext() { ConnectionString = connectionString! },
