@@ -1,19 +1,10 @@
 namespace ASqlServer.Test;
 
-public class MssSystemTablesTests
+public class MssSystemTablesTests : MssTestBase
 {
-    private readonly ILogger _logger;
-    private readonly IConfiguration _configuration;
-
     public MssSystemTablesTests(ITestOutputHelper output)
+        : base(output)
     {
-        _logger = new LoggerConfiguration()
-            .Enrich.FromLogContext()
-            .MinimumLevel.Verbose()
-            .WriteTo.TestOutput(output)
-            .CreateLogger();
-
-        _configuration = new ConfigHelper().GetConfiguration("128e015d-d8ef-4ca8-ba79-5390b26c675f");
     }
 
     [Theory]
@@ -183,39 +174,5 @@ public class MssSystemTablesTests
         foreignKeys[0].ColumnReference.Should().Be("ClientId");
         foreignKeys[0].DeleteAction.Should().Be(DeleteAction.Cascade);
         foreignKeys[0].UpdateAction.Should().Be(UpdateAction.NoAction);
-    }
-
-    [Fact]
-    public async Task TestGetIndexes_When_OneIndexOneColumn()
-    {
-        // Arrange
-        var systemTables = CreateMssSystemTables();
-        var tableHeader = await systemTables.GetTableHeader("ConfiguredClients");
-        tableHeader.Should().NotBeNull();
-
-        // Act
-        var indexes = (await systemTables.GetIndexes(tableHeader!)).ToList();
-
-        // Assert
-        indexes.Should().NotBeNull();
-        indexes.Count.Should().Be(1);
-        indexes[0].Header.Id.Should().Be(2);
-        indexes[0].Header.TableId.Should().BeGreaterThan(0);
-        indexes[0].Header.Name.Should().Be("IX_ConfiguredClients_OwnerTenant");
-        indexes[0].Header.IsUnique.Should().BeFalse();
-        indexes[0].Header.Type.Should().Be(IndexType.NonClustered);
-        indexes[0].Header.Location.Should().Be("PRIMARY");
-    }
-
-    private IMssSystemTables CreateMssSystemTables()
-    {
-        var connectionString = _configuration.GetConnectionString(TestConstants.Config.DbKey);
-        connectionString.Should()
-            .NotBeNullOrWhiteSpace("because the connection string should be set");
-        IMssColumnFactory colFactory = new MssColumnFactory(_logger);
-        IMssSystemTables systemTables = new MssSystemTables(
-            new MssContext() { ConnectionString = connectionString! },
-            colFactory, _logger);
-        return systemTables;
     }
 }

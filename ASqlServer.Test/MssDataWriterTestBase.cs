@@ -1,31 +1,21 @@
 ﻿namespace ASqlServer.Test;
 
-public abstract class MssDataWriterTestBase
+public abstract class MssDataWriterTestBase : MssTestBase
 {
     public const string TestPath = @"C:\testfiles";
     public abstract string _testTableName { get; }
-    protected readonly ILogger _logger;
     protected readonly TableDefinition _originalTableDefinition;
     protected readonly MockFileSystem _mockFileSystem;
     protected readonly IDataWriter _dataWriter;
 
     protected MssDataWriterTestBase(ITestOutputHelper output)
+        : base(output)
     {
-        _logger = new LoggerConfiguration()
-            .Enrich.FromLogContext()
-            .MinimumLevel.Verbose()
-            .WriteTo.TestOutput(output)
-            .CreateLogger();
-
         _originalTableDefinition = MssTestData.GetEmpty(_testTableName);
         _mockFileSystem = new MockFileSystem();
         _mockFileSystem.AddDirectory(TestPath);
-        IDbContext dbContext = new MssContext()
-        {
-            ConnectionString = MssDbHelper.Instance.ConnectionString
-        };
         _dataWriter = new DataWriter(
-            dbContext, 
+            MssDbContext, 
             new TableReaderFactory(new SelectCreator(_logger), _logger),
             _mockFileSystem, _logger);
     }

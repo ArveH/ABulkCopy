@@ -1,4 +1,6 @@
 ﻿using System.Data;
+using ABulkCopy.Common.Types;
+using ABulkCopy.Common.Types.Index;
 
 namespace Testing.Shared.SqlServer;
 
@@ -69,6 +71,52 @@ public class MssDbHelper
             sqlCommand.Parameters.Add(sqlParameter);
         }
         await sqlCommand.ExecuteNonQueryAsync();
+    }
+
+    public async Task CreateIndex(string tableName, IndexDefinition indexDefinition)
+    {
+        var sb = new StringBuilder();
+        sb.Append("create ");
+        if (indexDefinition.Header.IsUnique)
+        {
+            sb.Append("unique ");
+        }
+
+        if (indexDefinition.Header.Type == IndexType.Clustered)
+        {
+            sb.Append("clustered ");
+        }
+
+        sb.Append("index ");
+        sb.Append($"[{indexDefinition.Header.Name}] on ");
+        sb.Append($"[{tableName}] (");
+        var first = true;
+        foreach (var indexCol in indexDefinition.Columns)
+        {
+            if (first)
+            {
+                first = false;
+            }
+            else
+            {
+                sb.AppendLine(",");
+            }
+
+            sb.Append($"    {indexCol.Name} ");
+            if (indexCol.Direction == Direction.Descending)
+            {
+                sb.Append("desc");
+            }
+        }
+        sb.Append(")");
+
+        await ExecuteNonQuery(sb.ToString());
+    }
+
+    public async Task DropIndex(string tableName, string indexName)
+    {
+        var sqlString = $"if exists (select name from sys.indexes where object_id=object_id('{tableName}') and name = '{indexName}' drop index [{tableName}].[{indexName}];";
+        await ExecuteNonQuery(sqlString);
     }
 
     public async Task ExecuteNonQuery(string sqlString)
