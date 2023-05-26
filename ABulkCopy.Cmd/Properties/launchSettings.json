@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ABulkCopy.Cmd": {
+      "commandName": "Project",
+      "commandLineArgs": "-d out -c \"Server=.;Database=ABulkCopy;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true\" -l D:\\Temp\\LogFiles\\Application\\abulkcopy.log -f d:\\temp\\abulkcopydata -s %"
+    }
+  }
+}
