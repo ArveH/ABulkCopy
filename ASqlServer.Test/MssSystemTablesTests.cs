@@ -1,11 +1,11 @@
 namespace ASqlServer.Test;
 
-public class MssCommandTests
+public class MssSystemTablesTests
 {
     private readonly ILogger _logger;
     private readonly IConfiguration _configuration;
 
-    public MssCommandTests(ITestOutputHelper output)
+    public MssSystemTablesTests(ITestOutputHelper output)
     {
         _logger = new LoggerConfiguration()
             .Enrich.FromLogContext()
@@ -25,10 +25,10 @@ public class MssCommandTests
     public async Task TestGetTableNames(string searchString, int expectedCount)
     {
         // Arrange
-        var sqlCmd = CreateMssCommand();
+        var systemTables = CreateMssSystemTables();
 
         // Act
-        var tableNames = await sqlCmd.GetTableNames(searchString);
+        var tableNames = await systemTables.GetTableNames(searchString);
 
         // Assert
         tableNames.Count().Should().Be(expectedCount, $"because there should be {expectedCount} tables returned");
@@ -38,10 +38,10 @@ public class MssCommandTests
     public async Task TestGetTableHeader_Then_NameAndSchemaOk()
     {
         // Arrange
-        var sqlCmd = CreateMssCommand();
+        var systemTables = CreateMssSystemTables();
 
         // Act
-        var tableHeader = await sqlCmd.GetTableHeader("AllTypes");
+        var tableHeader = await systemTables.GetTableHeader("AllTypes");
 
         // Assert
         tableHeader.Should().NotBeNull();
@@ -54,10 +54,10 @@ public class MssCommandTests
     public async Task TestGetTableHeader_Then_IdentityOk()
     {
         // Arrange
-        var sqlCmd = CreateMssCommand();
+        var systemTables = CreateMssSystemTables();
 
         // Act
-        var tableHeader = await sqlCmd.GetTableHeader("AllTypes");
+        var tableHeader = await systemTables.GetTableHeader("AllTypes");
 
         // Assert
         tableHeader.Should().NotBeNull();
@@ -70,12 +70,12 @@ public class MssCommandTests
     public async Task TestGetColumnInfo_When_AllTypes()
     {
         // Arrange
-        var sqlCmd = CreateMssCommand();
-        var tableHeader = await sqlCmd.GetTableHeader("AllTypes");
+        var systemTables = CreateMssSystemTables();
+        var tableHeader = await systemTables.GetTableHeader("AllTypes");
         tableHeader.Should().NotBeNull();
 
         // Act
-        var columnInfo = (await sqlCmd.GetColumnInfo(tableHeader!)).ToList();
+        var columnInfo = (await systemTables.GetColumnInfo(tableHeader!)).ToList();
 
         // Assert
         columnInfo.Should().NotBeNull();
@@ -99,12 +99,12 @@ public class MssCommandTests
     public async Task TestGetColumnInfo_When_DefaultValues()
     {
         // Arrange
-        var sqlCmd = CreateMssCommand();
-        var tableHeader = await sqlCmd.GetTableHeader("TestDefaults");
+        var systemTables = CreateMssSystemTables();
+        var tableHeader = await systemTables.GetTableHeader("TestDefaults");
         tableHeader.Should().NotBeNull();
 
         // Act
-        var columnInfo = (await sqlCmd.GetColumnInfo(tableHeader!)).ToList();
+        var columnInfo = (await systemTables.GetColumnInfo(tableHeader!)).ToList();
 
         // Assert
         columnInfo.Should().NotBeNull("because ColumnInfo shouldn't be null");
@@ -131,12 +131,12 @@ public class MssCommandTests
     public async Task TestGetPrimaryKey_When_Exists()
     {
         // Arrange
-        var sqlCmd = CreateMssCommand();
-        var tableHeader = await sqlCmd.GetTableHeader("ClientScope");
+        var systemTables = CreateMssSystemTables();
+        var tableHeader = await systemTables.GetTableHeader("ClientScope");
         tableHeader.Should().NotBeNull();
 
         // Act
-        var pk = await sqlCmd.GetPrimaryKey(tableHeader!);
+        var pk = await systemTables.GetPrimaryKey(tableHeader!);
 
         // Assert
         pk.Should().NotBeNull();
@@ -152,12 +152,12 @@ public class MssCommandTests
     public async Task TestGetPrimaryKey_When_NotExist()
     {
         // Arrange
-        var sqlCmd = CreateMssCommand();
-        var tableHeader = await sqlCmd.GetTableHeader("TestDefaults");
+        var systemTables = CreateMssSystemTables();
+        var tableHeader = await systemTables.GetTableHeader("TestDefaults");
         tableHeader.Should().NotBeNull();
 
         // Act
-        var pk = await sqlCmd.GetPrimaryKey(tableHeader!);
+        var pk = await systemTables.GetPrimaryKey(tableHeader!);
 
         // Assert
         pk.Should().BeNull("because TestDefaults doesn't have a primary key");
@@ -167,12 +167,12 @@ public class MssCommandTests
     public async Task TestGetForeignKey_WhenExists()
     {
         // Arrange
-        var sqlCmd = CreateMssCommand();
-        var tableHeader = await sqlCmd.GetTableHeader("ClientScope");
+        var systemTables = CreateMssSystemTables();
+        var tableHeader = await systemTables.GetTableHeader("ClientScope");
         tableHeader.Should().NotBeNull();
 
         // Act
-        var fks = await sqlCmd.GetForeignKeys(tableHeader!);
+        var fks = await systemTables.GetForeignKeys(tableHeader!);
 
         // Assert
         var foreignKeys = fks.ToList();
@@ -185,15 +185,15 @@ public class MssCommandTests
         foreignKeys[0].UpdateAction.Should().Be(UpdateAction.NoAction);
     }
 
-    private IMssSystemTables CreateMssCommand()
+    private IMssSystemTables CreateMssSystemTables()
     {
         var connectionString = _configuration.GetConnectionString(TestConstants.Config.DbKey);
         connectionString.Should()
             .NotBeNullOrWhiteSpace("because the connection string should be set");
         IMssColumnFactory colFactory = new MssColumnFactory(_logger);
-        IMssSystemTables sqlCmd = new MssSystemTables(
+        IMssSystemTables systemTables = new MssSystemTables(
             new MssContext() { ConnectionString = connectionString! },
             colFactory, _logger);
-        return sqlCmd;
+        return systemTables;
     }
 }
