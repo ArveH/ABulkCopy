@@ -7,4 +7,5 @@ public interface IMssSystemTables
     Task<IEnumerable<IColumn>> GetColumnInfo(TableHeader tableHeader);
     Task<PrimaryKey?> GetPrimaryKey(TableHeader tableHeader);
     Task<IEnumerable<ForeignKey>> GetForeignKeys(TableHeader tableHeader);
+    Task<IEnumerable<IndexDefinition>> GetIndexes(TableHeader tableHeader);
 }

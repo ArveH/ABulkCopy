@@ -1,6 +1,4 @@
-﻿using ABulkCopy.ASqlServer.Column;
-
-namespace ABulkCopy.ASqlServer;
+﻿namespace ABulkCopy.ASqlServer;
 
 public class MssSystemTables : MssCommandBase, IMssSystemTables
 {
@@ -244,5 +242,41 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
             foreignKeys.Capacity, tableHeader.Name);
 
         return foreignKeys;
+    }
+
+    public async Task<IEnumerable<IndexDefinition>> GetIndexes(TableHeader tableHeader)
+    {
+        var command =
+            new SqlCommand("select i.index_id, i.object_id, i.name, i.type, i.is_unique, f.name\r\n" +
+                           "from sys.indexes i\r\n" +
+                           "join sys.filegroups f on (i.data_space_id = f.data_space_id)\r\n" +
+                           "where i.is_primary_key = 0\r\n" +
+                           "and i.object_id = @TableId");
+        command.Parameters.AddWithValue("@TableId", tableHeader.Id);
+
+        var indexes = new List<IndexDefinition>();
+        await ExecuteReader(command, reader =>
+        {
+            var index = new IndexDefinition
+            {
+                Header = new IndexHeader
+                {
+                    Id = reader.GetInt32(0),
+                    TableId = reader.GetInt32(1),
+                    Name = reader.GetString(2),
+                    Type = (IndexType)reader.GetByte(3),
+                    IsUnique = reader.GetBoolean(4),
+                    Location = reader.GetString(5)
+                }
+            };
+            indexes.Add(index);
+            _logger.Verbose("Added index: {IndexName}", index.Header.Name);
+        });
+
+        _logger.Information(
+            $"Retrieved {{IndexCount}} {"index".Plural(indexes.Count)} for table '{{tableName}}'",
+            indexes.Capacity, tableHeader.Name);
+
+        return indexes;
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace ABulkCopy.Common.Types;
+﻿namespace ABulkCopy.Common.Types.Column;
 
 public class OrderColumn
 {
