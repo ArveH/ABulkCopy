@@ -1,8 +1,4 @@
-﻿using System.Data;
-using ABulkCopy.Cmd.Factories;
-using ABulkCopy.Common.Database;
-
-namespace Common.Test;
+﻿namespace ASqlServer.Test;
 
 public abstract class MssDataWriterTestBase
 {

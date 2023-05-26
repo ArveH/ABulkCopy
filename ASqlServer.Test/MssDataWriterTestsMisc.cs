@@ -1,4 +1,4 @@
-﻿namespace Common.Test;
+﻿namespace ASqlServer.Test;
 
 public class MssDataWriterTestsMisc : MssDataWriterTestBase
 {

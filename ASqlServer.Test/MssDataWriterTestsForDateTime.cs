@@ -1,6 +1,4 @@
-﻿using System.Data;
-
-namespace Common.Test;
+﻿namespace ASqlServer.Test;
 
 public class MssDataWriterTestsForDateTime : MssDataWriterTestBase
 {
