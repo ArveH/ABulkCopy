@@ -2,10 +2,8 @@
 
 public class MssDataWriterTestsForDateTime : MssDataWriterTestBase
 {
-    public override string _testTableName => Environment.MachineName + "MssDataWriterTestsForDateTime";
-
     public MssDataWriterTestsForDateTime(ITestOutputHelper output)
-        : base(output)
+        : base(output, Environment.MachineName + "MssDataWriterTestsForDateTime")
     {
     }
 

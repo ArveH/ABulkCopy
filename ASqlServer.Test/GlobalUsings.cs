@@ -1,5 +1,3 @@
-global using System.Data;
-global using System.IO.Abstractions.TestingHelpers;
 global using ABulkCopy.ASqlServer;
 global using ABulkCopy.ASqlServer.Column;
 global using ABulkCopy.ASqlServer.Column.ColumnTypes;
@@ -18,6 +16,8 @@ global using FluentAssertions;
 global using Microsoft.Extensions.Configuration;
 global using Moq;
 global using Serilog;
+global using System.Data;
+global using System.IO.Abstractions.TestingHelpers;
 global using Testing.Shared;
 global using Testing.Shared.SqlServer;
 global using Xunit;

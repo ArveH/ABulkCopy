@@ -3,42 +3,43 @@
 public abstract class MssDataWriterTestBase : MssTestBase
 {
     public const string TestPath = @"C:\testfiles";
-    public abstract string _testTableName { get; }
-    protected readonly TableDefinition _originalTableDefinition;
-    protected readonly MockFileSystem _mockFileSystem;
-    protected readonly IDataWriter _dataWriter;
+    protected string TestTableName { get; }
+    protected readonly TableDefinition OriginalTableDefinition;
+    protected readonly MockFileSystem MockFileSystem;
+    protected readonly IDataWriter TestDataWriter;
 
-    protected MssDataWriterTestBase(ITestOutputHelper output)
+    protected MssDataWriterTestBase(ITestOutputHelper output, string tableName)
         : base(output)
     {
-        _originalTableDefinition = MssTestData.GetEmpty(_testTableName);
-        _mockFileSystem = new MockFileSystem();
-        _mockFileSystem.AddDirectory(TestPath);
-        _dataWriter = new DataWriter(
+        TestTableName = tableName;
+        OriginalTableDefinition = MssTestData.GetEmpty(tableName);
+        MockFileSystem = new MockFileSystem();
+        MockFileSystem.AddDirectory(TestPath);
+        TestDataWriter = new DataWriter(
             MssDbContext, 
-            new TableReaderFactory(new SelectCreator(_logger), _logger),
-            _mockFileSystem, _logger);
+            new TableReaderFactory(new SelectCreator(TestLogger), TestLogger),
+            MockFileSystem, TestLogger);
     }
 
     protected async Task<string> ArrangeAndAct(IColumn col, object? value, SqlDbType? dbType = null)
     {
         // Arrange
-        _originalTableDefinition.Columns.Add(col);
-        await MssDbHelper.Instance.DropTable(_testTableName);
-        await MssDbHelper.Instance.CreateTable(_originalTableDefinition);
+        OriginalTableDefinition.Columns.Add(col);
+        await MssDbHelper.Instance.DropTable(TestTableName);
+        await MssDbHelper.Instance.CreateTable(OriginalTableDefinition);
         await MssDbHelper.Instance.InsertIntoSingleColumnTable(
-            _testTableName, value, dbType);
+            TestTableName, value, dbType);
 
         // Act
         try
         {
-            await _dataWriter.Write(
-                _originalTableDefinition,
+            await TestDataWriter.Write(
+                OriginalTableDefinition,
                 TestPath);
         }
         finally
         {
-            await MssDbHelper.Instance.DropTable(_testTableName);
+            await MssDbHelper.Instance.DropTable(TestTableName);
         }
 
         return await GetJsonText();
@@ -66,9 +67,9 @@ public abstract class MssDataWriterTestBase : MssTestBase
 
     protected async Task<string> GetJsonText()
     {
-        var fullPath = Path.Combine(TestPath, _testTableName + CommonConstants.DataSuffix);
-        _mockFileSystem.FileExists(fullPath).Should().BeTrue("because data file should exist");
-        var jsonTxt = await _mockFileSystem.File.ReadAllTextAsync(fullPath);
+        var fullPath = Path.Combine(TestPath, TestTableName + CommonConstants.DataSuffix);
+        MockFileSystem.FileExists(fullPath).Should().BeTrue("because data file should exist");
+        var jsonTxt = await MockFileSystem.File.ReadAllTextAsync(fullPath);
         return jsonTxt;
     }
 }

@@ -2,10 +2,8 @@
 
 public class MssDataWriterForNumbersTests : MssDataWriterTestBase
 {
-    public override string _testTableName => Environment.MachineName + "MssDataWriterForNumbersTests";
-
     public MssDataWriterForNumbersTests(ITestOutputHelper output)
-        : base(output)
+        : base(output, Environment.MachineName + "MssDataWriterForNumbersTests")
     {
     }
 

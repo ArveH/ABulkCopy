@@ -2,19 +2,19 @@
 
 public abstract class MssTestBase
 {
-    protected readonly ILogger _logger;
-    protected readonly IConfiguration _configuration;
+    protected readonly ILogger TestLogger;
+    protected readonly IConfiguration TestConfiguration;
     protected readonly IDbContext MssDbContext;
 
     protected MssTestBase(ITestOutputHelper output)
     {
-        _logger = new LoggerConfiguration()
+        TestLogger = new LoggerConfiguration()
             .Enrich.FromLogContext()
             .MinimumLevel.Verbose()
             .WriteTo.TestOutput(output)
             .CreateLogger();
 
-        _configuration = new ConfigHelper().GetConfiguration("128e015d-d8ef-4ca8-ba79-5390b26c675f");
+        TestConfiguration = new ConfigHelper().GetConfiguration("128e015d-d8ef-4ca8-ba79-5390b26c675f");
 
         MssDbContext = new MssContext()
         {
@@ -24,13 +24,13 @@ public abstract class MssTestBase
 
     protected IMssSystemTables CreateMssSystemTables()
     {
-        var connectionString = _configuration.GetConnectionString(TestConstants.Config.DbKey);
+        var connectionString = TestConfiguration.GetConnectionString(TestConstants.Config.DbKey);
         connectionString.Should()
             .NotBeNullOrWhiteSpace("because the connection string should be set");
-        IMssColumnFactory colFactory = new MssColumnFactory(_logger);
+        IMssColumnFactory colFactory = new MssColumnFactory(TestLogger);
         IMssSystemTables systemTables = new MssSystemTables(
             new MssContext() { ConnectionString = connectionString! },
-            colFactory, _logger);
+            colFactory, TestLogger);
         return systemTables;
     }
 }
