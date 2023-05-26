@@ -28,6 +28,7 @@ public class PgCommandTests
             new PgContext { ConnectionString = connectionString! },
             _logger);
 
-        pgCmd.Connect().Should().BeTrue("because the connection should be successful");
+        var res = await pgCmd.Connect();
+        res.Should().BeTrue("because the connection should be successful");
     }
 }
