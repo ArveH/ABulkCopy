@@ -1,6 +1,4 @@
-﻿using System.Reflection.PortableExecutable;
-
-namespace ABulkCopy.ASqlServer;
+﻿namespace ABulkCopy.ASqlServer;
 
 public class MssSystemTables : MssCommandBase, IMssSystemTables
 {
@@ -289,5 +287,37 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
             indexes.Capacity, tableHeader.Name);
 
         return indexes;
+    }
+
+    public async Task<IEnumerable<IndexColumn>> GetIndexColumnInfo(string tableName, IndexHeader indexHeader)
+    {
+        var command =
+            new SqlCommand("select COL_NAME(ic.object_id,ic.column_id) AS column_name, ic.is_descending_key\r\n" +
+                           "from sys.indexes i\r\n" +
+                           "join sys.index_columns ic on (ic.object_id = i.object_id and ic.index_id = i.index_id)\r\n" +
+                           "where i.index_id = @IndexId\r\n" +
+                           "and i.is_primary_key = 0\r\n" +
+                           "and i.object_id = object_id(@TableName)");
+
+        command.Parameters.AddWithValue("@IndexId", indexHeader.Id);
+        command.Parameters.AddWithValue("@TableName", tableName);
+
+        var columns = new List<IndexColumn>();
+        await ExecuteReader(command, reader =>
+        {
+            var column = new IndexColumn
+            {
+                Name = reader.GetString(0),
+                Direction = reader.GetBoolean(1) ? Direction.Descending : Direction.Ascending
+            };
+            columns.Add(column);
+            _logger.Verbose("Added column: {ColumnName}", column.Name);
+        });
+
+        _logger.Information(
+            $"Retrieved {{ColumnCount}} index {"column".Plural(columns.Count)} for index '{{TableName}}.{{IndexName}}'",
+            columns.Capacity, tableName, indexHeader.Name);
+
+        return columns;
     }
 }

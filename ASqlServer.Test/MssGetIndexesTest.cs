@@ -48,10 +48,11 @@ public class MssGetIndexesTest : MssTestBase
 
         // Act
         var indexes = (await MssSystemTables.GetIndexes(tableHeader)).ToList();
-
-        // Assert
         indexes.Should().NotBeNull();
         indexes.Count.Should().Be(1);
+        indexes[0].Columns = (await MssSystemTables.GetIndexColumnInfo(_testTableName, indexes[0].Header)).ToList();
+
+        // Assert
         indexes[0].Header.Id.Should().BeGreaterThan(0, "because index_id = 0 is of type Heap");
         indexes[0].Header.TableId.Should().Be(tableHeader.Id);
         indexes[0].Header.Name.Should().Be(_testIndexName);
