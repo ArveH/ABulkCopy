@@ -21,7 +21,7 @@ public class MssTableSchema : IMssTableSchema
             _logger.Warning("Table {TableName} not found", tableName);
             return null;
         }
-        var columnInfo = await _systemTables.GetColumnInfo(tableHeader);
+        var columnInfo = await _systemTables.GetTableColumnInfo(tableHeader);
         var primaryKey = await _systemTables.GetPrimaryKey(tableHeader);
         var foreignKeys = await _systemTables.GetForeignKeys(tableHeader);
 

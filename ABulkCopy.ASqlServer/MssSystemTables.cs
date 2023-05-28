@@ -93,7 +93,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         return null;
     }
 
-    public async Task<IEnumerable<IColumn>> GetColumnInfo(TableHeader tableHeader)
+    public async Task<IEnumerable<IColumn>> GetTableColumnInfo(TableHeader tableHeader)
     {
         var command =
             new SqlCommand("WITH cte AS (\r\n" +

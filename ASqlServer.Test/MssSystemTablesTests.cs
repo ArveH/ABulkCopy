@@ -56,7 +56,7 @@ public class MssSystemTablesTests : MssTestBase
         tableHeader.Should().NotBeNull();
 
         // Act
-        var columnInfo = (await MssSystemTables.GetColumnInfo(tableHeader!)).ToList();
+        var columnInfo = (await MssSystemTables.GetTableColumnInfo(tableHeader!)).ToList();
 
         // Assert
         columnInfo.Should().NotBeNull();
@@ -84,7 +84,7 @@ public class MssSystemTablesTests : MssTestBase
         tableHeader.Should().NotBeNull();
 
         // Act
-        var columnInfo = (await MssSystemTables.GetColumnInfo(tableHeader!)).ToList();
+        var columnInfo = (await MssSystemTables.GetTableColumnInfo(tableHeader!)).ToList();
 
         // Assert
         columnInfo.Should().NotBeNull("because ColumnInfo shouldn't be null");
