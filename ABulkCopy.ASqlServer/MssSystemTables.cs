@@ -1,4 +1,6 @@
-﻿namespace ABulkCopy.ASqlServer;
+﻿using System.Reflection.PortableExecutable;
+
+namespace ABulkCopy.ASqlServer;
 
 public class MssSystemTables : MssCommandBase, IMssSystemTables
 {
@@ -251,26 +253,35 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
                            "from sys.indexes i\r\n" +
                            "join sys.filegroups f on (i.data_space_id = f.data_space_id)\r\n" +
                            "where i.is_primary_key = 0\r\n" +
+                           "and i.index_id != 0\r\n" +
                            "and i.object_id = @TableId");
         command.Parameters.AddWithValue("@TableId", tableHeader.Id);
 
         var indexes = new List<IndexDefinition>();
         await ExecuteReader(command, reader =>
         {
-            var index = new IndexDefinition
+            try
             {
-                Header = new IndexHeader
+                var index = new IndexDefinition
                 {
-                    Id = reader.GetInt32(0),
-                    TableId = reader.GetInt32(1),
-                    Name = reader.GetString(2),
-                    Type = (IndexType)reader.GetByte(3),
-                    IsUnique = reader.GetBoolean(4),
-                    Location = reader.GetString(5)
-                }
-            };
-            indexes.Add(index);
-            _logger.Verbose("Added index: {IndexName}", index.Header.Name);
+                    Header = new IndexHeader
+                    {
+                        Id = reader.GetInt32(0),
+                        TableId = reader.GetInt32(1),
+                        Name = reader.IsDBNull(2) ? "Heap" : reader.GetString(2),
+                        Type = (IndexType)reader.GetByte(3),
+                        IsUnique = reader.GetBoolean(4),
+                        Location = reader.IsDBNull(5) ? "PRIMARY" : reader.GetString(5)
+                    }
+                };
+                indexes.Add(index);
+                _logger.Verbose("Added index: {IndexName}", index.Header.Name);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
         });
 
         _logger.Information(
