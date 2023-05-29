@@ -1,4 +1,4 @@
-﻿namespace ABulkCopy.ASqlServer.Column.ColumnTypes;
+﻿namespace ABulkCopy.Common.Types.Column;
 
 public abstract class TemplateStrColumn : DefaultColumn
 {
