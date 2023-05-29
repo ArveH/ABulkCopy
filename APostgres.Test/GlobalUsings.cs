@@ -1,12 +1,10 @@
+global using ABulkCopy.APostgres.Column.ColumnTypes;
+global using ABulkCopy.APostgres.Reader;
 global using ABulkCopy.Common.Config;
-global using ABulkCopy.Common.TestData;
-global using ABulkCopy.Common.Types;
+global using ABulkCopy.Common.Reader;
 global using ABulkCopy.Common.Types.Column;
-global using ABulkCopy.Common.Types.Table;
-global using ABulkCopy.Common.Utils;
 global using FluentAssertions;
 global using Microsoft.Extensions.Configuration;
-global using Moq;
 global using Serilog;
 global using Testing.Shared;
 global using Xunit;
