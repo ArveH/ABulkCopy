@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace ABulkCopy.Common.Serialization;
+﻿namespace ABulkCopy.Common.Serialization;
 
 public class ColumnInterfaceConverter : JsonConverter<IColumn>
 {

@@ -9,16 +9,19 @@ public class DefaultColumn : IColumn
         IsNullable = isNullable;
     }
 
+    [JsonIgnore]
     public int Id { get; set; }
     public string Name { get; set; }
     public ColumnType Type { get; set; }
+    [JsonIgnore]
     public bool IsComputed => ComputedDefinition != null;
-    public string? ComputedDefinition { get; set; }
     public bool IsNullable { get; set; }
     public Identity? Identity { get; set; }
+    public string? ComputedDefinition { get; set; }
     public int Length { get; set; }
     public int? Precision { get; set; }
     public int? Scale { get; set; }
+    [JsonIgnore]
     public bool HasDefault => DefaultConstraint != null;
     public DefaultDefinition? DefaultConstraint { get; set; }
     public string? Collation { get; set; }
