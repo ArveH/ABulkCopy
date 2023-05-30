@@ -1,4 +1,9 @@
-﻿namespace Testing.Shared;
+﻿using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using ABulkCopy.Common.Serialization;
+
+namespace Testing.Shared;
 
 public class SchemaFileHelper
 {
@@ -13,33 +18,18 @@ public class SchemaFileHelper
 
     public void CreateSingleColFile(string path, IColumn col)
     {
-        var sb = new StringBuilder();
-        sb.AppendLine("{");
-        sb.AppendLine("  \"Header\": {");
-        sb.AppendLine("    \"Id\": 1, ");
-        sb.AppendLine($"    \"Name\": \"{_tableName}\", ");
-        sb.AppendLine("    \"Schema\": \"dbo\", ");
-        sb.AppendLine("    \"Location\": \"PRIMARY\"");
-        sb.AppendLine("    }");
-        sb.AppendLine("  \"  Columns\": [");
-        sb.AppendLine("    {");
-        sb.AppendLine($"      \"Name\":\"{col.Name}\",");
-        sb.AppendLine($"      \"Type\":\"{col.Type}\",");
-        sb.AppendLine("      \"IsNullable\": false");
-        sb.AppendLine("      \"Identity\": null");
-        sb.AppendLine("      \"ComputedDefinition\": null");
-        sb.AppendLine($"      \"Length\": {col.Length}");
-        sb.AppendLine($"      \"Precision\": {col.Precision}");
-        sb.AppendLine($"      \"Scale\": {col.Scale}");
-        sb.AppendLine("      \"DefaultConstraint\": null");
-        sb.AppendLine("      \"Collation\": null");
-        sb.AppendLine("    }");
-        sb.AppendLine("  ],");
-        sb.AppendLine("  \"PrimaryKey\": null,");
-        sb.AppendLine("  \"ForeignKeys\": []");
-        sb.AppendLine("}");
+        var tableDefinition = MssTestData.GetEmpty(_tableName);
+        tableDefinition.Columns.Add(col);
+        var options = new JsonSerializerOptions
+        {
+            // Contrast is going to have a field day with me allowing stuff like ' :-)
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            WriteIndented = true,
+            Converters = { new JsonStringEnumConverter(), new ColumnInterfaceConverter() }
+        };  
+        var jsonText = JsonSerializer.Serialize(tableDefinition, options);
 
-        var fileData = new MockFileData(sb.ToString());
+        var fileData = new MockFileData(jsonText);
         FileSystem.AddFile(
             Path.Combine(path, $"{_tableName}.schema"),
             fileData);

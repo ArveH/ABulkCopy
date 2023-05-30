@@ -23,8 +23,15 @@ public class PgSchemaReader : ISchemaReader
         }
 
         using var reader = _fileSystem.File.OpenText(fullPath);
-        var json = await reader.ReadToEndAsync();
-        var tableDefinition = JsonSerializer.Deserialize<TableDefinition>(json);
+        var jsonTxt = await reader.ReadToEndAsync();
+        var options = new JsonSerializerOptions
+        {
+            // Contrast is going to have a field day with me allowing stuff like ' :-)
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            WriteIndented = true,
+            Converters = { new JsonStringEnumConverter(), new ColumnInterfaceConverter() }
+        };  
+        var tableDefinition = JsonSerializer.Deserialize<TableDefinition>(jsonTxt, options);
 
         return tableDefinition;
     }
