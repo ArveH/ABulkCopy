@@ -1,6 +1,7 @@
 global using ABulkCopy.ASqlServer.Column.ColumnTypes;
 global using ABulkCopy.Common;
 global using ABulkCopy.Common.Serialization;
+global using ABulkCopy.Common.Types;
 global using ABulkCopy.Common.Types.Column;
 global using ABulkCopy.Common.Types.Table;
 global using ABulkCopy.Common.Utils;

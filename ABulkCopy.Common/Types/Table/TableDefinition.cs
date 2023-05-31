@@ -2,6 +2,11 @@
 
 public class TableDefinition
 {
+    public TableDefinition(DbServer dbServer)
+    {
+        DbServer = dbServer;
+    }
+    public DbServer DbServer { get; }
     public required TableHeader Header { get; set; }
 
     public List<IColumn> Columns { get; set; } = new();

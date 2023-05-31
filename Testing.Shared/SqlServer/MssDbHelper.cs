@@ -1,8 +1,4 @@
-﻿using System.Data;
-using ABulkCopy.Common.Types;
-using ABulkCopy.Common.Types.Index;
-
-namespace Testing.Shared.SqlServer;
+﻿namespace Testing.Shared.SqlServer;
 
 public class MssDbHelper
 {

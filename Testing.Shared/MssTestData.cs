@@ -4,7 +4,7 @@ public static class MssTestData
 {
     public static TableDefinition GetEmpty(string name)
     {
-        return new TableDefinition
+        return new TableDefinition (DbServer.SqlServer)
         {
             Header = new TableHeader
             {
@@ -18,7 +18,7 @@ public static class MssTestData
 
     public static TableDefinition GetTableDefinitionAllTypes()
     {
-        return new TableDefinition
+        return new TableDefinition(DbServer.SqlServer)
         {
             Header = new TableHeader
             {
@@ -45,8 +45,8 @@ public static class MssTestData
                 new SqlServerDateTime(115, "DTDateTime", false),
                 new SqlServerDateTime2(116, "DTDateTime2", false),
                 new SqlServerSmallDateTime(117, "DTSmallDateTime", false),
-                new SqlServerDateTimeOffset(118, "DTDateTimeOffset", false, 7),
-                new SqlServerTime(119, "DTTime", false, 7),
+                new SqlServerDateTimeOffset(118, "DTDateTimeOffset", false),
+                new SqlServerTime(119, "DTTime", false),
                 new SqlServerChar(120, "CharStrChar20", false, 20),
                 new SqlServerVarChar(121, "CharStrVarchar20", false, 20),
                 new SqlServerVarChar(122, "CharStrVarchar10K", false, -1),
@@ -62,7 +62,7 @@ public static class MssTestData
 
     public static TableDefinition GetTableDefaults()
     {
-        return new TableDefinition
+        return new TableDefinition(DbServer.SqlServer)
         {
             Header = new TableHeader
             {
