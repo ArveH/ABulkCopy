@@ -1,4 +1,6 @@
-﻿namespace ABulkCopy.APostgres.Reader;
+﻿using ABulkCopy.APostgres.Column;
+
+namespace ABulkCopy.APostgres.Reader;
 
 public class PgSchemaReader : ISchemaReader
 {
@@ -29,7 +31,7 @@ public class PgSchemaReader : ISchemaReader
             // Contrast is going to have a field day with me allowing stuff like ' :-)
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
             WriteIndented = true,
-            Converters = { new JsonStringEnumConverter(), new ColumnInterfaceConverter() }
+            Converters = { new JsonStringEnumConverter(), new PgColumnInterfaceConverter() }
         };  
         var tableDefinition = JsonSerializer.Deserialize<TableDefinition>(jsonTxt, options);
 

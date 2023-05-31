@@ -1,5 +1,6 @@
 // Global using directives
 
+global using ABulkCopy.APostgres.Column;
 global using ABulkCopy.Common;
 global using ABulkCopy.Common.Database;
 global using ABulkCopy.Common.Reader;
@@ -12,4 +13,3 @@ global using System.IO.Abstractions;
 global using System.Text.Encodings.Web;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
-global using ABulkCopy.Common.Serialization;

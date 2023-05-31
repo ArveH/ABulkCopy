@@ -27,10 +27,9 @@ public static class MssTestData
                 Location = "default",
                 Name = "MssAllTypes",
                 Schema = "dbo"
-            },
+             },
             Columns = new List<IColumn>
             {
-
                 GetIdColDefinition(101, "Id"),
                 new SqlServerBigInt(102, "ExactNumBigInt", false),
                 new SqlServerInt(103, "ExactNumInt", false),

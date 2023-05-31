@@ -27,7 +27,7 @@ public class SqlServerDatetimeOffset : DefaultColumn
 
     public override Type GetDotNetType()
     {
-        return typeof(DateTime);
+        return typeof(DateTimeOffset);
     }
 
     private void SetPrecisionAndLength(int scale)

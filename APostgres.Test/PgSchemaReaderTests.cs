@@ -11,15 +11,10 @@ public class PgSchemaReaderTests : PgTestBase
     }
 
     [Fact]
-    public async Task SchemaReaderForNumbersTests()
+    public async Task TestBigInt()
     {
         // Arrange
-        var col = new PostgresBigInt(1, "MyTestCol", false)
-        {
-            Precision = 19,
-            Scale = 0,
-            Collation = null
-        };
+        var col = new PostgresBigInt(1, "MyTestCol", false);
         var fileHelper = new SchemaFileHelper(TableName);
         fileHelper.CreateSingleColFile(TestPath, col);
         ISchemaReader schemaReader = new PgSchemaReader(fileHelper.FileSystem, TestLogger);
@@ -31,6 +26,28 @@ public class PgSchemaReaderTests : PgTestBase
         tableDefinition.Should().NotBeNull();
         tableDefinition!.Header.Name.Should().Be(TableName);
         tableDefinition.Columns.Should().HaveCount(1);
+        var colType = tableDefinition.Columns[0] as PostgresBigInt;
+        colType.Should().NotBeNull("because we should be able to cast to the correct type");
+        VerifyColumn(tableDefinition.Columns[0], col);
+    }
+
+    [Fact]
+    public async Task TestInt()
+    {
+        // Arrange
+        var col = new PostgresInt(1, "MyTestCol", false);
+        var fileHelper = new SchemaFileHelper(TableName);
+        fileHelper.CreateSingleColFile(TestPath, col);
+        ISchemaReader schemaReader = new PgSchemaReader(fileHelper.FileSystem, TestLogger);
+
+        // Act
+        var tableDefinition = await schemaReader.GetTableDefinition(TestPath, TableName);
+
+        // Assert
+        tableDefinition.Should().NotBeNull();
+        tableDefinition!.Columns.Should().HaveCount(1);
+        var colType = tableDefinition.Columns[0] as PostgresInt;
+        colType.Should().NotBeNull("because we should be able to cast to the correct type");
         VerifyColumn(tableDefinition.Columns[0], col);
     }
 
