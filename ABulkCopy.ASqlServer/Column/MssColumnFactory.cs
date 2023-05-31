@@ -44,7 +44,8 @@ public class MssColumnFactory : IMssColumnFactory
                 return new SqlServerDecimal(id, name, isNullable, 
                     precision??throw new ArgumentNullException(
                         nameof(precision), 
-                        $"precision can't be null for {nativeType}"));
+                        $"precision can't be null for {nativeType}"),
+                    scale);
             case MssTypes.Float:
                 return new SqlServerFloat(id, name, isNullable);
             case MssTypes.Int:
@@ -73,6 +74,8 @@ public class MssColumnFactory : IMssColumnFactory
                 return new SqlServerVarBinary(id, name, isNullable, length);
             case MssTypes.VarChar:
                 return new SqlServerVarChar(id, name, isNullable, length, collation);
+            case MssTypes.Xml:
+                return new SqlServerXml(id, name, isNullable);
             default:
                 throw new ArgumentOutOfRangeException(nameof(nativeType), nativeType, "Unknown native type");
         }

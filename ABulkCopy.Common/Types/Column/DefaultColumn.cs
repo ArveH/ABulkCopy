@@ -37,9 +37,9 @@ public class DefaultColumn : IColumn
         return Type;
     }
 
-    public string GetNativeCreateClause()
+    public virtual string GetNativeCreateClause()
     {
-        return Type + GetIdentityClause() + GetNullableClause();
+        return GetTypeClause() + GetIdentityClause() + GetNullableClause();
     }
 
     public virtual object ToInternalType(string value)

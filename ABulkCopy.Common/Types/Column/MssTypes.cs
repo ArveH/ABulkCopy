@@ -27,6 +27,7 @@ public static class MssTypes
     public const string UniqueIdentifier = "uniqueidentifier";
     public const string VarBinary = "varbinary";
     public const string VarChar = "varchar";
+    public const string Xml = "xml";
 
     public static IReadOnlyList<string> AllTypes = new List<string>
     {
@@ -54,6 +55,7 @@ public static class MssTypes
         TinyInt,
         UniqueIdentifier,
         VarBinary,
-        VarChar
+        VarChar,
+        Xml
     };
 }
