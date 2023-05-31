@@ -22,7 +22,7 @@ public class DataWriter : IDataWriter
         string path)
     {
         var fileFullPath = Path.Combine(
-            path, tableDefinition.Header.Name + CommonConstants.DataSuffix);
+            path, tableDefinition.Header.Name + tableDefinition.DbServer.DataSuffix());
         await using var writeStream = _fileSystem.File.CreateText(fileFullPath);
         await _tableReader.PrepareReader(tableDefinition);
         var rowCounter = 0;

@@ -15,7 +15,7 @@ public class PgSchemaReader : ISchemaReader
 
     public async Task<TableDefinition?> GetTableDefinition(string folderPath, string tableName)
     {
-        var fullPath = Path.Combine(folderPath, $"{tableName}{CommonConstants.SchemaSuffix}");
+        var fullPath = Path.Combine(folderPath, $"{tableName}{DbServer.Postgres.SchemaSuffix()}");
         if (!_fileSystem.File.Exists(fullPath))
         {
             _logger.Error("Schema file not found: {FullPath}", fullPath);

@@ -67,7 +67,7 @@ public abstract class MssDataWriterTestBase : MssTestBase
 
     protected async Task<string> GetJsonText()
     {
-        var fullPath = Path.Combine(TestPath, TestTableName + CommonConstants.DataSuffix);
+        var fullPath = Path.Combine(TestPath, TestTableName + DbServer.SqlServer.DataSuffix());
         MockFileSystem.FileExists(fullPath).Should().BeTrue("because data file should exist");
         var jsonTxt = await MockFileSystem.File.ReadAllTextAsync(fullPath);
         return jsonTxt;
