@@ -3,15 +3,8 @@
 public class PostgresTimestampTz : DefaultColumn
 {
     public PostgresTimestampTz(int id, string name, bool isNullable)
-        : base(id, name, isNullable)
+        : base(id, PgTypes.TimestampTz, name, isNullable)
     {
-        Type = ColumnType.DateTime;
-        Length = 8;
-    }
-
-    public override string GetNativeType()
-    {
-        return "timestamp with time zone";
     }
 
     public override string ToString(object value)

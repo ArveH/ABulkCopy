@@ -2,10 +2,9 @@
 
 public abstract class TemplateStrColumn : DefaultColumn
 {
-    protected TemplateStrColumn(int id, string name, bool isNullable, int length, string? collation = null)
-        : base(id, name, isNullable)
+    protected TemplateStrColumn(int id, string type, string name, bool isNullable, int length, string? collation = null)
+        : base(id, type, name, isNullable)
     {
-        Type = ColumnType.Char;
         Length = length;
         Collation = collation;
     }

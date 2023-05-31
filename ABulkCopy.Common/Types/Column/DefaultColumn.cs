@@ -2,9 +2,10 @@
 
 public class DefaultColumn : IColumn
 {
-    public DefaultColumn(int id, string name, bool isNullable)
+    public DefaultColumn(int id, string type, string name, bool isNullable)
     {
         Id = id;
+        Type = type;
         Name = name;
         IsNullable = isNullable;
     }
@@ -12,7 +13,7 @@ public class DefaultColumn : IColumn
     [JsonIgnore]
     public int Id { get; set; }
     public string Name { get; set; }
-    public ColumnType Type { get; set; }
+    public string Type { get; set; }
     [JsonIgnore]
     public bool IsComputed => ComputedDefinition != null;
     public bool IsNullable { get; set; }
@@ -31,14 +32,14 @@ public class DefaultColumn : IColumn
         throw new NotImplementedException();
     }
 
-    public virtual string GetNativeType()
+    public virtual string GetTypeClause()
     {
-        throw new NotImplementedException();
+        return Type;
     }
 
     public string GetNativeCreateClause()
     {
-        return GetNativeType() + GetIdentityClause() + GetNullableClause();
+        return Type + GetIdentityClause() + GetNullableClause();
     }
 
     public virtual object ToInternalType(string value)
@@ -53,7 +54,7 @@ public class DefaultColumn : IColumn
 
     public virtual IColumn Clone()
     {
-        return new DefaultColumn(Id, Name, IsNullable)
+        return new DefaultColumn(Id, Type, Name, IsNullable)
         {
             IsNullable = IsNullable,
             Collation = Collation,

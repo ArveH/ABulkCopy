@@ -3,9 +3,8 @@
 public class SqlServerChar : TemplateStrColumn
 {
     public SqlServerChar(int id, string name, bool isNullable, int length, string? collation = null)
-        : base(id, name, isNullable, length, collation)
+        : base(id, MssTypes.Char, name, isNullable, length, collation)
     {
-        Type = ColumnType.Char;
     }
 
     public override string ToString(object value)
@@ -19,8 +18,8 @@ public class SqlServerChar : TemplateStrColumn
         return "'" + cleanValue + "'";
     }
 
-    public override string GetNativeType()
+    public override string GetTypeClause()
     {
-        return $"char({Length})";
+        return $"{MssTypes.Char}({Length})";
     }
 }

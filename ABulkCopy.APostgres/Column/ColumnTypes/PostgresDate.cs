@@ -3,16 +3,8 @@
 public class PostgresDate : DefaultColumn
 {
     public PostgresDate(int id, string name, bool isNullable)
-        : base(id, name, isNullable)
+        : base(id, PgTypes.Date, name, isNullable)
     {
-        Type = ColumnType.Date;
-        Length = 3;
-        Precision = 10;
-    }
-
-    public override string GetNativeType()
-    {
-        return "date";
     }
 
     public override string ToString(object value)

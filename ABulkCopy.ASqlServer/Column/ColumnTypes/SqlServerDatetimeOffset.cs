@@ -1,18 +1,17 @@
 ﻿namespace ABulkCopy.ASqlServer.Column.ColumnTypes;
 
-public class SqlServerDatetimeOffset : DefaultColumn
+public class SqlServerDateTimeOffset : DefaultColumn
 {
-    public SqlServerDatetimeOffset(int id, string name, bool isNullable, int? scale = 7)
-        : base(id, name, isNullable)
+    public SqlServerDateTimeOffset(int id, string name, bool isNullable, int? scale = 7)
+        : base(id, MssTypes.DateTimeOffset, name, isNullable)
     {
-        Type = ColumnType.DateTimeOffset;
         Scale = scale??7;
         SetPrecisionAndLength(scale??7);
     }
 
-    public override string GetNativeType()
+    public override string GetTypeClause()
     {
-        return Scale == 7 ? "datetimeoffset" : $"datetimeoffset({Scale})";
+        return Scale == 7 ? Type : $"{Type}({Scale})";
     }
 
     public override string ToString(object value)

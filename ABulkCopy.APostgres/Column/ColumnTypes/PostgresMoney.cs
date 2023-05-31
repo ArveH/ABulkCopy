@@ -4,14 +4,8 @@ public class PostgresMoney : DefaultColumn
 {
     public PostgresMoney(
         int id, string name, bool isNullable)
-        : base(id, name, isNullable)
+        : base(id, PgTypes.Money, name, isNullable)
     {
-        Type = ColumnType.Money;
-    }
-
-    public override string GetNativeType()
-    {
-        return "money";
     }
 
     public override string ToString(object value)

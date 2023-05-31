@@ -4,14 +4,8 @@ public class SqlServerMoney : TemplateNumberColumn
 {
     public SqlServerMoney(
         int id, string name, bool isNullable)
-        : base(id, name, isNullable, 8, 19, 4)
+        : base(id, MssTypes.Money, name, isNullable, 8, 19, 4)
     {
-        Type = ColumnType.Money;
-    }
-
-    public override string GetNativeType()
-    {
-        return "money";
     }
 
     public override string ToString(object value)

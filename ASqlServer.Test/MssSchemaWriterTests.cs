@@ -66,7 +66,7 @@ public class MssSchemaWriterTests
         var col = new SqlServerFloat(101, "MyTestCol", false, 14);
         _originalTableDefinition.Columns.Add(col);
         var expectedCol = col.Clone();
-        expectedCol.Type = ColumnType.SmallFloat;
+        expectedCol.Type = MssTypes.Real;
         expectedCol.Precision = 24;
         await TestWriteColumn(expectedCol);
     }
@@ -77,7 +77,7 @@ public class MssSchemaWriterTests
         var col = new SqlServerFloat(101, "MyTestCol", false, 25);
         _originalTableDefinition.Columns.Add(col);
         var expectedCol = col.Clone();
-        expectedCol.Type = ColumnType.Float;
+        expectedCol.Type = MssTypes.Float;
         expectedCol.Precision = 53;
         await TestWriteColumn(expectedCol);
     }
@@ -88,7 +88,7 @@ public class MssSchemaWriterTests
         var col = new SqlServerNVarChar(101, "MyTestCol", false, 4000);
         _originalTableDefinition.Columns.Add(col);
         var expectedCol = col.Clone();
-        expectedCol.Type = ColumnType.NVarChar;
+        expectedCol.Type = MssTypes.NVarChar;
         expectedCol.Length = 4000;
         await TestWriteColumn(expectedCol);
     }
@@ -99,7 +99,7 @@ public class MssSchemaWriterTests
         var col = new SqlServerNVarChar(101, "MyTestCol", false, 4001);
         _originalTableDefinition.Columns.Add(col);
         var expectedCol = col.Clone();
-        expectedCol.Type = ColumnType.NLongText;
+        expectedCol.Type = MssTypes.NVarChar;
         expectedCol.Length = -1;
         await TestWriteColumn(expectedCol);
     }
@@ -110,7 +110,7 @@ public class MssSchemaWriterTests
         var col = new SqlServerVarBinary(101, "MyTestCol", false, 8000);
         _originalTableDefinition.Columns.Add(col);
         var expectedCol = col.Clone();
-        expectedCol.Type = ColumnType.Raw;
+        expectedCol.Type = MssTypes.VarBinary;
         expectedCol.Length = 8000;
         await TestWriteColumn(expectedCol);
     }
@@ -121,7 +121,7 @@ public class MssSchemaWriterTests
         var col = new SqlServerVarBinary(101, "MyTestCol", false, 8001);
         _originalTableDefinition.Columns.Add(col);
         var expectedCol = col.Clone();
-        expectedCol.Type = ColumnType.Raw;
+        expectedCol.Type = MssTypes.VarBinary;
         expectedCol.Length = -1;
         await TestWriteColumn(expectedCol);
     }

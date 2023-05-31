@@ -3,9 +3,8 @@
 public class SqlServerVarBinary : DefaultColumn
 {
     public SqlServerVarBinary(int id, string name, bool isNullable, int length)
-        : base(id, name, isNullable)
+        : base(id, MssTypes.VarBinary, name, isNullable)
     {
-        Type = ColumnType.Raw;
         Length = length;
         if (Length > 8000)
         {
@@ -13,9 +12,9 @@ public class SqlServerVarBinary : DefaultColumn
         }
     }
 
-    public override string GetNativeType()
+    public override string GetTypeClause()
     {
-        return Length == -1 ? "varbinary(max)" : $"varbinary({Length})";
+        return Length == -1 ? $"{Type}(max)" : $"{Type}({Length})";
     }
 
     public override string ToString(object value)

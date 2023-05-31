@@ -4,14 +4,8 @@ public class SqlServerInt : TemplateNumberColumn
 {
     public SqlServerInt(
         int id, string name, bool isNullable)
-        : base(id, name, isNullable, 4, 10)
+        : base(id, MssTypes.Int, name, isNullable, 4, 10)
     {
-        Type = ColumnType.Int;
-    }
-
-    public override string GetNativeType()
-    {
-        return "int";
     }
 
     public override string ToString(object value)

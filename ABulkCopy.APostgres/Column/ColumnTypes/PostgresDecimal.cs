@@ -6,17 +6,16 @@ public class PostgresDecimal : DefaultColumn
 {
     public PostgresDecimal(
         int id, string name, bool isNullable, int precision, int? scale=0)
-        : base(id, name, isNullable)
+        : base(id, PgTypes.Decimal, name, isNullable)
     {
-        Type = ColumnType.Decimal;
         Precision = precision;
         Scale = scale;
         Length = CalculateLength(precision);
     }
 
-    public override string GetNativeType()
+    public override string GetTypeClause()
     {
-        return Scale == 0 ? $"decimal({Precision})" : $"decimal({Precision}, {Scale})";
+        return Scale == 0 ? $"{Type}({Precision})" : $"{Type}({Precision}, {Scale})";
     }
 
     public override string ToString(object value)

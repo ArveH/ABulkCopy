@@ -4,14 +4,8 @@ public class SqlServerBit : TemplateNumberColumn
 {
     public SqlServerBit(
         int id, string name, bool isNullable)
-        : base(id, name, isNullable, 1, 1)
+        : base(id, MssTypes.Bit, name, isNullable, 1, 1)
     {
-        Type = ColumnType.Bool;
-    }
-
-    public override string GetNativeType()
-    {
-        return "bit";
     }
 
     public override string ToString(object value)

@@ -3,16 +3,15 @@
 public class SqlServerDateTime2 : DefaultColumn
 {
     public SqlServerDateTime2(int id, string name, bool isNullable, int? scale = 7)
-        : base(id, name, isNullable)
+        : base(id, MssTypes.DateTime2, name, isNullable)
     {
-        Type = ColumnType.DateTime;
         Scale = scale??7;
         SetPrecisionAndLength(scale??7);
     }
 
-    public override string GetNativeType()
+    public override string GetTypeClause()
     {
-        return Scale == 7 ? "datetime2" : $"datetime2({Scale})";
+        return Scale == 7 ? Type : $"{Type}({Scale})";
     }
 
     public override string ToString(object value)

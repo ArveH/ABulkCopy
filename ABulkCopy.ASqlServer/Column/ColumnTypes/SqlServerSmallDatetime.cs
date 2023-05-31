@@ -1,16 +1,11 @@
 ﻿namespace ABulkCopy.ASqlServer.Column.ColumnTypes;
 
-public class SqlServerSmallDatetime : DefaultColumn
+public class SqlServerSmallDateTime : DefaultColumn
 {
-    public SqlServerSmallDatetime(int id, string name, bool isNullable)
-        : base(id, name, isNullable)
+    public SqlServerSmallDateTime(int id, string name, bool isNullable)
+        : base(id, MssTypes.SmallDateTime, name, isNullable)
     {
         Length = 4;
-    }
-
-    public override string GetNativeType()
-    {
-        return "smalldatetime";
     }
 
     public override string ToString(object value)

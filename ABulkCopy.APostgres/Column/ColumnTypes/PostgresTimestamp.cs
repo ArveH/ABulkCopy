@@ -3,21 +3,18 @@
 public class PostgresTimestamp : DefaultColumn
 {
     public PostgresTimestamp(int id, string name, bool isNullable, int? precision)
-        : base(id, name, isNullable)
+        : base(id, PgTypes.Timestamp, name, isNullable)
     {
-        Type = ColumnType.DateTime;
         Precision = precision ?? 6;
-        Length = 8;
     }
 
-    public override string GetNativeType()
+    public override string GetTypeClause()
     {
-        return Precision == 6 ? "timestamp" : $"timestamp({Precision})";
+        return Precision == 6 ? $"{Type}" : $"{Type}({Precision})";
     }
 
     public override string ToString(object value)
     {
-        var tmp = Convert.ToDateTime(value);
         return ((DateTime)value).ToString("O");
     }
 

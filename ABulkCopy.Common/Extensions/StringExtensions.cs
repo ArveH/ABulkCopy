@@ -6,4 +6,9 @@ public static class StringExtensions
     {
         return str + (cnt > 1 ? str.EndsWith("x") ? "es" : "s" : "");
     }
+
+    public static bool IsRaw(this string str)
+    {
+        return str is MssTypes.Binary or MssTypes.VarBinary;
+    }
 }

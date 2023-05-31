@@ -3,14 +3,8 @@
 public class PostgresUuid : DefaultColumn
 {
     public PostgresUuid(int id, string name, bool isNullable)
-        : base(id, name, isNullable)
+        : base(id, PgTypes.Uuid, name, isNullable)
     {
-        Type = ColumnType.Guid;
-    }
-
-    public override string GetNativeType()
-    {
-        return "uuid";
     }
 
     public override string ToString(object value)

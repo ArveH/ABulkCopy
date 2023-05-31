@@ -3,15 +3,9 @@
 public class SqlServerDateTime : DefaultColumn
 {
     public SqlServerDateTime(int id, string name, bool isNullable)
-        : base(id, name, isNullable)
+        : base(id, MssTypes.DateTime, name, isNullable)
     {
-        Type = ColumnType.DateTimeAlt;
         Length = 8;
-    }
-
-    public override string GetNativeType()
-    {
-        return "datetime";
     }
 
     public override string ToString(object value)

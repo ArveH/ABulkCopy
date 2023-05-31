@@ -3,16 +3,15 @@
 public class SqlServerTime : DefaultColumn
 {
     public SqlServerTime(int id, string name, bool isNullable, int? scale = 7)
-        : base(id, name, isNullable)
+        : base(id, MssTypes.Time, name, isNullable)
     {
-        Type = ColumnType.Time;
         Scale = scale??7;
         SetPrecisionAndLength(scale??7);
     }
 
-    public override string GetNativeType()
+    public override string GetTypeClause()
     {
-        return Scale == 7 ? "time" : $"time({Scale})";
+        return Scale == 7 ? Type : $"{Type}({Scale})";
     }
 
     public override string ToString(object value)

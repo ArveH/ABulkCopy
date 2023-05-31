@@ -3,15 +3,14 @@
 public class SqlServerBinary : DefaultColumn
 {
     public SqlServerBinary(int id, string name, bool isNullable, int length)
-        : base(id, name, isNullable)
+        : base(id, MssTypes.Binary, name, isNullable)
     {
-        Type = ColumnType.SmallRaw;
         Length = length;
     }
 
-    public override string GetNativeType()
+    public override string GetTypeClause()
     {
-        return $"binary({Length})";
+        return $"{MssTypes.Binary}({Length})";
     }
 
     public override string ToString(object value)

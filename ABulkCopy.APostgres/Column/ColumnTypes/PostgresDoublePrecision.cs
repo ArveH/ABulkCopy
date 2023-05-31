@@ -2,20 +2,9 @@
 
 public class PostgresDoublePrecision: DefaultColumn
 {
-    private readonly string _typeName;
-
     public PostgresDoublePrecision(int id, string name, bool isNullable)
-        : base(id, name, isNullable)
+        : base(id, PgTypes.DoublePrecision, name, isNullable)
     {
-        Type = ColumnType.Float;
-        Length = 8;
-        Precision = 15;
-        _typeName = "float";
-    }
-
-    public override string GetNativeType()
-    {
-        return _typeName;
     }
 
     public override string ToString(object value)

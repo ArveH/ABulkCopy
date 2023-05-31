@@ -3,8 +3,8 @@
 public abstract class TemplateNumberColumn : DefaultColumn
 {
     protected TemplateNumberColumn(
-        int id, string name, bool isNullable, int length, int precision = 0, int scale = 0)
-        : base(id, name, isNullable)
+        int id, string type, string name, bool isNullable, int length, int precision = 0, int scale = 0)
+        : base(id, type, name, isNullable)
     {
         Length = length;
         Precision = precision;

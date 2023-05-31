@@ -49,7 +49,7 @@ public class DataWriter : IDataWriter
                 continue;
             }
 
-            if (tableDefinition.Columns[i].Type == ColumnType.Raw)
+            if (tableDefinition.Columns[i].Type.IsRaw())
             {
                 WriteBlobColumn(
                     tableDefinition.Header.Name,

@@ -7,7 +7,7 @@ public class ColumnInterfaceConverterTests
     {
         // Arrange
         var jsonTxt = JsonSerializer.Serialize(
-            new DefaultColumn(1, "MyCol", false) {Type = ColumnType.BigInt});
+            new DefaultColumn(1, MssTypes.BigInt, "MyCol", false));
 
         // Act
         var options = new JsonSerializerOptions
@@ -20,7 +20,7 @@ public class ColumnInterfaceConverterTests
         column.Should().NotBeNull();
         column!.Id.Should().Be(1);
         column.Name.Should().Be("MyCol");
-        column.Type.Should().Be(ColumnType.BigInt);
+        column.Type.Should().Be(MssTypes.BigInt);
         column.IsNullable.Should().BeFalse();
     }
 

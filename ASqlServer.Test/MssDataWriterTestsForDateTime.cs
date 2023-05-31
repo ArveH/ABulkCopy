@@ -74,7 +74,7 @@ public class MssDataWriterTestsForDateTime : MssDataWriterTestBase
         var value = new DateTimeOffset(2023, 5, 19, 11, 12, 13, 233, 666, new TimeSpan(1, 0, 0)).AddTicks(8);
 
         var jsonTxt = await ArrangeAndAct(
-            new SqlServerDatetimeOffset(101, "MyTestCol", false),
+            new SqlServerDateTimeOffset(101, "MyTestCol", false),
             value,
             SqlDbType.DateTimeOffset);
 

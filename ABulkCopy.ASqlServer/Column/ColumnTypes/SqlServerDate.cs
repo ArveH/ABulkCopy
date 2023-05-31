@@ -3,16 +3,10 @@
 public class SqlServerDate : DefaultColumn
 {
     public SqlServerDate(int id, string name, bool isNullable)
-        : base(id, name, isNullable)
+        : base(id, MssTypes.Date, name, isNullable)
     {
-        Type = ColumnType.Date;
         Length = 3;
         Precision = 10;
-    }
-
-    public override string GetNativeType()
-    {
-        return "date";
     }
 
     public override string ToString(object value)

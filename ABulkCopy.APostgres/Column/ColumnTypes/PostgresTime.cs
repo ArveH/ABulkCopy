@@ -3,16 +3,14 @@
 public class PostgresTime : DefaultColumn
 {
     public PostgresTime(int id, string name, bool isNullable, int? precision = 6)
-        : base(id, name, isNullable)
+        : base(id, PgTypes.Time, name, isNullable)
     {
-        Type = ColumnType.Time;
         Precision = precision??6;
-        Length = 8;
     }
 
-    public override string GetNativeType()
+    public override string GetTypeClause()
     {
-        return Scale == 6 ? "time" : $"time({Scale})";
+        return Scale == 6 ? $"{Type}" : $"{Type}({Scale})";
     }
 
     public override string ToString(object value)

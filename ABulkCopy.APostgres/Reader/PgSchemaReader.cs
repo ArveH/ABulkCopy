@@ -1,6 +1,4 @@
-﻿using ABulkCopy.APostgres.Column;
-
-namespace ABulkCopy.APostgres.Reader;
+﻿namespace ABulkCopy.APostgres.Reader;
 
 public class PgSchemaReader : ISchemaReader
 {

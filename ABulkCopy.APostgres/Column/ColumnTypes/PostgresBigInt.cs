@@ -4,14 +4,8 @@ public class PostgresBigInt : TemplateNumberColumn
 {
     public PostgresBigInt(
         int id, string name, bool isNullable)
-        : base(id, name, isNullable, 8, 19)
+        : base(id, MssTypes.BigInt, name, isNullable, 8, 19)
     {
-        Type = ColumnType.BigInt;
-    }
-
-    public override string GetNativeType()
-    {
-        return "bigint";
     }
 
     public override string ToString(object value)

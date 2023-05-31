@@ -4,14 +4,8 @@ public class SqlServerSmallInt : TemplateNumberColumn
 {
     public SqlServerSmallInt(
         int id, string name, bool isNullable)
-        : base(id, name, isNullable, 2, 5)
+        : base(id, MssTypes.SmallInt, name, isNullable, 2, 5)
     {
-        Type = ColumnType.SmallInt;
-    }
-
-    public override string GetNativeType()
-    {
-        return "smallint";
     }
 
     public override string ToString(object value)

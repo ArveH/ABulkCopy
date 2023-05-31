@@ -3,15 +3,9 @@
 public class SqlServerUniqueIdentifier : DefaultColumn
 {
     public SqlServerUniqueIdentifier(int id, string name, bool isNullable)
-        : base(id, name, isNullable)
+        : base(id, MssTypes.UniqueIdentifier, name, isNullable)
     {
-        Type = ColumnType.Guid;
         Length = 16;
-    }
-
-    public override string GetNativeType()
-    {
-        return "uniqueidentifier";
     }
 
     public override string ToString(object value)

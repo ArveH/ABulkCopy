@@ -4,7 +4,7 @@ public interface IColumn
 {
     int Id { get; set; }
     string Name { get; set; }
-    ColumnType Type { get; set; }
+    string Type { get; set; }
     bool IsComputed { get; }
     string? ComputedDefinition { get; set; }
     bool IsNullable { get; set; }
@@ -17,7 +17,7 @@ public interface IColumn
     string? Collation { get; set; }
 
     string ToString(object value);
-    string GetNativeType();
+    string GetTypeClause();
     string GetNativeCreateClause();
     object ToInternalType(string value);
     Type GetDotNetType();

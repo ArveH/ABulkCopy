@@ -1,25 +1,25 @@
 ﻿namespace ABulkCopy.APostgres.Column.ColumnTypes;
 
-public class PostgresBoolean : TemplateNumberColumn
+public class PostgresSmallInt : TemplateNumberColumn
 {
-    public PostgresBoolean(
+    public PostgresSmallInt(
         int id, string name, bool isNullable)
-        : base(id, PgTypes.Boolean, name, isNullable, 1)
+        : base(id, PgTypes.SmallInt, name, isNullable, 4, 10)
     {
     }
 
     public override string ToString(object value)
     {
-        return (bool)value ? "true" : "false";
+        return Convert.ToInt32(value).ToString();
     }
 
     public override object ToInternalType(string value)
     {
-        return value;
+        return Convert.ToInt32(value);
     }
 
     public override Type GetDotNetType()
     {
-        return typeof(bool);
+        return typeof(int);
     }
 }

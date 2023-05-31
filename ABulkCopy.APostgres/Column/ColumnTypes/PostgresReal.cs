@@ -3,16 +3,8 @@
 public class PostgresReal : DefaultColumn
 {
     public PostgresReal(int id, string name, bool isNullable)
-        : base(id, name, isNullable)
+        : base(id, PgTypes.Real, name, isNullable)
     {
-        Type = ColumnType.SmallFloat;
-        Length = 4;
-        Precision = 6;
-    }
-
-    public override string GetNativeType()
-    {
-        return "real";
     }
 
     public override string ToString(object value)

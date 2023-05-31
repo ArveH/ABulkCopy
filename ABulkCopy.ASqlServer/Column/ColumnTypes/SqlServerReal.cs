@@ -3,16 +3,10 @@
 public class SqlServerReal : DefaultColumn
 {
     public SqlServerReal(int id, string name, bool isNullable)
-        : base(id, name, isNullable)
+        : base(id, MssTypes.Real, name, isNullable)
     {
-        Type = ColumnType.SmallFloat;
         Length = 4;
         Precision = 24;
-    }
-
-    public override string GetNativeType()
-    {
-        return "real";
     }
 
     public override string ToString(object value)

@@ -3,22 +3,16 @@
 public class SqlServerNVarChar : TemplateStrColumn
 {
     public SqlServerNVarChar(int id, string name, bool isNullable, int length, string? collation = null)
-        : base(id, name, isNullable, length, collation)
+        : base(id, MssTypes.NVarChar, name, isNullable, length, collation)
     {
         if (length > 4000)
         {
-            Type = ColumnType.NLongText;
             Length = -1;
-        }
-        else
-        {
-            Type = ColumnType.NVarChar;
-            Length = length;
         }
     }
 
-    public override string GetNativeType()
+    public override string GetTypeClause()
     {
-        return Length == -1 ? "nvarchar(max)" : $"nvarchar({Length})";
+        return Length == -1 ? $"{Type}(max)" : $"{Type}({Length})";
     }
 }

@@ -3,15 +3,9 @@
 public class SqlServerTimestamp : DefaultColumn
 {
     public SqlServerTimestamp(int id, string name, bool isNullable)
-        : base(id, name, isNullable)
+        : base(id, MssTypes.Timestamp, name, isNullable)
     {
-        Type = ColumnType.TimeStamp;
         Length = 8;
-    }
-
-    public override string GetNativeType()
-    {
-        return "timestamp";
     }
 
     public override string ToString(object value)

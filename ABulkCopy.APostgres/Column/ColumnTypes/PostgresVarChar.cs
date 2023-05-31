@@ -3,22 +3,16 @@
 public class PostgresVarChar : TemplateStrColumn
 {
     public PostgresVarChar(int id, string name, bool isNullable, int length, string? collation = null)
-        : base(id, name, isNullable, length, collation)
+        : base(id, PgTypes.VarChar, name, isNullable, length, collation)
     {
-        if (length > 4000)
+        if (length is < 1 or > 10_485_760)
         {
-            Type = ColumnType.NLongText;
-            Length = -1;
-        }
-        else
-        {
-            Type = ColumnType.NVarChar;
-            Length = length;
+            Length = 1_073_741_824;
         }
     }
 
-    public override string GetNativeType()
+    public override string GetTypeClause()
     {
-        return Length == -1 ? "nvarchar(max)" : $"nvarchar({Length})";
+        return Length > 10_485_760 ? Type : $"{Type}({Length})";
     }
 }
