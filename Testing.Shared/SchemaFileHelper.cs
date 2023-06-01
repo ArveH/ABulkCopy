@@ -1,9 +1,4 @@
-﻿using System.Text.Encodings.Web;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using ABulkCopy.Common.Serialization;
-
-namespace Testing.Shared;
+﻿namespace Testing.Shared;
 
 public class SchemaFileHelper
 {
@@ -16,7 +11,7 @@ public class SchemaFileHelper
 
     public MockFileSystem FileSystem { get; } = new();
 
-    public void CreateSingleColFile(string path, IColumn col)
+    public void CreateSingleColMssSchemaFile(string path, IColumn col)
     {
         var tableDefinition = MssTestData.GetEmpty(_tableName);
         tableDefinition.Columns.Add(col);
@@ -31,7 +26,7 @@ public class SchemaFileHelper
 
         var fileData = new MockFileData(jsonText);
         FileSystem.AddFile(
-            Path.Combine(path, $"{_tableName}.schema"),
+            Path.Combine(path, $"{_tableName}{DbServer.SqlServer.SchemaSuffix()}"),
             fileData);
     }
 }

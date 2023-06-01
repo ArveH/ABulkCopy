@@ -15,11 +15,18 @@ public class PgSchemaReader : ISchemaReader
 
     public async Task<TableDefinition?> GetTableDefinition(string folderPath, string tableName)
     {
+        var needTypeConversion = false;
         var fullPath = Path.Combine(folderPath, $"{tableName}{DbServer.Postgres.SchemaSuffix()}");
         if (!_fileSystem.File.Exists(fullPath))
         {
-            _logger.Error("Schema file not found: {FullPath}", fullPath);
-            throw new FileNotFoundException($"Schema file not found: {fullPath}");
+            fullPath = Path.Combine(folderPath, $"{tableName}{DbServer.SqlServer.SchemaSuffix()}");
+            if (_fileSystem.File.Exists(fullPath))
+            {
+                _logger.Error("Schema file not found for table '{TableName}", tableName);
+                throw new FileNotFoundException($"Schema file not found: {fullPath}");
+            }
+
+            needTypeConversion = true;
         }
 
         using var reader = _fileSystem.File.OpenText(fullPath);
@@ -31,8 +38,28 @@ public class PgSchemaReader : ISchemaReader
             WriteIndented = true,
             Converters = { new JsonStringEnumConverter(), new PgColumnInterfaceConverter() }
         };  
-        var tableDefinition = JsonSerializer.Deserialize<TableDefinition>(jsonTxt, options);
+        var sourceDefinition = JsonSerializer.Deserialize<TableDefinition>(jsonTxt, options);
+        if (sourceDefinition == null)
+        {
+            _logger.Error("Failed to deserialize schema file for table '{TableName}", tableName);
+            throw new InvalidOperationException($"Failed to deserialize schema file: {fullPath}");
+        }
 
-        return tableDefinition;
+        if (needTypeConversion)
+        {
+            var schema = sourceDefinition.Header.Schema == "dbo" ? "public" : sourceDefinition.Header.Schema;
+            var location = sourceDefinition.Header.Location == "PRIMARY" ? null : sourceDefinition.Header.Location;
+            sourceDefinition = new TableDefinition(DbServer.Postgres)
+            {
+                Header = new TableHeader
+                {
+                    Name = sourceDefinition.Header.Name,
+                    Schema = schema,
+                    Location = location
+                }
+            };
+        }
+
+        return sourceDefinition;
     }
 }

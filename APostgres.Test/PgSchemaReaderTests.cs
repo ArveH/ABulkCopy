@@ -16,7 +16,7 @@ public class PgSchemaReaderTests : PgTestBase
         // Arrange
         var col = new PostgresBigInt(1, "MyTestCol", false);
         var fileHelper = new SchemaFileHelper(TableName);
-        fileHelper.CreateSingleColFile(TestPath, col);
+        fileHelper.CreateSingleColMssSchemaFile(TestPath, col);
         ISchemaReader schemaReader = new PgSchemaReader(fileHelper.FileSystem, TestLogger);
 
         // Act
@@ -37,7 +37,7 @@ public class PgSchemaReaderTests : PgTestBase
         // Arrange
         var col = new PostgresInt(1, "MyTestCol", false);
         var fileHelper = new SchemaFileHelper(TableName);
-        fileHelper.CreateSingleColFile(TestPath, col);
+        fileHelper.CreateSingleColMssSchemaFile(TestPath, col);
         ISchemaReader schemaReader = new PgSchemaReader(fileHelper.FileSystem, TestLogger);
 
         // Act
