@@ -3,21 +3,19 @@
 public class Mapping : IMapping
 {
     public Mapping(
-        string name, 
-        DbServer sourceDbServer, 
-        DbServer targetDbServer)
+        Dictionary<string, string>? columns = null,
+        Dictionary<string, string>? schemas = null,
+        Dictionary<string, string?>? locations = null,
+        Dictionary<string, string?>? collations = null)
     {
-        Name = name;
-        SourceDbServer = sourceDbServer;
-        TargetDbServer = targetDbServer;
+        if (columns != null) Columns = columns;
+        if (schemas != null) Schemas = schemas;
+        if (locations != null) Locations = locations;
+        if (collations != null) Collations = collations;
     }
 
-    public string Name { get; set; }
-    public DbServer SourceDbServer { get; set; }
-    public DbServer TargetDbServer { get; set; }
-
-    public List<ColumnMap> Columns { get; set; } = new();
-    public Dictionary<string, string> Schemas { get; set; } = new();
-    public Dictionary<string, string?> Locations { get; set; } = new();
-    public Dictionary<string, string?> Collations { get; set; } = new();
+    public Dictionary<string, string> Columns { get; } = new();
+    public Dictionary<string, string> Schemas { get; } = new();
+    public Dictionary<string, string?> Locations { get; } = new();
+    public Dictionary<string, string?> Collations { get; } = new();
 }
