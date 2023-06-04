@@ -7,6 +7,7 @@ public class PostgresVarChar : TemplateStrColumn
     {
         if (length is < 1 or > 10_485_760)
         {
+            Type = PgTypes.Text;
             Length = 1_073_741_824;
         }
     }
