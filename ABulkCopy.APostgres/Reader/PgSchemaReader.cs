@@ -2,13 +2,16 @@
 
 public class PgSchemaReader : ISchemaReader
 {
+    private readonly ITypeConverter _typeConverter;
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
 
     public PgSchemaReader(
+        ITypeConverter typeConverter,
         IFileSystem fileSystem,
         ILogger logger)
     {
+        _typeConverter = typeConverter;
         _fileSystem = fileSystem;
         _logger = logger.ForContext<PgSchemaReader>();
     }
@@ -20,7 +23,7 @@ public class PgSchemaReader : ISchemaReader
         if (!_fileSystem.File.Exists(fullPath))
         {
             fullPath = Path.Combine(folderPath, $"{tableName}{DbServer.SqlServer.SchemaSuffix()}");
-            if (_fileSystem.File.Exists(fullPath))
+            if (!_fileSystem.File.Exists(fullPath))
             {
                 _logger.Error("Schema file not found for table '{TableName}", tableName);
                 throw new FileNotFoundException($"Schema file not found: {fullPath}");
@@ -38,8 +41,8 @@ public class PgSchemaReader : ISchemaReader
             WriteIndented = true,
             Converters = { new JsonStringEnumConverter(), new PgColumnInterfaceConverter() }
         };  
-        var sourceDefinition = JsonSerializer.Deserialize<TableDefinition>(jsonTxt, options);
-        if (sourceDefinition == null)
+        var tableDefinition = JsonSerializer.Deserialize<TableDefinition>(jsonTxt, options);
+        if (tableDefinition == null)
         {
             _logger.Error("Failed to deserialize schema file for table '{TableName}", tableName);
             throw new InvalidOperationException($"Failed to deserialize schema file: {fullPath}");
@@ -47,19 +50,9 @@ public class PgSchemaReader : ISchemaReader
 
         if (needTypeConversion)
         {
-            var schema = sourceDefinition.Header.Schema == "dbo" ? "public" : sourceDefinition.Header.Schema;
-            var location = sourceDefinition.Header.Location == "PRIMARY" ? null : sourceDefinition.Header.Location;
-            sourceDefinition = new TableDefinition(DbServer.Postgres)
-            {
-                Header = new TableHeader
-                {
-                    Name = sourceDefinition.Header.Name,
-                    Schema = schema,
-                    Location = location
-                }
-            };
+            tableDefinition = _typeConverter.Convert(tableDefinition);
         }
 
-        return sourceDefinition;
+        return tableDefinition;
     }
 }

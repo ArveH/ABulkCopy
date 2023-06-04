@@ -4,7 +4,7 @@ public class PostgresBigInt : TemplateNumberColumn
 {
     public PostgresBigInt(
         int id, string name, bool isNullable)
-        : base(id, MssTypes.BigInt, name, isNullable, 8, 19)
+        : base(id, MssTypes.BigInt, name, isNullable, 0, 64)
     {
     }
 

@@ -2,7 +2,7 @@
 
 public class PgSchemaReaderTests : PgTestBase
 {
-    private const string TableName = "MyTabl";
+    private const string TableName = "MyTable";
     private const string TestPath = ".\\testpath";
 
     public PgSchemaReaderTests(ITestOutputHelper output) 
@@ -17,7 +17,10 @@ public class PgSchemaReaderTests : PgTestBase
         var col = new PostgresBigInt(1, "MyTestCol", false);
         var fileHelper = new SchemaFileHelper(TableName);
         fileHelper.CreateSingleColMssSchemaFile(TestPath, col);
-        ISchemaReader schemaReader = new PgSchemaReader(fileHelper.FileSystem, TestLogger);
+        IPgColumnFactory columnFactory = new PgColumnFactory();
+        IMappingFactory mappingFactory = new MappingFactory();
+        ITypeConverter typeConverter = new PgTypeMapper(columnFactory, mappingFactory);
+        ISchemaReader schemaReader = new PgSchemaReader(typeConverter, fileHelper.FileSystem, TestLogger);
 
         // Act
         var tableDefinition = await schemaReader.GetTableDefinition(TestPath, TableName);
@@ -38,7 +41,10 @@ public class PgSchemaReaderTests : PgTestBase
         var col = new PostgresInt(1, "MyTestCol", false);
         var fileHelper = new SchemaFileHelper(TableName);
         fileHelper.CreateSingleColMssSchemaFile(TestPath, col);
-        ISchemaReader schemaReader = new PgSchemaReader(fileHelper.FileSystem, TestLogger);
+        IPgColumnFactory columnFactory = new PgColumnFactory();
+        IMappingFactory mappingFactory = new MappingFactory();
+        ITypeConverter typeConverter = new PgTypeMapper(columnFactory, mappingFactory);
+        ISchemaReader schemaReader = new PgSchemaReader(typeConverter, fileHelper.FileSystem, TestLogger);
 
         // Act
         var tableDefinition = await schemaReader.GetTableDefinition(TestPath, TableName);

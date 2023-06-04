@@ -5,6 +5,7 @@ public class PostgresDoublePrecision: DefaultColumn
     public PostgresDoublePrecision(int id, string name, bool isNullable)
         : base(id, PgTypes.DoublePrecision, name, isNullable)
     {
+        Precision = 53;
     }
 
     public override string ToString(object value)

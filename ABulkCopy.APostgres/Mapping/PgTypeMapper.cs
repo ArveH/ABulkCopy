@@ -2,10 +2,14 @@
 
 public class PgTypeMapper : ITypeConverter
 {
+    private readonly IPgColumnFactory _columnFactory;
     private readonly IMappingFactory _mappingFactory;
 
-    public PgTypeMapper(IMappingFactory mappingFactory)
+    public PgTypeMapper(
+        IPgColumnFactory columnFactory,
+        IMappingFactory mappingFactory)
     {
+        _columnFactory = columnFactory;
         _mappingFactory = mappingFactory;
     }
 
@@ -23,12 +27,26 @@ public class PgTypeMapper : ITypeConverter
             Header = new TableHeader
             {
                 Name = sourceDefinition.Header.Name,
-                Location = mappings.Locations.SafeGet(sourceDefinition.Header.Location),
+                Location = mappings.Locations.NullGet(sourceDefinition.Header.Location),
                 Schema = mappings.Schemas[sourceDefinition.Header.Schema],
             },
-            Columns = new List<IColumn>()
+            Columns = ConvertColumns(sourceDefinition, mappings).ToList()
         };
 
         return tableDefinition;
+    }
+
+    private IEnumerable<IColumn> ConvertColumns(TableDefinition sourceDefinition, IMapping mappings)
+    {
+        return sourceDefinition.Columns
+            .Select(column => _columnFactory.Create(
+                column.Id, 
+                column.Name, 
+                mappings.Columns.ReplaceGet(column.Type), 
+                column.Length, 
+                column.Precision, 
+                column.Scale, 
+                column.IsNullable, 
+                column.Collation));
     }
 }

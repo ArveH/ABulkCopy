@@ -15,6 +15,7 @@ public class PgColumnFactory : IPgColumnFactory
         return nativeType switch
         {
             PgTypes.BigInt => new PostgresBigInt(id, name, isNullable),
+            PgTypes.Int => new PostgresInt(id, name, isNullable),
             PgTypes.Boolean => new PostgresBoolean(id, name, isNullable),
             PgTypes.Char => new PostgresChar(id, name, isNullable, length, collation),
             PgTypes.Character => new PostgresChar(id, name, isNullable, length, collation),

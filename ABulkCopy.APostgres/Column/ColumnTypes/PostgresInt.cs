@@ -4,7 +4,7 @@ public class PostgresInt : TemplateNumberColumn
 {
     public PostgresInt(
         int id, string name, bool isNullable)
-        : base(id, PgTypes.Int, name, isNullable, 4, 10)
+        : base(id, PgTypes.Int, name, isNullable, 0, 32)
     {
     }
 

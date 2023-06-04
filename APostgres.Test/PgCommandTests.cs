@@ -1,6 +1,4 @@
-﻿using ABulkCopy.APostgres;
-
-namespace APostgres.Test;
+﻿namespace APostgres.Test;
 
 public class PgCommandTests
 {
