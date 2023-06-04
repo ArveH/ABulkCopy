@@ -2,10 +2,11 @@
 
 public class PostgresTimestamp : DefaultColumn
 {
-    public PostgresTimestamp(int id, string name, bool isNullable, int? precision)
+    public PostgresTimestamp(int id, string name, bool isNullable, int? precision=null)
         : base(id, PgTypes.Timestamp, name, isNullable)
     {
-        Precision = precision ?? 6;
+        Length = 0;
+        Precision = precision is null or > 6 or < 0 ? 6 : precision;
     }
 
     public override string GetTypeClause()
