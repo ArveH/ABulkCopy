@@ -41,4 +41,11 @@ public class PgSchemaReaderDateTimeTests : PgSchemaReaderBase
         var result = await GetColFromTableDefinition(new SqlServerSmallDateTime(1, "MyTestCol", false));
         VerifyColumn(result, new PostgresTimestamp(1, "MyTestCol", false));
     }
+
+    [Fact]
+    public async Task ReadMssTime()
+    {
+        var result = await GetColFromTableDefinition(new SqlServerTime(1, "MyTestCol", false));
+        VerifyColumn(result, new PostgresTime(1, "MyTestCol", false));
+    }
 }
