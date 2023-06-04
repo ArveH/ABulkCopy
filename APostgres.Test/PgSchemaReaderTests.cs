@@ -4,57 +4,46 @@ public class PgSchemaReaderTests : PgTestBase
 {
     private const string TableName = "MyTable";
     private const string TestPath = ".\\testpath";
+    private readonly SchemaFileHelper _fileHelper;
+    private readonly ISchemaReader _schemaReader;
 
     public PgSchemaReaderTests(ITestOutputHelper output) 
         : base(output)
     {
+        _fileHelper = new SchemaFileHelper(TableName);
+        var columnFactory = new PgColumnFactory();
+        var mappingFactory = new MappingFactory();
+        var typeConverter = new PgTypeMapper(columnFactory, mappingFactory);
+        _schemaReader = new PgSchemaReader(typeConverter, _fileHelper.FileSystem, TestLogger);
+    }
+
+    private async Task<IColumn> GetColFromTableDefinition(IColumn col)
+    {
+        _fileHelper.CreateSingleColMssSchemaFile(TestPath, col);
+
+        var tableDefinition = await _schemaReader.GetTableDefinition(TestPath, TableName);
+
+        tableDefinition.Should().NotBeNull();
+        tableDefinition!.Header.Name.Should().Be(TableName);
+        tableDefinition.Columns.Should().HaveCount(1);
+        tableDefinition.Columns[0].Should().NotBeNull("because we should be able to cast to the correct type");
+        return tableDefinition.Columns[0];
     }
 
     [Fact]
     public async Task TestBigInt()
     {
-        // Arrange
         var col = new PostgresBigInt(1, "MyTestCol", false);
-        var fileHelper = new SchemaFileHelper(TableName);
-        fileHelper.CreateSingleColMssSchemaFile(TestPath, col);
-        IPgColumnFactory columnFactory = new PgColumnFactory();
-        IMappingFactory mappingFactory = new MappingFactory();
-        ITypeConverter typeConverter = new PgTypeMapper(columnFactory, mappingFactory);
-        ISchemaReader schemaReader = new PgSchemaReader(typeConverter, fileHelper.FileSystem, TestLogger);
-
-        // Act
-        var tableDefinition = await schemaReader.GetTableDefinition(TestPath, TableName);
-
-        // Assert
-        tableDefinition.Should().NotBeNull();
-        tableDefinition!.Header.Name.Should().Be(TableName);
-        tableDefinition.Columns.Should().HaveCount(1);
-        var colType = tableDefinition.Columns[0] as PostgresBigInt;
-        colType.Should().NotBeNull("because we should be able to cast to the correct type");
-        VerifyColumn(tableDefinition.Columns[0], col);
+        var result = await GetColFromTableDefinition(col);
+        VerifyColumn(result, col);
     }
 
     [Fact]
     public async Task TestInt()
     {
-        // Arrange
         var col = new PostgresInt(1, "MyTestCol", false);
-        var fileHelper = new SchemaFileHelper(TableName);
-        fileHelper.CreateSingleColMssSchemaFile(TestPath, col);
-        IPgColumnFactory columnFactory = new PgColumnFactory();
-        IMappingFactory mappingFactory = new MappingFactory();
-        ITypeConverter typeConverter = new PgTypeMapper(columnFactory, mappingFactory);
-        ISchemaReader schemaReader = new PgSchemaReader(typeConverter, fileHelper.FileSystem, TestLogger);
-
-        // Act
-        var tableDefinition = await schemaReader.GetTableDefinition(TestPath, TableName);
-
-        // Assert
-        tableDefinition.Should().NotBeNull();
-        tableDefinition!.Columns.Should().HaveCount(1);
-        var colType = tableDefinition.Columns[0] as PostgresInt;
-        colType.Should().NotBeNull("because we should be able to cast to the correct type");
-        VerifyColumn(tableDefinition.Columns[0], col);
+        var result = await GetColFromTableDefinition(col);
+        VerifyColumn(result, col);
     }
 
     private static void VerifyColumn(IColumn actual, IColumn expected)
