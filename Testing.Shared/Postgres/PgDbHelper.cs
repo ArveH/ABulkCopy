@@ -1,20 +1,24 @@
-﻿namespace Testing.Shared.Postgres;
+﻿using Microsoft.Extensions.Logging.Abstractions;
+
+namespace Testing.Shared.Postgres;
 
 public class PgDbHelper
 {
-    private static readonly Lazy<PgDbHelper> LazyInstance = 
+    private static readonly Lazy<PgDbHelper> LazyInstance =
         new(() => new PgDbHelper());
 
-    private readonly string? _connectionString;
+    private readonly PgContext _pgContext;
 
     private PgDbHelper()
     {
         var configuration = new ConfigHelper().GetConfiguration("128e015d-d8ef-4ca8-ba79-5390b26c675f");
-        _connectionString = configuration.GetConnectionString(TestConstants.Config.DbKey);
+        var connectionString = configuration.GetConnectionString(TestConstants.Config.DbKey);
+        if (connectionString == null) throw new ArgumentNullException(nameof(connectionString));
+        _pgContext = new PgContext(new NullLoggerFactory()) { ConnectionString = connectionString };
     }
 
     public static PgDbHelper Instance => LazyInstance.Value;
-    public string ConnectionString => _connectionString ?? throw new ArgumentNullException(nameof(ConnectionString));
+    public string ConnectionString => _pgContext.ConnectionString;
 
     public async Task CreateTable(TableDefinition tableDefinition)
     {
@@ -44,11 +48,18 @@ public class PgDbHelper
         await ExecuteNonQuery(sqlString);
     }
 
+    public async Task<T> SelectScalar<T>(string tableName, string colName)
+    {
+        var sqlString = $"select \"{colName}\" from \"{tableName}\";";
+        await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
+        var reader = await cmd.ExecuteReaderAsync();
+        if (!await reader.ReadAsync()) throw new SqlNullValueException();
+        return (T)reader[0];
+    }
+
     public async Task ExecuteNonQuery(string sqlString)
     {
-        await using var conn = new NpgsqlConnection(ConnectionString);
-        await conn.OpenAsync();
-        await using var cmd = new NpgsqlCommand(sqlString, conn);
+        await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
         await cmd.ExecuteNonQueryAsync();
     }
 }

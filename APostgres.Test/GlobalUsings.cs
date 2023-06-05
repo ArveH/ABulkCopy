@@ -5,6 +5,7 @@ global using ABulkCopy.APostgres.Mapping;
 global using ABulkCopy.APostgres.Reader;
 global using ABulkCopy.ASqlServer.Column.ColumnTypes;
 global using ABulkCopy.Common.Config;
+global using ABulkCopy.Common.Extensions;
 global using ABulkCopy.Common.Mapping;
 global using ABulkCopy.Common.Reader;
 global using ABulkCopy.Common.TestData;
