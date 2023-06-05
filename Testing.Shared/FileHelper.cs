@@ -1,17 +1,20 @@
 ﻿namespace Testing.Shared;
 
-public class SchemaFileHelper
+public class FileHelper
 {
     private readonly string _tableName;
+    private readonly DbServer _dbServer;
 
-    public SchemaFileHelper(string tableName)
+    public FileHelper(string tableName, DbServer dbServer)
     {
         _tableName = tableName;
+        _dbServer = dbServer;
     }
 
     public MockFileSystem FileSystem { get; } = new();
+    public string TestPath { get; set; } = ".\\testpath";
 
-    public void CreateSingleColMssSchemaFile(string path, IColumn col)
+    public void CreateSingleColMssSchemaFile(IColumn col)
     {
         var tableDefinition = MssTestData.GetEmpty(_tableName);
         tableDefinition.Columns.Add(col);
@@ -21,12 +24,20 @@ public class SchemaFileHelper
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
             WriteIndented = true,
             Converters = { new JsonStringEnumConverter(), new ColumnInterfaceConverter() }
-        };  
+        };
         var jsonText = JsonSerializer.Serialize(tableDefinition, options);
 
         var fileData = new MockFileData(jsonText);
         FileSystem.AddFile(
-            Path.Combine(path, $"{_tableName}{DbServer.SqlServer.SchemaSuffix()}"),
+            Path.Combine(TestPath, $"{_tableName}{DbServer.SqlServer.SchemaSuffix()}"),
+            fileData);
+    }
+
+    public void CreateSingleRowDataFile(string value)
+    {
+        var fileData = new MockFileData(value);
+        FileSystem.AddFile(
+            Path.Combine(TestPath, $"{_tableName}{_dbServer.DataSuffix()}"),
             fileData);
     }
 }

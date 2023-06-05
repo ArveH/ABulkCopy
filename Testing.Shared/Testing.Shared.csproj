@@ -15,4 +15,8 @@
     <ProjectReference Include="..\ABulkCopy.ASqlServer\ABulkCopy.ASqlServer.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Postgres\" />
+  </ItemGroup>
+
 </Project>

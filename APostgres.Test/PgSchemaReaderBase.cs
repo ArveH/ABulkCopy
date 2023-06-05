@@ -3,14 +3,13 @@
 public class PgSchemaReaderBase : PgTestBase
 {
     protected const string TableName = "MyTable";
-    protected const string TestPath = ".\\testpath";
-    protected SchemaFileHelper FileHelper;
+    protected FileHelper FileHelper;
     protected ISchemaReader SchemaReader;
 
     public PgSchemaReaderBase(ITestOutputHelper output) 
         : base(output)
     {
-        FileHelper = new SchemaFileHelper(TableName);
+        FileHelper = new FileHelper(TableName, DbServer.Postgres);
         var columnFactory = new PgColumnFactory();
         var mappingFactory = new MappingFactory();
         var typeConverter = new PgTypeMapper(columnFactory, mappingFactory);
@@ -19,9 +18,9 @@ public class PgSchemaReaderBase : PgTestBase
 
     protected async Task<IColumn> GetColFromTableDefinition(IColumn col)
     {
-        FileHelper.CreateSingleColMssSchemaFile(TestPath, col);
+        FileHelper.CreateSingleColMssSchemaFile(col);
 
-        var tableDefinition = await SchemaReader.GetTableDefinition(TestPath, TableName);
+        var tableDefinition = await SchemaReader.GetTableDefinition(FileHelper.TestPath, TableName);
 
         tableDefinition.Should().NotBeNull();
         tableDefinition!.Header.Name.Should().Be(TableName);
