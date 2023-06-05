@@ -16,7 +16,7 @@ public class PgDataReaderTestBase : PgTestBase
         OriginalTableDefinition = MssTestData.GetEmpty(TestTableName);
         MockFileSystem = new MockFileSystem();
         MockFileSystem.AddDirectory(TestPath);
-        TestDataReader = new ADataReader();
+        TestDataReader = new PgDataReader(PgContext, TestLogger);
         FileHelper = new FileHelper(TestTableName, DbServer.Postgres);
     }
 

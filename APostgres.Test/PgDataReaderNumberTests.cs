@@ -1,6 +1,4 @@
-﻿using ABulkCopy.Common.TestData;
-
-namespace APostgres.Test;
+﻿namespace APostgres.Test;
 
 public class PgDataReaderNumberTests : PgDataReaderTestBase
 {

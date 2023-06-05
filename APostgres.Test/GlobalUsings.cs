@@ -7,6 +7,7 @@ global using ABulkCopy.ASqlServer.Column.ColumnTypes;
 global using ABulkCopy.Common.Config;
 global using ABulkCopy.Common.Mapping;
 global using ABulkCopy.Common.Reader;
+global using ABulkCopy.Common.TestData;
 global using ABulkCopy.Common.Types;
 global using ABulkCopy.Common.Types.Column;
 global using ABulkCopy.Common.Types.Table;

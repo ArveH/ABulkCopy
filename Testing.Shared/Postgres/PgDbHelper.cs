@@ -19,7 +19,7 @@ public class PgDbHelper
     public async Task CreateTable(TableDefinition tableDefinition)
     {
         var sb = new StringBuilder();
-        sb.AppendLine($"create table [{tableDefinition.Header.Name}] (");
+        sb.AppendLine($"create table \"{tableDefinition.Header.Name}\" (");
         var first = true;
         foreach (var column in tableDefinition.Columns)
         {
@@ -32,7 +32,7 @@ public class PgDbHelper
                 sb.AppendLine(",");
             }
 
-            sb.Append($"    {column.Name} {column.GetNativeCreateClause()}");
+            sb.Append($"    \"{column.Name}\" {column.GetNativeCreateClause()}");
         }
         sb.AppendLine(");");
         await ExecuteNonQuery(sb.ToString());
@@ -40,15 +40,15 @@ public class PgDbHelper
 
     public async Task DropTable(string tableName)
     {
-        var sqlString = $"drop table if exists [{tableName}];";
+        var sqlString = $"drop table if exists \"{tableName}\";";
         await ExecuteNonQuery(sqlString);
     }
 
     public async Task ExecuteNonQuery(string sqlString)
     {
-        await using var sqlConnection = new SqlConnection(ConnectionString);
-        await sqlConnection.OpenAsync();
-        await using var sqlCommand = new SqlCommand(sqlString, sqlConnection);
-        await sqlCommand.ExecuteNonQueryAsync();
+        await using var conn = new NpgsqlConnection(ConnectionString);
+        await conn.OpenAsync();
+        await using var cmd = new NpgsqlCommand(sqlString, conn);
+        await cmd.ExecuteNonQueryAsync();
     }
 }
