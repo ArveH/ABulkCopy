@@ -24,7 +24,7 @@ public class PgDataReaderNumberTests : PgDataReaderTestBase, IAsyncLifetime
         OriginalTableDefinition.Columns.Add(col);
         await PgDbHelper.Instance.DropTable(TestTableName);
         await PgDbHelper.Instance.CreateTable(OriginalTableDefinition);
-        FileHelper.CreateSingleRowDataFile(AllTypes.SampleValues.BigInt.ToString());
+        FileHelper.CreateDataFile(AllTypes.SampleValues.BigInt.ToString());
 
         // Act
         await TestDataReader.Read(OriginalTableDefinition, TestPath);

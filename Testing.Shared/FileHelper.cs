@@ -33,9 +33,13 @@ public class FileHelper
             fileData);
     }
 
-    public void CreateSingleRowDataFile(string value)
+    public void CreateDataFile(string row1, string? row2=null)
     {
-        var fileData = new MockFileData(value);
+        var fileData = new MockFileData(row1, Encoding.UTF8);
+        if (!string.IsNullOrEmpty(row2))
+        {
+            fileData.TextContents += Environment.NewLine + row2;
+        }
         FileSystem.AddFile(
             Path.Combine(DataFolder, $"{_tableName}{_dbServer.DataSuffix()}"),
             fileData);

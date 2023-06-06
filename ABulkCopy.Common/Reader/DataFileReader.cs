@@ -20,11 +20,11 @@ public class DataFileReader : IDataFileReader, IDisposable
         _logger = logger.ForContext<DataFileReader>();
         var fileStream = fileSystem.FileStream.New(path, FileMode.Open);
         _stream = new StreamReader(fileStream, new UTF8Encoding(false));
-        CurrentChar = _stream.Read();
+        Read();
         RowCounter = 0;
     }
 
-    public long RowCounter { get; }
+    public long RowCounter { get; private set; }
     public int CurrentChar { get; private set; }
 
     public string? ReadColumn(string colName)
@@ -35,8 +35,9 @@ public class DataFileReader : IDataFileReader, IDisposable
         while (CurrentChar >= 0 && CurrentChar != ColumnSeparator)
         {
             _columnHolder.Append((char)CurrentChar);
-            CurrentChar = _stream.Read();
+            Read();
         }
+        ReadColumnSeparator(colName);
 
         return _columnHolder.Length == 0 ? null : _columnHolder.ToString();
     }
@@ -53,8 +54,35 @@ public class DataFileReader : IDataFileReader, IDisposable
                 $"in line {RowCounter}. Found '{CurrentChar}'");
         }
 
+        Read();
+    }
+
+    public void ReadNewLine()
+    {
+        if (CurrentChar != '\n' && CurrentChar != '\r' && !IsEndOfFile)
+        {
+            _logger.Error("Newline not found in correct position in line {RowCount}. " +
+                          "Found '{CurrentChar}'",
+                RowCounter, CurrentChar);
+            throw new NotValidDataException(
+                $"Newline not found in correct position in line {RowCounter}. " +
+                $"Found '{CurrentChar}'");
+        }
+        Read();
+        if (CurrentChar == '\n')
+        {
+            Read();
+        }
+
+        RowCounter++;
+    }
+
+    private void Read()
+    {
         CurrentChar = _stream.Read();
     }
+
+    public bool IsEndOfFile => CurrentChar == -1;
 
     public void Dispose()
     {
