@@ -15,7 +15,7 @@ public class PostgresBoolean : TemplateNumberColumn
 
     public override object ToInternalType(string value)
     {
-        return value;
+        return value is "1" or "true" or "True";
     }
 
     public override Type GetDotNetType()

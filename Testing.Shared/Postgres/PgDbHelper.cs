@@ -54,7 +54,11 @@ public class PgDbHelper
         await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
         var reader = await cmd.ExecuteReaderAsync();
         if (!await reader.ReadAsync()) throw new SqlNullValueException();
-        return (T)reader[0];
+        
+        // NOTE: The simple
+        //     return (T)reader[0];
+        // doesn't work for all types, e.g. cast Int16 to int32.
+        return (T)Convert.ChangeType(reader[0], typeof(T));
     }
 
     public async Task ExecuteNonQuery(string sqlString)

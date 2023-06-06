@@ -14,7 +14,7 @@ public class PostgresReal : DefaultColumn
 
     public override object ToInternalType(string value)
     {
-        return decimal.Parse(value, CultureInfo.InvariantCulture);
+        return double.Parse(value, CultureInfo.InvariantCulture);
     }
 
     public override Type GetDotNetType()
