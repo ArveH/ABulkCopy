@@ -1,6 +1,4 @@
-﻿using NpgsqlTypes;
-
-namespace ABulkCopy.APostgres.Reader;
+﻿namespace ABulkCopy.APostgres.Reader;
 
 public class PgDataReader : IADataReader
 {
@@ -25,9 +23,7 @@ public class PgDataReader : IADataReader
             CreateCopyStmt(tableDefinition)).ConfigureAwait(false);
 
         var counter = 0L;
-        await writer.StartRowAsync().ConfigureAwait(false);
-
-        await writer.WriteAsync(123, NpgsqlDbType.Bigint).ConfigureAwait(false);
+        await ReadRow(writer, tableDefinition.Columns).ConfigureAwait(false);
         counter++;
 
         await writer.CompleteAsync().ConfigureAwait(false);
@@ -35,6 +31,16 @@ public class PgDataReader : IADataReader
         _logger.Information("Read {RowCount} rows for table '{TableName}' from '{Path}'",
             counter, tableDefinition.Header.Name, path);
         return counter;
+    }
+
+    private async Task ReadRow(NpgsqlBinaryImporter writer, List<IColumn> columns)
+    {
+        await writer.StartRowAsync().ConfigureAwait(false);
+
+        foreach (var col in columns)
+        {
+            await writer.WriteAsync(123, col.Type.GetNativeType()).ConfigureAwait(false);
+        }
     }
 
     private static string CreateCopyStmt(TableDefinition tableDefinition)
