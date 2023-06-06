@@ -7,7 +7,7 @@ public static class StringExtensions
         return typeStr switch
         {
             PgTypes.BigInt => NpgsqlDbType.Bigint,
-            PgTypes.Int => NpgsqlDbType.Inet,
+            PgTypes.Int => NpgsqlDbType.Integer,
             PgTypes.Boolean => NpgsqlDbType.Boolean,
             PgTypes.Char => NpgsqlDbType.Char,
             PgTypes.Character => NpgsqlDbType.Char,

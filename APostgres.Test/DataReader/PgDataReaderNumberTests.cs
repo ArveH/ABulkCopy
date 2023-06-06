@@ -35,4 +35,23 @@ public class PgDataReaderNumberTests : PgDataReaderTestBase, IAsyncLifetime
         colValue.Should().Be(AllTypes.SampleValues.BigInt);
     }
 
+    [Fact]
+    public async Task TestInt()
+    {
+        // Arrange
+        var col = new PostgresInt(1, ColName, false);
+        TableDefinition.Columns.Add(col);
+        await PgDbHelper.Instance.DropTable(TestTableName);
+        await PgDbHelper.Instance.CreateTable(TableDefinition);
+        FileHelper.CreateDataFile(AllTypes.SampleValues.Int + ",");
+
+        // Act
+        await TestDataReader.Read(FileHelper.DataFolder, TableDefinition);
+
+        // Assert
+        var colValue = await PgDbHelper.Instance.SelectScalar<int>(
+            TestTableName, ColName);
+        colValue.Should().Be(AllTypes.SampleValues.Int);
+    }
+
 }
