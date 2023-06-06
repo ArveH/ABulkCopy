@@ -1,6 +1,6 @@
-﻿namespace APostgres.Test.DataFileReader;
+﻿namespace Common.Test.DataFileReader;
 
-public class DataFileReaderTests : PgTestBase
+public class DataFileReaderTests : CommonTestBase
 {
     private const string ColName = "Col1";
     private const string Col2Name = "Col2";
@@ -14,19 +14,16 @@ public class DataFileReaderTests : PgTestBase
         : base(output)
     {
         _tableDefinition = MssTestData.GetEmpty(TestTableName);
-        _fileHelper = new FileHelper(TestTableName, DbServer.SqlServer)
-        {
-            DataFolder = @"C:\testdata"
-        };
+        _fileHelper = new FileHelper(TestTableName, DbServer.SqlServer);
         _dfrFactory = new DataFileReaderFactory(_fileHelper.FileSystem, TestLogger);
     }
 
     [Fact]
-    public async Task TestReadOneRow_When_BigInt()
+    public void TestReadOneRow_When_BigInt()
     {
         // Arrange
         _tableDefinition.Columns.Add(new PostgresBigInt(1, ColName, false));
-        var dataFileReader = await Arrange(AllTypes.SampleValues.BigInt + ",");
+        var dataFileReader = Arrange(AllTypes.SampleValues.BigInt + ",");
 
         // Act
         var stringVal = dataFileReader.ReadColumn(ColName);
@@ -36,12 +33,12 @@ public class DataFileReaderTests : PgTestBase
     }
 
     [Fact]
-    public async Task TestReadOneRow_When_2BigInts()
+    public void TestReadOneRow_When_2BigInts()
     {
         // Arrange
         _tableDefinition.Columns.Add(new PostgresBigInt(1, ColName, false));
         _tableDefinition.Columns.Add(new PostgresBigInt(2, Col2Name, false));
-        var dataFileReader = await Arrange("1001,1002,");
+        var dataFileReader = Arrange("1001,1002,");
 
         // Act
         var col1Val = dataFileReader.ReadColumn(ColName);
@@ -53,11 +50,11 @@ public class DataFileReaderTests : PgTestBase
     }
 
     [Fact]
-    public async Task TestReadOneRow_When_BigInt_And_Null()
+    public void TestReadOneRow_When_BigInt_And_Null()
     {
         // Arrange
         _tableDefinition.Columns.Add(new PostgresBigInt(1, ColName, false));
-        var dataFileReader = await Arrange(",");
+        var dataFileReader = Arrange(",");
 
         // Act
         var stringVal = dataFileReader.ReadColumn(ColName);
@@ -67,11 +64,11 @@ public class DataFileReaderTests : PgTestBase
     }
 
     [Fact]
-    public async Task TestReadTwoRows_When_BigInt()
+    public void TestReadTwoRows_When_BigInt()
     {
         // Arrange
         _tableDefinition.Columns.Add(new PostgresBigInt(1, ColName, false));
-        var dataFileReader = await Arrange("1001,", "1002,");
+        var dataFileReader = Arrange("1001,", "1002,");
 
         // Act
         var row1Val = dataFileReader.ReadColumn(ColName);
@@ -84,12 +81,12 @@ public class DataFileReaderTests : PgTestBase
     }
 
     [Fact]
-    public async Task TestReadOneRow_When_Varchar()
+    public void TestReadOneRow_When_Varchar()
     {
         var testValue = "Some Value";
         // Arrange
         _tableDefinition.Columns.Add(new PostgresVarChar(1, ColName, false, 100, "en_ci_ai"));
-        var dataFileReader = await Arrange($"\"{testValue}\",");
+        var dataFileReader = Arrange($"\"{testValue}\",");
 
         // Act
         var stringVal = dataFileReader.ReadColumn(ColName);
@@ -98,10 +95,23 @@ public class DataFileReaderTests : PgTestBase
         stringVal.Should().Be(testValue);
     }
 
-    private async Task<IDataFileReader> Arrange(string row1, string? row2=null)
+    [Fact]
+    public void TestReadOneRow_When_VarcharContainingQuote()
     {
-        await PgDbHelper.Instance.DropTable(TestTableName);
-        await PgDbHelper.Instance.CreateTable(_tableDefinition);
+        var testValue = "Some \"Value\"";
+        // Arrange
+        _tableDefinition.Columns.Add(new PostgresVarChar(1, ColName, false, 100, "en_ci_ai"));
+        var dataFileReader = Arrange($"\"{testValue.Replace("\"", "\"\"")}\",");
+
+        // Act
+        var stringVal = dataFileReader.ReadColumn(ColName);
+
+        // Assert
+        stringVal.Should().Be(testValue);
+    }
+
+    private IDataFileReader Arrange(string row1, string? row2=null)
+    {
         _fileHelper.CreateDataFile(row1, row2);
         var dataFileReader = _dfrFactory.Create(
             _fileHelper.DataFolder, _tableDefinition);
