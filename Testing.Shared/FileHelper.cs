@@ -12,7 +12,7 @@ public class FileHelper
     }
 
     public MockFileSystem FileSystem { get; } = new();
-    public string TestPath { get; set; } = ".\\testpath";
+    public string DataFolder { get; set; } = ".\\testdata";
 
     public void CreateSingleColMssSchemaFile(IColumn col)
     {
@@ -29,7 +29,7 @@ public class FileHelper
 
         var fileData = new MockFileData(jsonText);
         FileSystem.AddFile(
-            Path.Combine(TestPath, $"{_tableName}{DbServer.SqlServer.SchemaSuffix()}"),
+            Path.Combine(DataFolder, $"{_tableName}{DbServer.SqlServer.SchemaSuffix()}"),
             fileData);
     }
 
@@ -37,7 +37,7 @@ public class FileHelper
     {
         var fileData = new MockFileData(value);
         FileSystem.AddFile(
-            Path.Combine(TestPath, $"{_tableName}{_dbServer.DataSuffix()}"),
+            Path.Combine(DataFolder, $"{_tableName}{_dbServer.DataSuffix()}"),
             fileData);
     }
 }

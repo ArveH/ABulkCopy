@@ -1,4 +1,4 @@
-﻿namespace APostgres.Test;
+﻿namespace APostgres.Test.SchemaReader;
 
 public class PgSchemaReaderBase : PgTestBase
 {
@@ -6,7 +6,7 @@ public class PgSchemaReaderBase : PgTestBase
     protected FileHelper FileHelper;
     protected ISchemaReader SchemaReader;
 
-    public PgSchemaReaderBase(ITestOutputHelper output) 
+    public PgSchemaReaderBase(ITestOutputHelper output)
         : base(output)
     {
         FileHelper = new FileHelper(TableName, DbServer.Postgres);
@@ -20,7 +20,7 @@ public class PgSchemaReaderBase : PgTestBase
     {
         FileHelper.CreateSingleColMssSchemaFile(col);
 
-        var tableDefinition = await SchemaReader.GetTableDefinition(FileHelper.TestPath, TableName);
+        var tableDefinition = await SchemaReader.GetTableDefinition(FileHelper.DataFolder, TableName);
 
         tableDefinition.Should().NotBeNull();
         tableDefinition!.Header.Name.Should().Be(TableName);

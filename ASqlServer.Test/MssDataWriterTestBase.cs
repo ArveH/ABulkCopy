@@ -16,7 +16,7 @@ public abstract class MssDataWriterTestBase : MssTestBase
         MockFileSystem = new MockFileSystem();
         MockFileSystem.AddDirectory(TestPath);
         TestDataWriter = new DataWriter(
-            MssDbContext, 
+            MssDbContext,
             new TableReaderFactory(new SelectCreator(TestLogger), TestLogger),
             MockFileSystem, TestLogger);
     }
@@ -62,8 +62,8 @@ public abstract class MssDataWriterTestBase : MssTestBase
         jsonTxt.TrimEnd().Should().Be($"{expected},");
     }
 
-    protected static readonly string String10K = new ('a', 10000);
-    protected static readonly string NString10K = new ('ﯵ', 10000);
+    protected static readonly string String10K = new('a', 10000);
+    protected static readonly string NString10K = new('ﯵ', 10000);
 
     protected async Task<string> GetJsonText()
     {

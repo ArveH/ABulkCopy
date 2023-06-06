@@ -1,6 +1,7 @@
 // Global using directives
 
 global using ABulkCopy.Common.Database;
+global using ABulkCopy.Common.Exceptions;
 global using ABulkCopy.Common.Extensions;
 global using ABulkCopy.Common.Reader;
 global using ABulkCopy.Common.Serialization;

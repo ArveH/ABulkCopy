@@ -9,6 +9,7 @@
   <ItemGroup>
     <Folder Include="Config\" />
     <Folder Include="Extensions\" />
+    <Folder Include="Exceptions\" />
     <Folder Include="Serialization\" />
   </ItemGroup>
 

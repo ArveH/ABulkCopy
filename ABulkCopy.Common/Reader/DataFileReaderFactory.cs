@@ -13,8 +13,11 @@ public class DataFileReaderFactory : IDataFileReaderFactory
         _logger = logger;
     }
 
-    public IDataFileReader Create(string path, IReadOnlyList<IColumn> columns)
+    public IDataFileReader Create(string folder, TableDefinition tableDefinition)
     {
-        return new DataFileReader(path, _fileSystem, columns, _logger);
+        var path = Path.Combine(
+            folder, 
+            $"{tableDefinition.Header.Name}{tableDefinition.DbServer.DataSuffix()}");
+        return new DataFileReader(path, _fileSystem, tableDefinition.Columns, _logger);
     }
 }

@@ -8,10 +8,10 @@ public class DataFileReader : IDataFileReader, IDisposable
 
     private const int QuoteChar = '"';
     private const int ColumnSeparator = ',';
-
+    private readonly StringBuilder _columnHolder = new(10_485_760);
 
     public DataFileReader(
-        string path, 
+        string path,
         IFileSystem fileSystem,
         IReadOnlyList<IColumn> columns,
         ILogger logger)
@@ -27,15 +27,33 @@ public class DataFileReader : IDataFileReader, IDisposable
     public long RowCounter { get; }
     public int CurrentChar { get; private set; }
 
-    public IEnumerable<char> ReadColumn(IColumn column)
+    public string ReadColumn(string colName)
     {
         _logger.Verbose("Reading value for row {RowCount} column '{ColumnName}'",
-            RowCounter, column.Name);
+            RowCounter, colName);
+        _columnHolder.Clear();
         while (CurrentChar >= 0 && CurrentChar != ColumnSeparator)
         {
-            yield return (char)CurrentChar;
             CurrentChar = _stream.Read();
+            _columnHolder.Append(CurrentChar);
         }
+
+        return _columnHolder.ToString();
+    }
+
+    public void ReadColumnSeparator(string colName)
+    {
+        if (CurrentChar != ',')
+        {
+            _logger.Error("Data for column '{ColName}' missing field terminator " +
+                          "in line {RowCounter}. Found '{CurrentChar}'",
+                colName, RowCounter, CurrentChar);
+            throw new NotValidDataException(
+                $"Data for column '{colName}' missing field terminator " +
+                $"in line {RowCounter}. Found '{CurrentChar}'");
+        }
+
+        CurrentChar = _stream.Read();
     }
 
     public void Dispose()

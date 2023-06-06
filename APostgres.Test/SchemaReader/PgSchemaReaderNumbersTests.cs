@@ -1,8 +1,8 @@
-﻿namespace APostgres.Test;
+﻿namespace APostgres.Test.SchemaReader;
 
 public class PgSchemaReaderNumbersTests : PgSchemaReaderBase
 {
-    public PgSchemaReaderNumbersTests(ITestOutputHelper output) 
+    public PgSchemaReaderNumbersTests(ITestOutputHelper output)
         : base(output)
     {
     }
