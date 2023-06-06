@@ -1,15 +1,15 @@
 ﻿namespace APostgres.Test.DataFileReader;
 
-public class MssDataFileReaderTests : MssDataFileReaderTestBase
+public class DataFileReaderTests : PgTestBase
 {
     private const string ColName = "Col1";
-    private static string TestTableName => nameof(MssDataFileReaderTests);
+    private static string TestTableName => nameof(DataFileReaderTests);
 
     private readonly TableDefinition _tableDefinition;
     private readonly FileHelper _fileHelper;
     private readonly IDataFileReaderFactory _dfrFactory;
 
-    public MssDataFileReaderTests(ITestOutputHelper output)
+    public DataFileReaderTests(ITestOutputHelper output)
         : base(output)
     {
         _tableDefinition = MssTestData.GetEmpty(TestTableName);
@@ -21,7 +21,7 @@ public class MssDataFileReaderTests : MssDataFileReaderTestBase
     }
 
     [Fact]
-    public async Task TestReadColumn_When_BigInt()
+    public async Task TestReadOneRow_When_BigInt()
     {
         // Arrange
         _tableDefinition.Columns.Add(new PostgresBigInt(1, ColName, false));
@@ -39,7 +39,7 @@ public class MssDataFileReaderTests : MssDataFileReaderTestBase
     }
 
     [Fact]
-    public async Task TestReadColumn_When_BigInt_And_Null()
+    public async Task TestReadOneRow_When_BigInt_And_Null()
     {
         // Arrange
         _tableDefinition.Columns.Add(new PostgresBigInt(1, ColName, false));
@@ -57,7 +57,7 @@ public class MssDataFileReaderTests : MssDataFileReaderTestBase
     }
 
     [Fact]
-    public async Task TestReadColumn_When_TwoRows()
+    public async Task TestReadTwoRows_When_BigInt()
     {
         // Arrange
         _tableDefinition.Columns.Add(new PostgresBigInt(1, ColName, false));
