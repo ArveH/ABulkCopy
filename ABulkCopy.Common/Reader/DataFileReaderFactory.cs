@@ -18,6 +18,6 @@ public class DataFileReaderFactory : IDataFileReaderFactory
         var path = Path.Combine(
             folder, 
             $"{tableDefinition.Header.Name}{tableDefinition.DbServer.DataSuffix()}");
-        return new DataFileReader(path, _fileSystem, tableDefinition.Columns, _logger);
+        return new DataFileReader(path, _fileSystem, _logger);
     }
 }

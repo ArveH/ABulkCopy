@@ -2,7 +2,6 @@
 
 public class DataFileReader : IDataFileReader, IDisposable
 {
-    private readonly IReadOnlyList<IColumn> _columns;
     private readonly ILogger _logger;
     private readonly StreamReader _stream;
 
@@ -13,14 +12,12 @@ public class DataFileReader : IDataFileReader, IDisposable
     public DataFileReader(
         string path,
         IFileSystem fileSystem,
-        IReadOnlyList<IColumn> columns,
         ILogger logger)
     {
-        _columns = columns;
         _logger = logger.ForContext<DataFileReader>();
         var fileStream = fileSystem.FileStream.New(path, FileMode.Open);
         _stream = new StreamReader(fileStream, new UTF8Encoding(false));
-        Read();
+        ReadChar();
         RowCounter = 0;
     }
 
@@ -29,17 +26,72 @@ public class DataFileReader : IDataFileReader, IDisposable
 
     public string? ReadColumn(string colName)
     {
-        _logger.Verbose("Reading value for row {RowCount} column '{ColumnName}'",
+        _logger.Verbose("Reading value for column '{ColumnName}' row {RowCount}",
             RowCounter, colName);
         _columnHolder.Clear();
-        while (CurrentChar >= 0 && CurrentChar != ColumnSeparator)
+        if (CurrentChar == QuoteChar)
         {
-            _columnHolder.Append((char)CurrentChar);
-            Read();
+            ReadQuotedValue(colName);
+        }
+        else
+        {
+            ReadUnquotedValue();
         }
         ReadColumnSeparator(colName);
 
         return _columnHolder.Length == 0 ? null : _columnHolder.ToString();
+    }
+
+    private void ReadQuotedValue(string colName)
+    {
+        ReadQuote(colName, "opening");
+        while (CurrentChar >= 0)
+        {
+            if (CurrentChar == QuoteChar)
+            {
+                if (_stream.Peek() == QuoteChar)
+                {
+                    ReadChar();
+                }
+                else
+                {
+                    break;
+                }
+            }
+            AddChar();
+            ReadChar();
+        }
+        ReadQuote(colName, "closing");
+    }
+
+    private void ReadUnquotedValue()
+    {
+        while (CurrentChar >= 0 && CurrentChar != ColumnSeparator)
+        {
+            AddChar();
+            ReadChar();
+        }
+    }
+
+    private void AddChar()
+    {
+        _columnHolder.Append((char)CurrentChar);
+    }
+
+    // quotePlacement is either "opening" or "closing"
+    public void ReadQuote(string colName, string quotePlacement)
+    {
+        if (CurrentChar != QuoteChar)
+        {
+            _logger.Error($"Expected {quotePlacement} quote for column '{{ColName}}' " +
+                          "in line {RowCounter}. Found '{CurrentChar}'",
+                colName, RowCounter, CurrentChar);
+            throw new NotValidDataException(
+                $"Expected {quotePlacement} quote for column '{colName}' " +
+                $"in line {RowCounter}. Found '{CurrentChar}'");
+        }
+
+        ReadChar();
     }
 
     public void ReadColumnSeparator(string colName)
@@ -54,7 +106,7 @@ public class DataFileReader : IDataFileReader, IDisposable
                 $"in line {RowCounter}. Found '{CurrentChar}'");
         }
 
-        Read();
+        ReadChar();
     }
 
     public void ReadNewLine()
@@ -68,16 +120,16 @@ public class DataFileReader : IDataFileReader, IDisposable
                 $"Newline not found in correct position in line {RowCounter}. " +
                 $"Found '{CurrentChar}'");
         }
-        Read();
+        ReadChar();
         if (CurrentChar == '\n')
         {
-            Read();
+            ReadChar();
         }
 
         RowCounter++;
     }
 
-    private void Read()
+    private void ReadChar()
     {
         CurrentChar = _stream.Read();
     }
