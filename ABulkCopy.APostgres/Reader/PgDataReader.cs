@@ -3,44 +3,62 @@
 public class PgDataReader : IADataReader
 {
     private readonly IPgContext _context;
+    private readonly IDataFileReaderFactory _dataFileReaderFactory;
     private readonly ILogger _logger;
 
     public PgDataReader(
         IPgContext context,
+        IDataFileReaderFactory dataFileReaderFactory,
         ILogger logger)
     {
         _context = context;
+        _dataFileReaderFactory = dataFileReaderFactory;
         _logger = logger.ForContext<PgDataReader>();
     }
 
-    public async Task<long> Read(TableDefinition tableDefinition, string path)
+    public async Task<long> Read(string folder, TableDefinition tableDefinition)
     {
         _logger.Information("Reading data for table '{TableName}' from '{Path}'",
-            tableDefinition.Header.Name, path);
+            tableDefinition.Header.Name, folder);
         await using var conn = await _context.DataSource.OpenConnectionAsync().ConfigureAwait(false);
 
         await using var writer = await conn.BeginBinaryImportAsync(
             CreateCopyStmt(tableDefinition)).ConfigureAwait(false);
-
+        
+        var fileReader = _dataFileReaderFactory.Create(folder, tableDefinition);
         var counter = 0L;
-        await ReadRow(writer, tableDefinition.Columns).ConfigureAwait(false);
+        await ReadRow(fileReader, writer, tableDefinition.Columns).ConfigureAwait(false);
         counter++;
 
         await writer.CompleteAsync().ConfigureAwait(false);
 
         _logger.Information("Read {RowCount} rows for table '{TableName}' from '{Path}'",
-            counter, tableDefinition.Header.Name, path);
+            counter, tableDefinition.Header.Name, folder);
         return counter;
     }
 
-    private async Task ReadRow(NpgsqlBinaryImporter writer, List<IColumn> columns)
+    private async Task ReadRow(
+        IDataFileReader dataFileReader, 
+        NpgsqlBinaryImporter writer, 
+        List<IColumn> columns)
     {
         await writer.StartRowAsync().ConfigureAwait(false);
 
         foreach (var col in columns)
         {
-            await writer.WriteAsync(123, col.Type.GetNativeType()).ConfigureAwait(false);
+            var colValue = dataFileReader.ReadColumn(col.Name);
+            if (colValue == null)
+            {
+                await writer.WriteNullAsync().ConfigureAwait(false);
+            }
+            else
+            {
+                await writer.WriteAsync(
+                    col.ToInternalType(colValue), 
+                    col.Type.GetNativeType()).ConfigureAwait(false);
+            }
         }
+        dataFileReader.ReadNewLine();
     }
 
     private static string CreateCopyStmt(TableDefinition tableDefinition)

@@ -21,13 +21,13 @@ public class PgDataReaderNumberTests : PgDataReaderTestBase, IAsyncLifetime
     {
         // Arrange
         var col = new PostgresBigInt(1, ColName, false);
-        OriginalTableDefinition.Columns.Add(col);
+        TableDefinition.Columns.Add(col);
         await PgDbHelper.Instance.DropTable(TestTableName);
-        await PgDbHelper.Instance.CreateTable(OriginalTableDefinition);
-        FileHelper.CreateDataFile(AllTypes.SampleValues.BigInt.ToString());
+        await PgDbHelper.Instance.CreateTable(TableDefinition);
+        FileHelper.CreateDataFile(AllTypes.SampleValues.BigInt + ",");
 
         // Act
-        await TestDataReader.Read(OriginalTableDefinition, TestPath);
+        await TestDataReader.Read(FileHelper.DataFolder, TableDefinition);
 
         // Assert
         var colValue = await PgDbHelper.Instance.SelectScalar<long>(

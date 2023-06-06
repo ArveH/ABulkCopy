@@ -2,6 +2,5 @@
 
 public interface IADataReader
 {
-    Task<long> Read(TableDefinition tableDefinition,
-        string path);
+    Task<long> Read(string folder, TableDefinition tableDefinition);
 }
