@@ -27,18 +27,18 @@ public class DataFileReader : IDataFileReader, IDisposable
     public long RowCounter { get; }
     public int CurrentChar { get; private set; }
 
-    public string ReadColumn(string colName)
+    public string? ReadColumn(string colName)
     {
         _logger.Verbose("Reading value for row {RowCount} column '{ColumnName}'",
             RowCounter, colName);
         _columnHolder.Clear();
         while (CurrentChar >= 0 && CurrentChar != ColumnSeparator)
         {
+            _columnHolder.Append((char)CurrentChar);
             CurrentChar = _stream.Read();
-            _columnHolder.Append(CurrentChar);
         }
 
-        return _columnHolder.ToString();
+        return _columnHolder.Length == 0 ? null : _columnHolder.ToString();
     }
 
     public void ReadColumnSeparator(string colName)
