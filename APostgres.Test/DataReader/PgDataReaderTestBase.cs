@@ -4,7 +4,7 @@ public class PgDataReaderTestBase : PgTestBase
 {
     protected string TestTableName { get; }
     protected readonly TableDefinition TableDefinition;
-    protected readonly IADataReader TestDataReader;
+    protected readonly IADataReader ADataReader;
     protected FileHelper FileHelper;
     protected readonly IDataFileReaderFactory DataFileReaderFactory;
 
@@ -15,28 +15,30 @@ public class PgDataReaderTestBase : PgTestBase
         TableDefinition = MssTestData.GetEmpty(TestTableName);
         FileHelper = new FileHelper(TableDefinition.Header.Name, DbServer.SqlServer);
         DataFileReaderFactory = new DataFileReaderFactory(FileHelper.FileSystem, TestLogger);
-        TestDataReader = new PgDataReader(PgContext, DataFileReaderFactory, TestLogger);
+        ADataReader = new PgDataReader(PgContext, DataFileReaderFactory, TestLogger);
     }
 
-
-    protected async Task<T?> ArrangeAndAct<T>(
-        IColumn col, T? fileValue)
+    protected async Task<T> TestDataReader<T>(
+        IColumn col,
+        string fileData)
     {
-        // Arrange
-        TableDefinition.Columns.Add(col);
-        await PgDbHelper.Instance.DropTable(TestTableName);
-        await PgDbHelper.Instance.CreateTable(TableDefinition);
-
-        // Act
         try
         {
-            await TestDataReader.Read(FileHelper.DataFolder, TableDefinition);
+            TableDefinition.Columns.Add(col);
+            await PgDbHelper.Instance.DropTable(TestTableName);
+            await PgDbHelper.Instance.CreateTable(TableDefinition);
+            FileHelper.CreateDataFile(fileData);
+
+            // Act
+            await ADataReader.Read(FileHelper.DataFolder, TableDefinition);
+
+            // Assert
+            return await PgDbHelper.Instance.SelectScalar<T>(
+                TestTableName, col.Name);
         }
         finally
         {
             await PgDbHelper.Instance.DropTable(TestTableName);
         }
-
-        return default;
     }
 }

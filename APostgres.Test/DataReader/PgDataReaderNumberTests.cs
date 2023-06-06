@@ -19,19 +19,10 @@ public class PgDataReaderNumberTests : PgDataReaderTestBase, IAsyncLifetime
     [Fact]
     public async Task TestBigint()
     {
-        // Arrange
         var col = new PostgresBigInt(1, ColName, false);
-        TableDefinition.Columns.Add(col);
-        await PgDbHelper.Instance.DropTable(TestTableName);
-        await PgDbHelper.Instance.CreateTable(TableDefinition);
-        FileHelper.CreateDataFile(AllTypes.SampleValues.BigInt + ",");
+        var colValue = await TestDataReader<long>(
+            col, AllTypes.SampleValues.BigInt + ",");
 
-        // Act
-        await TestDataReader.Read(FileHelper.DataFolder, TableDefinition);
-
-        // Assert
-        var colValue = await PgDbHelper.Instance.SelectScalar<long>(
-            TestTableName, ColName);
         colValue.Should().Be(AllTypes.SampleValues.BigInt);
     }
 
@@ -40,17 +31,9 @@ public class PgDataReaderNumberTests : PgDataReaderTestBase, IAsyncLifetime
     {
         // Arrange
         var col = new PostgresInt(1, ColName, false);
-        TableDefinition.Columns.Add(col);
-        await PgDbHelper.Instance.DropTable(TestTableName);
-        await PgDbHelper.Instance.CreateTable(TableDefinition);
-        FileHelper.CreateDataFile(AllTypes.SampleValues.Int + ",");
+        var colValue = await TestDataReader<int>(
+            col, AllTypes.SampleValues.Int + ",");
 
-        // Act
-        await TestDataReader.Read(FileHelper.DataFolder, TableDefinition);
-
-        // Assert
-        var colValue = await PgDbHelper.Instance.SelectScalar<int>(
-            TestTableName, ColName);
         colValue.Should().Be(AllTypes.SampleValues.Int);
     }
 
