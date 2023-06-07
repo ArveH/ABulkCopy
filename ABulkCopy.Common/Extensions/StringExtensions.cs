@@ -1,10 +1,13 @@
-﻿namespace ABulkCopy.Common.Extensions;
+﻿using System.Numerics;
+
+namespace ABulkCopy.Common.Extensions;
 
 public static class StringExtensions
 {
-    public static string Plural(this string str, int cnt)
+    public static string Plural<T>(this string str, T cnt)
+        where T : INumber<T>
     {
-        return str + (cnt > 1 ? str.EndsWith("x") ? "es" : "s" : "");
+        return str + (cnt != T.CreateChecked(1) ? str.EndsWith("x") ? "es" : "s" : "");
     }
 
     public static bool IsRaw(this string str)
