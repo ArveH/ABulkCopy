@@ -110,6 +110,21 @@ public class DataFileReaderTests : CommonTestBase
         stringVal.Should().Be(testValue);
     }
 
+    [Fact]
+    public void TestReadOneRow_When_CharWithUnicode()
+    {
+        var testValue = "AﯵChar";
+        // Arrange
+        _tableDefinition.Columns.Add(new PostgresChar(1, ColName, false, 10, "en_ci_ai"));
+        var dataFileReader = Arrange($"\"{testValue}\",");
+
+        // Act
+        var stringVal = dataFileReader.ReadColumn(ColName);
+
+        // Assert
+        stringVal.Should().Be(testValue);
+    }
+
     private IDataFileReader Arrange(string row1, string? row2=null)
     {
         _fileHelper.CreateDataFile(row1, row2);
