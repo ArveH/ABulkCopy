@@ -14,11 +14,11 @@ public class PostgresReal : DefaultColumn
 
     public override object ToInternalType(string value)
     {
-        return double.Parse(value, CultureInfo.InvariantCulture);
+        return float.Parse(value, CultureInfo.InvariantCulture);
     }
 
     public override Type GetDotNetType()
     {
-        return typeof(double);
+        return typeof(float);
     }
 }

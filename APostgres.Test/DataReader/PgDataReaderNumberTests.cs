@@ -1,19 +1,12 @@
 ﻿namespace APostgres.Test.DataReader;
 
-public class PgDataReaderNumberTests : PgDataReaderTestBase, IAsyncLifetime
+public class PgDataReaderNumberTests : PgDataReaderTestBase
 {
     private const string ColName = "Col1";
 
     public PgDataReaderNumberTests(ITestOutputHelper output)
-        : base(output, nameof(PgDataReaderNumberTests))
+        : base(output)
     {
-    }
-
-    public Task InitializeAsync() => Task.CompletedTask;
-
-    Task IAsyncLifetime.DisposeAsync()
-    {
-        return PgDbHelper.Instance.DropTable(TestTableName);
     }
 
     [Fact]
@@ -21,7 +14,7 @@ public class PgDataReaderNumberTests : PgDataReaderTestBase, IAsyncLifetime
     {
         var col = new PostgresBigInt(1, ColName, false);
         var colValue = await TestDataReader<long>(
-            col, AllTypes.SampleValues.BigInt + ",");
+            GetName(), col, AllTypes.SampleValues.BigInt + ",");
 
         colValue.Should().Be(AllTypes.SampleValues.BigInt);
     }
@@ -32,7 +25,7 @@ public class PgDataReaderNumberTests : PgDataReaderTestBase, IAsyncLifetime
         // Arrange
         var col = new PostgresInt(1, ColName, false);
         var colValue = await TestDataReader<int>(
-            col, AllTypes.SampleValues.Int + ",");
+            GetName(), col, AllTypes.SampleValues.Int + ",");
 
         colValue.Should().Be(AllTypes.SampleValues.Int);
     }
@@ -43,7 +36,7 @@ public class PgDataReaderNumberTests : PgDataReaderTestBase, IAsyncLifetime
         // Arrange
         var col = new PostgresSmallInt(1, ColName, false);
         var colValue = await TestDataReader<int>(
-            col, AllTypes.SampleValues.SmallInt + ",");
+            GetName(), col, AllTypes.SampleValues.SmallInt + ",");
 
         colValue.Should().Be(AllTypes.SampleValues.SmallInt);
     }
@@ -54,7 +47,7 @@ public class PgDataReaderNumberTests : PgDataReaderTestBase, IAsyncLifetime
         // Arrange
         var col = new PostgresBoolean(1, ColName, false);
         var colValue = await TestDataReader<bool>(
-            col, "1,");
+            GetName(), col, "1,");
 
         colValue.Should().BeTrue();
     }
@@ -65,7 +58,7 @@ public class PgDataReaderNumberTests : PgDataReaderTestBase, IAsyncLifetime
         // Arrange
         var col = new PostgresBoolean(1, ColName, false);
         var colValue = await TestDataReader<bool>(
-            col, "0,");
+            GetName(), col, "0,");
 
         colValue.Should().BeFalse();
     }
@@ -76,7 +69,7 @@ public class PgDataReaderNumberTests : PgDataReaderTestBase, IAsyncLifetime
         // Arrange
         var col = new PostgresBoolean(1, ColName, false);
         var colValue = await TestDataReader<bool>(
-            col, "true,");
+            GetName(), col, "true,");
 
         colValue.Should().BeTrue();
     }
@@ -87,7 +80,7 @@ public class PgDataReaderNumberTests : PgDataReaderTestBase, IAsyncLifetime
         // Arrange
         var col = new PostgresBoolean(1, ColName, false);
         var colValue = await TestDataReader<bool>(
-            col, "false,");
+            GetName(), col, "false,");
 
         colValue.Should().BeFalse();
     }
@@ -99,7 +92,7 @@ public class PgDataReaderNumberTests : PgDataReaderTestBase, IAsyncLifetime
         var testVal = 12345678901234567890.123456m;
         var col = new PostgresDecimal(1, ColName, false, 32, 6);
         var colValue = await TestDataReader<decimal>(
-            col, testVal + ",");
+            GetName(), col, testVal + ",");
 
         colValue.Should().Be(testVal);
     }
@@ -111,7 +104,7 @@ public class PgDataReaderNumberTests : PgDataReaderTestBase, IAsyncLifetime
         var testVal = 1234m;
         var col = new PostgresDecimal(1, ColName, false, 4);
         var colValue = await TestDataReader<decimal>(
-            col, testVal + ",");
+            GetName(), col, testVal + ",");
 
         colValue.Should().Be(testVal);
     }
@@ -123,7 +116,7 @@ public class PgDataReaderNumberTests : PgDataReaderTestBase, IAsyncLifetime
         var testVal = 12345678.123456d;
         var col = new PostgresDoublePrecision(1, ColName, false);
         var colValue = await TestDataReader<double>(
-            col, testVal + ",");
+            GetName(), col, testVal + ",");
 
         colValue.Should().Be(testVal);
     }
@@ -135,7 +128,7 @@ public class PgDataReaderNumberTests : PgDataReaderTestBase, IAsyncLifetime
         var testVal = 123.12m;
         var col = new PostgresMoney(1, ColName, false);
         var colValue = await TestDataReader<decimal>(
-            col, testVal + ",");
+            GetName(), col, testVal + ",");
 
         colValue.Should().Be(testVal);
     }
@@ -147,7 +140,7 @@ public class PgDataReaderNumberTests : PgDataReaderTestBase, IAsyncLifetime
         var testVal = 123.12f;
         var col = new PostgresReal(1, ColName, false);
         var colValue = await TestDataReader<float>(
-            col, testVal + ",");
+            GetName(), col, testVal + ",");
 
         colValue.Should().Be(testVal);
     }
