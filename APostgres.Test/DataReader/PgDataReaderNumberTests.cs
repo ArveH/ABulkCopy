@@ -49,7 +49,7 @@ public class PgDataReaderNumberTests : PgDataReaderTestBase, IAsyncLifetime
     }
 
     [Fact]
-    public async Task? TestBoolean_When_1()
+    public async Task TestBoolean_When_1()
     {
         // Arrange
         var col = new PostgresBoolean(1, ColName, false);
@@ -60,7 +60,7 @@ public class PgDataReaderNumberTests : PgDataReaderTestBase, IAsyncLifetime
     }
 
     [Fact]
-    public async Task? TestBoolean_When_0()
+    public async Task TestBoolean_When_0()
     {
         // Arrange
         var col = new PostgresBoolean(1, ColName, false);
@@ -71,7 +71,7 @@ public class PgDataReaderNumberTests : PgDataReaderTestBase, IAsyncLifetime
     }
 
     [Fact]
-    public async Task? TestBoolean_When_true()
+    public async Task TestBoolean_When_true()
     {
         // Arrange
         var col = new PostgresBoolean(1, ColName, false);
@@ -82,7 +82,7 @@ public class PgDataReaderNumberTests : PgDataReaderTestBase, IAsyncLifetime
     }
 
     [Fact]
-    public async Task? TestBoolean_When_false()
+    public async Task TestBoolean_When_false()
     {
         // Arrange
         var col = new PostgresBoolean(1, ColName, false);
@@ -93,7 +93,7 @@ public class PgDataReaderNumberTests : PgDataReaderTestBase, IAsyncLifetime
     }
 
     [Fact]
-    public async Task? TestLargeDecimal()
+    public async Task TestLargeDecimal()
     {
         // Arrange
         var testVal = 12345678901234567890.123456m;
@@ -105,7 +105,7 @@ public class PgDataReaderNumberTests : PgDataReaderTestBase, IAsyncLifetime
     }
 
     [Fact]
-    public async Task? TestSmallDecimal()
+    public async Task TestSmallDecimal()
     {
         // Arrange
         var testVal = 1234m;
@@ -117,7 +117,7 @@ public class PgDataReaderNumberTests : PgDataReaderTestBase, IAsyncLifetime
     }
 
     [Fact]
-    public async Task? TestDoublePrecision()
+    public async Task TestDoublePrecision()
     {
         // Arrange
         var testVal = 12345678.123456d;
@@ -129,7 +129,7 @@ public class PgDataReaderNumberTests : PgDataReaderTestBase, IAsyncLifetime
     }
 
     [Fact]
-    public async Task? TestMoney()
+    public async Task TestMoney()
     {
         // Arrange
         var testVal = 123.12m;
@@ -141,7 +141,7 @@ public class PgDataReaderNumberTests : PgDataReaderTestBase, IAsyncLifetime
     }
 
     [Fact]
-    public async Task? TestReal()
+    public async Task TestReal()
     {
         // Arrange
         var testVal = 123.12f;
