@@ -32,7 +32,7 @@ public class PgDataReader : IADataReader
 
         await writer.CompleteAsync().ConfigureAwait(false);
 
-        _logger.Information("Read {RowCount} rows for table '{TableName}' from '{Path}'",
+        _logger.Information($"Read {{RowCount}} {"row".Plural(counter)} for table '{{TableName}}' from '{{Path}}'",
             counter, tableDefinition.Header.Name, folder);
         return counter;
     }

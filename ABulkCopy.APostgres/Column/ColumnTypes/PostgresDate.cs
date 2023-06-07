@@ -5,9 +5,6 @@ public class PostgresDate : DefaultColumn
     public PostgresDate(int id, string name, bool isNullable)
         : base(id, PgTypes.Date, name, isNullable)
     {
-        Length = 0;
-        Scale = 0;
-        Precision = 0;
     }
 
     public override string ToString(object value)
@@ -17,7 +14,7 @@ public class PostgresDate : DefaultColumn
 
     public override object ToInternalType(string value)
     {
-        return DateTime.ParseExact(value, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+        return DateOnly.ParseExact(value, "yyyy-MM-dd", CultureInfo.InvariantCulture);
     }
 
     public override Type GetDotNetType()

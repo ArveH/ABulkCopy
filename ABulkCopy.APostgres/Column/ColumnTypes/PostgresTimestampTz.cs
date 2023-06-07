@@ -5,7 +5,6 @@ public class PostgresTimestampTz : DefaultColumn
     public PostgresTimestampTz(int id, string name, bool isNullable, int? precision=null)
         : base(id, PgTypes.TimestampTz, name, isNullable)
     {
-        Length = 0;
         Precision = precision is null or > 6 or < 0 ? 6 : precision;
     }
 

@@ -1,6 +1,7 @@
 // Global using directives
 
 global using ABulkCopy.APostgres;
+global using ABulkCopy.APostgres.Column.ColumnTypes;
 global using ABulkCopy.ASqlServer.Column.ColumnTypes;
 global using ABulkCopy.Common.Config;
 global using ABulkCopy.Common.Extensions;

@@ -34,7 +34,7 @@ public class PgDataReaderTestBase : PgTestBase
 
             // Assert
             return await PgDbHelper.Instance.SelectScalar<T>(
-                TestTableName, col.Name);
+                TestTableName, col);
         }
         finally
         {
