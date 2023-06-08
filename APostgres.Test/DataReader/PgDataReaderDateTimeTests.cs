@@ -22,6 +22,17 @@ public class PgDataReaderDateTimeTests : PgDataReaderTestBase
     }
 
     [Fact]
+    public async Task TestDate_When_Null()
+    {
+        // Arrange
+        var col = new PostgresDate(1, ColName, true);
+        var colValue = await TestDataReader<DateOnly?>(
+            GetName(), col, ",");
+
+        colValue.Should().BeNull();
+    }
+
+    [Fact]
     public async Task? TestTime_When_NoFractions()
     {
         // Arrange
@@ -58,6 +69,17 @@ public class PgDataReaderDateTimeTests : PgDataReaderTestBase
     }
 
     [Fact]
+    public async Task TestTime_When_Null()
+    {
+        // Arrange
+        var col = new PostgresTime(1, ColName, true);
+        var colValue = await TestDataReader<TimeOnly?>(
+            GetName(), col, ",");
+
+        colValue.Should().BeNull();
+    }
+
+    [Fact]
     public async Task? TestTimestamp_When_NoFractions()
     {
         // Arrange
@@ -79,6 +101,17 @@ public class PgDataReaderDateTimeTests : PgDataReaderTestBase
             GetName(), col, "2023-06-23T11:12:13.456789,");
 
         colValue.Should().Be(testVal);
+    }
+
+    [Fact]
+    public async Task TestTimestamp_When_Null()
+    {
+        // Arrange
+        var col = new PostgresTimestamp(1, ColName, true);
+        var colValue = await TestDataReader<DateTime?>(
+            GetName(), col, ",");
+
+        colValue.Should().BeNull();
     }
 
     [Fact]
@@ -105,4 +138,14 @@ public class PgDataReaderDateTimeTests : PgDataReaderTestBase
             new DateTimeOffset(2023, 6, 23, 8, 10, 11, 456, 789, TimeSpan.FromMinutes(90)));
     }
 
+    [Fact]
+    public async Task TestTimestampTz_When_Null()
+    {
+        // Arrange
+        var col = new PostgresTimestampTz(1, ColName, true);
+        var colValue = await TestDataReader<DateTimeOffset?>(
+            GetName(), col, ",");
+
+        colValue.Should().BeNull();
+    }
 }

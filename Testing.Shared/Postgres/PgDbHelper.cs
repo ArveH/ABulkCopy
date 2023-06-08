@@ -84,12 +84,14 @@ public class PgDbHelper
         await ExecuteNonQuery(sqlString);
     }
 
-    public async Task<T> SelectScalar<T>(string tableName, IColumn col)
+    public async Task<T?> SelectScalar<T>(string tableName, IColumn col)
     {
         var sqlString = $"select \"{col.Name}\" from \"{tableName}\";";
         await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
         var reader = await cmd.ExecuteReaderAsync();
         if (!await reader.ReadAsync()) throw new SqlNullValueException();
+
+        if (reader.IsDBNull(0)) return default(T);
 
         return reader.GetFieldValue<T>(0);
     }

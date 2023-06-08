@@ -10,7 +10,7 @@ public class PgDataReaderTestBase : PgTestBase
     {
     }
 
-    protected async Task<T> TestDataReader<T>(
+    protected async Task<T?> TestDataReader<T>(
         string tableName,
         IColumn col,
         string fileData)

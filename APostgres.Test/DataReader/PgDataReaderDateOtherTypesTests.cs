@@ -19,4 +19,15 @@ public class PgDataReaderDateOtherTypesTests : PgDataReaderTestBase
 
         colValue.Should().Be(new Guid("8e98618c-6a78-4fa2-9c0e-b6bb2571af72"));
     }
+
+    [Fact]
+    public async Task TestUuid_When_Null()
+    {
+        // Arrange
+        var col = new PostgresUuid(1, ColName, true);
+        var colValue = await TestDataReader<Guid?>(
+            GetName(), col, ",");
+
+        colValue.Should().BeNull();
+    }
 }

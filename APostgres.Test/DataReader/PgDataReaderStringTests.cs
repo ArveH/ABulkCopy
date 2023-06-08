@@ -22,6 +22,17 @@ public class PgDataReaderStringTests : PgDataReaderTestBase
     }
 
     [Fact]
+    public async Task TestChar_When_Null()
+    {
+        // Arrange
+        var col = new PostgresChar(1, ColName, true, 10);
+        var colValue = await TestDataReader<string?>(
+            GetName(), col, ",");
+
+        colValue.Should().BeNull();
+    }
+
+    [Fact]
     public async Task TestVarChar()
     {
         // Arrange
@@ -69,4 +80,14 @@ public class PgDataReaderStringTests : PgDataReaderTestBase
         colValue.Should().Be(testVal);
     }
 
+    [Fact]
+    public async Task TestVarChar_When_Null()
+    {
+        // Arrange
+        var col = new PostgresVarChar(1, ColName, true, 10);
+        var colValue = await TestDataReader<string?>(
+            GetName(), col, ",");
+
+        colValue.Should().BeNull();
+    }
 }
