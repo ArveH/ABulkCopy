@@ -5,14 +5,12 @@ public class PostgresTime : DefaultColumn
     public PostgresTime(int id, string name, bool isNullable, int? precision = 6)
         : base(id, PgTypes.Time, name, isNullable)
     {
-        Length = 0;
-        Scale = 0;
         Precision = precision is null or > 6 or < 0 ? 6 : precision;
     }
 
     public override string GetTypeClause()
     {
-        return Scale == 6 ? $"{Type}" : $"{Type}({Scale})";
+        return Scale == 6 ? $"{Type}" : $"{Type}({Precision})";
     }
 
     public override string ToString(object value)
@@ -22,7 +20,7 @@ public class PostgresTime : DefaultColumn
 
     public override object ToInternalType(string value)
     {
-        return TimeSpan.ParseExact(value, "HH:mm:ss.ffffff", CultureInfo.InvariantCulture);
+        return TimeOnly.Parse(value, CultureInfo.InvariantCulture);
     }
 
     public override Type GetDotNetType()

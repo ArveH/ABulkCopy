@@ -20,7 +20,7 @@ public class PostgresTimestamp : DefaultColumn
 
     public override object ToInternalType(string value)
     {
-        return DateTime.ParseExact(value, "O", CultureInfo.InvariantCulture);
+        return DateTime.Parse(value, CultureInfo.InvariantCulture);
     }
 
     public override Type GetDotNetType()

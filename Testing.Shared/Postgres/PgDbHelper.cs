@@ -91,11 +91,7 @@ public class PgDbHelper
         var reader = await cmd.ExecuteReaderAsync();
         if (!await reader.ReadAsync()) throw new SqlNullValueException();
 
-        return col.Type switch
-        {
-            PgTypes.Date => (T)(object)DateOnly.FromDateTime(reader.GetDateTime(0)),
-            _ => (T)Convert.ChangeType(reader[0], col.GetDotNetType())
-        };
+        return reader.GetFieldValue<T>(0);
     }
 
     public async Task ExecuteNonQuery(string sqlString)
