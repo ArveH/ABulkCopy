@@ -23,7 +23,7 @@ public class PgContext : IPgContext
             if (_dataSource is null)
             {
                 var dataSourceBuilder = new NpgsqlDataSourceBuilder(ConnectionString);
-                dataSourceBuilder.UseLoggerFactory(_loggerFactory);
+                dataSourceBuilder.UseLoggerFactory(_loggerFactory).EnableParameterLogging();
                 _dataSource = dataSourceBuilder.Build();
             }
             return _dataSource;
