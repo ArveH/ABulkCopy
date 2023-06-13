@@ -127,7 +127,12 @@ public class DataFileReaderTests : CommonTestBase
 
     private IDataFileReader Arrange(string row1, string? row2=null)
     {
-        _fileHelper.CreateDataFile(row1, row2);
+        var rows = new List<string> { row1 };
+        if (row2 != null)
+        {
+            rows.Add(row2);
+        }
+        _fileHelper.CreateDataFile(rows);
         var dataFileReader = _dfrFactory.Create(
             _fileHelper.DataFolder, _tableDefinition);
         return dataFileReader;
