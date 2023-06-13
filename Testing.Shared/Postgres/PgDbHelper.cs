@@ -96,6 +96,20 @@ public class PgDbHelper
         return reader.GetFieldValue<T>(0);
     }
 
+    public async Task<List<T?>> SelectColumn<T>(string tableName, string colName)
+    {
+        var sqlString = $"select \"{colName}\" from \"{tableName}\";";
+        await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
+        var reader = await cmd.ExecuteReaderAsync();
+        var result = new List<T?>();
+        while (await reader.ReadAsync())
+        {
+            result.Add(reader.IsDBNull(0) ? default : reader.GetFieldValue<T>(0));
+        }
+
+        return result;
+    }
+
     public async Task ExecuteNonQuery(string sqlString)
     {
         await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);

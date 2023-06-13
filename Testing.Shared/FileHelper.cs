@@ -33,6 +33,14 @@ public class FileHelper
             fileData);
     }
 
+    public void CreateDataFile(List<string> rows)
+    {
+        var fileData = new MockFileData(string.Join(Environment.NewLine, rows), Encoding.UTF8);
+        FileSystem.AddFile(
+            Path.Combine(DataFolder, $"{_tableName}{_dbServer.DataSuffix()}"),
+            fileData);
+    }
+
     public void CreateDataFile(string row1, string? row2=null)
     {
         var fileData = new MockFileData(row1, Encoding.UTF8);

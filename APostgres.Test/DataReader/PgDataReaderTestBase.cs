@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Runtime.CompilerServices;
 
 namespace APostgres.Test.DataReader;
 
@@ -17,17 +16,9 @@ public class PgDataReaderTestBase : PgTestBase
     {
         try
         {
-            var tableDefinition = MssTestData.GetEmpty(tableName);
-            tableDefinition.Columns.Add(col);
-            var fileHelper = new FileHelper(tableName, DbServer.SqlServer);
-            var dataFileReaderFactory = new DataFileReaderFactory(fileHelper.FileSystem, TestLogger);
-            var dataReader = new PgDataReader(PgContext, dataFileReaderFactory, TestLogger);
-            await PgDbHelper.Instance.DropTable(tableName);
-            await PgDbHelper.Instance.CreateTable(tableDefinition);
-            fileHelper.CreateDataFile(fileData);
-
-            // Act
-            await dataReader.Read(fileHelper.DataFolder, tableDefinition);
+            // Arrange
+            await CreateTableAndReadData(
+                tableName, new() { col }, new() { fileData });
 
             // Assert
             return await PgDbHelper.Instance.SelectScalar<T>(
@@ -37,6 +28,22 @@ public class PgDataReaderTestBase : PgTestBase
         {
             await PgDbHelper.Instance.DropTable(tableName);
         }
+    }
+
+    protected async Task CreateTableAndReadData(
+        string tableName,
+        List<IColumn> cols,
+        List<string> fileData)
+    {
+        var tableDefinition = MssTestData.GetEmpty(tableName);
+        cols.ForEach(col => tableDefinition.Columns.Add(col));
+        var fileHelper = new FileHelper(tableName, DbServer.SqlServer);
+        var dataFileReaderFactory = new DataFileReaderFactory(fileHelper.FileSystem, TestLogger);
+        await PgDbHelper.Instance.DropTable(tableName);
+        await PgDbHelper.Instance.CreateTable(tableDefinition);
+        fileHelper.CreateDataFile(fileData);
+        var dataReader = new PgDataReader(PgContext, dataFileReaderFactory, TestLogger);
+        await dataReader.Read(fileHelper.DataFolder, tableDefinition);
     }
 
     //[MethodImpl(MethodImplOptions.NoInlining)]

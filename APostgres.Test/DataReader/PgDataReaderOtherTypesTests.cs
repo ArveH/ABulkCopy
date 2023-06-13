@@ -1,10 +1,10 @@
 ﻿namespace APostgres.Test.DataReader;
 
-public class PgDataReaderDateOtherTypesTests : PgDataReaderTestBase
+public class PgDataReaderOtherTypesTests : PgDataReaderTestBase
 {
     private const string ColName = "Col1";
 
-    public PgDataReaderDateOtherTypesTests(ITestOutputHelper output)
+    public PgDataReaderOtherTypesTests(ITestOutputHelper output)
         : base(output)
     {
     }

@@ -27,8 +27,12 @@ public class PgDataReader : IADataReader
         
         var fileReader = _dataFileReaderFactory.Create(folder, tableDefinition);
         var counter = 0L;
-        await ReadRow(fileReader, writer, tableDefinition.Columns).ConfigureAwait(false);
-        counter++;
+        while (true)
+        {
+            await ReadRow(fileReader, writer, tableDefinition.Columns).ConfigureAwait(false);
+            counter++;
+            if (fileReader.IsEndOfFile) break;
+        }
 
         await writer.CompleteAsync().ConfigureAwait(false);
 
