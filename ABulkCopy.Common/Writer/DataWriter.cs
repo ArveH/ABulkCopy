@@ -69,7 +69,7 @@ public class DataWriter : IDataWriter
         {
             if (tableReader.IsNull(i))
             {
-                textWriter.Write("NULL,");
+                textWriter.Write(",");
                 continue;
             }
 

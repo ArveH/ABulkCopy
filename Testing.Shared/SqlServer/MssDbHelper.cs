@@ -55,7 +55,7 @@ public class MssDbHelper
         await using var sqlCommand = new SqlCommand(sqlString, sqlConnection);
         if (dbType == null)
         {
-            sqlCommand.Parameters.AddWithValue("@Value", value);
+            sqlCommand.Parameters.AddWithValue("@Value", value ?? DBNull.Value);
         }
         else
         {
@@ -63,7 +63,7 @@ public class MssDbHelper
             // otherwise we get the wrong SqlParameter constructor
             // and dbType is treated as the value instead of the SqlDbType
             var sqlParameter = new SqlParameter("@Value", (SqlDbType)dbType);
-            sqlParameter.Value = value;
+            sqlParameter.Value = value ?? DBNull.Value;
             sqlCommand.Parameters.Add(sqlParameter);
         }
         await sqlCommand.ExecuteNonQueryAsync();
