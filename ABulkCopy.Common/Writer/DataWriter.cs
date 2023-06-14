@@ -21,52 +21,98 @@ public class DataWriter : IDataWriter
         TableDefinition tableDefinition,
         string path)
     {
+        AddDirectoriesForBlobs(tableDefinition, path);
         var fileFullPath = Path.Combine(
             path, tableDefinition.Header.Name + tableDefinition.DbServer.DataSuffix());
-        await using var writeStream = _fileSystem.File.CreateText(fileFullPath);
+        await using var streamWriter = _fileSystem.File.CreateText(fileFullPath);
         await _tableReader.PrepareReader(tableDefinition);
         var rowCounter = 0;
         while (await _tableReader.Read())
         {
-            WriteRow(_tableReader, tableDefinition, writeStream);
-            writeStream.WriteLine();
+            WriteRow(_tableReader, tableDefinition, streamWriter, path, rowCounter);
+            streamWriter.WriteLine();
             rowCounter++;
         }
 
         return rowCounter;
     }
 
-    private void WriteRow(
-        ITableReader tableReader, 
-        TableDefinition tableDefinition, 
-        TextWriter dataWriter)
+    private void AddDirectoriesForBlobs(TableDefinition tableDefinition, string path)
+    {
+        if (!_fileSystem.Directory.Exists(path))
+        {
+            throw new InvalidOperationException($"Directory '{path}' does not exist");
+        }
+
+        foreach (var column in tableDefinition.Columns)
+        {
+            if (column.Type.IsRaw())
+            {
+                var blobPath = Path.Combine(path, tableDefinition.Header.Name, column.Name);
+                if (!_fileSystem.Directory.Exists(blobPath))
+                {
+                    _logger.Information("Creating directory '{blobPath}' for blob column '{columnName}'",
+                        blobPath, column.Name);
+                    _fileSystem.Directory.CreateDirectory(blobPath);
+                }
+            }
+        }
+    }
+
+    private void WriteRow(ITableReader tableReader,
+        TableDefinition tableDefinition,
+        TextWriter textWriter,
+        string path,
+        int rowCounter)
     {
         for (var i = 0; i < tableDefinition.Columns.Count; i++)
         {
             if (tableReader.IsNull(i))
             {
-                dataWriter.Write("NULL,");
+                textWriter.Write("NULL,");
                 continue;
             }
 
             if (tableDefinition.Columns[i].Type.IsRaw())
             {
+                var rawFileName = $"i{rowCounter:D15}.raw";
+                textWriter.Write(rawFileName);
                 WriteBlobColumn(
-                    tableDefinition.Header.Name,
-                    tableDefinition.Columns[i].Name);
+                    i,
+                    Path.Combine(
+                        path,
+                        tableDefinition.Header.Name,
+                        tableDefinition.Columns[i].Name,
+                        rawFileName)
+                    ,
+                    tableReader);
             }
             else
             {
-                dataWriter.Write(tableDefinition.Columns[i].ToString(tableReader.GetValue(i)!));
+                textWriter.Write(tableDefinition.Columns[i].ToString(tableReader.GetValue(i)!));
             }
-            dataWriter.Write(",");
+
+            textWriter.Write(",");
         }
     }
 
-    private void WriteBlobColumn(string tabName, string colName)
+    private const int RawBufferSize = 4096;
+
+    private void WriteBlobColumn(int colId, string fullPath, ITableReader tableReader)
     {
-        _logger.Error("Can't write blob column '{ColumnName}' for table '{TableName}'",
-            colName, tabName);
-        throw new NotImplementedException($"Can't write blob column '{colName}' for table '{tabName}'");
+        var buf = new byte[RawBufferSize];
+        using var writer = new BinaryWriter(_fileSystem.FileStream.New(fullPath, FileMode.Create, FileAccess.Write));
+        var startIndex = 0L;
+        var byteCount = tableReader.GetBytes(colId, startIndex, buf, RawBufferSize);
+        while (byteCount == RawBufferSize)
+        {
+            writer.Write(buf, 0, (int)byteCount);
+            writer.Flush();
+            startIndex += byteCount;
+            byteCount = tableReader.GetBytes(colId, startIndex, buf, RawBufferSize);
+        }
+
+        writer.Write(buf, 0, (int)byteCount);
+        writer.Flush();
     }
 }
