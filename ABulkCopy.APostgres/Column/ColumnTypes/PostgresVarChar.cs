@@ -14,6 +14,6 @@ public class PostgresVarChar : TemplateStrColumn
 
     public override string GetTypeClause()
     {
-        return Length > 10_485_760 ? Type : $"{Type}({Length})";
+        return Length is < 1 or > 10_485_760 ? Type : $"{Type}({Length})";
     }
 }
