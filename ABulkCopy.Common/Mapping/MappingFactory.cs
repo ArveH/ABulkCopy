@@ -7,6 +7,7 @@ public class MappingFactory : IMappingFactory
         return new Mapping(
             columns:new Dictionary<string, string>
             {
+                {MssTypes.Binary, PgTypes.ByteA},
                 {MssTypes.Bit, PgTypes.Boolean},
                 {MssTypes.DateTime, PgTypes.Timestamp},
                 {MssTypes.DateTime2, PgTypes.Timestamp},
@@ -16,7 +17,8 @@ public class MappingFactory : IMappingFactory
                 {MssTypes.NVarChar, PgTypes.VarChar},
                 {MssTypes.SmallDateTime, PgTypes.Timestamp},
                 {MssTypes.TinyInt, PgTypes.SmallInt},
-                {MssTypes.UniqueIdentifier, PgTypes.Uuid }
+                {MssTypes.UniqueIdentifier, PgTypes.Uuid },
+                {MssTypes.VarBinary, PgTypes.ByteA}
             })
         {
             Schemas =

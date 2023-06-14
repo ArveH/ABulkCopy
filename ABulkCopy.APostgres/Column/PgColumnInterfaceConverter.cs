@@ -1,6 +1,4 @@
-﻿using ABulkCopy.APostgres.Column.ColumnTypes;
-
-namespace ABulkCopy.APostgres.Column;
+﻿namespace ABulkCopy.APostgres.Column;
 
 public class PgColumnInterfaceConverter : JsonConverter<IColumn>
 {

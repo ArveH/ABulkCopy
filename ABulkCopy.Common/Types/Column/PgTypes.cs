@@ -4,6 +4,7 @@ public static class PgTypes
 {
     public const string BigInt = "bigint";
     public const string Boolean = "boolean";
+    public const string ByteA = "bytea";
     public const string Char = "char";
     public const string Character = "character";
     public const string CharacterVarying = "character varying";
@@ -26,6 +27,7 @@ public static class PgTypes
     {
         BigInt,
         Boolean,
+        ByteA,
         Char,
         Character,
         CharacterVarying,
