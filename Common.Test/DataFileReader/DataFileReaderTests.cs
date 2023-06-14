@@ -14,7 +14,7 @@ public class DataFileReaderTests : CommonTestBase
         : base(output)
     {
         _tableDefinition = MssTestData.GetEmpty(TestTableName);
-        _fileHelper = new FileHelper(TestTableName, DbServer.SqlServer);
+        _fileHelper = new FileHelper(DbServer.SqlServer);
         _dfrFactory = new DataFileReaderFactory(_fileHelper.FileSystem, TestLogger);
     }
 
@@ -132,7 +132,7 @@ public class DataFileReaderTests : CommonTestBase
         {
             rows.Add(row2);
         }
-        _fileHelper.CreateDataFile(rows);
+        _fileHelper.CreateDataFile(TestTableName, rows);
         var dataFileReader = _dfrFactory.Create(
             _fileHelper.DataFolder, _tableDefinition);
         return dataFileReader;

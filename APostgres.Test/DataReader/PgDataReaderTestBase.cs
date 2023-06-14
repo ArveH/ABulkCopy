@@ -4,6 +4,8 @@ namespace APostgres.Test.DataReader;
 
 public class PgDataReaderTestBase : PgTestBase
 {
+    protected readonly FileHelper FileHelper = new (DbServer.SqlServer);
+
     protected PgDataReaderTestBase(ITestOutputHelper output)
         : base(output)
     {
@@ -36,14 +38,13 @@ public class PgDataReaderTestBase : PgTestBase
         List<string> fileData)
     {
         var tableDefinition = MssTestData.GetEmpty(tableName);
-        cols.ForEach(col => tableDefinition.Columns.Add(col));
-        var fileHelper = new FileHelper(tableName, DbServer.SqlServer);
-        var dataFileReaderFactory = new DataFileReaderFactory(fileHelper.FileSystem, TestLogger);
+        cols.ForEach(tableDefinition.Columns.Add);
+        var dataFileReaderFactory = new DataFileReaderFactory(FileHelper.FileSystem, TestLogger);
         await PgDbHelper.Instance.DropTable(tableName);
         await PgDbHelper.Instance.CreateTable(tableDefinition);
-        fileHelper.CreateDataFile(fileData);
+        FileHelper.CreateDataFile(tableName, fileData);
         var dataReader = new PgDataReader(PgContext, dataFileReaderFactory, TestLogger);
-        await dataReader.Read(fileHelper.DataFolder, tableDefinition);
+        await dataReader.Read(FileHelper.DataFolder, tableDefinition);
     }
 
     //[MethodImpl(MethodImplOptions.NoInlining)]

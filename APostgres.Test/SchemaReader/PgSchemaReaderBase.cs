@@ -9,7 +9,7 @@ public class PgSchemaReaderBase : PgTestBase
     public PgSchemaReaderBase(ITestOutputHelper output)
         : base(output)
     {
-        FileHelper = new FileHelper(TableName, DbServer.Postgres);
+        FileHelper = new FileHelper(DbServer.Postgres);
         var columnFactory = new PgColumnFactory();
         var mappingFactory = new MappingFactory();
         var typeConverter = new PgTypeMapper(columnFactory, mappingFactory);
@@ -18,7 +18,7 @@ public class PgSchemaReaderBase : PgTestBase
 
     protected async Task<IColumn> GetColFromTableDefinition(IColumn col)
     {
-        FileHelper.CreateSingleColMssSchemaFile(col);
+        FileHelper.CreateSingleColMssSchemaFile(TableName, col);
 
         var tableDefinition = await SchemaReader.GetTableDefinition(FileHelper.DataFolder, TableName);
 
