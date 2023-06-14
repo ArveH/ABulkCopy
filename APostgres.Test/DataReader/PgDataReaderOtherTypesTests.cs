@@ -30,4 +30,33 @@ public class PgDataReaderOtherTypesTests : PgDataReaderTestBase
 
         colValue.Should().BeNull();
     }
+
+    [Fact]
+    public async Task TestByteA()
+    {
+        // Arrange
+        var tableName = GetName();
+        var col = new PostgresByteA(1, ColName, true);
+        var blobFileName = $"i{0:D15}.raw";
+        var blobFilePath = Path.Combine(
+            FileHelper.DataFolder, tableName, ColName, blobFileName);
+        var fileData = new MockFileData(AllTypes.SampleValues.Binary5K);
+        FileHelper.FileSystem.AddFile(blobFileName, fileData);
+        
+        var colValue = await TestDataReader<byte[]?>(
+            tableName, col, blobFileName + ",");
+
+        colValue.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task TestByteA_When_Null()
+    {
+        // Arrange
+        var col = new PostgresByteA(1, ColName, true);
+        var colValue = await TestDataReader<byte[]?>(
+            GetName(), col, ",");
+
+        colValue.Should().BeNull();
+    }
 }
