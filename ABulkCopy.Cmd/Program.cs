@@ -12,6 +12,7 @@ internal class Program
         if (cmdParameters == null) return;
         ConfigureLogger(configuration, cmdParameters.LogFile);
         Log.Information("ABulkCopy.Cmd started.");
+        Console.WriteLine("ABulkCopy.Cmd started.");
 
         try
         {
@@ -28,12 +29,22 @@ internal class Program
                     DbContextFactory.GetContext(cmdParameters.ConnectionString));
                 var host = builder.Build();
                 var copyOut = host.Services.GetRequiredService<ICopyOut>();
+                if (DataFolder.CreateIfNotExists(cmdParameters.Folder) == CmdStatus.ShouldExit)
+                {
+                    Log.Information("Folder {Folder} didn't exist. ABulkCopy.Cmd finished.",
+                        cmdParameters.Folder);
+                    Console.WriteLine($"Folder {cmdParameters.Folder} didn't exist. ABulkCopy.Cmd finished.");
+                    return;
+                }
                 await copyOut.Run(cmdParameters.Folder, cmdParameters.SearchStr);
             }
             Log.Information("ABulkCopy.Cmd finished.");
+            Console.WriteLine("ABulkCopy.Cmd finished.");
         }
         catch (Exception ex)
         {
+            Console.Write("Host terminated unexpectedly: ");
+            Console.WriteLine(ex.FlattenMessages());
             Log.Fatal(ex, "Host terminated unexpectedly");
         }
         finally
@@ -99,6 +110,7 @@ internal class Program
         builder.Services.AddSingleton<ITableReaderFactory, TableReaderFactory>();
         builder.Services.AddSingleton<ISelectCreator, SelectCreator>();
         builder.Services.AddSingleton<ICopyOut, CopyOut>();
+        builder.Services.AddTransient<IDataFileReader, DataFileReader>();
         builder.Services.AddMssServices();
     }
 
