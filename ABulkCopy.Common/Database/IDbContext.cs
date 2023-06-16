@@ -3,5 +3,5 @@
 public interface IDbContext
 {
     string ConnectionString { get; }
-    DbServer DbServer{ get; }
+    Rdbms Rdbms{ get; }
 }

@@ -9,11 +9,11 @@ public class PgContext : IPgContext
     public PgContext(ILoggerFactory loggerFactory)
     {
         _loggerFactory = loggerFactory;
-        DbServer = DbServer.Postgres;
+        Rdbms = Rdbms.Postgres;
     }
 
     public required string ConnectionString { get; init; }
-    public DbServer DbServer { get; }
+    public Rdbms Rdbms { get; }
 
     private NpgsqlDataSource? _dataSource;
     public NpgsqlDataSource DataSource

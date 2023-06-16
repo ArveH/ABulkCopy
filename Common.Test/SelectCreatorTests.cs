@@ -42,7 +42,7 @@ public class SelectCreatorTests
 
     private string TestCreate(int colCount)
     {
-        var tableDefinition = new TableDefinition(DbServer.SqlServer)
+        var tableDefinition = new TableDefinition(Rdbms.SqlServer)
         {
             Header = new TableHeader
             {

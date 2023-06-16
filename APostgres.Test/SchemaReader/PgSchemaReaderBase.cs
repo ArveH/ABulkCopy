@@ -9,7 +9,7 @@ public class PgSchemaReaderBase : PgTestBase
     public PgSchemaReaderBase(ITestOutputHelper output)
         : base(output)
     {
-        FileHelper = new FileHelper(DbServer.Postgres);
+        FileHelper = new FileHelper(Rdbms.Postgres);
         var columnFactory = new PgColumnFactory();
         var mappingFactory = new MappingFactory();
         var typeConverter = new PgTypeMapper(columnFactory, mappingFactory);

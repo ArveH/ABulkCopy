@@ -1,6 +1,6 @@
 ﻿namespace ABulkCopy.Common.Types;
 
-public enum DbServer
+public enum Rdbms
 {
     SqlServer = 1,
     Postgres = 2

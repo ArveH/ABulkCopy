@@ -2,5 +2,5 @@
 
 internal interface ICopyIn
 {
-    Task Run(string folder, DbServer contextDbServer);
+    Task Run(string folder, Rdbms contextRdbms);
 }

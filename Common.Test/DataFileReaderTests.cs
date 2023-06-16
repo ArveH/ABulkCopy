@@ -15,7 +15,7 @@ public class DataFileReaderTests : CommonTestBase
         : base(output)
     {
         _tableDefinition = MssTestData.GetEmpty(TestTableName);
-        _fileHelper = new FileHelper(DbServer.SqlServer);
+        _fileHelper = new FileHelper(Rdbms.SqlServer);
     }
 
     [Fact]
@@ -136,7 +136,7 @@ public class DataFileReaderTests : CommonTestBase
         var dataFileReader = new DataFileReader(_fileHelper.FileSystem, TestLogger);
         var path = Path.Combine(
             _fileHelper.DataFolder,
-            $"{TestTableName}{DbServer.SqlServer.DataSuffix()}");
+            $"{TestTableName}{Rdbms.SqlServer.DataSuffix()}");
         dataFileReader.Open(path);
         return dataFileReader;
     }

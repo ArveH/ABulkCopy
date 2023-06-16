@@ -18,7 +18,7 @@ public class DesignTimeContextFactory: IDesignTimeDbContextFactory<IdsTestingCon
         var connectionString = configuration.GetConnectionString(Constants.Config.DbKey);
         ArgumentException.ThrowIfNullOrEmpty(nameof(connectionString));
 
-        if (GetDbServer(connectionString!) == DbServer.SqlServer)
+        if (GetDbServer(connectionString!) == Rdbms.SqlServer)
         {
             var builder = new DbContextOptionsBuilder<IdsTestingContext>();
             builder
@@ -50,7 +50,7 @@ public class DesignTimeContextFactory: IDesignTimeDbContextFactory<IdsTestingCon
         }
     }
 
-    private DbServer GetDbServer(string connectionString)
+    private Rdbms GetDbServer(string connectionString)
     {
         var canBePostgres = false;
         var canBeSqlServer = false;
@@ -83,6 +83,6 @@ public class DesignTimeContextFactory: IDesignTimeDbContextFactory<IdsTestingCon
             throw new ArgumentException("Connection string can't be parsed");
         }
 
-        return canBePostgres ? DbServer.Postgres : DbServer.SqlServer;
+        return canBePostgres ? Rdbms.Postgres : Rdbms.SqlServer;
     }
 }

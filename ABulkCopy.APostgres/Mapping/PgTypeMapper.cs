@@ -15,14 +15,14 @@ public class PgTypeMapper : ITypeConverter
 
     public TableDefinition Convert(TableDefinition sourceDefinition)
     {
-        if (sourceDefinition.DbServer != DbServer.SqlServer)
+        if (sourceDefinition.Rdbms != Rdbms.SqlServer)
         {
             throw new ArgumentException("Only SQL Server schema files can be converted to Postgres");
         }
 
         var mappings = _mappingFactory.GetDefaultMssToPgMappings();
 
-        var tableDefinition = new TableDefinition(DbServer.Postgres)
+        var tableDefinition = new TableDefinition(Rdbms.Postgres)
         {
             Header = new TableHeader
             {

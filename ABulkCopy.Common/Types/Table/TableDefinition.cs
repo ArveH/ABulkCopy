@@ -2,11 +2,11 @@
 
 public class TableDefinition
 {
-    public TableDefinition(DbServer dbServer)
+    public TableDefinition(Rdbms rdbms)
     {
-        DbServer = dbServer;
+        Rdbms = rdbms;
     }
-    public DbServer DbServer { get; }
+    public Rdbms Rdbms { get; }
     public required TableHeader Header { get; set; }
 
     public List<IColumn> Columns { get; set; } = new();

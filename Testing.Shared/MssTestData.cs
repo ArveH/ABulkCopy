@@ -4,7 +4,7 @@ public static class MssTestData
 {
     public static TableDefinition GetEmpty(string name)
     {
-        return new TableDefinition (DbServer.SqlServer)
+        return new TableDefinition (Rdbms.SqlServer)
         {
             Header = new TableHeader
             {
@@ -18,7 +18,7 @@ public static class MssTestData
 
     public static TableDefinition GetTableDefinitionAllTypes()
     {
-        return new TableDefinition(DbServer.SqlServer)
+        return new TableDefinition(Rdbms.SqlServer)
         {
             Header = new TableHeader
             {
@@ -62,7 +62,7 @@ public static class MssTestData
 
     public static TableDefinition GetTableDefaults()
     {
-        return new TableDefinition(DbServer.SqlServer)
+        return new TableDefinition(Rdbms.SqlServer)
         {
             Header = new TableHeader
             {

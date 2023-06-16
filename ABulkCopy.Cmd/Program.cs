@@ -21,7 +21,7 @@ internal class Program
             if (cmdParameters.Direction == CopyDirection.In)
             {
                 var copyIn = host.Services.GetRequiredService<ICopyIn>();
-                await copyIn.Run(cmdParameters.Folder, context.DbServer);
+                await copyIn.Run(cmdParameters.Folder, context.Rdbms);
             }
             else
             {

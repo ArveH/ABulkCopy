@@ -19,9 +19,9 @@ public class CopyIn : ICopyIn
         _logger = logger;
     }
 
-    public async Task Run(string folder, DbServer dbServer)
+    public async Task Run(string folder, Rdbms rdbms)
     {
-        var schemaFiles = _fileSystem.Directory.GetFiles(folder, $"*.{dbServer.SchemaSuffix()}").ToList();
+        var schemaFiles = _fileSystem.Directory.GetFiles(folder, $"*.{rdbms.SchemaSuffix()}").ToList();
         _logger.Information($"Creating and filling {{TableCount}} {"table".Plural(schemaFiles.Count)}",
             schemaFiles.Count);
         Console.WriteLine($"Creating and filling {schemaFiles.Count} {"table".Plural(schemaFiles.Count)}.");
