@@ -1,5 +1,6 @@
 ﻿using ABulkCopy.Cmd.Config;
 using ABulkCopy.Cmd.Factories;
+using ABulkCopy.Common.Mapping;
 
 namespace ABulkCopy.Cmd;
 
@@ -17,17 +18,17 @@ internal class Program
         try
         {
             var builder = CreateAppBuilder(configuration);
+            var context = DbContextFactory.GetContext(cmdParameters.ConnectionString);
+            builder.Services.AddSingleton(context);
+            var host = builder.Build();
 
             if (cmdParameters.Direction == CopyDirection.In)
             {
-                Log.Information("ABulkCopy.Cmd started. Copy direction: In");
-                throw new NotImplementedException("Copy In not implemented");
+                var copyIn = host.Services.GetRequiredService<ICopyIn>();
+                await copyIn.Run(cmdParameters.Folder, context.DbServer);
             }
             else
             {
-                builder.Services.AddSingleton(
-                    DbContextFactory.GetContext(cmdParameters.ConnectionString));
-                var host = builder.Build();
                 var copyOut = host.Services.GetRequiredService<ICopyOut>();
                 if (DataFolder.CreateIfNotExists(cmdParameters.Folder) == CmdStatus.ShouldExit)
                 {
@@ -110,8 +111,11 @@ internal class Program
         builder.Services.AddSingleton<ITableReaderFactory, TableReaderFactory>();
         builder.Services.AddSingleton<ISelectCreator, SelectCreator>();
         builder.Services.AddSingleton<ICopyOut, CopyOut>();
+        builder.Services.AddSingleton<ICopyIn, CopyIn>();
         builder.Services.AddTransient<IDataFileReader, DataFileReader>();
+        builder.Services.AddSingleton<IMappingFactory, MappingFactory>();
         builder.Services.AddMssServices();
+        builder.Services.AddPgServices();
     }
 
     private static HostApplicationBuilder CreateAppBuilder(IConfigurationRoot configuration)

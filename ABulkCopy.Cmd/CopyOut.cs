@@ -1,6 +1,4 @@
-﻿using ABulkCopy.Common.Extensions;
-
-namespace ABulkCopy.Cmd;
+﻿namespace ABulkCopy.Cmd;
 
 public class CopyOut : ICopyOut
 {

@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ABulkCopy.APostgres\ABulkCopy.APostgres.csproj" />
     <ProjectReference Include="..\ABulkCopy.ASqlServer\ABulkCopy.ASqlServer.csproj" />
     <ProjectReference Include="..\ABulkCopy.Common\ABulkCopy.Common.csproj" />
   </ItemGroup>

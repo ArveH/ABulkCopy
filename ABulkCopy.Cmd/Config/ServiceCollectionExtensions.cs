@@ -11,4 +11,14 @@ public static class ServiceCollectionExtensions
         
         return services;
     }
+
+    public static IServiceCollection AddPgServices(this IServiceCollection services)
+    {
+        services.AddSingleton<IADataReader, PgDataReader>();
+        services.AddSingleton<ISchemaReader, PgSchemaReader>();
+        services.AddSingleton<ITypeConverter, PgTypeMapper>();
+        services.AddSingleton<IPgColumnFactory, PgColumnFactory>();
+
+        return services;
+    }
 }
