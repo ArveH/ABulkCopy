@@ -2,27 +2,38 @@
 
 public class DataFileReader : IDataFileReader, IDisposable
 {
+    private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
-    private readonly StreamReader _stream;
+    private StreamReader? _stream;
+    private StreamReader InternalStream
+    {
+        get => _stream ?? throw new InvalidOperationException();
+        set => _stream = value;
+    }
 
     private const int QuoteChar = '"';
     private const int ColumnSeparator = ',';
     private readonly StringBuilder _columnHolder = new(10_485_760);
 
     public DataFileReader(
-        string path,
         IFileSystem fileSystem,
         ILogger logger)
     {
+        _fileSystem = fileSystem;
+        _stream = null;
         _logger = logger.ForContext<DataFileReader>();
-        var fileStream = fileSystem.FileStream.New(path, FileMode.Open);
-        _stream = new StreamReader(fileStream, new UTF8Encoding(false));
-        ReadChar();
-        RowCounter = 0;
     }
 
     public long RowCounter { get; private set; }
     public int CurrentChar { get; private set; }
+
+    public void Open(string path)
+    {
+        var fileStream = _fileSystem.FileStream.New(path, FileMode.Open);
+        InternalStream = new StreamReader(fileStream, new UTF8Encoding(false));
+        ReadChar();
+        RowCounter = 0;
+    }
 
     public string? ReadColumn(string colName)
     {
@@ -49,7 +60,7 @@ public class DataFileReader : IDataFileReader, IDisposable
         {
             if (CurrentChar == QuoteChar)
             {
-                if (_stream.Peek() == QuoteChar)
+                if (InternalStream.Peek() == QuoteChar)
                 {
                     ReadChar();
                 }
@@ -131,13 +142,13 @@ public class DataFileReader : IDataFileReader, IDisposable
 
     private void ReadChar()
     {
-        CurrentChar = _stream.Read();
+        CurrentChar = InternalStream.Read();
     }
 
     public bool IsEndOfFile => CurrentChar == -1;
 
     public void Dispose()
     {
-        _stream.Dispose();
+        _stream?.Dispose();
     }
 }

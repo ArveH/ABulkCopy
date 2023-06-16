@@ -3,16 +3,16 @@
 public class PgDataReader : IADataReader
 {
     private readonly IPgContext _context;
-    private readonly IDataFileReaderFactory _dataFileReaderFactory;
+    private readonly IDataFileReader _fileReader;
     private readonly ILogger _logger;
 
     public PgDataReader(
         IPgContext context,
-        IDataFileReaderFactory dataFileReaderFactory,
+        IDataFileReader dataFileReader,
         ILogger logger)
     {
         _context = context;
-        _dataFileReaderFactory = dataFileReaderFactory;
+        _fileReader = dataFileReader;
         _logger = logger.ForContext<PgDataReader>();
     }
 
@@ -25,13 +25,16 @@ public class PgDataReader : IADataReader
         await using var writer = await conn.BeginBinaryImportAsync(
             CreateCopyStmt(tableDefinition)).ConfigureAwait(false);
         
-        var fileReader = _dataFileReaderFactory.Create(folder, tableDefinition);
+        var path = Path.Combine(
+            folder, 
+            $"{tableDefinition.Header.Name}{tableDefinition.DbServer.DataSuffix()}");
+        _fileReader.Open(path);
         var counter = 0L;
         while (true)
         {
-            await ReadRow(fileReader, writer, tableDefinition.Columns).ConfigureAwait(false);
+            await ReadRow(_fileReader, writer, tableDefinition.Columns).ConfigureAwait(false);
             counter++;
-            if (fileReader.IsEndOfFile) break;
+            if (_fileReader.IsEndOfFile) break;
         }
 
         await writer.CompleteAsync().ConfigureAwait(false);
@@ -50,6 +53,11 @@ public class PgDataReader : IADataReader
 
         foreach (var col in columns)
         {
+            if (col.Type.IsRaw())
+            {
+
+            }
+
             var colValue = dataFileReader.ReadColumn(col.Name);
             if (colValue == null)
             {

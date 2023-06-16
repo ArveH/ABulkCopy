@@ -12,6 +12,6 @@ public static class StringExtensions
 
     public static bool IsRaw(this string str)
     {
-        return str is MssTypes.Binary or MssTypes.VarBinary;
+        return str is MssTypes.Binary or MssTypes.VarBinary or PgTypes.ByteA;
     }
 }

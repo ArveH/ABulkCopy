@@ -1,4 +1,6 @@
-﻿namespace Common.Test.DataFileReader;
+﻿using ABulkCopy.Common.Types.Table;
+
+namespace Common.Test;
 
 public class DataFileReaderTests : CommonTestBase
 {
@@ -8,14 +10,12 @@ public class DataFileReaderTests : CommonTestBase
 
     private readonly TableDefinition _tableDefinition;
     private readonly FileHelper _fileHelper;
-    private readonly IDataFileReaderFactory _dfrFactory;
 
     public DataFileReaderTests(ITestOutputHelper output)
         : base(output)
     {
         _tableDefinition = MssTestData.GetEmpty(TestTableName);
         _fileHelper = new FileHelper(DbServer.SqlServer);
-        _dfrFactory = new DataFileReaderFactory(_fileHelper.FileSystem, TestLogger);
     }
 
     [Fact]
@@ -125,7 +125,7 @@ public class DataFileReaderTests : CommonTestBase
         stringVal.Should().Be(testValue);
     }
 
-    private IDataFileReader Arrange(string row1, string? row2=null)
+    private IDataFileReader Arrange(string row1, string? row2 = null)
     {
         var rows = new List<string> { row1 };
         if (row2 != null)
@@ -133,8 +133,11 @@ public class DataFileReaderTests : CommonTestBase
             rows.Add(row2);
         }
         _fileHelper.CreateDataFile(TestTableName, rows);
-        var dataFileReader = _dfrFactory.Create(
-            _fileHelper.DataFolder, _tableDefinition);
+        var dataFileReader = new DataFileReader(_fileHelper.FileSystem, TestLogger);
+        var path = Path.Combine(
+            _fileHelper.DataFolder,
+            $"{TestTableName}{DbServer.SqlServer.DataSuffix()}");
+        dataFileReader.Open(path);
         return dataFileReader;
     }
 }

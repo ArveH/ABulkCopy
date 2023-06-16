@@ -39,11 +39,13 @@ public class PgDataReaderTestBase : PgTestBase
     {
         var tableDefinition = MssTestData.GetEmpty(tableName);
         cols.ForEach(tableDefinition.Columns.Add);
-        var dataFileReaderFactory = new DataFileReaderFactory(FileHelper.FileSystem, TestLogger);
         await PgDbHelper.Instance.DropTable(tableName);
         await PgDbHelper.Instance.CreateTable(tableDefinition);
         FileHelper.CreateDataFile(tableName, fileData);
-        var dataReader = new PgDataReader(PgContext, dataFileReaderFactory, TestLogger);
+        var dataReader = new PgDataReader(
+            PgContext, 
+            new DataFileReader(FileHelper.FileSystem, TestLogger), 
+            TestLogger);
         await dataReader.Read(FileHelper.DataFolder, tableDefinition);
     }
 
