@@ -9,6 +9,7 @@ public static class StringExtensions
             PgTypes.BigInt => NpgsqlDbType.Bigint,
             PgTypes.Int => NpgsqlDbType.Integer,
             PgTypes.Boolean => NpgsqlDbType.Boolean,
+            PgTypes.ByteA => NpgsqlDbType.Bytea,
             PgTypes.Char => NpgsqlDbType.Char,
             PgTypes.Character => NpgsqlDbType.Char,
             PgTypes.CharacterVarying => NpgsqlDbType.Varchar,

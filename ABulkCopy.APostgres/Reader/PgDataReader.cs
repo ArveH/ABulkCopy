@@ -24,15 +24,19 @@ public class PgDataReader : IADataReader
 
         await using var writer = await conn.BeginBinaryImportAsync(
             CreateCopyStmt(tableDefinition)).ConfigureAwait(false);
-        
+
         var path = Path.Combine(
-            folder, 
+            folder,
             $"{tableDefinition.Header.Name}{tableDefinition.DbServer.DataSuffix()}");
         _fileReader.Open(path);
         var counter = 0L;
         while (true)
         {
-            await ReadRow(_fileReader, writer, tableDefinition.Columns).ConfigureAwait(false);
+            await ReadRow(
+                _fileReader, 
+                writer, 
+                folder,
+                tableDefinition).ConfigureAwait(false);
             counter++;
             if (_fileReader.IsEndOfFile) break;
         }
@@ -45,31 +49,41 @@ public class PgDataReader : IADataReader
     }
 
     private async Task ReadRow(
-        IDataFileReader dataFileReader, 
-        NpgsqlBinaryImporter writer, 
-        List<IColumn> columns)
+        IDataFileReader dataFileReader,
+        NpgsqlBinaryImporter writer,
+        string folder,
+        TableDefinition tableDefinition)
     {
         await writer.StartRowAsync().ConfigureAwait(false);
 
-        foreach (var col in columns)
+        foreach (var col in tableDefinition.Columns)
         {
-            if (col.Type.IsRaw())
-            {
-
-            }
-
             var colValue = dataFileReader.ReadColumn(col.Name);
             if (colValue == null)
             {
                 await writer.WriteNullAsync().ConfigureAwait(false);
+                continue;
+            }
+
+            if (col.Type.IsRaw())
+            {
+                var path = Path.Combine(
+                    folder,
+                    tableDefinition.Header.Name,
+                    col.Name,
+                    colValue);
+                await writer.WriteAsync(
+                    dataFileReader.ReadAllBytes(path),
+                    col.Type.GetNativeType()).ConfigureAwait(false);
             }
             else
             {
                 await writer.WriteAsync(
-                    col.ToInternalType(colValue), 
+                    col.ToInternalType(colValue),
                     col.Type.GetNativeType()).ConfigureAwait(false);
             }
         }
+
         dataFileReader.ReadNewLine();
     }
 

@@ -35,6 +35,11 @@ public class DataFileReader : IDataFileReader, IDisposable
         RowCounter = 0;
     }
 
+    public byte[] ReadAllBytes(string path)
+    {
+        return _fileSystem.File.ReadAllBytes(path);
+    }
+
     public string? ReadColumn(string colName)
     {
         _logger.Verbose("Reading value for column '{ColumnName}' row {RowCount}",

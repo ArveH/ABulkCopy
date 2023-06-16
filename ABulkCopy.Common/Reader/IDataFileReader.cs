@@ -7,4 +7,5 @@ public interface IDataFileReader
     void ReadColumnSeparator(string colName);
     void ReadNewLine();
     public bool IsEndOfFile { get; }
+    byte[] ReadAllBytes(string path);
 }

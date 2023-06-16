@@ -41,12 +41,14 @@ public class PgDataReaderOtherTypesTests : PgDataReaderTestBase
         var blobFilePath = Path.Combine(
             FileHelper.DataFolder, tableName, ColName, blobFileName);
         var fileData = new MockFileData(AllTypes.SampleValues.Binary5K);
-        FileHelper.FileSystem.AddFile(blobFileName, fileData);
+        FileHelper.FileSystem.AddFile(blobFilePath, fileData);
         
         var colValue = await TestDataReader<byte[]?>(
             tableName, col, blobFileName + ",");
 
-        colValue.Should().BeNull();
+        colValue.Should().NotBeNull();
+        colValue!.Length.Should().Be(5000);
+        colValue[65].Should().Be((byte)'A');
     }
 
     [Fact]
