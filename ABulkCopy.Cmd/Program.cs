@@ -1,8 +1,4 @@
-﻿using ABulkCopy.Cmd.Config;
-using ABulkCopy.Cmd.Factories;
-using ABulkCopy.Common.Mapping;
-
-namespace ABulkCopy.Cmd;
+﻿namespace ABulkCopy.Cmd;
 
 internal class Program
 {
