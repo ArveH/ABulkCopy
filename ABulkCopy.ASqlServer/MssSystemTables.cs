@@ -20,8 +20,13 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         _logger.Information("Reading tables '{searchString}'", searchString);
 
         var command =
-            new SqlCommand("SELECT name FROM sys.objects WITH(NOLOCK)\r\n" +
-                           " WHERE type = 'U'\r\n" +
+            new SqlCommand("SELECT name FROM sys.tables WITH(NOLOCK)\r\n" +
+                           " WHERE object_id not in (\r\n" +
+                           "   SELECT major_id\r\n" +
+                           "     FROM sys.extended_properties WITH(NOLOCK)\r\n" +
+                           "    WHERE minor_id = 0\r\n" +
+                           "      AND class = 1\r\n" +
+                           "      AND name = N'microsoft_database_tools_support')\r\n" +
                            "   AND name LIKE @SearchString\r\n" +
                            "ORDER BY name");
         command.Parameters.AddWithValue("@SearchString", searchString);
