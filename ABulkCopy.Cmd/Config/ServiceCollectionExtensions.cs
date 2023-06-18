@@ -2,8 +2,10 @@
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddMssServices(this IServiceCollection services)
+    public static IServiceCollection AddMssServices(
+        this IServiceCollection services)
     {
+        services.AddSingleton<IDbContext, MssContext>();
         services.AddTransient<IMssSystemTables, MssSystemTables>();
         services.AddSingleton<IMssTableReader, MssTableReader>();
         services.AddSingleton<IMssTableSchema, MssTableSchema>();
@@ -12,8 +14,12 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddPgServices(this IServiceCollection services)
+    public static IServiceCollection AddPgServices(
+        this IServiceCollection services)
     {
+        services.AddSingleton<PgContext>();
+        services.AddSingleton<IDbContext>(s => s.GetRequiredService<PgContext>());
+        services.AddSingleton<IPgContext>(s => s.GetRequiredService<PgContext>());
         services.AddSingleton<IADataReader, PgDataReader>();
         services.AddSingleton<ISchemaReader, PgSchemaReader>();
         services.AddSingleton<ITypeConverter, PgTypeMapper>();

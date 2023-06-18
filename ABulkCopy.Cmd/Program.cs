@@ -4,36 +4,37 @@ internal class Program
 {
     static async Task Main(string[] args)
     {
-        var configuration = GetConfiguration();
-        var cmdParameters = GetArguments(args);
-        if (cmdParameters == null) return;
-        ConfigureLogger(configuration, cmdParameters.LogFile);
+        var cmdArguments = GetArguments(args);
+        if (cmdArguments == null) return;
+        var configuration = GetConfiguration(cmdArguments);
+        var logger = ConfigureLogger(configuration, cmdArguments.LogFile);
+        Log.Logger = logger;
         Log.Information("ABulkCopy.Cmd started.");
         Console.WriteLine("ABulkCopy.Cmd started.");
 
         try
         {
-            var builder = CreateAppBuilder(configuration);
-            var context = DbContextFactory.GetContext(cmdParameters.ConnectionString);
-            builder.Services.AddSingleton(context);
+            var builder = CreateAppBuilder(
+                cmdArguments.Rdbms,
+                configuration);
             var host = builder.Build();
 
-            if (cmdParameters.Direction == CopyDirection.In)
+            if (cmdArguments.Direction == CopyDirection.In)
             {
                 var copyIn = host.Services.GetRequiredService<ICopyIn>();
-                await copyIn.Run(cmdParameters.Folder, context.Rdbms);
+                await copyIn.Run(cmdArguments.Folder, cmdArguments.Rdbms);
             }
             else
             {
                 var copyOut = host.Services.GetRequiredService<ICopyOut>();
-                if (DataFolder.CreateIfNotExists(cmdParameters.Folder) == CmdStatus.ShouldExit)
+                if (DataFolder.CreateIfNotExists(cmdArguments.Folder) == CmdStatus.ShouldExit)
                 {
                     Log.Information("Folder {Folder} didn't exist. ABulkCopy.Cmd finished.",
-                        cmdParameters.Folder);
-                    Console.WriteLine($"Folder {cmdParameters.Folder} didn't exist. ABulkCopy.Cmd finished.");
+                        cmdArguments.Folder);
+                    Console.WriteLine($"Folder {cmdArguments.Folder} didn't exist. ABulkCopy.Cmd finished.");
                     return;
                 }
-                await copyOut.Run(cmdParameters.Folder, cmdParameters.SearchStr);
+                await copyOut.Run(cmdArguments.Folder, cmdArguments.SearchStr);
             }
             Log.Information("ABulkCopy.Cmd finished.");
             Console.WriteLine("ABulkCopy.Cmd finished.");
@@ -50,13 +51,15 @@ internal class Program
         }
     }
 
-    private static IConfigurationRoot GetConfiguration()
+    private static IConfigurationRoot GetConfiguration(CmdArguments cmdArguments)
     {
         var configuration = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", true)
             .AddUserSecrets("128e015d-d8ef-4ca8-ba79-5390b26c675f")
             .AddEnvironmentVariables()
+            .AddInMemoryCollection(new Dictionary<string, string?> {
+                ["ConnectionStrings:BulkCopy"] = cmdArguments.ConnectionString})
             .Build();
         return configuration;
     }
@@ -78,7 +81,7 @@ internal class Program
         return result.Value;
     }
 
-    private static void ConfigureLogger(
+    private static ILogger ConfigureLogger(
         IConfigurationRoot configuration,
         string fileFullPath)
     {
@@ -94,10 +97,13 @@ internal class Program
                 rollOnFileSizeLimit: true,
                 shared: true,
                 flushToDiskInterval: TimeSpan.FromSeconds(1));
-        Log.Logger = loggerConfig.CreateLogger();
+        return loggerConfig.CreateLogger();
     }
 
-    private static void ConfigureServices(HostApplicationBuilder builder, IConfigurationRoot configuration)
+    private static void ConfigureServices(
+        HostApplicationBuilder builder,
+        Rdbms rdbms,
+        IConfigurationRoot configuration)
     {
         builder.Services.AddSingleton(configuration);
         builder.Services.AddSingleton(Log.Logger);
@@ -110,17 +116,18 @@ internal class Program
         builder.Services.AddSingleton<ICopyIn, CopyIn>();
         builder.Services.AddTransient<IDataFileReader, DataFileReader>();
         builder.Services.AddSingleton<IMappingFactory, MappingFactory>();
-        builder.Services.AddMssServices();
-        builder.Services.AddPgServices();
+        if (rdbms == Rdbms.Mss) builder.Services.AddMssServices();
+        if (rdbms == Rdbms.Pg) builder.Services.AddPgServices();
     }
 
-    private static HostApplicationBuilder CreateAppBuilder(IConfigurationRoot configuration)
+    private static HostApplicationBuilder CreateAppBuilder(
+        Rdbms rdbms, IConfigurationRoot configuration)
     {
         var builder = Host.CreateApplicationBuilder();
         builder.Configuration.AddConfiguration(configuration);
         builder.Logging.AddSerilog();
 
-        ConfigureServices(builder, configuration);
+        ConfigureServices(builder, rdbms, configuration);
 
         return builder;
     }

@@ -17,10 +17,7 @@ public abstract class MssTestBase
 
         TestConfiguration = new ConfigHelper().GetConfiguration("128e015d-d8ef-4ca8-ba79-5390b26c675f");
 
-        MssDbContext = new MssContext()
-        {
-            ConnectionString = MssDbHelper.Instance.ConnectionString
-        };
+        MssDbContext = new MssContext(TestConfiguration);
 
         MssSystemTables = CreateMssSystemTables();
     }

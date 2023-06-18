@@ -34,9 +34,6 @@ public class PgTestBase
 
         TestLoggerFactory = new Microsoft.Extensions.Logging.LoggerFactory().AddSerilog(TestLogger);
 
-        PgContext = new PgContext(TestLoggerFactory)
-        {
-            ConnectionString = PgDbHelper.Instance.ConnectionString
-        };
+        PgContext = new PgContext(TestLoggerFactory, TestConfiguration);
     }
 }

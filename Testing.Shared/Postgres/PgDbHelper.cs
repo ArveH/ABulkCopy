@@ -40,9 +40,7 @@ public class PgDbHelper
     private PgDbHelper()
     {
         var configuration = new ConfigHelper().GetConfiguration("128e015d-d8ef-4ca8-ba79-5390b26c675f");
-        var connectionString = configuration.GetConnectionString(TestConstants.Config.DbKey);
-        if (connectionString == null) throw new ArgumentNullException(nameof(connectionString));
-        _pgContext = new PgContext(new NullLoggerFactory()) { ConnectionString = connectionString };
+        _pgContext = new PgContext(new NullLoggerFactory(), configuration);
     }
 
     public static PgDbHelper Instance => LazyInstance.Value;
