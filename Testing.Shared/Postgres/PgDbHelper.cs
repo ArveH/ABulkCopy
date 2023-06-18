@@ -8,7 +8,7 @@ public class PgDbHelper
         new(() => new PgDbHelper());
 
     private readonly PgContext _pgContext;
-    private static TableDefinition _tableDefinition = new(Rdbms.Postgres)
+    private static TableDefinition _tableDefinition = new(Rdbms.Pg)
     {
         Header = new()
         {

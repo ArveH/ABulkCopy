@@ -15,7 +15,7 @@ public class TableReaderFactory : ITableReaderFactory
 
     public ITableReader GetTableReader(IDbContext dbContext)
     {
-        if (dbContext.Rdbms == Rdbms.SqlServer)
+        if (dbContext.Rdbms == Rdbms.Mss)
             return new MssTableReader(_selectCreator, _logger) {ConnectionString = dbContext.ConnectionString};
 
         throw new NotSupportedException($"Rdbms {dbContext.Rdbms} is not supported");

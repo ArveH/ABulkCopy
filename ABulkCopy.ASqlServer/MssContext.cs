@@ -4,7 +4,7 @@ public class MssContext : IDbContext
 {
     public MssContext()
     {
-        Rdbms = Rdbms.SqlServer;
+        Rdbms = Rdbms.Mss;
     }
 
     public required string ConnectionString { get; init; }

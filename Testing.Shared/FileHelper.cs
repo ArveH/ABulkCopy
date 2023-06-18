@@ -27,7 +27,7 @@ public class FileHelper
 
         var fileData = new MockFileData(jsonText);
         FileSystem.AddFile(
-            Path.Combine(DataFolder, $"{tableName}{Rdbms.SqlServer.SchemaSuffix()}"),
+            Path.Combine(DataFolder, $"{tableName}{Rdbms.Mss.SchemaSuffix()}"),
             fileData);
     }
 

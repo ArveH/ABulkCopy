@@ -14,6 +14,9 @@ public class CmdArguments
     [Option('l', "log", Required = false, Default = "\\.\\abulkcopy.log", HelpText = "Full path for log file.")]
     public string LogFile { get; set; } = "\\.\\abulkcopy.log";
 
+    [Option('r', "rdbms", Required = true, HelpText = "Database Management System. \"Pg\" or \"Mss\".")]
+    public required Rdbms Rdbms { get; set; }
+
     [Option('s', "search-str", Required = false, Default = "%", HelpText = "Table name(s) search string.")]
     public string SearchStr { get; set; } = "%";
 

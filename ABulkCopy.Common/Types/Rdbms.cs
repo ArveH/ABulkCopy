@@ -2,6 +2,6 @@
 
 public enum Rdbms
 {
-    SqlServer = 1,
-    Postgres = 2
+    Mss = 1,
+    Pg = 2
 }

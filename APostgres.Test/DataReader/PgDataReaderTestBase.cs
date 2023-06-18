@@ -4,7 +4,7 @@ namespace APostgres.Test.DataReader;
 
 public class PgDataReaderTestBase : PgTestBase
 {
-    protected readonly FileHelper FileHelper = new (Rdbms.SqlServer);
+    protected readonly FileHelper FileHelper = new (Rdbms.Mss);
 
     protected PgDataReaderTestBase(ITestOutputHelper output)
         : base(output)

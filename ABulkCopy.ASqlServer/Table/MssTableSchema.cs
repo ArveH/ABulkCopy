@@ -25,7 +25,7 @@ public class MssTableSchema : IMssTableSchema
         var primaryKey = await _systemTables.GetPrimaryKey(tableHeader);
         var foreignKeys = await _systemTables.GetForeignKeys(tableHeader);
 
-        return new TableDefinition(Rdbms.SqlServer)
+        return new TableDefinition(Rdbms.Mss)
         {
             Header = tableHeader,
             Columns = columnInfo.ToList(),

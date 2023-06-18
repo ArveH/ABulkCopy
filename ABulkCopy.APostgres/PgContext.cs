@@ -9,7 +9,7 @@ public class PgContext : IPgContext
     public PgContext(ILoggerFactory loggerFactory)
     {
         _loggerFactory = loggerFactory;
-        Rdbms = Rdbms.Postgres;
+        Rdbms = Rdbms.Pg;
     }
 
     public required string ConnectionString { get; init; }
