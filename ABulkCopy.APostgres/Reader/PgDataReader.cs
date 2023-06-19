@@ -30,21 +30,40 @@ public class PgDataReader : IADataReader
             $"{tableDefinition.Header.Name}{Constants.DataSuffix}");
         _fileReader.Open(path);
         var counter = 0L;
+        var errors = 0L;
         while (true)
         {
             if (_fileReader.IsEndOfFile) break;
-            await ReadRow(
-                _fileReader, 
-                writer, 
-                folder,
-                tableDefinition).ConfigureAwait(false);
-            counter++;
+            try
+            {
+                await ReadRow(
+                    _fileReader, 
+                    writer, 
+                    folder,
+                    tableDefinition).ConfigureAwait(false);
+                counter++;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Reading data file failed for row {RowCounter}: {ErrorMessage}",
+                    counter, ex.FlattenMessages());
+                errors++;
+                _fileReader.SkipToNextLine();
+            }
         }
 
         await writer.CompleteAsync().ConfigureAwait(false);
 
-        _logger.Information($"Read {{RowCount}} {"row".Plural(counter)} for table '{{TableName}}' from '{{Path}}'",
-            counter, tableDefinition.Header.Name, folder);
+        if (errors > 0)
+        {
+            _logger.Error($"{{ErrorCount}} {"row".Plural(errors)} failed when reading {{RowCount}} {"row".Plural(counter)} for table '{{TableName}}' from '{{Path}}'",
+                errors, counter, tableDefinition.Header.Name, folder);
+        }
+        else
+        {
+            _logger.Information($"Read {{RowCount}} {"row".Plural(counter)} for table '{{TableName}}' from '{{Path}}'",
+                counter, tableDefinition.Header.Name, folder);
+        }
         return counter;
     }
 

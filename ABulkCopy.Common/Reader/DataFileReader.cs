@@ -125,6 +125,15 @@ public class DataFileReader : IDataFileReader, IDisposable
         ReadChar();
     }
 
+    public void SkipToNextLine()
+    {
+        while (CurrentChar != '\n' && CurrentChar != '\r' && !IsEndOfFile)
+        {
+            ReadChar();
+        }
+        ReadNewLine();
+    }
+
     public void ReadNewLine()
     {
         if (CurrentChar != '\n' && CurrentChar != '\r' && !IsEndOfFile)

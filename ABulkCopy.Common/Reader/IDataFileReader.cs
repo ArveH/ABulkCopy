@@ -8,4 +8,5 @@ public interface IDataFileReader
     void ReadNewLine();
     public bool IsEndOfFile { get; }
     byte[] ReadAllBytes(string path);
+    void SkipToNextLine();
 }
