@@ -9,6 +9,12 @@ public class PgCmd : IPgCmd
         _pgContext = pgContext;
     }
 
+    public async Task DropTable(string tableName)
+    {
+        var sqlString = $"drop table if exists \"{tableName}\";";
+        await ExecuteNonQuery(sqlString);
+    }
+
     public async Task CreateTable(TableDefinition tableDefinition, bool addIfNotExists = false)
     {
         var sb = new StringBuilder();

@@ -34,10 +34,10 @@ public class CopyIn : ICopyIn
             try
             {
                 var tableDefinition = await _schemaReader.GetTableDefinition(schemaFile);
+                await _pgCmd.DropTable(tableDefinition.Header.Name);
                 await _pgCmd.CreateTable(tableDefinition);
                 var rows = await _aDataReader.Read(folder, tableDefinition);
-                Console.WriteLine($"Read {{RowCount}} {"row".Plural(rows)} for table '{{TableName}}'",
-                    rows, tableDefinition.Header.Name, folder);
+                Console.WriteLine($"Read {rows} {"row".Plural(rows)} for table '{tableDefinition.Header.Name}'");
             }
             catch (Exception ex)
             {
