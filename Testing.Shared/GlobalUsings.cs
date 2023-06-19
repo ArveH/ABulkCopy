@@ -3,8 +3,8 @@
 global using ABulkCopy.APostgres;
 global using ABulkCopy.APostgres.Column.ColumnTypes;
 global using ABulkCopy.ASqlServer.Column.ColumnTypes;
+global using ABulkCopy.Common;
 global using ABulkCopy.Common.Config;
-global using ABulkCopy.Common.Extensions;
 global using ABulkCopy.Common.Serialization;
 global using ABulkCopy.Common.Types;
 global using ABulkCopy.Common.Types.Column;

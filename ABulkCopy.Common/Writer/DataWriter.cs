@@ -23,7 +23,7 @@ public class DataWriter : IDataWriter
     {
         AddDirectoriesForBlobs(tableDefinition, path);
         var fileFullPath = Path.Combine(
-            path, tableDefinition.Header.Name + tableDefinition.Rdbms.DataSuffix());
+            path, tableDefinition.Header.Name + Constants.DataSuffix);
         await using var streamWriter = _fileSystem.File.CreateText(fileFullPath);
         await _tableReader.PrepareReader(tableDefinition);
         var rowCounter = 0;

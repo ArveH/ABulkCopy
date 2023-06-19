@@ -145,7 +145,7 @@ public class SchemaWriterTests
 
     private async Task<string> GetJsonText()
     {
-        var fullPath = Path.Combine(TestPath, TestTableName + Rdbms.Mss.SchemaSuffix());
+        var fullPath = Path.Combine(TestPath, TestTableName + Constants.SchemaSuffix);
         _mockFileSystem.FileExists(fullPath).Should().BeTrue("because schema file should exist");
         var jsonTxt = await _mockFileSystem.File.ReadAllTextAsync(fullPath);
         return jsonTxt;

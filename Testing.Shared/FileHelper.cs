@@ -2,13 +2,6 @@
 
 public class FileHelper
 {
-    private readonly Rdbms _rdbms;
-
-    public FileHelper(Rdbms rdbms)
-    {
-        _rdbms = rdbms;
-    }
-
     public MockFileSystem FileSystem { get; } = new();
     public string DataFolder { get; set; } = ".\\testdata";
 
@@ -27,7 +20,7 @@ public class FileHelper
 
         var fileData = new MockFileData(jsonText);
         FileSystem.AddFile(
-            Path.Combine(DataFolder, $"{tableName}{Rdbms.Mss.SchemaSuffix()}"),
+            Path.Combine(DataFolder, $"{tableName}{Constants.SchemaSuffix}"),
             fileData);
     }
 
@@ -35,7 +28,7 @@ public class FileHelper
     {
         var fileData = new MockFileData(string.Join(Environment.NewLine, rows), Encoding.UTF8);
         FileSystem.AddFile(
-            Path.Combine(DataFolder, $"{tableName}{_rdbms.DataSuffix()}"),
+            Path.Combine(DataFolder, $"{tableName}{Constants.DataSuffix}"),
             fileData);
     }
 }

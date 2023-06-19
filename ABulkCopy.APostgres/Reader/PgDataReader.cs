@@ -27,7 +27,7 @@ public class PgDataReader : IADataReader
 
         var path = Path.Combine(
             folder,
-            $"{tableDefinition.Header.Name}{tableDefinition.Rdbms.DataSuffix()}");
+            $"{tableDefinition.Header.Name}{Constants.DataSuffix}");
         _fileReader.Open(path);
         var counter = 0L;
         while (true)

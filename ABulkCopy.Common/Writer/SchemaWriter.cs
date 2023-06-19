@@ -19,7 +19,7 @@ public class SchemaWriter : ISchemaWriter
     {
         _logger.Debug("Writing table definition for '{TableName}' to file...",
             tableDefinition.Header.Name);
-        var fullPath = Path.Combine(path, tableDefinition.Header.Name + tableDefinition.Rdbms.SchemaSuffix());
+        var fullPath = Path.Combine(path, tableDefinition.Header.Name + Constants.SchemaSuffix);
         await _fileSystem.File.WriteAllTextAsync(
             fullPath,
             JsonSerializer.Serialize(tableDefinition, new JsonSerializerOptions

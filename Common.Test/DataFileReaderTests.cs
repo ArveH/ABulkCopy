@@ -1,6 +1,4 @@
-﻿using ABulkCopy.Common.Types.Table;
-
-namespace Common.Test;
+﻿namespace Common.Test;
 
 public class DataFileReaderTests : CommonTestBase
 {
@@ -15,7 +13,7 @@ public class DataFileReaderTests : CommonTestBase
         : base(output)
     {
         _tableDefinition = MssTestData.GetEmpty(TestTableName);
-        _fileHelper = new FileHelper(Rdbms.Mss);
+        _fileHelper = new FileHelper();
     }
 
     [Fact]
@@ -136,7 +134,7 @@ public class DataFileReaderTests : CommonTestBase
         var dataFileReader = new DataFileReader(_fileHelper.FileSystem, TestLogger);
         var path = Path.Combine(
             _fileHelper.DataFolder,
-            $"{TestTableName}{Rdbms.Mss.DataSuffix()}");
+            $"{TestTableName}{Constants.DataSuffix}");
         dataFileReader.Open(path);
         return dataFileReader;
     }
