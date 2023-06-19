@@ -20,6 +20,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<PgContext>();
         services.AddSingleton<IDbContext>(s => s.GetRequiredService<PgContext>());
         services.AddSingleton<IPgContext>(s => s.GetRequiredService<PgContext>());
+        services.AddSingleton<IPgCmd, PgCmd>();
         services.AddSingleton<IADataReader, PgDataReader>();
         services.AddSingleton<ISchemaReader, PgSchemaReader>();
         services.AddSingleton<ITypeConverter, PgTypeMapper>();

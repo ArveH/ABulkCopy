@@ -2,7 +2,7 @@
   "profiles": {
     "ABulkCopy.Cmd": {
       "commandName": "Project",
-      "commandLineArgs": "-d out -c \"Server=.;Database=ABulkCopy;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true\" -l D:\\Temp\\LogFiles\\Application\\abulkcopy.log -f d:\\temp\\abulkcopydata -s %"
+      "commandLineArgs": "-d in -r Pg -c \"Server=localhost;Port=5432;Database=PgIds;User Id=postgres;Integrated Security=true;Include Error Detail=True;\" -l D:\\Temp\\LogFiles\\Application\\abulkcopy_in.log -f d:\\temp\\abulkcopy\\u4idsdata"
     }
   }
 }

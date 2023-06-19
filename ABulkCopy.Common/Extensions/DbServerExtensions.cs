@@ -5,12 +5,12 @@ public static class DbServerExtensions
     public static string SchemaSuffix(this Rdbms rdbms)
     {
         var dbSuffix = rdbms == Rdbms.Mss ? "mss" : "pg";
-        return $".{dbSuffix}.schema";
+        return $".{dbSuffix}{Constants.SchemaSuffix}";
     }
 
     public static string DataSuffix(this Rdbms rdbms)
     {
         var dbSuffix = rdbms == Rdbms.Mss ? "mss" : "pg";
-        return $".{dbSuffix}.data";
+        return $".{dbSuffix}{Constants.DataSuffix}";
     }
 }

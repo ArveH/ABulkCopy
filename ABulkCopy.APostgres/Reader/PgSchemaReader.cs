@@ -16,7 +16,26 @@ public class PgSchemaReader : ISchemaReader
         _logger = logger.ForContext<PgSchemaReader>();
     }
 
-    public async Task<TableDefinition?> GetTableDefinition(string folderPath, string tableName)
+    public async Task<TableDefinition> GetTableDefinition(string fullPath)
+    {
+        if (!_fileSystem.File.Exists(fullPath))
+        {
+            _logger.Error("Schema file not found: '{FullPath}'", fullPath);
+            throw new FileNotFoundException($"Schema file not found: '{fullPath}'");
+        }
+
+        var tableName = Path.GetFileNameWithoutExtension(fullPath);
+        var tableDefinition = await ReadSchemaFile(tableName, fullPath).ConfigureAwait(false);
+
+        if (fullPath.EndsWith(Rdbms.Mss.SchemaSuffix()))
+        {
+            tableDefinition = _typeConverter.Convert(tableDefinition);
+        }
+
+        return tableDefinition;
+    }
+
+    public async Task<TableDefinition> GetTableDefinition(string folderPath, string tableName)
     {
         var needTypeConversion = false;
         var fullPath = Path.Combine(folderPath, $"{tableName}{Rdbms.Pg.SchemaSuffix()}");
@@ -32,6 +51,18 @@ public class PgSchemaReader : ISchemaReader
             needTypeConversion = true;
         }
 
+        var tableDefinition = await ReadSchemaFile(tableName, fullPath);
+
+        if (needTypeConversion)
+        {
+            tableDefinition = _typeConverter.Convert(tableDefinition);
+        }
+
+        return tableDefinition;
+    }
+
+    private async Task<TableDefinition> ReadSchemaFile(string tableName, string fullPath)
+    {
         using var reader = _fileSystem.File.OpenText(fullPath);
         var jsonTxt = await reader.ReadToEndAsync();
         var options = new JsonSerializerOptions
@@ -40,17 +71,12 @@ public class PgSchemaReader : ISchemaReader
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
             WriteIndented = true,
             Converters = { new JsonStringEnumConverter(), new PgColumnInterfaceConverter() }
-        };  
+        };
         var tableDefinition = JsonSerializer.Deserialize<TableDefinition>(jsonTxt, options);
         if (tableDefinition == null)
         {
             _logger.Error("Failed to deserialize schema file for table '{TableName}", tableName);
             throw new InvalidOperationException($"Failed to deserialize schema file: {fullPath}");
-        }
-
-        if (needTypeConversion)
-        {
-            tableDefinition = _typeConverter.Convert(tableDefinition);
         }
 
         return tableDefinition;
