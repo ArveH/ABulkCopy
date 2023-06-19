@@ -41,26 +41,28 @@ public class PgTypeMapper : ITypeConverter
         var newColumns = new List<IColumn>();
         foreach (var sourceCol in sourceDefinition.Columns)
         {
+            var newScale = sourceCol.Scale;
+            var newPrecision = sourceCol.Precision;
+            switch (sourceCol.Type)
+            {
+                case MssTypes.Time:
+                case MssTypes.DateTime:
+                case MssTypes.DateTime2:
+                case MssTypes.DateTimeOffset:
+                    newPrecision = sourceCol.Scale;
+                    newScale = null;
+                    break;
+            }
+
             var newColumn = _columnFactory.Create(
                 sourceCol.Id,
                 sourceCol.Name,
                 mappings.Columns.ReplaceGet(sourceCol.Type),
                 sourceCol.Length,
-                sourceCol.Precision,
-                sourceCol.Scale,
+                newPrecision,
+                newScale,
                 sourceCol.IsNullable,
                 sourceCol.Collation);
-            switch (sourceCol.Type)
-            {
-                case MssTypes.DateTime2:
-                    newColumn.Precision = sourceCol.Scale;
-                    newColumn.Scale = null;
-                    break;
-                case MssTypes.DateTimeOffset:
-                    newColumn.Precision = sourceCol.Scale;
-                    newColumn.Scale = null;
-                    break;
-            }
             newColumns.Add(newColumn);
         }
         return newColumns;

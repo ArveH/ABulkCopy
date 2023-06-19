@@ -41,9 +41,9 @@ public class CopyIn : ICopyIn
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Failed with schema file '{SchemaFile}'",
+                _logger.Error(ex, "CopyIn failed with schema file '{SchemaFile}'",
                     schemaFile);
-                Console.WriteLine($"Failed with schema file '{schemaFile}'");
+                Console.WriteLine($"CopyIn failed with schema file '{schemaFile}'");
                 errors++;
             }
         }
