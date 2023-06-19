@@ -22,14 +22,16 @@ public class PgDataReader : IADataReader
             tableDefinition.Header.Name, folder);
         await using var conn = await _context.DataSource.OpenConnectionAsync().ConfigureAwait(false);
 
+        var copyStmt = CreateCopyStmt(tableDefinition);
         await using var writer = await conn.BeginBinaryImportAsync(
-            CreateCopyStmt(tableDefinition)).ConfigureAwait(false);
+            copyStmt).ConfigureAwait(false);
 
         var path = Path.Combine(
             folder,
             $"{tableDefinition.Header.Name}{Constants.DataSuffix}");
         _fileReader.Open(path);
         var counter = 0L;
+        // TODO: Currently, it will not continue on error.
         var errors = 0L;
         while (true)
         {
@@ -49,10 +51,9 @@ public class PgDataReader : IADataReader
                     counter, ex.FlattenMessages());
                 errors++;
                 _fileReader.SkipToNextLine();
+                break;
             }
         }
-
-        await writer.CompleteAsync().ConfigureAwait(false);
 
         if (errors > 0)
         {
@@ -61,6 +62,7 @@ public class PgDataReader : IADataReader
         }
         else
         {
+            await writer.CompleteAsync().ConfigureAwait(false);
             _logger.Information($"Read {{RowCount}} {"row".Plural(counter)} for table '{{TableName}}' from '{{Path}}'",
                 counter, tableDefinition.Header.Name, folder);
         }
