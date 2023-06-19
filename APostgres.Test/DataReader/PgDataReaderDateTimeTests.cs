@@ -115,6 +115,17 @@ public class PgDataReaderDateTimeTests : PgDataReaderTestBase
     }
 
     [Fact]
+    public async Task TestTimestamp_When_MinDate()
+    {
+        // Arrange
+        var col = new PostgresTimestamp(1, ColName, true);
+        var colValue = await TestDataReader<DateTime?>(
+            GetName(), col, "0001-01-01T00:00:00.0000000,");
+
+        colValue.Should().Be(DateTime.MinValue);
+    }
+
+    [Fact]
     public async Task? TestTimestampTz_When_NoFractions()
     {
         // Arrange
