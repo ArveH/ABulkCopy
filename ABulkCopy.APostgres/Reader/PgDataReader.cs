@@ -32,13 +32,13 @@ public class PgDataReader : IADataReader
         var counter = 0L;
         while (true)
         {
+            if (_fileReader.IsEndOfFile) break;
             await ReadRow(
                 _fileReader, 
                 writer, 
                 folder,
                 tableDefinition).ConfigureAwait(false);
             counter++;
-            if (_fileReader.IsEndOfFile) break;
         }
 
         await writer.CompleteAsync().ConfigureAwait(false);

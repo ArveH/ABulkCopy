@@ -82,6 +82,18 @@ public class PgDbHelper
         await ExecuteNonQuery(sqlString);
     }
 
+    public async Task<long> GetRowCount(string tableName)
+    {
+        var sqlString = $"select count(*) from \"{tableName}\";";
+        await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
+        var reader = await cmd.ExecuteReaderAsync();
+        if (!await reader.ReadAsync()) throw new SqlNullValueException();
+
+        if (reader.IsDBNull(0)) return 0L;
+
+        return reader.GetFieldValue<long>(0);
+    }
+
     public async Task<T?> SelectScalar<T>(string tableName, IColumn col)
     {
         var sqlString = $"select \"{col.Name}\" from \"{tableName}\";";

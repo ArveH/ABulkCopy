@@ -8,6 +8,33 @@ public class PgDataReaderMiscTests : PgDataReaderTestBase
     }
 
     [Fact]
+    public async Task TestRead_When_EmptyDataFile()
+    {
+        var tableName = "TestRead_When_EmptyDataFile";
+        var fileData = new List<string>();
+        var cols = new List<IColumn>
+        {
+            new PostgresUuid(1, "Id", false),
+            new PostgresVarChar(2, "Name", true, 100),
+            new PostgresTimestamp(3, "LastUpdate", true),
+        };
+        try
+        {
+            // Arrange
+            await CreateTableAndReadData(
+                tableName, cols, fileData);
+
+            // Assert
+            var rowcount = await PgDbHelper.Instance.GetRowCount(tableName);
+            rowcount.Should().Be(0);
+        }
+        finally
+        {
+            await PgDbHelper.Instance.DropTable(tableName);
+        }
+    }
+
+    [Fact]
     public async Task Test3Cols()
     {
         var tableName = "Test3Cols";
