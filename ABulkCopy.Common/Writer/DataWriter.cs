@@ -69,7 +69,7 @@ public class DataWriter : IDataWriter
         {
             if (tableReader.IsNull(i))
             {
-                textWriter.Write(",");
+                textWriter.Write(Constants.ColumnSeparator);
                 continue;
             }
 
@@ -92,7 +92,7 @@ public class DataWriter : IDataWriter
                 textWriter.Write(tableDefinition.Columns[i].ToString(tableReader.GetValue(i)!));
             }
 
-            textWriter.Write(",");
+            textWriter.Write(Constants.ColumnSeparator);
         }
     }
 

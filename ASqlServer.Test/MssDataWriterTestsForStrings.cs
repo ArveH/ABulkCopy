@@ -13,7 +13,7 @@ public class MssDataWriterTestsForStrings : MssDataWriterTestBase
         await TestWrite(
             new SqlServerChar(101, "MyTestCol", false, 10),
                 "Arve",
-                "'Arve      '");
+                "Arve      ".Quote());
     }
 
     [Fact]
@@ -21,8 +21,8 @@ public class MssDataWriterTestsForStrings : MssDataWriterTestBase
     {
         await TestWrite(
             new SqlServerChar(101, "MyTestCol", false, 15),
-            "Arve's vodka",
-            "'Arve''s vodka   '");
+            $"Arve{Constants.QuoteChar}s vodka",
+            $"Arve{Constants.QuoteChar}{Constants.QuoteChar}s vodka   ".Quote());
     }
 
     [Fact]
@@ -31,7 +31,7 @@ public class MssDataWriterTestsForStrings : MssDataWriterTestBase
         await TestWrite(
             new SqlServerChar(101, "MyTestCol", false, 10),
             "123456789\\",
-            "'123456789\\'");
+            "123456789\\".Quote());
     }
 
     [Fact]
@@ -39,8 +39,8 @@ public class MssDataWriterTestsForStrings : MssDataWriterTestBase
     {
         await TestWrite(
             new SqlServerVarChar(101, "MyTestCol", false, 15),
-            "Arve's vodka",
-            "'Arve''s vodka'");
+            $"Arve{Constants.QuoteChar}s vodka",
+            $"Arve{Constants.QuoteChar}{Constants.QuoteChar}s vodka".Quote());
     }
 
     [Fact]
@@ -49,7 +49,7 @@ public class MssDataWriterTestsForStrings : MssDataWriterTestBase
         await TestWrite(
             new SqlServerVarChar(101, "MyTestCol", false, 10),
             "\\Arve",
-            "'\\Arve'");
+            "\\Arve".Quote());
     }
 
     [Fact]
@@ -58,7 +58,7 @@ public class MssDataWriterTestsForStrings : MssDataWriterTestBase
         await TestWrite(
             new SqlServerVarChar(101, "MyTestCol", false, -1),
             String10K,
-            "'" + String10K + "'");
+            String10K.Quote());
     }
 
     [Fact]
@@ -67,7 +67,7 @@ public class MssDataWriterTestsForStrings : MssDataWriterTestBase
         await TestWrite(
             new SqlServerNChar(101, "MyTestCol", false, 10),
             "Arveﯵ",
-            "'Arveﯵ'");
+            "Arveﯵ     ".Quote());
     }
 
     [Fact]
@@ -75,8 +75,8 @@ public class MssDataWriterTestsForStrings : MssDataWriterTestBase
     {
         await TestWrite(
             new SqlServerNChar(101, "MyTestCol", false, 15),
-            "Arveﯵ's vodka",
-            "'Arveﯵ''s vodka'");
+            $"Arveﯵ{Constants.QuoteChar}s vodka",
+            $"Arveﯵ{Constants.QuoteChar}{Constants.QuoteChar}s vodka  ".Quote());
     }
 
     [Fact]
@@ -85,7 +85,7 @@ public class MssDataWriterTestsForStrings : MssDataWriterTestBase
         await TestWrite(
             new SqlServerNChar(101, "MyTestCol", false, 10),
             "12345678ﯵ\\",
-            "'12345678ﯵ\\'");
+            "12345678ﯵ\\".Quote());
     }
 
     [Fact]
@@ -93,8 +93,8 @@ public class MssDataWriterTestsForStrings : MssDataWriterTestBase
     {
         await TestWrite(
             new SqlServerNVarChar(101, "MyTestCol", false, 15),
-            "Arveﯵ's vodka",
-            "'Arveﯵ''s vodka'");
+            $"Arveﯵ{Constants.QuoteChar}s vodka",
+            $"Arveﯵ{Constants.QuoteChar}{Constants.QuoteChar}s vodka".Quote());
     }
 
     [Fact]
@@ -103,7 +103,7 @@ public class MssDataWriterTestsForStrings : MssDataWriterTestBase
         await TestWrite(
             new SqlServerNVarChar(101, "MyTestCol", false, 10),
             "\\ﯵArve",
-            "'\\ﯵArve'");
+            "\\ﯵArve".Quote());
     }
 
     [Fact]
@@ -112,6 +112,6 @@ public class MssDataWriterTestsForStrings : MssDataWriterTestBase
         await TestWrite(
             new SqlServerNVarChar(101, "MyTestCol", false, -1),
             NString10K,
-            "'" + NString10K + "'");
+            NString10K.Quote());
     }
 }

@@ -90,4 +90,15 @@ public class PgDataReaderStringTests : PgDataReaderTestBase
 
         colValue.Should().BeNull();
     }
+
+    [Fact]
+    public async Task TestVarChar_When_Comma()
+    {
+        // Arrange
+        var col = new PostgresVarChar(1, ColName, true, 10);
+        var colValue = await TestDataReader<string?>(
+            GetName(), col, ",");
+
+        colValue.Should().BeNull();
+    }
 }

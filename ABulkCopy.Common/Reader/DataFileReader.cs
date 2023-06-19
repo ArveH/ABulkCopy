@@ -11,8 +11,6 @@ public class DataFileReader : IDataFileReader, IDisposable
         set => _stream = value;
     }
 
-    private const int QuoteChar = '"';
-    private const int ColumnSeparator = ',';
     private readonly StringBuilder _columnHolder = new(10_485_760);
 
     public DataFileReader(
@@ -45,7 +43,7 @@ public class DataFileReader : IDataFileReader, IDisposable
         _logger.Verbose("Reading value for column '{ColumnName}' row {RowCount}",
             RowCounter, colName);
         _columnHolder.Clear();
-        if (CurrentChar == QuoteChar)
+        if (CurrentChar == Constants.QuoteChar)
         {
             ReadQuotedValue(colName);
         }
@@ -63,9 +61,9 @@ public class DataFileReader : IDataFileReader, IDisposable
         ReadQuote(colName, "opening");
         while (CurrentChar >= 0)
         {
-            if (CurrentChar == QuoteChar)
+            if (CurrentChar == Constants.QuoteChar)
             {
-                if (InternalStream.Peek() == QuoteChar)
+                if (InternalStream.Peek() == Constants.QuoteChar)
                 {
                     ReadChar();
                 }
@@ -82,7 +80,7 @@ public class DataFileReader : IDataFileReader, IDisposable
 
     private void ReadUnquotedValue()
     {
-        while (CurrentChar >= 0 && CurrentChar != ColumnSeparator)
+        while (CurrentChar >= 0 && CurrentChar != Constants.ColumnSeparatorChar)
         {
             AddChar();
             ReadChar();
@@ -97,7 +95,7 @@ public class DataFileReader : IDataFileReader, IDisposable
     // quotePlacement is either "opening" or "closing"
     public void ReadQuote(string colName, string quotePlacement)
     {
-        if (CurrentChar != QuoteChar)
+        if (CurrentChar != Constants.QuoteChar)
         {
             _logger.Error($"Expected {quotePlacement} quote for column '{{ColName}}' " +
                           "in line {RowCounter}. Found '{CurrentChar}'",

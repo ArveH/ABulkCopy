@@ -14,4 +14,9 @@ public static class StringExtensions
     {
         return str is MssTypes.Binary or MssTypes.VarBinary or PgTypes.ByteA;
     }
+
+    public static string Quote(this string str)
+    {
+        return Constants.Quote + str + Constants.Quote;
+    }
 }
