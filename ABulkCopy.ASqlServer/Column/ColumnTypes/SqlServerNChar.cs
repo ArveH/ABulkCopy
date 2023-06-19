@@ -7,6 +7,11 @@ public class SqlServerNChar : TemplateStrColumn
     {
     }
 
+    public override string ToString(object value)
+    {
+        return InternalToString(value, false);
+    }
+
     public override string GetTypeClause()
     {
         return $"{Type}({Length})";

@@ -11,13 +11,7 @@ public abstract class TemplateStrColumn : DefaultColumn
 
     public override string ToString(object value)
     {
-        var cleanValue = Convert.ToString(value)?.Replace("'", "''").TrimEnd(' ');
-        if (cleanValue == null)
-        {
-            return "NULL";
-        }
-
-        return "'" + cleanValue + "'";
+        return InternalToString(value);
     }
 
     public override object ToInternalType(string value)
@@ -28,5 +22,20 @@ public abstract class TemplateStrColumn : DefaultColumn
     public override Type GetDotNetType()
     {
         return typeof(string);
+    }
+
+    protected string InternalToString(object value, bool shouldTrim = true)
+    {
+        var cleanValue = Convert.ToString(value)?.Replace(Constants.Quote, $"{Constants.Quote}{Constants.Quote}");
+        if (shouldTrim)
+        {
+            cleanValue = cleanValue?.TrimEnd(' ');
+        }
+        if (cleanValue == null)
+        {
+            return "";
+        }
+
+        return Constants.Quote + cleanValue + Constants.Quote;
     }
 }

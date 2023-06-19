@@ -9,13 +9,7 @@ public class SqlServerChar : TemplateStrColumn
 
     public override string ToString(object value)
     {
-        var cleanValue = Convert.ToString(value)?.Replace("'", "''");
-        if (cleanValue == null)
-        {
-            return "NULL";
-        }
-
-        return "'" + cleanValue + "'";
+        return InternalToString(value, false);
     }
 
     public override string GetTypeClause()
