@@ -1,4 +1,6 @@
-﻿namespace ABulkCopy.Cmd;
+﻿using Microsoft.Extensions.Logging;
+
+namespace ABulkCopy.Cmd;
 
 internal class Program
 {
@@ -7,8 +9,7 @@ internal class Program
         var cmdArguments = GetArguments(args);
         if (cmdArguments == null) return;
         var configuration = GetConfiguration(cmdArguments);
-        var logger = ConfigureLogger(configuration, cmdArguments.LogFile);
-        Log.Logger = logger;
+        Log.Logger = ConfigureLogger(configuration, cmdArguments.LogFile);
         Log.Information("ABulkCopy.Cmd started.");
         Console.WriteLine("ABulkCopy.Cmd started.");
 
@@ -81,7 +82,7 @@ internal class Program
         return result.Value;
     }
 
-    private static ILogger ConfigureLogger(
+    private static Serilog.ILogger ConfigureLogger(
         IConfigurationRoot configuration,
         string fileFullPath)
     {
@@ -105,6 +106,13 @@ internal class Program
         Rdbms rdbms,
         IConfigurationRoot configuration)
     {
+        var loggerFactory = LoggerFactory.Create(loggingBuilder =>
+        {
+            loggingBuilder.ClearProviders();
+            loggingBuilder.AddSerilog(Log.Logger);
+        });
+        builder.Services.AddSingleton(loggerFactory);
+
         builder.Services.AddSingleton(configuration);
         builder.Services.AddSingleton(Log.Logger);
         builder.Services.AddSingleton<IFileSystem>(new FileSystem());
@@ -125,8 +133,6 @@ internal class Program
     {
         var builder = Host.CreateApplicationBuilder();
         builder.Configuration.AddConfiguration(configuration);
-        builder.Logging.AddSerilog();
-
         ConfigureServices(builder, rdbms, configuration);
 
         return builder;
