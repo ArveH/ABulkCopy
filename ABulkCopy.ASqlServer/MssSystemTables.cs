@@ -263,7 +263,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         command.Parameters.AddWithValue("@TableId", tableHeader.Id);
 
         var indexes = new List<IndexDefinition>();
-        await ExecuteReader(command, reader =>
+        await ExecuteReader(command, async reader =>
         {
             try
             {
@@ -279,7 +279,11 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
                         Location = reader.IsDBNull(5) ? "PRIMARY" : reader.GetString(5)
                     }
                 };
+                
+                var indexColumns = await GetIndexColumnInfo(tableHeader.Name, index.Header);
+                index.Columns.AddRange(indexColumns);
                 indexes.Add(index);
+
                 _logger.Verbose("Added index: {IndexName}", index.Header.Name);
             }
             catch (Exception ex)
@@ -296,7 +300,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         return indexes;
     }
 
-    public async Task<IEnumerable<IndexColumn>> GetIndexColumnInfo(string tableName, IndexHeader indexHeader)
+    private async Task<IEnumerable<IndexColumn>> GetIndexColumnInfo(string tableName, IndexHeader indexHeader)
     {
         var command =
             new SqlCommand("select COL_NAME(ic.object_id,ic.column_id) AS column_name, ic.is_descending_key\r\n" +

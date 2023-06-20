@@ -29,6 +29,7 @@ public class MssGetIndexesTest : MssTestBase
         indexes[0].Header.IsUnique.Should().BeFalse();
         indexes[0].Header.Type.Should().Be(IndexType.NonClustered);
         indexes[0].Header.Location.Should().Be("PRIMARY");
+        indexes[0].Columns.Count.Should().Be(1);
     }
 
     [Fact]
@@ -50,7 +51,6 @@ public class MssGetIndexesTest : MssTestBase
         var indexes = (await MssSystemTables.GetIndexes(tableHeader)).ToList();
         indexes.Should().NotBeNull();
         indexes.Count.Should().Be(1);
-        indexes[0].Columns = (await MssSystemTables.GetIndexColumnInfo(_testTableName, indexes[0].Header)).ToList();
 
         // Assert
         indexes[0].Header.Id.Should().BeGreaterThan(0, "because index_id = 0 is of type Heap");

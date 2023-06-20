@@ -12,4 +12,5 @@ public class TableDefinition
     public List<IColumn> Columns { get; set; } = new();
     public PrimaryKey? PrimaryKey { get; set; }
     public List<ForeignKey> ForeignKeys { get; set; } = new();
+    public List<IndexDefinition> Indexes { get; set; } = new();
 }

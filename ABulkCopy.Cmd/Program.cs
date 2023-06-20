@@ -94,7 +94,7 @@ internal class Program
             .Enrich.WithMachineName()
             .WriteTo.File(fileFullPath,
                 outputTemplate: outputTemplate,
-                fileSizeLimitBytes: 10000000,
+                fileSizeLimitBytes: 100000000,
                 rollOnFileSizeLimit: true,
                 shared: true,
                 flushToDiskInterval: TimeSpan.FromSeconds(1));

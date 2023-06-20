@@ -24,13 +24,15 @@ public class MssTableSchema : IMssTableSchema
         var columnInfo = await _systemTables.GetTableColumnInfo(tableHeader);
         var primaryKey = await _systemTables.GetPrimaryKey(tableHeader);
         var foreignKeys = await _systemTables.GetForeignKeys(tableHeader);
+        var indexes = await _systemTables.GetIndexes(tableHeader);
 
         return new TableDefinition(Rdbms.Mss)
         {
             Header = tableHeader,
             Columns = columnInfo.ToList(),
             PrimaryKey = primaryKey,
-            ForeignKeys = foreignKeys.ToList()
+            ForeignKeys = foreignKeys.ToList(),
+            Indexes = indexes.ToList()
         };
     }
 }
