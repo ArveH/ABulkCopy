@@ -2,7 +2,7 @@
 
 // NOTE: Decimal and Numeric are equivalent in Postgres,
 // and can be used interchangeably.
-public class PostgresDecimal : DefaultColumn
+public class PostgresDecimal : PgDefaultColumn
 {
     public PostgresDecimal(
         int id, string name, bool isNullable, int precision, int? scale=0)

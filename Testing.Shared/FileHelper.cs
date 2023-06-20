@@ -9,6 +9,11 @@ public class FileHelper
     {
         var tableDefinition = MssTestData.GetEmpty(tableName);
         tableDefinition.Columns.Add(col);
+        CreateSingleColMssSchemaFile(tableDefinition);
+    }
+
+    public void CreateSingleColMssSchemaFile(TableDefinition tableDefinition)
+    {
         var options = new JsonSerializerOptions
         {
             // Contrast is going to have a field day with me allowing stuff like ' :-)
@@ -20,7 +25,7 @@ public class FileHelper
 
         var fileData = new MockFileData(jsonText);
         FileSystem.AddFile(
-            Path.Combine(DataFolder, $"{tableName}{Constants.SchemaSuffix}"),
+            Path.Combine(DataFolder, $"{tableDefinition.Header.Name}{Constants.SchemaSuffix}"),
             fileData);
     }
 

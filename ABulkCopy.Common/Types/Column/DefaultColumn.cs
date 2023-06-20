@@ -72,7 +72,7 @@ public class DefaultColumn : IColumn
         return IsNullable ? " NULL" : " NOT NULL";
     }
 
-    protected string GetIdentityClause() {
+    protected virtual string GetIdentityClause() {
         return Identity != null ? $" IDENTITY({Identity.Seed},{Identity.Increment})" : string.Empty;
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace ABulkCopy.APostgres.Column.ColumnTypes;
 
-public class PostgresDate : DefaultColumn
+public class PostgresDate : PgDefaultColumn
 {
     public PostgresDate(int id, string name, bool isNullable)
         : base(id, PgTypes.Date, name, isNullable)

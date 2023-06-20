@@ -1,6 +1,6 @@
 ﻿namespace ABulkCopy.APostgres.Column.ColumnTypes;
 
-public class PostgresReal : DefaultColumn
+public class PostgresReal : PgDefaultColumn
 {
     public PostgresReal(int id, string name, bool isNullable)
         : base(id, PgTypes.Real, name, isNullable)

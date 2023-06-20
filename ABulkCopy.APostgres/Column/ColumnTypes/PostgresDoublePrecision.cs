@@ -1,6 +1,6 @@
 ﻿namespace ABulkCopy.APostgres.Column.ColumnTypes;
 
-public class PostgresDoublePrecision: DefaultColumn
+public class PostgresDoublePrecision: PgDefaultColumn
 {
     public PostgresDoublePrecision(int id, string name, bool isNullable)
         : base(id, PgTypes.DoublePrecision, name, isNullable)

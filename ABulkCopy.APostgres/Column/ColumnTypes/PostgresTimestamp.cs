@@ -1,6 +1,6 @@
 ﻿namespace ABulkCopy.APostgres.Column.ColumnTypes;
 
-public class PostgresTimestamp : DefaultColumn
+public class PostgresTimestamp : PgDefaultColumn
 {
     public PostgresTimestamp(int id, string name, bool isNullable, int? precision=null)
         : base(id, PgTypes.Timestamp, name, isNullable)

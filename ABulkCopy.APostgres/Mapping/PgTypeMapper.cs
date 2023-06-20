@@ -63,6 +63,9 @@ public class PgTypeMapper : ITypeConverter
                 newScale,
                 sourceCol.IsNullable,
                 sourceCol.Collation);
+            newColumn.Identity = sourceCol.Identity?.Clone();
+            newColumn.DefaultConstraint = sourceCol.DefaultConstraint?.Clone();
+            newColumn.ComputedDefinition = sourceCol.ComputedDefinition;
             newColumns.Add(newColumn);
         }
         return newColumns;

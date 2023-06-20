@@ -1,6 +1,6 @@
 ﻿namespace ABulkCopy.APostgres.Column.ColumnTypes;
 
-public class PostgresUuid : DefaultColumn
+public class PostgresUuid : PgDefaultColumn
 {
     public PostgresUuid(int id, string name, bool isNullable)
         : base(id, PgTypes.Uuid, name, isNullable)

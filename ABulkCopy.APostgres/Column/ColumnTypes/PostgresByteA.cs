@@ -1,6 +1,6 @@
 ﻿namespace ABulkCopy.APostgres.Column.ColumnTypes;
 
-public class PostgresByteA : DefaultColumn
+public class PostgresByteA : PgDefaultColumn
 {
     public PostgresByteA(int id, string name, bool isNullable)
         : base(id, PgTypes.ByteA, name, isNullable)
