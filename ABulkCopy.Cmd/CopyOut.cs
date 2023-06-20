@@ -24,6 +24,8 @@ public class CopyOut : ICopyOut
 
     public async Task Run(string folder, string searchStr)
     {
+        var sw = new Stopwatch();
+        sw.Start();
         var tableNames = (await _systemTables.GetTableNames(searchStr)).ToList();
         _logger.Information($"Copy out {{TableCount}} {"table".Plural(tableNames.Count)}",
             tableNames.Count);
@@ -55,6 +57,7 @@ public class CopyOut : ICopyOut
                 errors++;
             }
         }
+        sw.Stop();
 
         if (errors > 0)
         {
@@ -68,5 +71,7 @@ public class CopyOut : ICopyOut
                 tableNames.Count);
             Console.WriteLine($"Copy out {tableNames.Count} {"table".Plural(tableNames.Count)} finished.");
         }
+        _logger.Information("Copy took {Elapsed}", sw.Elapsed.ToString("g"));
+        Console.WriteLine($"Copy took {sw.Elapsed:g}");
     }
 }

@@ -28,6 +28,8 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
                            "      AND class = 1\r\n" +
                            "      AND name = N'microsoft_database_tools_support')\r\n" +
                            "   AND name LIKE @SearchString\r\n" +
+                           "   AND is_ms_shipped = 0\r\n" +
+                           "   AND schema_id not in (2, 3, 4, 5)\r\n" + // guest, information_schema, sys, logs
                            "ORDER BY name");
         command.Parameters.AddWithValue("@SearchString", searchString);
 
