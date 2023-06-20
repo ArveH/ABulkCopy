@@ -84,7 +84,7 @@ public class DataFileReaderTests : CommonTestBase
         var testValue = "Some Value";
         // Arrange
         _tableDefinition.Columns.Add(new PostgresVarChar(1, ColName, false, 100, "en_ci_ai"));
-        var dataFileReader = Arrange($"\"{testValue}\",");
+        var dataFileReader = Arrange($"{Constants.QuoteChar}{testValue}{Constants.QuoteChar},");
 
         // Act
         var stringVal = dataFileReader.ReadColumn(ColName);
@@ -96,10 +96,10 @@ public class DataFileReaderTests : CommonTestBase
     [Fact]
     public void TestReadOneRow_When_VarcharContainingQuote()
     {
-        var testValue = "Some \"Value\"";
+        var testValue = $"Some {Constants.QuoteChar}Value{Constants.QuoteChar}";
         // Arrange
         _tableDefinition.Columns.Add(new PostgresVarChar(1, ColName, false, 100, "en_ci_ai"));
-        var dataFileReader = Arrange($"\"{testValue.Replace("\"", "\"\"")}\",");
+        var dataFileReader = Arrange($"{Constants.QuoteChar}{testValue.Replace(Constants.Quote, Constants.Quote+Constants.Quote)}{Constants.QuoteChar},");
 
         // Act
         var stringVal = dataFileReader.ReadColumn(ColName);
@@ -114,7 +114,7 @@ public class DataFileReaderTests : CommonTestBase
         var testValue = "AﯵChar";
         // Arrange
         _tableDefinition.Columns.Add(new PostgresChar(1, ColName, false, 10, "en_ci_ai"));
-        var dataFileReader = Arrange($"\"{testValue}\",");
+        var dataFileReader = Arrange($"{Constants.QuoteChar}{testValue}{Constants.QuoteChar},");
 
         // Act
         var stringVal = dataFileReader.ReadColumn(ColName);
