@@ -1,4 +1,6 @@
-﻿namespace APostgres.Test.SchemaReader;
+﻿using Testing.Shared.SqlServer;
+
+namespace APostgres.Test.SchemaReader;
 
 public class PgSchemaReaderMiscTests : PgSchemaReaderBase
 {

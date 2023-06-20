@@ -1,6 +1,6 @@
-﻿namespace ABulkCopy.Common.Types.Column;
+﻿namespace ABulkCopy.ASqlServer.Column.ColumnTypes;
 
-public abstract class TemplateStrColumn : DefaultColumn
+public abstract class TemplateStrColumn : MssDefaultColumn
 {
     protected TemplateStrColumn(int id, string type, string name, bool isNullable, int length, string? collation = null)
         : base(id, type, name, isNullable)

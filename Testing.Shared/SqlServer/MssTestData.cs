@@ -1,10 +1,10 @@
-﻿namespace Testing.Shared;
+﻿namespace Testing.Shared.SqlServer;
 
 public static class MssTestData
 {
     public static TableDefinition GetEmpty(string name)
     {
-        return new TableDefinition (Rdbms.Mss)
+        return new TableDefinition(Rdbms.Mss)
         {
             Header = new TableHeader
             {
@@ -27,7 +27,7 @@ public static class MssTestData
                 Location = "default",
                 Name = "MssAllTypes",
                 Schema = "dbo"
-             },
+            },
             Columns = new List<IColumn>
             {
                 GetIdColDefinition(101, "Id"),

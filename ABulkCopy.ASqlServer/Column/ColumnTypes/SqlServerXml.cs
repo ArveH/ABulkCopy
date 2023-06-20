@@ -1,6 +1,6 @@
 ﻿namespace ABulkCopy.ASqlServer.Column.ColumnTypes;
 
-public class SqlServerXml : DefaultColumn
+public class SqlServerXml : MssDefaultColumn
 {
     public SqlServerXml(int id, string name, bool isNullable)
         : base(id, MssTypes.Xml, name, isNullable)

@@ -1,6 +1,6 @@
 ﻿namespace ABulkCopy.ASqlServer.Column.ColumnTypes;
 
-public class SqlServerUniqueIdentifier : DefaultColumn
+public class SqlServerUniqueIdentifier : MssDefaultColumn
 {
     public SqlServerUniqueIdentifier(int id, string name, bool isNullable)
         : base(id, MssTypes.UniqueIdentifier, name, isNullable)

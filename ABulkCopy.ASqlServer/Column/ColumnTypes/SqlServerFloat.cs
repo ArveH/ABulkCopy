@@ -1,6 +1,6 @@
 ﻿namespace ABulkCopy.ASqlServer.Column.ColumnTypes;
 
-public class SqlServerFloat : DefaultColumn
+public class SqlServerFloat : MssDefaultColumn
 {
     public SqlServerFloat(int id, string name, bool isNullable, int precision = 53)
         : base(id, MssTypes.Float, name, isNullable)

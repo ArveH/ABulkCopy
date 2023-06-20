@@ -1,4 +1,6 @@
-﻿namespace APostgres.Test.PgCmd;
+﻿using Testing.Shared.SqlServer;
+
+namespace APostgres.Test.PgCmd;
 
 public class PgCmdTests : PgTestBase
 {
@@ -11,18 +13,18 @@ public class PgCmdTests : PgTestBase
     {
         // Arrange
         var tableName = GetName();
-        var inputDefinition = MssTestData.GetEmpty(tableName);
+        var inputDefinition = PgTestData.GetEmpty(tableName);
         inputDefinition.Header.Identity = new Identity
         {
             Increment = 10,
             Seed = 100
         };
-        var identityCol = new SqlServerBigInt(1, "agrtid", false)
+        var identityCol = new PostgresBigInt(1, "agrtid", false)
         {
             Identity = inputDefinition.Header.Identity
         };
         inputDefinition.Columns.Add(identityCol);
-        inputDefinition.Columns.Add(new SqlServerNVarChar(2, "Name", true, 100));
+        inputDefinition.Columns.Add(new PostgresVarChar(2, "Name", true, 100));
         await PgDbHelper.Instance.DropTable(tableName);
 
         // Act

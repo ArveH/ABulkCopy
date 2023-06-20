@@ -1,8 +1,8 @@
-﻿namespace ABulkCopy.Common.Types.Column;
+﻿namespace ABulkCopy.APostgres.Column.ColumnTypes;
 
-public abstract class TemplateNumberColumn : DefaultColumn
+public abstract class PgTemplateNumberColumn : PgDefaultColumn
 {
-    protected TemplateNumberColumn(
+    protected PgTemplateNumberColumn(
         int id, string type, string name, bool isNullable, int length, int precision = 0, int scale = 0)
         : base(id, type, name, isNullable)
     {

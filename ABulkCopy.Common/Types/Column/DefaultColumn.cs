@@ -73,6 +73,6 @@ public class DefaultColumn : IColumn
     }
 
     protected virtual string GetIdentityClause() {
-        return Identity != null ? $" IDENTITY({Identity.Seed},{Identity.Increment})" : string.Empty;
+        throw new NotImplementedException();
     }
 }

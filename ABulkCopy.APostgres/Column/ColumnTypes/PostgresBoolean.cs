@@ -1,6 +1,6 @@
 ﻿namespace ABulkCopy.APostgres.Column.ColumnTypes;
 
-public class PostgresBoolean : TemplateNumberColumn
+public class PostgresBoolean : PgTemplateNumberColumn
 {
     public PostgresBoolean(
         int id, string name, bool isNullable)

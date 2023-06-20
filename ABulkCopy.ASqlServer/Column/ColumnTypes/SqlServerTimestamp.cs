@@ -1,6 +1,6 @@
 ﻿namespace ABulkCopy.ASqlServer.Column.ColumnTypes;
 
-public class SqlServerTimestamp : DefaultColumn
+public class SqlServerTimestamp : MssDefaultColumn
 {
     public SqlServerTimestamp(int id, string name, bool isNullable)
         : base(id, MssTypes.Timestamp, name, isNullable)

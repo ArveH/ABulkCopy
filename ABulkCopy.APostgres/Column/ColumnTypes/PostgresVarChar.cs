@@ -1,6 +1,6 @@
 ﻿namespace ABulkCopy.APostgres.Column.ColumnTypes;
 
-public class PostgresVarChar : TemplateStrColumn
+public class PostgresVarChar : PgTemplateStrColumn
 {
     public PostgresVarChar(int id, string name, bool isNullable, int length, string? collation = null)
         : base(id, PgTypes.VarChar, name, isNullable, length, collation)

@@ -1,6 +1,6 @@
 ﻿namespace ABulkCopy.ASqlServer.Column.ColumnTypes;
 
-public class SqlServerBinary : DefaultColumn
+public class SqlServerBinary : MssDefaultColumn
 {
     public SqlServerBinary(int id, string name, bool isNullable, int length)
         : base(id, MssTypes.Binary, name, isNullable)

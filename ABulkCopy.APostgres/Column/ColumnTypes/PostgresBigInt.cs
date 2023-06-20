@@ -1,6 +1,6 @@
 ﻿namespace ABulkCopy.APostgres.Column.ColumnTypes;
 
-public class PostgresBigInt : TemplateNumberColumn
+public class PostgresBigInt : PgTemplateNumberColumn
 {
     public PostgresBigInt(
         int id, string name, bool isNullable)

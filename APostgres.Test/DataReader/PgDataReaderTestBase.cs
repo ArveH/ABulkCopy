@@ -1,4 +1,6 @@
-﻿namespace APostgres.Test.DataReader;
+﻿using Testing.Shared.SqlServer;
+
+namespace APostgres.Test.DataReader;
 
 public class PgDataReaderTestBase : PgTestBase
 {

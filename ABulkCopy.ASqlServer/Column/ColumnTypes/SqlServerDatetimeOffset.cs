@@ -1,6 +1,6 @@
 ﻿namespace ABulkCopy.ASqlServer.Column.ColumnTypes;
 
-public class SqlServerDateTimeOffset : DefaultColumn
+public class SqlServerDateTimeOffset : MssDefaultColumn
 {
     public SqlServerDateTimeOffset(int id, string name, bool isNullable, int? scale = 7)
         : base(id, MssTypes.DateTimeOffset, name, isNullable)

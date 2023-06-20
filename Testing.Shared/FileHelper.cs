@@ -1,4 +1,6 @@
-﻿namespace Testing.Shared;
+﻿using Testing.Shared.SqlServer;
+
+namespace Testing.Shared;
 
 public class FileHelper
 {

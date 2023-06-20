@@ -1,3 +1,5 @@
+using Testing.Shared.SqlServer;
+
 namespace Common.Test;
 
 public class SchemaWriterTests

@@ -1,6 +1,6 @@
 ﻿namespace ABulkCopy.ASqlServer.Column.ColumnTypes;
 
-public class SqlServerDate : DefaultColumn
+public class SqlServerDate : MssDefaultColumn
 {
     public SqlServerDate(int id, string name, bool isNullable)
         : base(id, MssTypes.Date, name, isNullable)

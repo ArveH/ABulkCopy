@@ -1,6 +1,6 @@
 ﻿namespace ABulkCopy.ASqlServer.Column.ColumnTypes;
 
-public class SqlServerSmallDateTime : DefaultColumn
+public class SqlServerSmallDateTime : MssDefaultColumn
 {
     public SqlServerSmallDateTime(int id, string name, bool isNullable)
         : base(id, MssTypes.SmallDateTime, name, isNullable)

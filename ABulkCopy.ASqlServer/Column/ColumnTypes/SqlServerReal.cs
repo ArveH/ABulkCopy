@@ -1,6 +1,6 @@
 ﻿namespace ABulkCopy.ASqlServer.Column.ColumnTypes;
 
-public class SqlServerReal : DefaultColumn
+public class SqlServerReal : MssDefaultColumn
 {
     public SqlServerReal(int id, string name, bool isNullable)
         : base(id, MssTypes.Real, name, isNullable)
