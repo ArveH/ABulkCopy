@@ -1,6 +1,7 @@
 // Global using directives
 
 global using ABulkCopy.ASqlServer.Column;
+global using ABulkCopy.ASqlServer.Column.ColumnTypes;
 global using ABulkCopy.Common;
 global using ABulkCopy.Common.Database;
 global using ABulkCopy.Common.Extensions;
@@ -14,4 +15,3 @@ global using Serilog;
 global using System.Data;
 global using System.Data.SqlClient;
 global using System.Globalization;
-global using System.Text.Json.Serialization;

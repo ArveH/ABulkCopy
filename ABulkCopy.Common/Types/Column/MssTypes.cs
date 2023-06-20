@@ -12,6 +12,7 @@ public static class MssTypes
     public const string DateTimeOffset = "datetimeoffset";
     public const string Decimal = "decimal";
     public const string Float = "float";
+    public const string Image = "image";
     public const string Int = "int";
     public const string Money = "money";
     public const string NChar = "nchar";
@@ -43,6 +44,7 @@ public static class MssTypes
         DateTimeOffset,
         Decimal,
         Float,
+        Image,
         Int,
         Money,
         NChar,

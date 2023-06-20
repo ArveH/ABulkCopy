@@ -21,7 +21,7 @@ public class MssDataWriterTestsMisc : MssDataWriterTestBase
     }
 
     [Fact]
-    public async Task TestRaw_When_OneRow()
+    public async Task TestVarBinary_When_OneRow()
     {
         var value = AllTypes.SampleValues.Varbinary10K;
         var col = new SqlServerVarBinary(101, "MyTestCol", false, 10000);
@@ -52,7 +52,38 @@ public class MssDataWriterTestsMisc : MssDataWriterTestBase
     }
 
     [Fact]
-    public async Task TestRaw_When_3Rows_And_NullValue()
+    public async Task TestImage_When_OneRow()
+    {
+        var value = AllTypes.SampleValues.Varbinary10K;
+        var col = new SqlServerImage(101, "MyTestCol", false);
+        OriginalTableDefinition.Columns.Add(col);
+        await MssDbHelper.Instance.DropTable(TestTableName);
+        await MssDbHelper.Instance.CreateTable(OriginalTableDefinition);
+        await MssDbHelper.Instance.InsertIntoSingleColumnTable(
+            TestTableName, value, SqlDbType.Image);
+
+        // Act
+        try
+        {
+            await TestDataWriter.Write(
+                OriginalTableDefinition,
+                TestPath);
+        }
+        finally
+        {
+            await MssDbHelper.Instance.DropTable(TestTableName);
+        }
+
+        // Assert
+        var dataFile = await GetJsonText();
+        dataFile.TrimEnd().Should().Be("i000000000000000.raw,");
+        var fullPath = Path.Combine(TestPath, TestTableName, "MyTestCol", $"i{0:D15}.raw");
+        MockFileSystem.FileExists(fullPath).Should().BeTrue($"because '{fullPath}' should exist");
+        MockFileSystem.FileInfo.New(fullPath).Length.Should().Be(10000);
+    }
+
+    [Fact]
+    public async Task TestVarBinary_When_3Rows_And_NullValue()
     {
         var col = new SqlServerVarBinary(101, "MyTestCol", true, -1);
         OriginalTableDefinition.Columns.Add(col);

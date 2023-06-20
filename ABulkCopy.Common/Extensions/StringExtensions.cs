@@ -12,7 +12,7 @@ public static class StringExtensions
 
     public static bool IsRaw(this string str)
     {
-        return str is MssTypes.Binary or MssTypes.VarBinary or PgTypes.ByteA;
+        return str is MssTypes.Binary or MssTypes.VarBinary or MssTypes.Image or PgTypes.ByteA;
     }
 
     public static string Quote(this string str)

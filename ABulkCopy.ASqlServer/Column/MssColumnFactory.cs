@@ -1,16 +1,7 @@
-﻿using ABulkCopy.ASqlServer.Column.ColumnTypes;
-
-namespace ABulkCopy.ASqlServer.Column;
+﻿namespace ABulkCopy.ASqlServer.Column;
 
 public class MssColumnFactory : IMssColumnFactory
 {
-    private readonly ILogger _logger;
-
-    public MssColumnFactory(ILogger logger)
-    {
-        _logger = logger;
-    }
-
     public IColumn Create(
         int id,
         string name,
@@ -48,6 +39,8 @@ public class MssColumnFactory : IMssColumnFactory
                     scale);
             case MssTypes.Float:
                 return new SqlServerFloat(id, name, isNullable);
+            case MssTypes.Image:
+                return new SqlServerImage(id, name, isNullable);
             case MssTypes.Int:
                 return new SqlServerInt(id, name, isNullable);
             case MssTypes.Money:
