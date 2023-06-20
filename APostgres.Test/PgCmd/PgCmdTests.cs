@@ -32,8 +32,8 @@ public class PgCmdTests : PgTestBase
         try
         {
             await PgDbHelper.Instance.CreateTable(inputDefinition);
-            await PgDbHelper.Instance.ExecuteNonQuery($"insert into {tableName} (Name) values ('Arve1')");
-            await PgDbHelper.Instance.ExecuteNonQuery($"insert into {tableName} (Name) values ('Arve2')");
+            await PgDbHelper.Instance.ExecuteNonQuery($"insert into \"{tableName}\" (\"Name\") values ('Arve1')");
+            await PgDbHelper.Instance.ExecuteNonQuery($"insert into \"{tableName}\" (\"Name\") values ('Arve2')");
             identityValues = (await PgDbHelper.Instance.SelectColumn<long>(tableName, "agrtid")).ToList();
         }
         finally
