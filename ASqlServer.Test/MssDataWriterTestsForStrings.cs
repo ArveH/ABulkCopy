@@ -114,4 +114,26 @@ public class MssDataWriterTestsForStrings : MssDataWriterTestBase
             NString10K,
             NString10K.Quote());
     }
+
+    [Fact]
+    public async Task TestWriteText()
+    {
+        var jsonTxt = await ArrangeAndAct(
+            new SqlServerText(101, "MyTestCol", false), 
+            String10K,
+            SqlDbType.Text);
+
+        jsonTxt.TrimEnd().Should().Be($"{String10K.Quote()}{Constants.ColumnSeparatorChar}");
+    }
+
+    [Fact]
+    public async Task TestWriteNText()
+    {
+        var jsonTxt = await ArrangeAndAct(
+            new SqlServerNText(101, "MyTestCol", false), 
+            NString10K,
+            SqlDbType.NText);
+
+        jsonTxt.TrimEnd().Should().Be($"{NString10K.Quote()}{Constants.ColumnSeparatorChar}");
+    }
 }

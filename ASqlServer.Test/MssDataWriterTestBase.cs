@@ -49,7 +49,7 @@ public abstract class MssDataWriterTestBase : MssTestBase
     {
         // Assert
         var jsonTxt = await ArrangeAndAct(col, value);
-        jsonTxt.TrimEnd().Should().Be(value + ",");
+        jsonTxt.TrimEnd().Should().Be(value + Constants.ColumnSeparator);
     }
 
     protected async Task TestWrite(
@@ -59,7 +59,7 @@ public abstract class MssDataWriterTestBase : MssTestBase
     {
         var jsonTxt = await ArrangeAndAct(col, actual);
         expected ??= actual;
-        jsonTxt.TrimEnd().Should().Be($"{expected},");
+        jsonTxt.TrimEnd().Should().Be($"{expected}{Constants.ColumnSeparatorChar}");
     }
 
     protected static readonly string String10K = new('a', 10000);

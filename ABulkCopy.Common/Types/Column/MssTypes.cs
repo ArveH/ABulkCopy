@@ -16,11 +16,13 @@ public static class MssTypes
     public const string Money = "money";
     public const string NChar = "nchar";
     public const string Numeric = "numeric";
+    public const string NText = "ntext";
     public const string NVarChar = "nvarchar";
     public const string Real = "real";
     public const string SmallDateTime = "smalldatetime";
     public const string SmallInt = "smallint";
     public const string SmallMoney = "smallmoney";
+    public const string Text = "text";
     public const string Time = "time";
     public const string Timestamp = "timestamp";
     public const string TinyInt = "tinyint";
@@ -45,11 +47,13 @@ public static class MssTypes
         Money,
         NChar,
         Numeric,
+        NText,
         NVarChar,
         Real,
         SmallDateTime,
         SmallInt,
         SmallMoney,
+        Text,
         Time,
         Timestamp,
         TinyInt,
