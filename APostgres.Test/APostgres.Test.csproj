@@ -47,4 +47,8 @@
     <ProjectReference Include="..\Testing.Shared\Testing.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="PgCmd\" />
+  </ItemGroup>
+
 </Project>

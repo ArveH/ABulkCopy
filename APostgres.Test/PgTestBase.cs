@@ -36,4 +36,17 @@ public class PgTestBase
 
         PgContext = new PgContext(TestLoggerFactory, TestConfiguration);
     }
+
+    //[MethodImpl(MethodImplOptions.NoInlining)]
+    protected string GetName()
+    {
+        var st = new StackTrace();
+        var sf = st.GetFrame(3);
+        if (sf == null)
+        {
+            throw new InvalidOperationException("Stack Frame is null");
+        }
+
+        return Environment.MachineName + sf.GetMethod()?.Name ?? throw new InvalidOperationException("Method is null");
+    }
 }

@@ -14,6 +14,7 @@ global using ABulkCopy.Common.Types.Table;
 global using FluentAssertions;
 global using Microsoft.Extensions.Configuration;
 global using Serilog;
+global using System.Diagnostics;
 global using System.IO.Abstractions.TestingHelpers;
 global using Testing.Shared;
 global using Testing.Shared.Postgres;

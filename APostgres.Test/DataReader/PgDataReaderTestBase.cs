@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace APostgres.Test.DataReader;
+﻿namespace APostgres.Test.DataReader;
 
 public class PgDataReaderTestBase : PgTestBase
 {
@@ -47,18 +45,5 @@ public class PgDataReaderTestBase : PgTestBase
             new DataFileReader(FileHelper.FileSystem, TestLogger), 
             TestLogger);
         await dataReader.Read(FileHelper.DataFolder, tableDefinition);
-    }
-
-    //[MethodImpl(MethodImplOptions.NoInlining)]
-    protected string GetName()
-    {
-        var st = new StackTrace();
-        var sf = st.GetFrame(3);
-        if (sf == null)
-        {
-            throw new InvalidOperationException("Stack Frame is null");
-        }
-
-        return sf.GetMethod()?.Name ?? throw new InvalidOperationException("Method is null");
     }
 }
