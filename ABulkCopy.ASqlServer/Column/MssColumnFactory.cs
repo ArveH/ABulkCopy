@@ -54,6 +54,8 @@ public class MssColumnFactory : IMssColumnFactory
                 return new SqlServerMoney(id, name, isNullable);
             case MssTypes.NChar:
                 return new SqlServerNChar(id, name, isNullable, length, collation);
+            case MssTypes.NText:
+                return new SqlServerNText(id, name, isNullable, collation);
             case MssTypes.NVarChar:
                 return new SqlServerNVarChar(id, name, isNullable, length, collation);
             case MssTypes.Real:
@@ -64,6 +66,8 @@ public class MssColumnFactory : IMssColumnFactory
                 return new SqlServerSmallInt(id, name, isNullable);
             case MssTypes.SmallMoney:
                 return new SqlServerSmallMoney(id, name, isNullable);
+            case MssTypes.Text:
+                return new SqlServerText(id, name, isNullable, collation);
             case MssTypes.Time:
                 return new SqlServerTime(id, name, isNullable, scale);
             case MssTypes.TinyInt:
