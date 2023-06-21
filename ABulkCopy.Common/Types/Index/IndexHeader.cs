@@ -8,4 +8,17 @@ public class IndexHeader
     public IndexType Type { get; set; }
     public required string Location { get; set; }
     public bool IsUnique { get; set; }
+
+    public IndexHeader Clone()
+    {
+        return new IndexHeader
+        {
+            Id = Id,
+            TableId = TableId,
+            Name = Name,
+            Type = Type,
+            Location = Location,
+            IsUnique = IsUnique
+        };
+    }
 }

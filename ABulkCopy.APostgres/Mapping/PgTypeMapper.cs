@@ -32,6 +32,9 @@ public class PgTypeMapper : ITypeConverter
             },
             Columns = ConvertColumns(sourceDefinition, mappings).ToList()
         };
+        tableDefinition.ForeignKeys.AddRange(sourceDefinition.ForeignKeys.Select(k => k.Clone()));
+        tableDefinition.Indexes.AddRange(sourceDefinition.Indexes.Select(i => i.Clone()));
+        tableDefinition.PrimaryKey = sourceDefinition.PrimaryKey?.Clone();
 
         return tableDefinition;
     }

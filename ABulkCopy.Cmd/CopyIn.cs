@@ -38,6 +38,16 @@ public class CopyIn : ICopyIn
                 await _pgCmd.CreateTable(tableDefinition);
                 var rows = await _aDataReader.Read(folder, tableDefinition);
                 Console.WriteLine($"Read {rows} {"row".Plural(rows)} for table '{tableDefinition.Header.Name}'");
+                _logger.Information($"Read {{Rows}} {"row".Plural(rows)} for table '{{TableName}}'",
+                    rows, tableDefinition.Header.Name);
+
+                foreach (var indexDefinition in tableDefinition.Indexes)
+                {
+                    await _pgCmd.CreateIndex(tableDefinition.Header.Name, indexDefinition);
+                    Console.WriteLine($"Created index '{indexDefinition.Header.Name}' for table '{tableDefinition.Header.Name}'");
+                    _logger.Information("Created index '{IndexName}' for table '{TableName}'",
+                        indexDefinition.Header.Name, tableDefinition.Header.Name);
+                }
             }
             catch (Exception ex)
             {
@@ -50,15 +60,18 @@ public class CopyIn : ICopyIn
 
         if (errors > 0)
         {
-            _logger.Warning($"Creating and filling {{TableCount}} {"table".Plural(schemaFiles.Count)} finished with {{Errors}} {"error".Plural(errors)}", 
+            _logger.Warning(
+                $"Creating and filling {{TableCount}} {"table".Plural(schemaFiles.Count)} finished with {{Errors}} {"error".Plural(errors)}",
                 schemaFiles.Count, errors);
-            Console.WriteLine($"Creating and filling {schemaFiles.Count} {"table".Plural(schemaFiles.Count)} finished with {errors} {"error".Plural(errors)}");
+            Console.WriteLine(
+                $"Creating and filling {schemaFiles.Count} {"table".Plural(schemaFiles.Count)} finished with {errors} {"error".Plural(errors)}");
         }
         else
         {
-            _logger.Information($"Creating and filling {{TableCount}} {"table".Plural(schemaFiles.Count)} finished.", 
+            _logger.Information($"Creating and filling {{TableCount}} {"table".Plural(schemaFiles.Count)} finished.",
                 schemaFiles.Count);
-            Console.WriteLine($"Creating and filling {schemaFiles.Count} {"table".Plural(schemaFiles.Count)} finished.");
+            Console.WriteLine(
+                $"Creating and filling {schemaFiles.Count} {"table".Plural(schemaFiles.Count)} finished.");
         }
     }
 }

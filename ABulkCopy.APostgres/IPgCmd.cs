@@ -5,4 +5,5 @@ public interface IPgCmd
     Task CreateTable(TableDefinition tableDefinition, bool addIfNotExists = false);
     Task ExecuteNonQuery(string sqlString);
     Task DropTable(string tableName);
+    Task CreateIndex(string tableName, IndexDefinition indexDefinition);
 }

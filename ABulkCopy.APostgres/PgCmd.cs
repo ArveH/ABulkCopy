@@ -39,6 +39,54 @@ public class PgCmd : IPgCmd
         await ExecuteNonQuery(sb.ToString());
     }
 
+    public async Task CreateIndex(string tableName, IndexDefinition indexDefinition)
+    {
+        var sb = new StringBuilder();
+        sb.Append("create ");
+        if (indexDefinition.Header.IsUnique) sb.Append("unique ");
+        sb.Append("index ");
+        sb.AppendLine($"\"{indexDefinition.Header.Name}\" ");
+        sb.Append("on ");
+        sb.AppendLine($"\"{tableName}\" (");
+        var first = true;
+        foreach (var column in indexDefinition.Columns.Where(c => !c.IsIncluded))
+        {
+            if (first)
+            {
+                first = false;
+            }
+            else
+            {
+                sb.AppendLine(",");
+            }
+
+            sb.Append($"    \"{column.Name}\" ");
+            if (column.Direction == Direction.Descending) sb.Append("desc ");
+        }
+        sb.AppendLine(")");
+        if (indexDefinition.Columns.Any(c => c.IsIncluded))
+        {
+            sb.AppendLine(" include (");
+            first = true;
+            foreach (var column in indexDefinition.Columns.Where(c => c.IsIncluded))
+            {
+                if (first)
+                {
+                    first = false;
+                }
+                else
+                {
+                    sb.AppendLine(",");
+                }
+
+                sb.Append($"    \"{column.Name}\" ");
+            }
+            sb.Append(")");
+        }
+
+        await ExecuteNonQuery(sb.ToString());
+    }
+
     public async Task ExecuteNonQuery(string sqlString)
     {
         await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);

@@ -8,4 +8,17 @@ public class ForeignKey
     public required string TableReference { get; set; }
     public DeleteAction DeleteAction { get; set; } = DeleteAction.NoAction;
     public UpdateAction UpdateAction { get; set; } = UpdateAction.NoAction;
+
+    public ForeignKey Clone()
+    {
+        return new ForeignKey
+        {
+            Name = Name,
+            ColName = ColName,
+            ColumnReference = ColumnReference,
+            TableReference = TableReference,
+            DeleteAction = DeleteAction,
+            UpdateAction = UpdateAction
+        };
+    }
 }
