@@ -120,9 +120,10 @@ public class PgCmdTests : PgTestBase
     }
 
     [Theory]
-    [InlineData("(CONVERT([datetime],N'19000101 00:00:00:000',(9)))", "19000101 00:00:00")]
-    [InlineData("(CONVERT([datetime],'JAN 1 1900 00:00:01:000',(9)))", "19000101 00:00:01")]
-    [InlineData("(CONVERT([datetime],'JAN 1 1900',(9)))", "19000101 00:00:00")]
+    [InlineData("(CONVERT([datetime],N'19000101 00:00:00:000',(9)))", "19000101 00:00:00:000")]
+    [InlineData("(CONVERT([datetime],'JAN 1 1900 00:00:01:000',(9)))", "19000101 00:00:01:000")]
+    [InlineData("(CONVERT([datetime],'20991231 23:59:59:998',(9)))", "20991231 23:59:59:998")]
+    [InlineData("(CONVERT([datetime],'JAN 1 1900',(9)))", "19000101 00:00:00:000")]
     [InlineData("(getdate())", "today")]
     public async Task TestCreateTable_When_MssDateTimeDefault(string val, string expected)
     {
@@ -158,8 +159,8 @@ public class PgCmdTests : PgTestBase
 
         // Assert
         statusValues.Count.Should().Be(1);
-        var actual = statusValues[0].ToString("yyyyMMdd HH:mm:ss");
-        if (expected == "today") expected = DateTime.Today.ToString("yyyyMMdd HH:mm:ss");
+        var actual = statusValues[0].ToString("yyyyMMdd HH:mm:ss:fff");
+        if (expected == "today") expected = DateTime.Today.ToString("yyyyMMdd HH:mm:ss:fff");
         actual.Should().Be(expected);
     }
 

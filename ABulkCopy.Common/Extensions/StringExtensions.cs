@@ -3,6 +3,7 @@
 public static class StringExtensions
 {
     private static readonly Regex SingleQuoteRegex = new("('[^']*')");
+    private static readonly Regex LongDateRegex = new("('[0-9]{8}.[0-9]{2}:[0-9]{2}:[0-9]{2}:[0-9]{3}[^']*')");
 
     public static string Plural<T>(this string str, T cnt)
         where T : INumber<T>
@@ -26,7 +27,13 @@ public static class StringExtensions
         return str[offset..^offset];
     }
 
-    public static string? ExtractDateString(this string str)
+    public static string? ExtractSingleQuoteString(this string str)
+    {
+        var match = SingleQuoteRegex.Match(str);
+        return match.Success ? match.Groups[1].Value : null;
+
+    }
+    public static string? ExtractLongDateString(this string str)
     {
         var match = SingleQuoteRegex.Match(str);
         return match.Success ? match.Groups[1].Value : null;
