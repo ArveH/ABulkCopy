@@ -11,9 +11,4 @@ public class PgDefaultColumn : DefaultColumn
         return Identity == null ? string.Empty
             : $" GENERATED ALWAYS AS IDENTITY (INCREMENT BY {Identity.Increment} START WITH {Identity.Seed})";
     }
-
-    protected override string GetDefaultClause()
-    {
-        return DefaultConstraint == null ? " " : $" DEFAULT {DefaultConstraint.Definition.TrimParentheses()}";
-    }
 }

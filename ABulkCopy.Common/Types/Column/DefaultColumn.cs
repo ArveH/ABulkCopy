@@ -78,6 +78,6 @@ public class DefaultColumn : IColumn
 
     protected virtual string GetDefaultClause()
     {
-        return DefaultConstraint == null ? " " : $" DEFAULT {DefaultConstraint.Definition}";
+        return DefaultConstraint == null ? " " : $" DEFAULT {DefaultConstraint.Definition.TrimParentheses()}";
     }
 }

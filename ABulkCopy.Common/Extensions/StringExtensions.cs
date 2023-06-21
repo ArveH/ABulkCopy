@@ -22,6 +22,7 @@ public static class StringExtensions
 
     public static string TrimParentheses(this string str)
     {
-        return str.TrimStart('(').TrimEnd(')');
+        var offset = str.TakeWhile(c => c == '(').Count();
+        return str[offset..^offset];
     }
 }

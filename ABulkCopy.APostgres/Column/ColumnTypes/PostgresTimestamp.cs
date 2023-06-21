@@ -2,7 +2,7 @@
 
 public class PostgresTimestamp : PgDefaultColumn
 {
-    public PostgresTimestamp(int id, string name, bool isNullable, int? precision=null)
+    public PostgresTimestamp(int id, string name, bool isNullable, int? precision = null)
         : base(id, PgTypes.Timestamp, name, isNullable)
     {
         Precision = precision is null or > 6 or < 0 ? 6 : precision;
@@ -26,5 +26,18 @@ public class PostgresTimestamp : PgDefaultColumn
     public override Type GetDotNetType()
     {
         return typeof(DateTime);
+    }
+
+    protected override string GetDefaultClause()
+    {
+        if (DefaultConstraint == null) return "";
+
+        if (DefaultConstraint.Definition.Contains("Convert", StringComparison.InvariantCultureIgnoreCase) &&
+            DefaultConstraint.Definition.Contains("", StringComparison.InvariantCultureIgnoreCase))
+        {
+            return " DEFAULT to_timestamp('01 Jan 1900', 'DD Mon YYYY')";
+        }
+
+        return $" DEFAULT {DefaultConstraint.Definition}";
     }
 }
