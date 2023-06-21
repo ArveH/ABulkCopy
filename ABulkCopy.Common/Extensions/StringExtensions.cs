@@ -1,9 +1,9 @@
-﻿using System.Numerics;
-
-namespace ABulkCopy.Common.Extensions;
+﻿namespace ABulkCopy.Common.Extensions;
 
 public static class StringExtensions
 {
+    private static readonly Regex SingleQuoteRegex = new("('[^']*')");
+
     public static string Plural<T>(this string str, T cnt)
         where T : INumber<T>
     {
@@ -24,5 +24,11 @@ public static class StringExtensions
     {
         var offset = str.TakeWhile(c => c == '(').Count();
         return str[offset..^offset];
+    }
+
+    public static string? ExtractDateString(this string str)
+    {
+        var match = SingleQuoteRegex.Match(str);
+        return match.Success ? match.Groups[1].Value : null;
     }
 }

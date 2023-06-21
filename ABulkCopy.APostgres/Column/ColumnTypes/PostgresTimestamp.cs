@@ -32,10 +32,13 @@ public class PostgresTimestamp : PgDefaultColumn
     {
         if (DefaultConstraint == null) return "";
 
+        var dateStr = DefaultConstraint.Definition.ExtractDateString();
+
         if (DefaultConstraint.Definition.Contains("Convert", StringComparison.InvariantCultureIgnoreCase) &&
-            DefaultConstraint.Definition.Contains("", StringComparison.InvariantCultureIgnoreCase))
+            dateStr != null)
         {
-            return " DEFAULT to_timestamp('01 Jan 1900', 'DD Mon YYYY')";
+            // CAST doesn't accept strings with milliseconds
+            return $" DEFAULT CAST({dateStr.Replace(":000", "")} AS timestamp)";
         }
 
         return $" DEFAULT {DefaultConstraint.Definition}";

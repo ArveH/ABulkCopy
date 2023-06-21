@@ -119,8 +119,11 @@ public class PgCmdTests : PgTestBase
         statusValues[0].Should().Be(99.9M);
     }
 
-    [Fact]
-    public async Task TestCreateTable_When_MssDateTimeDefault()
+    [Theory]
+    [InlineData("(CONVERT([datetime],N'19000101 00:00:00:000',(9)))", "19000101 00:00:00")]
+    [InlineData("(CONVERT([datetime],'JAN 1 1900 00:00:01:000',(9)))", "19000101 00:00:01")]
+    [InlineData("(CONVERT([datetime],'JAN 1 1900',(9)))", "19000101 00:00:00")]
+    public async Task TestCreateTable_When_MssDateTimeDefault(string val, string expected)
     {
         // Arrange
         var tableName = GetName();
@@ -130,10 +133,11 @@ public class PgCmdTests : PgTestBase
             DefaultConstraint = new DefaultDefinition
             {
                 Name = "DF__atswbstas__activ__1DE5A643",
-                Definition = "(CONVERT([datetime],N'19000101 00:00:00:000',(9)))",
+                Definition = val,
                 IsSystemNamed = true
             }
         };
+
         inputDefinition.Columns.Add(new PostgresBigInt(1, "id", false));
         inputDefinition.Columns.Add(defCol);
         await PgDbHelper.Instance.DropTable(tableName);
@@ -153,6 +157,7 @@ public class PgCmdTests : PgTestBase
 
         // Assert
         statusValues.Count.Should().Be(1);
-        statusValues[0].Should().Be(new DateTime(1900,1,1));
+        var actual = statusValues[0].ToString("yyyyMMdd HH:mm:ss");
+        actual.Should().Be(expected);
     }
 }
