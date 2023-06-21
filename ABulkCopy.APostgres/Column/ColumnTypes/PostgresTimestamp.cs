@@ -41,6 +41,11 @@ public class PostgresTimestamp : PgDefaultColumn
             return $" DEFAULT CAST({dateStr.Replace(":000", "")} AS timestamp)";
         }
 
+        if (DefaultConstraint.Definition.Contains("getdate", StringComparison.InvariantCultureIgnoreCase))
+        {
+            return " DEFAULT CURRENT_DATE";
+        }
+
         return $" DEFAULT {DefaultConstraint.Definition}";
     }
 }
