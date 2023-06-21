@@ -16,7 +16,7 @@ public abstract class PgTemplateStrColumn : PgDefaultColumn
 
     public override object ToInternalType(string value)
     {
-        return string.IsNullOrWhiteSpace(value) ? " " : value;
+        return value;
     }
 
     public override Type GetDotNetType()

@@ -113,4 +113,15 @@ public class PgDataReaderStringTests : PgDataReaderTestBase
 
         colValue.Should().Be("One, Two");
     }
+
+    [Fact]
+    public async Task TestVarChar_When_EmptyString()
+    {
+        // Arrange
+        var col = new PostgresVarChar(1, ColName, true, 50);
+        var colValue = await TestDataReader<string?>(
+            GetName(), col, $"{Constants.QuoteChar}{Constants.QuoteChar},");
+
+        colValue.Should().Be("");
+    }
 }

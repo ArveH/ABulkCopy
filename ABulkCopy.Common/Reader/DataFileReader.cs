@@ -46,13 +46,10 @@ public class DataFileReader : IDataFileReader, IDisposable
         if (CurrentChar == Constants.QuoteChar)
         {
             ReadQuotedValue(colName);
+            return _columnHolder.ToString();
         }
-        else
-        {
-            ReadUnquotedValue();
-        }
-        ReadColumnSeparator(colName);
 
+        ReadUnquotedValue(colName);
         return _columnHolder.Length == 0 ? null : _columnHolder.ToString();
     }
 
@@ -76,15 +73,17 @@ public class DataFileReader : IDataFileReader, IDisposable
             ReadChar();
         }
         ReadQuote(colName, "closing");
+        ReadColumnSeparator(colName);
     }
 
-    private void ReadUnquotedValue()
+    private void ReadUnquotedValue(string colName)
     {
         while (CurrentChar >= 0 && CurrentChar != Constants.ColumnSeparatorChar)
         {
             AddChar();
             ReadChar();
         }
+        ReadColumnSeparator(colName);
     }
 
     private void AddChar()
