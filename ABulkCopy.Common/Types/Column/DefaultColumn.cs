@@ -39,7 +39,7 @@ public class DefaultColumn : IColumn
 
     public virtual string GetNativeCreateClause()
     {
-        return GetTypeClause() + GetIdentityClause() + GetNullableClause();
+        return GetTypeClause() + GetIdentityClause() + GetDefaultClause() + GetNullableClause();
     }
 
     public virtual object ToInternalType(string value)
@@ -74,5 +74,10 @@ public class DefaultColumn : IColumn
 
     protected virtual string GetIdentityClause() {
         throw new NotImplementedException();
+    }
+
+    protected virtual string GetDefaultClause()
+    {
+        return DefaultConstraint == null ? " " : $" DEFAULT {DefaultConstraint.Definition}";
     }
 }

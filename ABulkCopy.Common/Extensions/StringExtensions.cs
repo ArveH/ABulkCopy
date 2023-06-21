@@ -19,4 +19,9 @@ public static class StringExtensions
     {
         return Constants.Quote + str + Constants.Quote;
     }
+
+    public static string TrimParentheses(this string str)
+    {
+        return str.TrimStart('(').TrimEnd(')');
+    }
 }
