@@ -14,10 +14,13 @@ public class MappingFactory : IMappingFactory
                 {MssTypes.DateTimeOffset, PgTypes.TimestampTz},
                 {MssTypes.Float, PgTypes.DoublePrecision},
                 {MssTypes.NChar, PgTypes.Char},
+                {MssTypes.Text, PgTypes.VarChar},
+                {MssTypes.NText, PgTypes.VarChar},
                 {MssTypes.NVarChar, PgTypes.VarChar},
                 {MssTypes.SmallDateTime, PgTypes.Timestamp},
                 {MssTypes.TinyInt, PgTypes.SmallInt},
                 {MssTypes.UniqueIdentifier, PgTypes.Uuid },
+                {MssTypes.Image, PgTypes.ByteA},
                 {MssTypes.VarBinary, PgTypes.ByteA}
             })
         {
