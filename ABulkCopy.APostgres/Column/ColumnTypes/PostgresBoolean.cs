@@ -22,4 +22,22 @@ public class PostgresBoolean : PgTemplateNumberColumn
     {
         return typeof(bool);
     }
+
+    protected override string GetDefaultClause()
+    {
+        if (DefaultConstraint == null) return "";
+
+        var trimmedDefault = DefaultConstraint.Definition.TrimParentheses();
+        if (trimmedDefault == "0")
+        {
+            return " DEFAULT false";
+        }
+
+        if (trimmedDefault == "1")
+        {
+            return " DEFAULT true";
+        }
+
+        return $" DEFAULT {DefaultConstraint.Definition}";
+    }
 }

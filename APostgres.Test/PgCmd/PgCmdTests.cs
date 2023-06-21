@@ -160,4 +160,44 @@ public class PgCmdTests : PgTestBase
         var actual = statusValues[0].ToString("yyyyMMdd HH:mm:ss");
         actual.Should().Be(expected);
     }
+
+    [Theory]
+    [InlineData("((0))", false)]
+    [InlineData("((1))", true)]
+    public async Task TestCreateTable_When_MssBitDefault(string val, bool expected)
+    {
+        // Arrange
+        var tableName = GetName();
+        var inputDefinition = PgTestData.GetEmpty(tableName);
+        var defCol = new PostgresBoolean(2, "status", false)
+        {
+            DefaultConstraint = new DefaultDefinition
+            {
+                Name = "DF__atswbstas__activ__1DE5A643",
+                Definition = val,
+                IsSystemNamed = true
+            }
+        };
+
+        inputDefinition.Columns.Add(new PostgresBigInt(1, "id", false));
+        inputDefinition.Columns.Add(defCol);
+        await PgDbHelper.Instance.DropTable(tableName);
+
+        // Act
+        List<bool> statusValues;
+        try
+        {
+            await PgDbHelper.Instance.CreateTable(inputDefinition);
+            await PgDbHelper.Instance.ExecuteNonQuery($"insert into \"{tableName}\" (id) values (3)");
+            statusValues = (await PgDbHelper.Instance.SelectColumn<bool>(tableName, "status")).ToList();
+        }
+        finally
+        {
+            await PgDbHelper.Instance.DropTable(tableName);
+        }
+
+        // Assert
+        statusValues.Count.Should().Be(1);
+        statusValues[0].Should().Be(expected);
+    }
 }
