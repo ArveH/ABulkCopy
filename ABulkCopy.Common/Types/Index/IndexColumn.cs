@@ -4,7 +4,7 @@ public class IndexColumn : OrderColumn
 {
     public bool IsIncluded { get; set; }
 
-    public IndexColumn Clone()
+    public new IndexColumn Clone()
     {
         return new IndexColumn
         {

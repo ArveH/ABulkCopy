@@ -1,6 +1,6 @@
 ﻿namespace ABulkCopy.APostgres.Reader;
 
-public class PgDataReader : IADataReader
+public class PgDataReader : IADataReader, IDisposable
 {
     private readonly IPgContext _context;
     private readonly IDataFileReader _fileReader;
@@ -47,8 +47,8 @@ public class PgDataReader : IADataReader
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Reading data file failed for row {RowCounter}: {ErrorMessage}",
-                    counter, ex.FlattenMessages());
+                _logger.Error(ex, "Reading data file for table '{TableName}' failed for row {RowCounter}: {ErrorMessage}",
+                    tableDefinition.Header.Name, counter, ex.FlattenMessages());
                 errors++;
                 _fileReader.SkipToNextLine();
                 break;
@@ -130,5 +130,10 @@ public class PgDataReader : IADataReader
 
         sb.Append(") FROM STDIN (FORMAT BINARY)");
         return sb.ToString();
+    }
+
+    public void Dispose()
+    {
+        _fileReader.Dispose();
     }
 }

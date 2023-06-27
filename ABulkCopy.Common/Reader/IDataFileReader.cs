@@ -9,4 +9,5 @@ public interface IDataFileReader
     public bool IsEndOfFile { get; }
     byte[] ReadAllBytes(string path);
     void SkipToNextLine();
+    void Dispose();
 }

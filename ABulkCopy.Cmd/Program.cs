@@ -115,15 +115,16 @@ internal class Program
 
         builder.Services.AddSingleton(configuration);
         builder.Services.AddSingleton(Log.Logger);
-        builder.Services.AddSingleton<IFileSystem>(new FileSystem());
         builder.Services.AddSingleton<ISchemaWriter, SchemaWriter>();
         builder.Services.AddSingleton<IDataWriter, DataWriter>();
+        builder.Services.AddSingleton<IADataReaderFactory, ADataReaderFactory>();
         builder.Services.AddSingleton<ITableReaderFactory, TableReaderFactory>();
         builder.Services.AddSingleton<ISelectCreator, SelectCreator>();
         builder.Services.AddSingleton<ICopyOut, CopyOut>();
         builder.Services.AddSingleton<ICopyIn, CopyIn>();
-        builder.Services.AddTransient<IDataFileReader, DataFileReader>();
         builder.Services.AddSingleton<IMappingFactory, MappingFactory>();
+        builder.Services.AddSingleton<IFileSystem>(new FileSystem());
+        builder.Services.AddTransient<IDataFileReader, DataFileReader>();
         if (rdbms == Rdbms.Mss) builder.Services.AddMssServices();
         if (rdbms == Rdbms.Pg) builder.Services.AddPgServices();
     }
