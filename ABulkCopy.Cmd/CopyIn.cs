@@ -3,20 +3,20 @@
 public class CopyIn : ICopyIn
 {
     private readonly IPgCmd _pgCmd;
-    private readonly ISchemaReader _schemaReader;
+    private readonly ISchemaReaderFactory _schemaReaderFactory;
     private readonly IADataReaderFactory _aDataReaderFactory;
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
 
     public CopyIn(
         IPgCmd pgCmd,
-        ISchemaReader schemaReader,
+        ISchemaReaderFactory schemaReaderFactory,
         IADataReaderFactory aDataReaderFactory,
         IFileSystem fileSystem,
         ILogger logger)
     {
         _pgCmd = pgCmd;
-        _schemaReader = schemaReader;
+        _schemaReaderFactory = schemaReaderFactory;
         _aDataReaderFactory = aDataReaderFactory;
         _fileSystem = fileSystem;
         _logger = logger;
@@ -67,7 +67,8 @@ public class CopyIn : ICopyIn
         IADataReader? dataReader = null;
         try
         {
-            var tableDefinition = await _schemaReader.GetTableDefinition(schemaFile);
+            var schemaReader = _schemaReaderFactory.Get(Rdbms.Pg);
+            var tableDefinition = await schemaReader.GetTableDefinition(schemaFile);
             await _pgCmd.DropTable(tableDefinition.Header.Name);
             await _pgCmd.CreateTable(tableDefinition);
             dataReader = _aDataReaderFactory.Get(tableDefinition.Rdbms);

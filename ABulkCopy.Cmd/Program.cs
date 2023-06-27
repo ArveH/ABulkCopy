@@ -117,6 +117,7 @@ internal class Program
         builder.Services.AddSingleton(Log.Logger);
         builder.Services.AddSingleton<ISchemaWriter, SchemaWriter>();
         builder.Services.AddSingleton<IDataWriter, DataWriter>();
+        builder.Services.AddSingleton<ISchemaReaderFactory, SchemaReaderFactory>();
         builder.Services.AddSingleton<IADataReaderFactory, ADataReaderFactory>();
         builder.Services.AddSingleton<ITableReaderFactory, TableReaderFactory>();
         builder.Services.AddSingleton<ISelectCreator, SelectCreator>();
