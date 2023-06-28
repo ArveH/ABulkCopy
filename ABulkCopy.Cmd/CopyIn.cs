@@ -24,6 +24,8 @@ public class CopyIn : ICopyIn
 
     public async Task Run(string folder, Rdbms rdbms)
     {
+        var sw = new Stopwatch();
+        sw.Start();
         var schemaFiles = _fileSystem.Directory.GetFiles(folder, $"*{Constants.SchemaSuffix}").ToList();
         _logger.Information($"Creating and filling {{TableCount}} {"table".Plural(schemaFiles.Count)}",
             schemaFiles.Count);
@@ -60,6 +62,9 @@ public class CopyIn : ICopyIn
             Console.WriteLine(
                 $"Creating and filling {schemaFiles.Count} {"table".Plural(schemaFiles.Count)} finished.");
         }
+        sw.Stop();
+        _logger.Information("The total CopyIn operation took {Elapsed}", sw.Elapsed.ToString("g"));
+        Console.WriteLine($"The total CopyIn operation took {sw.Elapsed:g}");
     }
 
     private async Task<bool> CreateTable(string folder, string schemaFile)
