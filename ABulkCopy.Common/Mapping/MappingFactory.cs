@@ -8,7 +8,7 @@ public class MappingFactory : IMappingFactory
             columns:new Dictionary<string, string>
             {
                 {MssTypes.Binary, PgTypes.ByteA},
-                {MssTypes.Bit, PgTypes.Boolean},
+                {MssTypes.Bit, PgTypes.SmallInt},
                 {MssTypes.DateTime, PgTypes.Timestamp},
                 {MssTypes.DateTime2, PgTypes.Timestamp},
                 {MssTypes.DateTimeOffset, PgTypes.TimestampTz},
