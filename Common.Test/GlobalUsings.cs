@@ -20,6 +20,8 @@ global using System.IO.Abstractions.TestingHelpers;
 global using System.Text.Encodings.Web;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
+global using ABulkCopy.Common.Graph;
 global using Testing.Shared;
+global using Testing.Shared.SqlServer;
 global using Xunit;
 global using Xunit.Abstractions;

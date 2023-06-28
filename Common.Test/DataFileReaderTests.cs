@@ -1,6 +1,4 @@
-﻿using Testing.Shared.SqlServer;
-
-namespace Common.Test;
+﻿namespace Common.Test;
 
 public class DataFileReaderTests : CommonTestBase
 {
