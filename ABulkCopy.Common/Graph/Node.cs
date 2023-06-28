@@ -15,4 +15,13 @@ public class Node
 
     public Dictionary<string, Node> Parents = new();
     public Dictionary<string, Node> Children = new();
+
+    public void Accept(IVisitor visitor)
+    {
+        visitor.Visit();
+        foreach (var child in Children)
+        {
+            child.Value.Accept(visitor);
+        }
+    }
 }
