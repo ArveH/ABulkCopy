@@ -18,7 +18,7 @@ public class Node
 
     public void Accept(IVisitor visitor)
     {
-        visitor.Visit();
+        visitor.Visit(this);
         foreach (var child in Children)
         {
             child.Value.Accept(visitor);

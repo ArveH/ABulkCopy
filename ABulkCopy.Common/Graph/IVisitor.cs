@@ -2,5 +2,5 @@
 
 public interface IVisitor
 {
-    void Visit();
+    void Visit(Node node);
 }

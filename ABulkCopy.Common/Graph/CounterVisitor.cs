@@ -9,7 +9,7 @@ public class CounterVisitor : ICounterVisitor
         Count = 0;
     }
 
-    public void Visit()
+    public void Visit(Node _)
     {
         Count++;
     }
