@@ -6,4 +6,9 @@ public class VisitorFactory : IVisitorFactory
     {
         return new CounterVisitor();
     }
+
+    public IAddNodeVisitor GetAddNodeVisitor(Node node)
+    {
+        return new AddNodeVisitor(node);
+    }
 }

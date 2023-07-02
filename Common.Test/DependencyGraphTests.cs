@@ -10,11 +10,11 @@ public class DependencyGraphTests
 
         // Assert
         graph.Count().Should().Be(0);
-        graph.TablesInOrder.Count().Should().Be(0);
+        graph.
     }
 
     [Fact]
-    public void Insert_First()
+    public void TestAdd_When_InsertFirst()
     {
         // Arrange
         var graph = GetDependencyGraph();
@@ -32,7 +32,7 @@ public class DependencyGraphTests
     }
 
     [Fact]
-    public void Insert_Independent_Second()
+    public void TestAdd_When_Insert_Independent_Second()
     {
         // Arrange
         var graph = GetDependencyGraph();
@@ -74,9 +74,9 @@ public class DependencyGraphTests
         graph.Add(child);
 
         // Assert
-        graph.Count().Should().Be(2);
+        graph.Count().Should().Be(2, "because Count should be 2");
         var tablesInOrder = graph.TablesInOrder.ToList();
-        tablesInOrder.Count.Should().Be(2);
+        tablesInOrder.Count.Should().Be(2, "because tablesInOrder should be 2");
         tablesInOrder[0].Should().BeEquivalentTo(parent);
         tablesInOrder[1].Should().BeEquivalentTo(child);
     }
