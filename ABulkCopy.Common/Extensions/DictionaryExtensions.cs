@@ -13,4 +13,10 @@ public static class DictionaryExtensions
     {
         return dictionary.TryGetValue(key, out var value) ? value : key;
     }
+
+    public static string? ReplaceGetNull(this Dictionary<string, string?> dictionary, string? key)
+    {
+        if (key == null) return null;
+        return dictionary.TryGetValue(key, out var value) ? value : key;
+    }
 }
