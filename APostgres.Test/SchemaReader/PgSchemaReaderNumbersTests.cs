@@ -39,7 +39,7 @@ public class PgSchemaReaderNumbersTests : PgSchemaReaderBase
     public async Task TestBit()
     {
         var result = await GetColFromTableDefinition(new SqlServerBit(1, "MyTestCol", false));
-        VerifyColumn(result, new PostgresBoolean(1, "MyTestCol", false));
+        VerifyColumn(result, new PostgresSmallInt(1, "MyTestCol", false));
     }
 
     [Fact]

@@ -35,7 +35,7 @@ public static class StringExtensions
     }
     public static string? ExtractLongDateString(this string str)
     {
-        var match = SingleQuoteRegex.Match(str);
+        var match = LongDateRegex.Match(str);
         return match.Success ? match.Groups[1].Value : null;
     }
 }
