@@ -87,6 +87,16 @@ public class PgCmd : IPgCmd
         await ExecuteNonQuery(sb.ToString());
     }
 
+    public async Task ResetIdentity(string tableName, string columnName)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("select setval(");
+        sb.AppendLine($"pg_get_serial_sequence('{tableName}', '{columnName}'), ");
+        sb.AppendLine($"(select max(\"{columnName}\") from \"{tableName}\") )");
+
+        await ExecuteNonQuery(sb.ToString());
+    }
+
     public async Task ExecuteNonQuery(string sqlString)
     {
         await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);

@@ -39,14 +39,6 @@ public class CopyIn : ICopyIn
             }
         });
 
-        //foreach (var schemaFile in schemaFiles)
-        //{
-        //    if (!await CreateTable(folder, schemaFile))
-        //    {
-        //        errors++;
-        //    }
-        //}
-
         if (errors > 0)
         {
             _logger.Warning(
@@ -75,7 +67,17 @@ public class CopyIn : ICopyIn
             var schemaReader = _schemaReaderFactory.Get(Rdbms.Pg);
             var tableDefinition = await schemaReader.GetTableDefinition(schemaFile);
             await _pgCmd.DropTable(tableDefinition.Header.Name);
-            await _pgCmd.CreateTable(tableDefinition);
+            await _pgCmd.CreateTable(tableDefinition).ContinueWith(async _ =>
+            {
+                foreach (var columnName in tableDefinition.Columns
+                             .Where(c => c.Identity != null)
+                             .Select(c => c.Name))
+                {
+                    await _pgCmd.ResetIdentity(tableDefinition.Header.Name, columnName);
+                    _logger.Debug("Reset identity for '{TableName}.{ColumnName}'",
+                        tableDefinition.Header.Name, columnName);
+                }
+            });
             dataReader = _aDataReaderFactory.Get(tableDefinition.Rdbms);
             var rows = await dataReader.Read(folder, tableDefinition);
             Console.WriteLine($"Read {rows} {"row".Plural(rows)} for table '{tableDefinition.Header.Name}'");
