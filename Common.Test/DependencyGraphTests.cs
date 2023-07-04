@@ -10,7 +10,7 @@ public class DependencyGraphTests
 
         // Assert
         graph.Count().Should().Be(0);
-        graph.
+        graph.TablesInOrder.Should().BeEmpty();
     }
 
     [Fact]
