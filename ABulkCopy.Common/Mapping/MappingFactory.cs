@@ -36,7 +36,8 @@ public class MappingFactory : IMappingFactory
             },
             Collations =
             {
-                { "SQL_Latin1_General_CP1_CI_AS", "en_ci_ai" }
+                { "SQL_Latin1_General_CP1_CI_AI", "en_ci_ai" },
+                { "SQL_Latin1_General_CP1_CI_AS", "en_ci_as" }
             }
         };
     }
