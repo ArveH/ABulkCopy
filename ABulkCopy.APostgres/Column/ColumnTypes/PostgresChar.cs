@@ -9,6 +9,11 @@ public class PostgresChar : PgTemplateStrColumn
 
     public override string GetTypeClause()
     {
+        if (Collation != null)
+        {
+            return $"{Type}({Length}) COLLATE {Collation}";
+        }
+
         return $"{Type}({Length})";
     }
 }

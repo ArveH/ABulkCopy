@@ -14,6 +14,17 @@ public class PostgresVarChar : PgTemplateStrColumn
 
     public override string GetTypeClause()
     {
-        return Length is < 1 or > 10_485_760 ? Type : $"{Type}({Length})";
+        var type = Type;
+        if (Length is > 0 and < 10_485_760)
+        {
+            type += $"({Length})";
+        }
+
+        if (Collation != null)
+        {
+            type += $" COLLATE {Collation}";
+        }
+
+        return type;
     }
 }

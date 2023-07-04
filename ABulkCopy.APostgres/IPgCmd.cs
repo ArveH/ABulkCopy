@@ -6,4 +6,5 @@ public interface IPgCmd
     Task ExecuteNonQuery(string sqlString);
     Task DropTable(string tableName);
     Task CreateIndex(string tableName, IndexDefinition indexDefinition);
+    Task ResetIdentity(string tableName, string columnName);
 }

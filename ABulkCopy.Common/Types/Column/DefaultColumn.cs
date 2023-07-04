@@ -72,7 +72,8 @@ public class DefaultColumn : IColumn
         return IsNullable ? " NULL" : " NOT NULL";
     }
 
-    protected virtual string GetIdentityClause() {
+    protected virtual string GetIdentityClause() 
+    {
         throw new NotImplementedException();
     }
 

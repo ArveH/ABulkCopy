@@ -87,9 +87,33 @@ public class PgCmd : IPgCmd
         await ExecuteNonQuery(sb.ToString());
     }
 
+    public async Task ResetIdentity(string tableName, string columnName)
+    {
+        var seqName = $"{tableName}_{columnName}_seq";
+        var oid = await SelectScalar($"select oid from pg_class where relkind = 'S' and relname = '{seqName}'");
+        if (oid == null || oid == DBNull.Value)
+        {
+            throw new SqlNullValueException($"Sequence {seqName} not found");
+        }
+
+        var sb = new StringBuilder();
+        sb.AppendLine("select setval(");
+        sb.AppendLine($"{oid}, ");
+        sb.AppendLine($"(select max(\"{columnName}\") from \"{tableName}\") )");
+
+        await using var cmd = _pgContext.DataSource.CreateCommand(sb.ToString());
+        await cmd.ExecuteScalarAsync();
+    }
+
     public async Task ExecuteNonQuery(string sqlString)
     {
         await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
         await cmd.ExecuteNonQueryAsync();
+    }
+
+    public async Task<object?> SelectScalar(string sqlString)
+    {
+        await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
+        return await cmd.ExecuteScalarAsync();
     }
 }
