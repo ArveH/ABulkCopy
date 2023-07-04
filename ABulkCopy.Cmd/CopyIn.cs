@@ -67,17 +67,8 @@ public class CopyIn : ICopyIn
             var schemaReader = _schemaReaderFactory.Get(Rdbms.Pg);
             var tableDefinition = await schemaReader.GetTableDefinition(schemaFile);
             await _pgCmd.DropTable(tableDefinition.Header.Name);
-            await _pgCmd.CreateTable(tableDefinition).ContinueWith(async _ =>
-            {
-                foreach (var columnName in tableDefinition.Columns
-                             .Where(c => c.Identity != null)
-                             .Select(c => c.Name))
-                {
-                    await _pgCmd.ResetIdentity(tableDefinition.Header.Name, columnName);
-                    _logger.Debug("Reset identity for '{TableName}.{ColumnName}'",
-                        tableDefinition.Header.Name, columnName);
-                }
-            });
+            await _pgCmd.CreateTable(tableDefinition);
+
             dataReader = _aDataReaderFactory.Get(tableDefinition.Rdbms);
             var rows = await dataReader.Read(folder, tableDefinition);
             Console.WriteLine($"Read {rows} {"row".Plural(rows)} for table '{tableDefinition.Header.Name}'");
@@ -91,6 +82,15 @@ public class CopyIn : ICopyIn
                     $"Created index '{indexDefinition.Header.Name}' for table '{tableDefinition.Header.Name}'");
                 _logger.Information("Created index '{IndexName}' for table '{TableName}'",
                     indexDefinition.Header.Name, tableDefinition.Header.Name);
+            }
+
+            foreach (var columnName in tableDefinition.Columns
+                         .Where(c => c.Identity != null)
+                         .Select(c => c.Name))
+            {
+                await _pgCmd.ResetIdentity(tableDefinition.Header.Name, columnName);
+                _logger.Information("Reset identity for {TableName}.{ColumnName}",
+                    tableDefinition.Header.Name, columnName);
             }
 
             return true;
