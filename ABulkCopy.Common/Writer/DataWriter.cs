@@ -2,7 +2,8 @@
 
 public class DataWriter : IDataWriter
 {
-    private readonly ITableReader _tableReader;
+    private readonly IDbContext _dbContext;
+    private readonly ITableReaderFactory _tableReaderFactory;
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
 
@@ -12,24 +13,26 @@ public class DataWriter : IDataWriter
         IFileSystem fileSystem,
         ILogger logger)
     {
-        _tableReader = tableReaderFactory.GetTableReader(dbContext);
+        _dbContext = dbContext;
+        _tableReaderFactory = tableReaderFactory;
         _fileSystem = fileSystem;
         _logger = logger;
     }
 
     public async Task<long> Write(
-        TableDefinition tableDefinition,
+    TableDefinition tableDefinition,
         string path)
     {
+        var tableReader = _tableReaderFactory.GetTableReader(_dbContext);
         AddDirectoriesForBlobs(tableDefinition, path);
         var fileFullPath = Path.Combine(
             path, tableDefinition.Header.Name + Constants.DataSuffix);
         await using var streamWriter = _fileSystem.File.CreateText(fileFullPath);
-        await _tableReader.PrepareReader(tableDefinition);
+        await tableReader.PrepareReader(tableDefinition);
         var rowCounter = 0;
-        while (await _tableReader.Read())
+        while (await tableReader.Read())
         {
-            WriteRow(_tableReader, tableDefinition, streamWriter, path, rowCounter);
+            WriteRow(tableReader, tableDefinition, streamWriter, path, rowCounter);
             streamWriter.WriteLine();
             rowCounter++;
         }

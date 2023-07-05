@@ -31,9 +31,9 @@ public class CopyIn : ICopyIn
             schemaFiles.Count);
         Console.WriteLine($"Creating and filling {schemaFiles.Count} {"table".Plural(schemaFiles.Count)}.");
         var errors = 0;
-        await Parallel.ForEachAsync(schemaFiles, async (f, _) =>
+        await Parallel.ForEachAsync(schemaFiles, async (schemaFile, _) =>
         {
-            if (!await CreateTable(folder, f))
+            if (!await CreateTable(folder, schemaFile))
             {
                 Interlocked.Increment(ref errors);
             }

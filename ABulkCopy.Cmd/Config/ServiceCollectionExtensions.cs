@@ -6,8 +6,7 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services)
     {
         services.AddSingleton<IDbContext, MssContext>();
-        services.AddTransient<IMssSystemTables, MssSystemTables>();
-        services.AddSingleton<IMssTableReader, MssTableReader>();
+        services.AddSingleton<IMssSystemTables, MssSystemTables>();
         services.AddSingleton<IMssTableSchema, MssTableSchema>();
         services.AddSingleton<IMssColumnFactory, MssColumnFactory>();
         

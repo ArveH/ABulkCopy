@@ -31,32 +31,13 @@ public class CopyOut : ICopyOut
             tableNames.Count);
         Console.WriteLine($"Copy out {tableNames.Count} {"table".Plural(tableNames.Count)}.");
         var errors = 0;
-        foreach (var tableName in tableNames)
+        await Parallel.ForEachAsync(tableNames, async (tableName, _) =>
         {
-            try
+            if (!await CopyTable(folder, tableName))
             {
-                var tabDef = await _tableSchema.GetTableInfo(tableName);
-                if (tabDef == null)
-                {
-                    _logger.Warning("Table {SearchString} not found", tableName);
-                    errors++;
-                    continue;
-                }
-
-                await _schemaWriter.Write(tabDef, folder);
-                var rows = await _dataWriter.Write(tabDef, folder);
-                _logger.Information("Table '{TableName}' with {Rows} rows copied to disk",
-                    tableName, rows);
-                Console.WriteLine($"Table '{tableName}' with {rows} rows copied to disk");
+                Interlocked.Increment(ref errors);
             }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Copy out from table '{TableName}' failed",
-                    tableName);
-                Console.WriteLine($"Copy out from table '{tableName}' failed");
-                errors++;
-            }
-        }
+        });
         sw.Stop();
 
         if (errors > 0)
@@ -73,5 +54,32 @@ public class CopyOut : ICopyOut
         }
         _logger.Information("Copy took {Elapsed}", sw.Elapsed.ToString("g"));
         Console.WriteLine($"Copy took {sw.Elapsed:g}");
+    }
+
+    private async Task<bool> CopyTable(string folder, string tableName)
+    {
+        try
+        {
+            var tabDef = await _tableSchema.GetTableInfo(tableName);
+            if (tabDef == null)
+            {
+                _logger.Warning("Table {SearchString} not found", tableName);
+                return false;
+            }
+
+            await _schemaWriter.Write(tabDef, folder);
+            var rows = await _dataWriter.Write(tabDef, folder);
+            _logger.Information("Table '{TableName}' with {Rows} rows copied to disk",
+                tableName, rows);
+            Console.WriteLine($"Table '{tableName}' with {rows} rows copied to disk");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Copy out from table '{TableName}' failed",
+                tableName);
+            Console.WriteLine($"Copy out from table '{tableName}' failed");
+            return false;
+        }
     }
 }
