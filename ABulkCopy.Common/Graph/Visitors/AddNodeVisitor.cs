@@ -1,6 +1,6 @@
-﻿namespace ABulkCopy.Common.Graph;
+﻿namespace ABulkCopy.Common.Graph.Visitors;
 
-public class AddNodeVisitor : IAddNodeVisitor
+public class AddNodeVisitor : VisitorBase, IAddNodeVisitor
 {
     private readonly Node _newNode;
 
@@ -9,8 +9,9 @@ public class AddNodeVisitor : IAddNodeVisitor
         _newNode = newNode;
     }
 
-    public void Visit(Node node)
+    public override void Visit(Node node)
     {
+        base.Visit(node);
         if (node.Value.ForeignKeys.Any(fk => fk.TableReference == _newNode.Name))
         {
             node.Parents.TryAdd(_newNode.Name, _newNode);

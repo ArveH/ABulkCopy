@@ -43,13 +43,24 @@ public class DependencyGraph : IDependencyGraph
 
     public int Count()
     {
-        var counter = _visitorFactory.GetCounterVisitor();
+        var counterVisitor = _visitorFactory.GetCounterVisitor();
         foreach (var child in _children)
         {
-            child.Value.Accept(counter);
+            child.Value.Accept(counterVisitor);
         }
 
-        return counter.Count;
+        return counterVisitor.NodeCount;
+    }
+
+    public override string ToString()
+    {
+        var toStringVisitor = _visitorFactory.GetToStringVisitor();
+        foreach (var child in _children)
+        {
+            child.Value.Accept(toStringVisitor);
+        }
+
+        return toStringVisitor.Result;
     }
 
     public IEnumerable<TableDefinition> TablesInOrder => _children.Select(c => c.Value.Value);

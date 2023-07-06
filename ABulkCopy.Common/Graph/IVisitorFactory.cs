@@ -1,7 +1,10 @@
-﻿namespace ABulkCopy.Common.Graph;
+﻿using ABulkCopy.Common.Graph.Visitors;
+
+namespace ABulkCopy.Common.Graph;
 
 public interface IVisitorFactory
 {
-    ICounterVisitor GetCounterVisitor();
+    IVisitor GetCounterVisitor();
+    IToStringVisitor GetToStringVisitor();
     IAddNodeVisitor GetAddNodeVisitor(Node node);
 }

@@ -1,4 +1,6 @@
-﻿namespace ABulkCopy.Common.Graph;
+﻿using ABulkCopy.Common.Graph.Visitors;
+
+namespace ABulkCopy.Common.Graph;
 
 public class Node
 {
@@ -21,6 +23,7 @@ public class Node
         visitor.Visit(this);
         foreach (var child in Children)
         {
+            visitor.Indent++;
             child.Value.Accept(visitor);
         }
     }
