@@ -31,7 +31,7 @@ public class DependencyGraph : IDependencyGraph
         return counterVisitor.NodeCount; // we don't count root node
     }
 
-    public List<TableDepth> TableDepths()
+    public List<TableDepth> GetTableDepths()
     {
         var depthVisitor = _visitorFactory.GetDepthVisitor();
         _root.Accept(depthVisitor, 0);

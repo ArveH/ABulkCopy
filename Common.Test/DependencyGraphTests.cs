@@ -28,10 +28,10 @@ public class DependencyGraphTests
 
         // Assert
         graph.Count().Should().Be(1, "because count is 1");
-        var depths = graph.TableDepths();
-        depths.Count.Should().Be(1, "because there is 1 table");
-        depths[0].Name.Should().Be(tableName, $"because the table name is '{tableName}'");
-        depths[0].Depth.Should().Be(1, $"because '{tableName}' is at level 1");
+        VerifyDepths(
+            graph.GetTableDepths(),
+            new List<string> { tableName },
+            new List<int> { 1 });
     }
 
     [Fact]
@@ -53,12 +53,10 @@ public class DependencyGraphTests
 
         // Assert
         graph.Count().Should().Be(2);
-        var depths = graph.TableDepths();
-        depths.Count.Should().Be(2, "because there are 2 tables");
-        depths[0].Name.Should().Be(tableName, $"because the table name is '{tableName}'");
-        depths[0].Depth.Should().Be(1, $"because '{tableName}' is at level 1");
-        depths[1].Name.Should().Be(tableName2, $"because the table name is '{tableName2}'");
-        depths[1].Depth.Should().Be(1, $"because '{tableName2}' is at level 1");
+        VerifyDepths(
+            graph.GetTableDepths(),
+            new List<string> { tableName, tableName2 },
+            new List<int> { 1, 1 });
     }
 
     [Fact]
@@ -87,12 +85,10 @@ public class DependencyGraphTests
 
         // Assert
         graph.Count().Should().Be(2, "because Count should be 2");
-        var depths = graph.TableDepths();
-        depths.Count.Should().Be(2, "because there are 2 tables");
-        depths[0].Name.Should().Be(tableName, $"because the table name is '{tableName}'");
-        depths[0].Depth.Should().Be(1, $"because '{tableName}' is at level 1");
-        depths[1].Name.Should().Be(tableName2, $"because the table name is '{tableName2}'");
-        depths[1].Depth.Should().Be(2, $"because '{tableName2}' is at level 2");
+        VerifyDepths(
+            graph.GetTableDepths(),
+            new List<string> { tableName, tableName2 },
+            new List<int> { 1, 2 });
     }
 
     [Fact]
@@ -120,13 +116,28 @@ public class DependencyGraphTests
         graph.Add(parent);
 
         // Assert
-        graph.Count().Should().Be(2);
-        var depths = graph.TableDepths();
-        depths.Count.Should().Be(2, "because there are 2 tables");
-        depths[0].Name.Should().Be(tableName, $"because the table name is '{tableName}'");
-        depths[0].Depth.Should().Be(1, $"because '{tableName}' is at level 1");
-        depths[1].Name.Should().Be(tableName2, $"because the table name is '{tableName2}'");
-        depths[1].Depth.Should().Be(2, $"because '{tableName2}' is at level 2");
+        graph.Count().Should().Be(2, "because Count should be 2");
+        VerifyDepths(
+            graph.GetTableDepths(), 
+            new List<string>{tableName, tableName2},
+            new List<int>{1, 2});
+    }
+
+    private static void VerifyDepths(
+        IReadOnlyList<TableDepth> tableDepths, 
+        IReadOnlyList<string> tableNames,
+        IReadOnlyList<int> expectedDepths)
+    {
+        tableDepths.Count.Should().Be(tableNames.Count);
+        for (var i = 0; i < tableNames.Count; i++)
+        {
+            tableDepths[i].Name.Should().Be(
+                tableNames[i], 
+                $"because the table name is '{tableNames[i]}'");
+            tableDepths[i].Depth.Should().Be(
+                expectedDepths[i], 
+                $"because '{tableNames[i]}' is at level {expectedDepths[i]}");
+        }
     }
 
     private IDependencyGraph GetDependencyGraph()

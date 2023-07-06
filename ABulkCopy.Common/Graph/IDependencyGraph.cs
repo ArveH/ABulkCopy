@@ -5,5 +5,5 @@ public interface IDependencyGraph
     public void Add(TableDefinition newTable);
     public int Count();
     public IEnumerable<TableDefinition> GetTablesInOrder();
-    List<TableDepth> TableDepths();
+    List<TableDepth> GetTableDepths();
 }
