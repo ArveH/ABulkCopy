@@ -2,7 +2,6 @@
 
 public interface IVisitor
 {
-    public int Indent { get; set; }
     public int NodeCount { get; }
-    public void Visit(Node node);
+    public void Visit(Node node, int depth);
 }

@@ -5,6 +5,6 @@ namespace ABulkCopy.Common.Graph;
 public interface IVisitorFactory
 {
     IVisitor GetCounterVisitor();
-    IToStringVisitor GetToStringVisitor();
+    IDepthVisitor GetDepthVisitor();
     IAddNodeVisitor GetAddNodeVisitor(Node node);
 }

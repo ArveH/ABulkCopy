@@ -3,7 +3,7 @@
 public class DependencyGraph : IDependencyGraph
 {
     private readonly IVisitorFactory _visitorFactory;
-    private readonly Dictionary<string, Node> _children = new ();
+    private readonly Node _root = new();
 
     public DependencyGraph(IVisitorFactory visitorFactory)
     {
@@ -15,53 +15,47 @@ public class DependencyGraph : IDependencyGraph
         var newNode = new Node(newTable);
         var addNodeVisitor = _visitorFactory.GetAddNodeVisitor(newNode);
 
-        if (_children.Count == 0)
-        {
-            _children.Add(newNode.Name, newNode);
-            return;
-        }
+        _root.Accept(addNodeVisitor, 0);
 
-        foreach (var child in _children)
-        {
-            child.Value.Accept(addNodeVisitor);
-        }
+        if (addNodeVisitor.IsAdded) return;
 
-        if (newNode.Value.ForeignKeys.Count == 0)
-        {
-            _children.Add(newNode.Name, newNode);
-        }
-
-        // If no Foreign Keys, add to root
-
-        // Check if newTable is Foreign Key for an existing table
-        // Add newTable as Parent for existing table
-        // Add existing table to newTable.Children
-
-        // Foreach Foreign Key
-        // Find existing table and add it to newTable.Parents
+        newNode.Parents.Add(_root.Name, _root);
+        _root.Children.Add(newNode.Name, newNode);
     }
 
     public int Count()
     {
         var counterVisitor = _visitorFactory.GetCounterVisitor();
-        foreach (var child in _children)
-        {
-            child.Value.Accept(counterVisitor);
-        }
+        _root.Accept(counterVisitor, 0);
 
-        return counterVisitor.NodeCount;
+        return counterVisitor.NodeCount; // we don't count root node
     }
 
-    public override string ToString()
+    public List<TableDepth> TableDepths()
     {
-        var toStringVisitor = _visitorFactory.GetToStringVisitor();
-        foreach (var child in _children)
-        {
-            child.Value.Accept(toStringVisitor);
-        }
+        var depthVisitor = _visitorFactory.GetDepthVisitor();
+        _root.Accept(depthVisitor, 0);
 
-        return toStringVisitor.Result;
+        return depthVisitor.Result;
     }
 
-    public IEnumerable<TableDefinition> TablesInOrder => _children.Select(c => c.Value.Value);
+    public IEnumerable<TableDefinition> GetTablesInOrder()
+    {
+        var queue = new Queue<Node>();
+
+        foreach (var child in _root.Children)
+        {
+            queue.Enqueue(child.Value);
+        }
+
+        while (queue.Count > 0)
+        {
+            var current = queue.Dequeue();
+            yield return current.Value!;
+            foreach (var child in current.Children)
+            {
+                queue.Enqueue(child.Value);
+            }
+        }
+    }
 }

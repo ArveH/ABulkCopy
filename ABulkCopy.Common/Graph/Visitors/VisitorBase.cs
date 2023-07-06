@@ -2,7 +2,6 @@
 
 public abstract class VisitorBase : IVisitor
 {
-    public int Indent { get; set; } = 0;
     public int NodeCount { get; protected set; }
 
     protected VisitorBase()
@@ -10,8 +9,11 @@ public abstract class VisitorBase : IVisitor
         NodeCount = 0;
     }
 
-    public virtual void Visit(Node node)
+    public virtual void Visit(Node node, int depth)
     {
-        NodeCount++;
+        if (!node.IsRoot)
+        {
+            NodeCount++;
+        }
     }
 }

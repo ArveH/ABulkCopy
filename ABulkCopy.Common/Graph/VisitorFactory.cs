@@ -9,9 +9,9 @@ public class VisitorFactory : IVisitorFactory
         return new CounterVisitor();
     }
 
-    public IToStringVisitor GetToStringVisitor()
+    public IDepthVisitor GetDepthVisitor()
     {
-        return new ToStringVisitor();
+        return new DepthVisitor();
     }
 
     public IAddNodeVisitor GetAddNodeVisitor(Node node)

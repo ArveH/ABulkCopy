@@ -2,7 +2,8 @@
 
 public interface IDependencyGraph
 {
-    void Add(TableDefinition newTable);
-    int Count();
-    IEnumerable<TableDefinition> TablesInOrder { get; }
+    public void Add(TableDefinition newTable);
+    public int Count();
+    public IEnumerable<TableDefinition> GetTablesInOrder();
+    List<TableDepth> TableDepths();
 }
