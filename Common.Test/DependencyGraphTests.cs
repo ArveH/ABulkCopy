@@ -50,7 +50,7 @@ public class DependencyGraphTests
     }
 
     [Fact]
-    public void Insert_Parent_Before_Child()
+    public void TestAdd_When_InsertParentBeforeChild()
     {
         // Arrange
         var tableDefinitions = GetTableDefinitions("A1", "B2");
@@ -70,7 +70,7 @@ public class DependencyGraphTests
     }
 
     [Fact]
-    public void Insert_Child_Before_Parent()
+    public void TestAdd_When_InsertChildBeforeParent()
     {
         // Arrange
         var tableDefinitions = GetTableDefinitions("A1", "B2");
