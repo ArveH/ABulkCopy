@@ -39,7 +39,39 @@ public class DependencyGraph : IDependencyGraph
         return depthVisitor.Result;
     }
 
+    // TODO: Re-think how to get tables in order
+    // This will get the tables in the correct order, but it's not very efficient.
+    // I also can't use it since I need to know that a parent table has completed
+    // before I can start coping the child table.
+    // I need to rethink the whole process
     public IEnumerable<TableDefinition> GetTablesInOrder()
+    {
+        var allTablesWithDuplicates = BreathFirst().ToArray();
+        for (var i = 0; i < allTablesWithDuplicates.Length; i++)
+        {
+            var table = allTablesWithDuplicates[i];
+            if (TableExistsLater(table, allTablesWithDuplicates, i))
+            {
+                continue;
+            }
+            yield return table;
+        }
+    }
+
+    private bool TableExistsLater(TableDefinition table, TableDefinition[] allTablesWithDuplicates, int currentPos)
+    {
+        for (var i = currentPos + 1; i < allTablesWithDuplicates.Length; i++)
+        {
+            if (allTablesWithDuplicates[i].Header.Name == table.Header.Name)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public IEnumerable<TableDefinition> BreathFirst()
     {
         var queue = new Queue<Node>();
 

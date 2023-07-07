@@ -89,6 +89,151 @@ public class DependencyGraphTests
             new List<int> { 1, 2 });
     }
 
+    // Situation 1: Both dependencies above in the tree
+    // c depends on a and b
+    //   - child is inserted before one of the parents
+    //         a     b                       
+    //               
+    //         ^     ^                       
+    //         |     |
+    //               
+    //            c
+    //               
+    [Fact]
+    public void TestOrder_When_Situation1()
+    {
+        // Arrange
+        var tableDefinitions = GetTableDefinitions("a", "c", "b");
+        SetDependency(tableDefinitions[0].Header.Name, tableDefinitions[1]);
+        SetDependency(tableDefinitions[2].Header.Name, tableDefinitions[1]);
+        var graph = GetDependencyGraph();
+        tableDefinitions.ForEach(graph.Add);
+
+        // Act
+        var result = graph.GetTablesInOrder().ToList();
+
+        // Assert
+        result.Count.Should().Be(tableDefinitions.Count);
+        VerifyFirstLevel(result, "a", "b");
+        result[2].Header.Name.Should().Be("c");
+    }
+
+    private void VerifyFirstLevel(List<TableDefinition> result, string t1, string t2)
+    {
+        result[0].Header.Name.Should().BeOneOf(t1, t2);
+        result[1].Header.Name.Should().BeOneOf(t1, t2);
+        result[0].Should().NotBe(result[1]);
+    }
+
+    // Situation 2: Both dependencies above in the tree, but on different levels
+    // d depends on c
+    // d depends on b
+    // c depends on a
+    //
+    //    a        b                       
+    //               
+    //    ^        ^                       
+    //    |        |    
+    //            |     
+    //    c      |                         
+    //          |       
+    //    ^    |                          
+    //    |   |                            
+    //                  
+    //      d                                 
+    //                                                 
+    [Fact]
+    public void TestOrder_When_Situation2()
+    {
+        // Arrange
+        var tableDefinitions = GetTableDefinitions("d", "a", "b", "c");
+        SetDependency(tableDefinitions[3].Header.Name, tableDefinitions[0]);
+        SetDependency(tableDefinitions[2].Header.Name, tableDefinitions[0]);
+        SetDependency(tableDefinitions[1].Header.Name, tableDefinitions[3]);
+        var graph = GetDependencyGraph();
+        tableDefinitions.ForEach(graph.Add);
+
+        // Act
+        var result = graph.GetTablesInOrder().ToList();
+
+        // Assert
+        result.Count.Should().Be(tableDefinitions.Count);
+        VerifyFirstLevel(result, "a", "b");
+        result[2].Header.Name.Should().Be("c");
+        result[3].Header.Name.Should().Be("d");
+    }
+
+    // Situation 3: One dependency above, and one at the same level
+    // c depends on a
+    // d depends on b
+    // c depends on d
+    //      a      b                       
+    //             
+    //      ^      ^                       
+    //      |      |
+    //             
+    //      c  ->  d                       
+    //                                                
+    [Fact]
+    public void TestOrder_When_Situation3()
+    {
+        // Arrange
+        var tableDefinitions = GetTableDefinitions("a", "b", "c", "d");
+        SetDependency(tableDefinitions[0].Header.Name, tableDefinitions[2]);
+        SetDependency(tableDefinitions[1].Header.Name, tableDefinitions[3]);
+        SetDependency(tableDefinitions[3].Header.Name, tableDefinitions[2]);
+        var graph = GetDependencyGraph();
+        tableDefinitions.ForEach(graph.Add);
+
+        // Act
+        var result = graph.GetTablesInOrder().ToList();
+
+        // Assert
+        result.Count.Should().Be(tableDefinitions.Count);
+        VerifyFirstLevel(result, "a", "b");
+        result[2].Header.Name.Should().Be("d");
+        result[3].Header.Name.Should().Be("c");
+    }
+
+    // Situation 4: One dependency above, and one below
+    // c depends on a and e
+    // d depends on b
+    // e depends on d
+    //         a     b                       
+    //               
+    //         ^     ^                       
+    //         |     |
+    //               
+    //         c     d                       
+    //               
+    //           \   ^                      
+    //            v  |                      
+    //               
+    //               e                      
+    //                                                 
+    [Fact]
+    public void TestOrder_When_Situation4()
+    {
+        // Arrange
+        var tableDefinitions = GetTableDefinitions("a", "b", "c", "d", "e");
+        SetDependency(tableDefinitions[0].Header.Name, tableDefinitions[2]);
+        SetDependency(tableDefinitions[4].Header.Name, tableDefinitions[2]);
+        SetDependency(tableDefinitions[1].Header.Name, tableDefinitions[3]);
+        SetDependency(tableDefinitions[3].Header.Name, tableDefinitions[4]);
+        var graph = GetDependencyGraph();
+        tableDefinitions.ForEach(graph.Add);
+
+        // Act
+        var result = graph.GetTablesInOrder().ToList();
+
+        // Assert
+        result.Count.Should().Be(tableDefinitions.Count);
+        VerifyFirstLevel(result, "a", "b");
+        result[2].Header.Name.Should().Be("d");
+        result[3].Header.Name.Should().Be("e");
+        result[4].Header.Name.Should().Be("c");
+    }
+
     private static void VerifyCount(IDependencyGraph graph, int expectedCount)
     {
         graph.Count().Should().Be(
