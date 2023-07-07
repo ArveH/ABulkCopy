@@ -2,11 +2,6 @@
 
 public class TableDefinition
 {
-    public TableDefinition()
-    {
-        
-    }
-
     public TableDefinition(Rdbms rdbms)
     {
         Rdbms = rdbms;

@@ -126,6 +126,8 @@ internal class Program
         builder.Services.AddSingleton<IMappingFactory, MappingFactory>();
         builder.Services.AddSingleton<IFileSystem>(new FileSystem());
         builder.Services.AddTransient<IDataFileReader, DataFileReader>();
+        builder.Services.AddTransient<IDependencyGraph, DependencyGraph>();
+        builder.Services.AddTransient<IVisitorFactory, VisitorFactory>();
         if (rdbms == Rdbms.Mss) builder.Services.AddMssServices();
         if (rdbms == Rdbms.Pg) builder.Services.AddPgServices();
     }
