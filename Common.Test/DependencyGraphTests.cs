@@ -234,6 +234,45 @@ public class DependencyGraphTests
         result[4].Header.Name.Should().Be("c");
     }
 
+    // Situation 5: Same as 4, but tables inserted in different order
+    // c depends on a and e
+    // d depends on b
+    // e depends on d
+    //         a     b                       
+    //               
+    //         ^     ^                       
+    //         |     |
+    //               
+    //         c     d                       
+    //               
+    //           \   ^                      
+    //            v  |                      
+    //               
+    //               e                      
+    //                                                 
+    [Fact]
+    public void TestOrder_When_Situation5()
+    {
+        // Arrange
+        var tableDefinitions = GetTableDefinitions("c", "b", "a", "e", "d");
+        SetDependency(tableDefinitions[1].Header.Name, tableDefinitions[0]);
+        SetDependency(tableDefinitions[3].Header.Name, tableDefinitions[0]);
+        SetDependency(tableDefinitions[1].Header.Name, tableDefinitions[4]);
+        SetDependency(tableDefinitions[4].Header.Name, tableDefinitions[3]);
+        var graph = GetDependencyGraph();
+        tableDefinitions.ForEach(graph.Add);
+
+        // Act
+        var result = graph.GetTablesInOrder().ToList();
+
+        // Assert
+        result.Count.Should().Be(tableDefinitions.Count);
+        VerifyFirstLevel(result, "a", "b");
+        result[2].Header.Name.Should().Be("d");
+        result[3].Header.Name.Should().Be("e");
+        result[4].Header.Name.Should().Be("c");
+    }
+
     private static void VerifyCount(IDependencyGraph graph, int expectedCount)
     {
         graph.Count().Should().Be(
