@@ -3,7 +3,7 @@
 global using ABulkCopy.Common.Database;
 global using ABulkCopy.Common.Exceptions;
 global using ABulkCopy.Common.Extensions;
-global using ABulkCopy.Common.Graph;
+global using ABulkCopy.Common.Graph.Visitors;
 global using ABulkCopy.Common.Reader;
 global using ABulkCopy.Common.Serialization;
 global using ABulkCopy.Common.Types;

@@ -1,6 +1,4 @@
-﻿using ABulkCopy.Common.Graph.Visitors;
-
-namespace ABulkCopy.Common.Graph;
+﻿namespace ABulkCopy.Common.Graph;
 
 public class VisitorFactory : IVisitorFactory
 {

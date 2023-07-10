@@ -1,6 +1,4 @@
-﻿using ABulkCopy.Common.Graph.Visitors;
-
-namespace ABulkCopy.Common.Graph;
+﻿namespace ABulkCopy.Common.Graph;
 
 public class Node
 {
@@ -18,8 +16,6 @@ public class Node
 
     public TableDefinition? Value { get; }
 
-    public bool HasParents => Parents.Count > 0;
-    public bool HasChildren => Children.Count > 0;
     public bool IsRoot => Name == "root";
 
     public Dictionary<string, Node> Parents = new();

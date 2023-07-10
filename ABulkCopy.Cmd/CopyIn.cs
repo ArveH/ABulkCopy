@@ -3,23 +3,23 @@
 public class CopyIn : ICopyIn
 {
     private readonly IPgCmd _pgCmd;
+    private readonly IPgBulkCopy _pgBulkCopy;
     private readonly IDependencyGraph _dependencyGraph;
-    private readonly ISchemaReaderFactory _schemaReaderFactory;
     private readonly IADataReaderFactory _aDataReaderFactory;
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
 
     public CopyIn(
         IPgCmd pgCmd,
+        IPgBulkCopy pgBulkCopy,
         IDependencyGraph dependencyGraph,
-        ISchemaReaderFactory schemaReaderFactory,
         IADataReaderFactory aDataReaderFactory,
         IFileSystem fileSystem,
         ILogger logger)
     {
         _pgCmd = pgCmd;
+        _pgBulkCopy = pgBulkCopy;
         _dependencyGraph = dependencyGraph;
-        _schemaReaderFactory = schemaReaderFactory;
         _aDataReaderFactory = aDataReaderFactory;
         _fileSystem = fileSystem;
         _logger = logger;
@@ -42,7 +42,7 @@ public class CopyIn : ICopyIn
             schemaFiles.Count);
         Console.WriteLine($"Creating and filling {schemaFiles.Count} {"table".Plural(schemaFiles.Count)}.");
 
-        var tablesInOrder = await GetTablesInOrder(rdbms, schemaFiles);
+        var tablesInOrder = await _pgBulkCopy.BuildDependencyGraph(rdbms, schemaFiles);
 
         var errors = 0;
         await Parallel.ForEachAsync(tablesInOrder, async (tabDef, _) =>
@@ -71,31 +71,6 @@ public class CopyIn : ICopyIn
         sw.Stop();
         _logger.Information("The total CopyIn operation took {Elapsed}", sw.Elapsed.ToString("g"));
         Console.WriteLine($"The total CopyIn operation took {sw.Elapsed:g}");
-    }
-
-    private async Task<IEnumerable<TableDefinition>> GetTablesInOrder(Rdbms rdbms, List<string> schemaFiles)
-    {
-        var sw = new Stopwatch();
-        sw.Start();
-        foreach (var schemaFile in schemaFiles)
-        {
-            try
-            {
-                var schemaReader = _schemaReaderFactory.Get(rdbms);
-                _dependencyGraph.Add(await schemaReader.GetTableDefinition(schemaFile));
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Creating TableDefinition failed with schema file '{SchemaFile}'",
-                    schemaFile);
-                Console.WriteLine($"Creating TableDefinition failed with schema file '{schemaFile}'");
-                throw;
-            }
-        }
-        sw.Stop();
-        _logger.Information("Creating dependency graph took {Elapsed}", sw.Elapsed.ToString("g"));
-
-        return _dependencyGraph.GetTablesInOrder();
     }
 
     private async Task<bool> CreateTable(string folder, TableDefinition tableDefinition)
