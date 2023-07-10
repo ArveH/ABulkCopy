@@ -17,6 +17,7 @@ public class Node
     public TableDefinition? Value { get; }
 
     public bool IsRoot => Name == "root";
+    public bool IsIndependent => Parents.Count == 0;
 
     public Dictionary<string, Node> Parents = new();
     public Dictionary<string, Node> Children = new();

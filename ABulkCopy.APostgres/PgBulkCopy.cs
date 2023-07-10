@@ -1,4 +1,5 @@
-﻿using ABulkCopy.Common.Graph;
+﻿using System.Collections.Concurrent;
+using ABulkCopy.Common.Graph;
 using ABulkCopy.Common.Reader;
 using ABulkCopy.Common.Types;
 using System.Diagnostics;
@@ -13,6 +14,8 @@ public class PgBulkCopy : IPgBulkCopy
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
 
+
+    
     public PgBulkCopy(
         IDependencyGraph dependencyGraph,
         ISchemaReaderFactory schemaReaderFactory,
@@ -27,7 +30,7 @@ public class PgBulkCopy : IPgBulkCopy
         _logger = logger.ForContext<PgBulkCopy>();
     }
 
-    public async Task<IEnumerable<TableDefinition>> BuildDependencyGraph(Rdbms rdbms, List<string> schemaFiles)
+    public async Task BuildDependencyGraph(Rdbms rdbms, List<string> schemaFiles)
     {
         var sw = new Stopwatch();
         sw.Start();
@@ -48,12 +51,5 @@ public class PgBulkCopy : IPgBulkCopy
         }
         sw.Stop();
         _logger.Information("Creating dependency graph took {Elapsed}", sw.Elapsed.ToString("g"));
-
-        return _dependencyGraph.GetTablesInOrder();
     }
-
-    public async Task CopyTables(string folder, Rdbms rdbms)
-    {
-    }
-
 }

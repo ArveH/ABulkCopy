@@ -2,5 +2,5 @@
 
 public interface IPgBulkCopy
 {
-    Task<IEnumerable<TableDefinition>> BuildDependencyGraph(Rdbms rdbms, List<string> schemaFiles);
+    Task BuildDependencyGraph(Rdbms rdbms, List<string> schemaFiles);
 }

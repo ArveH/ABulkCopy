@@ -42,7 +42,8 @@ public class CopyIn : ICopyIn
             schemaFiles.Count);
         Console.WriteLine($"Creating and filling {schemaFiles.Count} {"table".Plural(schemaFiles.Count)}.");
 
-        var tablesInOrder = await _pgBulkCopy.BuildDependencyGraph(rdbms, schemaFiles);
+        await _pgBulkCopy.BuildDependencyGraph(rdbms, schemaFiles);
+        var tablesInOrder = _dependencyGraph.GetTablesInOrder();
 
         var errors = 0;
         await Parallel.ForEachAsync(tablesInOrder, async (tabDef, _) =>

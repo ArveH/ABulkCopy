@@ -1,5 +1,6 @@
 // Global using directives
 
+global using System.Collections.Concurrent;
 global using ABulkCopy.Common.Database;
 global using ABulkCopy.Common.Exceptions;
 global using ABulkCopy.Common.Extensions;
