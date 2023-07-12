@@ -1,11 +1,11 @@
 ﻿namespace ABulkCopy.Common;
 
-public class ImportState
+public class ImportState : IImportState
 {
     private readonly ILogger _logger;
-    private ConcurrentBag<string> _tablesLeft;
-    private ConcurrentQueue<string> _tablesReadyForCreation;
-    private ConcurrentBag<string> _finishedTables;
+    private readonly ConcurrentBag<string> _tablesLeft;
+    private readonly ConcurrentQueue<string> _tablesReadyForCreation;
+    private readonly ConcurrentBag<string> _finishedTables;
 
     public ImportState(
         IEnumerable<string> tablesLeft,
