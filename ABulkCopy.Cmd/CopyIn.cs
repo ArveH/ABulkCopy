@@ -4,7 +4,6 @@ public class CopyIn : ICopyIn
 {
     private readonly IPgCmd _pgCmd;
     private readonly IPgBulkCopy _pgBulkCopy;
-    private readonly IDependencyGraph _dependencyGraph;
     private readonly IADataReaderFactory _aDataReaderFactory;
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
@@ -12,14 +11,12 @@ public class CopyIn : ICopyIn
     public CopyIn(
         IPgCmd pgCmd,
         IPgBulkCopy pgBulkCopy,
-        IDependencyGraph dependencyGraph,
         IADataReaderFactory aDataReaderFactory,
         IFileSystem fileSystem,
         ILogger logger)
     {
         _pgCmd = pgCmd;
         _pgBulkCopy = pgBulkCopy;
-        _dependencyGraph = dependencyGraph;
         _aDataReaderFactory = aDataReaderFactory;
         _fileSystem = fileSystem;
         _logger = logger;
@@ -43,7 +40,7 @@ public class CopyIn : ICopyIn
         Console.WriteLine($"Creating and filling {schemaFiles.Count} {"table".Plural(schemaFiles.Count)}.");
 
         await _pgBulkCopy.BuildDependencyGraph(rdbms, schemaFiles);
-        var tablesInOrder = _dependencyGraph.GetTablesInOrder();
+        var tablesInOrder = _pgBulkCopy.DependencyGraph.GetTablesInOrder();
 
         var errors = 0;
         await Parallel.ForEachAsync(tablesInOrder, async (tabDef, _) =>
@@ -77,6 +74,7 @@ public class CopyIn : ICopyIn
     private async Task<bool> CreateTable(string folder, TableDefinition tableDefinition)
     {
         IADataReader? dataReader = null;
+        bool errorOccured = false;
         try
         {
             await _pgCmd.DropTable(tableDefinition.Header.Name);
@@ -88,7 +86,40 @@ public class CopyIn : ICopyIn
             _logger.Information($"Read {{Rows}} {"row".Plural(rows)} for table '{{TableName}}'",
                 rows, tableDefinition.Header.Name);
 
-            foreach (var indexDefinition in tableDefinition.Indexes)
+            foreach (var columnName in tableDefinition.Columns
+                         .Where(c => c.Identity != null)
+                         .Select(c => c.Name))
+            {
+                try
+                {
+                    await _pgCmd.ResetIdentity(tableDefinition.Header.Name, columnName);
+                    _logger.Information("Reset auto generation for {TableName}.{ColumnName}",
+                        tableDefinition.Header.Name, columnName);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "Reset auto generation for {TableName}.{ColumnName} failed",
+                        tableDefinition.Header.Name, columnName);
+                    Console.WriteLine($"**ERROR**: Reset auto generation for {tableDefinition.Header.Name}.{columnName} failed after all rows where inserted. This is a serious error! The auto generation will most likely produce duplicates.");
+                    errorOccured = true;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Read data for table '{TableName}' failed",
+                tableDefinition.Header.Name);
+            Console.WriteLine($"Read data for table '{tableDefinition.Header.Name}' failed");
+            return false;
+        }
+        finally
+        {
+            dataReader?.Dispose();
+        }
+
+        foreach (var indexDefinition in tableDefinition.Indexes)
+        {
+            try
             {
                 await _pgCmd.CreateIndex(tableDefinition.Header.Name, indexDefinition);
                 Console.WriteLine(
@@ -96,28 +127,16 @@ public class CopyIn : ICopyIn
                 _logger.Information("Created index '{IndexName}' for table '{TableName}'",
                     indexDefinition.Header.Name, tableDefinition.Header.Name);
             }
-
-            foreach (var columnName in tableDefinition.Columns
-                         .Where(c => c.Identity != null)
-                         .Select(c => c.Name))
+            catch (Exception ex)
             {
-                await _pgCmd.ResetIdentity(tableDefinition.Header.Name, columnName);
-                _logger.Information("Reset identity for {TableName}.{ColumnName}",
-                    tableDefinition.Header.Name, columnName);
+                Console.WriteLine(
+                    $"Created index '{indexDefinition.Header.Name}' for table '{tableDefinition.Header.Name}' failed");
+                _logger.Information(ex, "Created index '{IndexName}' for table '{TableName}' failed",
+                    indexDefinition.Header.Name, tableDefinition.Header.Name);
+                errorOccured = true;
             }
+        }
 
-            return true;
-        }
-        catch (Exception ex)
-        {
-            _logger.Error(ex, "CopyIn failed for '{TableName}'",
-                tableDefinition.Header.Name);
-            Console.WriteLine($"CopyIn failed for '{tableDefinition.Header.Name}'");
-            return false;
-        }
-        finally
-        {
-            dataReader?.Dispose();
-        }
+        return !errorOccured;
     }
 }

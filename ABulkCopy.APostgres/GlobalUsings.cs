@@ -6,6 +6,7 @@ global using ABulkCopy.APostgres.Extensions;
 global using ABulkCopy.Common;
 global using ABulkCopy.Common.Database;
 global using ABulkCopy.Common.Extensions;
+global using ABulkCopy.Common.Graph;
 global using ABulkCopy.Common.Mapping;
 global using ABulkCopy.Common.Reader;
 global using ABulkCopy.Common.Types;

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using ABulkCopy.Common.Graph;
 using ABulkCopy.Common.Reader;
 using ABulkCopy.Common.Types;
 using System.Diagnostics;
@@ -8,7 +7,7 @@ namespace ABulkCopy.APostgres;
 
 public class PgBulkCopy : IPgBulkCopy
 {
-    private readonly IDependencyGraph _dependencyGraph;
+    public IDependencyGraph DependencyGraph { get; }
     private readonly ISchemaReaderFactory _schemaReaderFactory;
     private readonly IADataReaderFactory _aDataReaderFactory;
     private readonly IFileSystem _fileSystem;
@@ -17,13 +16,13 @@ public class PgBulkCopy : IPgBulkCopy
 
     
     public PgBulkCopy(
-        IDependencyGraph dependencyGraph,
+        IDependencyGraph dependencyDependencyGraph,
         ISchemaReaderFactory schemaReaderFactory,
         IADataReaderFactory aDataReaderFactory,
         IFileSystem fileSystem,
         ILogger logger)
     {
-        _dependencyGraph = dependencyGraph;
+        DependencyGraph = dependencyDependencyGraph;
         _schemaReaderFactory = schemaReaderFactory;
         _aDataReaderFactory = aDataReaderFactory;
         _fileSystem = fileSystem;
@@ -39,7 +38,7 @@ public class PgBulkCopy : IPgBulkCopy
             try
             {
                 var schemaReader = _schemaReaderFactory.Get(rdbms);
-                _dependencyGraph.Add(await schemaReader.GetTableDefinition(schemaFile));
+                DependencyGraph.Add(await schemaReader.GetTableDefinition(schemaFile));
             }
             catch (Exception ex)
             {
