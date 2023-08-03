@@ -1,4 +1,6 @@
-﻿namespace ABulkCopy.Cmd;
+﻿using ABulkCopy.Common.Types.Index;
+
+namespace ABulkCopy.Cmd;
 
 public class CopyIn : ICopyIn
 {
@@ -117,10 +119,12 @@ public class CopyIn : ICopyIn
             dataReader?.Dispose();
         }
 
-        foreach (var indexDefinition in tableDefinition.Indexes)
+        await Parallel.ForEachAsync(tableDefinition.Indexes, async (indexDefinition, _) =>
         {
             try
             {
+                _logger.Information("Creating index '{IndexName}' for table '{TableName}'...",
+                    indexDefinition.Header.Name, tableDefinition.Header.Name);
                 await _pgCmd.CreateIndex(tableDefinition.Header.Name, indexDefinition);
                 Console.WriteLine(
                     $"Created index '{indexDefinition.Header.Name}' for table '{tableDefinition.Header.Name}'");
@@ -135,7 +139,7 @@ public class CopyIn : ICopyIn
                     indexDefinition.Header.Name, tableDefinition.Header.Name);
                 errorOccured = true;
             }
-        }
+        });
 
         return !errorOccured;
     }
