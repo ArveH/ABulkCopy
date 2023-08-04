@@ -54,7 +54,7 @@ public class DependencyGraphTests
     {
         // Arrange
         var tableDefinitions = GetTableDefinitions("A1", "B2");
-        SetDependency(tableDefinitions[0].Header.Name, tableDefinitions[1]);
+        SetForeignKey(tableDefinitions[0].Header.Name, tableDefinitions[1]);
         var graph = GetDependencyGraph();
 
         // Act
@@ -74,7 +74,7 @@ public class DependencyGraphTests
     {
         // Arrange
         var tableDefinitions = GetTableDefinitions("A1", "B2");
-        SetDependency(tableDefinitions[0].Header.Name, tableDefinitions[1]);
+        SetForeignKey(tableDefinitions[0].Header.Name, tableDefinitions[1]);
         var graph = GetDependencyGraph();
 
         // Act
@@ -104,8 +104,8 @@ public class DependencyGraphTests
     {
         // Arrange
         var tableDefinitions = GetTableDefinitions("a", "c", "b");
-        SetDependency(tableDefinitions[0].Header.Name, tableDefinitions[1]);
-        SetDependency(tableDefinitions[2].Header.Name, tableDefinitions[1]);
+        SetForeignKey(tableDefinitions[0].Header.Name, tableDefinitions[1]);
+        SetForeignKey(tableDefinitions[2].Header.Name, tableDefinitions[1]);
         var graph = GetDependencyGraph();
         tableDefinitions.ForEach(graph.Add);
 
@@ -147,9 +147,9 @@ public class DependencyGraphTests
     {
         // Arrange
         var tableDefinitions = GetTableDefinitions("d", "a", "b", "c");
-        SetDependency(tableDefinitions[3].Header.Name, tableDefinitions[0]);
-        SetDependency(tableDefinitions[2].Header.Name, tableDefinitions[0]);
-        SetDependency(tableDefinitions[1].Header.Name, tableDefinitions[3]);
+        SetForeignKey(tableDefinitions[3].Header.Name, tableDefinitions[0]);
+        SetForeignKey(tableDefinitions[2].Header.Name, tableDefinitions[0]);
+        SetForeignKey(tableDefinitions[1].Header.Name, tableDefinitions[3]);
         var graph = GetDependencyGraph();
         tableDefinitions.ForEach(graph.Add);
 
@@ -179,9 +179,9 @@ public class DependencyGraphTests
     {
         // Arrange
         var tableDefinitions = GetTableDefinitions("a", "b", "c", "d");
-        SetDependency(tableDefinitions[0].Header.Name, tableDefinitions[2]);
-        SetDependency(tableDefinitions[1].Header.Name, tableDefinitions[3]);
-        SetDependency(tableDefinitions[3].Header.Name, tableDefinitions[2]);
+        SetForeignKey(tableDefinitions[0].Header.Name, tableDefinitions[2]);
+        SetForeignKey(tableDefinitions[1].Header.Name, tableDefinitions[3]);
+        SetForeignKey(tableDefinitions[3].Header.Name, tableDefinitions[2]);
         var graph = GetDependencyGraph();
         tableDefinitions.ForEach(graph.Add);
 
@@ -216,10 +216,10 @@ public class DependencyGraphTests
     {
         // Arrange
         var tableDefinitions = GetTableDefinitions("a", "b", "c", "d", "e");
-        SetDependency(tableDefinitions[0].Header.Name, tableDefinitions[2]);
-        SetDependency(tableDefinitions[4].Header.Name, tableDefinitions[2]);
-        SetDependency(tableDefinitions[1].Header.Name, tableDefinitions[3]);
-        SetDependency(tableDefinitions[3].Header.Name, tableDefinitions[4]);
+        SetForeignKey(tableDefinitions[0].Header.Name, tableDefinitions[2]);
+        SetForeignKey(tableDefinitions[4].Header.Name, tableDefinitions[2]);
+        SetForeignKey(tableDefinitions[1].Header.Name, tableDefinitions[3]);
+        SetForeignKey(tableDefinitions[3].Header.Name, tableDefinitions[4]);
         var graph = GetDependencyGraph();
         tableDefinitions.ForEach(graph.Add);
 
@@ -255,10 +255,10 @@ public class DependencyGraphTests
     {
         // Arrange
         var tableDefinitions = GetTableDefinitions("c", "b", "a", "e", "d");
-        SetDependency(tableDefinitions[1].Header.Name, tableDefinitions[0]);
-        SetDependency(tableDefinitions[3].Header.Name, tableDefinitions[0]);
-        SetDependency(tableDefinitions[1].Header.Name, tableDefinitions[4]);
-        SetDependency(tableDefinitions[4].Header.Name, tableDefinitions[3]);
+        SetForeignKey(tableDefinitions[1].Header.Name, tableDefinitions[0]);
+        SetForeignKey(tableDefinitions[3].Header.Name, tableDefinitions[0]);
+        SetForeignKey(tableDefinitions[1].Header.Name, tableDefinitions[4]);
+        SetForeignKey(tableDefinitions[4].Header.Name, tableDefinitions[3]);
         var graph = GetDependencyGraph();
         tableDefinitions.ForEach(graph.Add);
 
@@ -280,7 +280,7 @@ public class DependencyGraphTests
             $"because Count should be {expectedCount}");
     }
 
-    private void SetDependency(string parentName, TableDefinition child)
+    private void SetForeignKey(string parentName, TableDefinition child)
     {
         child.Columns.Add(new SqlServerBigInt(1, $"{parentName}_Id", false));
         child.ForeignKeys.Add(new ForeignKey
