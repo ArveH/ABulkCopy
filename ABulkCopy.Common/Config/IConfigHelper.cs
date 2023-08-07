@@ -2,5 +2,6 @@
 
 public interface IConfigHelper
 {
-    IConfigurationRoot GetConfiguration(string? userSecretsKey = null);
+    IConfigurationRoot GetConfiguration(
+        string? userSecretsKey = null, string? connectionString = null);
 }

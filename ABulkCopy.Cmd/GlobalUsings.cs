@@ -10,6 +10,7 @@ global using ABulkCopy.ASqlServer.Table;
 global using ABulkCopy.Cmd.Config;
 global using ABulkCopy.Cmd.Factories;
 global using ABulkCopy.Common;
+global using ABulkCopy.Common.Config;
 global using ABulkCopy.Common.Database;
 global using ABulkCopy.Common.Extensions;
 global using ABulkCopy.Common.Graph;

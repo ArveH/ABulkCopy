@@ -29,7 +29,7 @@ public class PgBulkCopy : IPgBulkCopy
         _logger = logger.ForContext<PgBulkCopy>();
     }
 
-    public async Task BuildDependencyGraph(Rdbms rdbms, List<string> schemaFiles)
+    public async Task<string> BuildDependencyGraph(Rdbms rdbms, List<string> schemaFiles)
     {
         var sw = new Stopwatch();
         sw.Start();
@@ -49,6 +49,8 @@ public class PgBulkCopy : IPgBulkCopy
             }
         }
         sw.Stop();
-        _logger.Information("Creating dependency graph took {Elapsed}", sw.Elapsed.ToString("g"));
+        var elapsed = sw.Elapsed.ToString("g");
+        _logger.Information("Creating dependency graph took {Elapsed}", elapsed);
+        return elapsed;
     }
 }

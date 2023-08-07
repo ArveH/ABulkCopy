@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-
-namespace ABulkCopy.Cmd;
+﻿namespace ABulkCopy.Cmd;
 
 internal class Program
 {
@@ -8,16 +6,18 @@ internal class Program
     {
         var cmdArguments = GetArguments(args);
         if (cmdArguments == null) return;
-        var configuration = GetConfiguration(cmdArguments);
-        Log.Logger = ConfigureLogger(configuration, cmdArguments.LogFile);
+        var configuration = new ConfigHelper().GetConfiguration(
+            userSecretsKey: "128e015d-d8ef-4ca8-ba79-5390b26c675f",
+            connectionString: cmdArguments.ConnectionString);
+        Log.Logger = LogConfigHelper.ConfigureLogger(configuration, cmdArguments.LogFile);
         Log.Information("ABulkCopy.Cmd started.");
         Console.WriteLine("ABulkCopy.Cmd started.");
 
         try
         {
-            var builder = CreateAppBuilder(
-                cmdArguments.Rdbms,
-                configuration);
+            var builder = Host.CreateApplicationBuilder();
+            builder.Configuration.AddConfiguration(configuration);
+            builder.ConfigureServices(cmdArguments.Rdbms, configuration);
             var host = builder.Build();
 
             if (cmdArguments.Direction == CopyDirection.In)
@@ -35,8 +35,10 @@ internal class Program
                     Console.WriteLine($"Folder {cmdArguments.Folder} didn't exist. ABulkCopy.Cmd finished.");
                     return;
                 }
+
                 await copyOut.Run(cmdArguments.Folder, cmdArguments.SearchStr);
             }
+
             Log.Information("ABulkCopy.Cmd finished.");
             Console.WriteLine("ABulkCopy.Cmd finished.");
         }
@@ -50,19 +52,6 @@ internal class Program
         {
             await Log.CloseAndFlushAsync();
         }
-    }
-
-    private static IConfigurationRoot GetConfiguration(CmdArguments cmdArguments)
-    {
-        var configuration = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", true)
-            .AddUserSecrets("128e015d-d8ef-4ca8-ba79-5390b26c675f")
-            .AddEnvironmentVariables()
-            .AddInMemoryCollection(new Dictionary<string, string?> {
-                ["ConnectionStrings:BulkCopy"] = cmdArguments.ConnectionString})
-            .Build();
-        return configuration;
     }
 
     private static CmdArguments? GetArguments(string[] args)
@@ -80,66 +69,5 @@ internal class Program
         }
 
         return result.Value;
-    }
-
-    private static Serilog.ILogger ConfigureLogger(
-        IConfigurationRoot configuration,
-        string fileFullPath)
-    {
-        const string outputTemplate =
-            "{Timestamp:HH:mm:ss.fff} [{Level:u3}] {Message}    {Timestamp:yyyy-MM-dd }{Properties}{NewLine}{Exception}{NewLine}";
-        var loggerConfig = new LoggerConfiguration()
-            .ReadFrom.Configuration(configuration)
-            .Enrich.FromLogContext()
-            .Enrich.WithMachineName()
-            .WriteTo.File(fileFullPath,
-                outputTemplate: outputTemplate,
-                fileSizeLimitBytes: 100000000,
-                rollOnFileSizeLimit: true,
-                shared: true,
-                flushToDiskInterval: TimeSpan.FromSeconds(1));
-        return loggerConfig.CreateLogger();
-    }
-
-    private static void ConfigureServices(
-        HostApplicationBuilder builder,
-        Rdbms rdbms,
-        IConfigurationRoot configuration)
-    {
-        var loggerFactory = LoggerFactory.Create(loggingBuilder =>
-        {
-            loggingBuilder.ClearProviders();
-            loggingBuilder.AddSerilog(Log.Logger);
-        });
-        builder.Services.AddSingleton(loggerFactory);
-
-        builder.Services.AddSingleton(configuration);
-        builder.Services.AddSingleton(Log.Logger);
-        builder.Services.AddSingleton<ISchemaWriter, SchemaWriter>();
-        builder.Services.AddSingleton<IDataWriter, DataWriter>();
-        builder.Services.AddSingleton<ISchemaReaderFactory, SchemaReaderFactory>();
-        builder.Services.AddSingleton<IADataReaderFactory, ADataReaderFactory>();
-        builder.Services.AddSingleton<ITableReaderFactory, TableReaderFactory>();
-        builder.Services.AddSingleton<ISelectCreator, SelectCreator>();
-        builder.Services.AddSingleton<ICopyOut, CopyOut>();
-        builder.Services.AddSingleton<ICopyIn, CopyIn>();
-        builder.Services.AddSingleton<IMappingFactory, MappingFactory>();
-        builder.Services.AddSingleton<IFileSystem>(new FileSystem());
-        builder.Services.AddTransient<IDataFileReader, DataFileReader>();
-        builder.Services.AddTransient<IDependencyGraph, DependencyGraph>();
-        builder.Services.AddTransient<IVisitorFactory, VisitorFactory>();
-        builder.Services.AddSingleton<INodeFactory, NodeFactory>();
-        if (rdbms == Rdbms.Mss) builder.Services.AddMssServices();
-        if (rdbms == Rdbms.Pg) builder.Services.AddPgServices();
-    }
-
-    private static HostApplicationBuilder CreateAppBuilder(
-        Rdbms rdbms, IConfigurationRoot configuration)
-    {
-        var builder = Host.CreateApplicationBuilder();
-        builder.Configuration.AddConfiguration(configuration);
-        ConfigureServices(builder, rdbms, configuration);
-
-        return builder;
     }
 }

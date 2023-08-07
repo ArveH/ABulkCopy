@@ -37,11 +37,12 @@ public class CopyIn : ICopyIn
         }
 
         var schemaFiles = _fileSystem.Directory.GetFiles(folder, $"*{Constants.SchemaSuffix}").ToList();
-        _logger.Information($"Creating and filling {{TableCount}} {"table".Plural(schemaFiles.Count)}",
+        _logger.Information($"Creating {{TableCount}} {"table".Plural(schemaFiles.Count)}",
             schemaFiles.Count);
-        Console.WriteLine($"Creating and filling {schemaFiles.Count} {"table".Plural(schemaFiles.Count)}.");
+        Console.WriteLine($"Creating {schemaFiles.Count} {"table".Plural(schemaFiles.Count)}.");
 
-        await _pgBulkCopy.BuildDependencyGraph(rdbms, schemaFiles);
+        var elapsedStr = await _pgBulkCopy.BuildDependencyGraph(rdbms, schemaFiles);
+        Console.WriteLine($"Creating dependency graph took {elapsedStr}");
         var allTables = _pgBulkCopy.DependencyGraph.BreathFirst().ToList();
 
         var errors = 0;
@@ -85,7 +86,7 @@ public class CopyIn : ICopyIn
     private async Task<bool> CreateTable(string folder, TableDefinition tableDefinition)
     {
         IADataReader? dataReader = null;
-        bool errorOccured = false;
+        var errorOccurred = false;
         try
         {
             await _pgCmd.DropTable(tableDefinition.Header.Name);
@@ -112,7 +113,7 @@ public class CopyIn : ICopyIn
                     _logger.Error(ex, "Reset auto generation for {TableName}.{ColumnName} failed",
                         tableDefinition.Header.Name, columnName);
                     Console.WriteLine($"**ERROR**: Reset auto generation for {tableDefinition.Header.Name}.{columnName} failed after all rows where inserted. This is a serious error! The auto generation will most likely produce duplicates.");
-                    errorOccured = true;
+                    errorOccurred = true;
                 }
             }
         }
@@ -146,10 +147,10 @@ public class CopyIn : ICopyIn
                     $"Created index '{indexDefinition.Header.Name}' for table '{tableDefinition.Header.Name}' failed");
                 _logger.Information(ex, "Created index '{IndexName}' for table '{TableName}' failed",
                     indexDefinition.Header.Name, tableDefinition.Header.Name);
-                errorOccured = true;
+                errorOccurred = true;
             }
         });
 
-        return !errorOccured;
+        return !errorOccurred;
     }
 }

@@ -2,20 +2,31 @@
 
 public class ConfigHelper : IConfigHelper
 {
-    public IConfigurationRoot GetConfiguration(string? userSecretsKey = null)
+
+    public IConfigurationRoot GetConfiguration(
+        string? userSecretsKey = null,
+        string? connectionString = null)
     {
-        var envName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-        var builder = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory());
-
-        builder.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-
-        if (!string.IsNullOrWhiteSpace(envName))
-            builder.AddJsonFile($"appsettings.{envName}.json", optional: true);
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", true);
 
         if (!string.IsNullOrWhiteSpace(userSecretsKey))
-            builder.AddUserSecrets(userSecretsKey);
+        {
+            configuration.AddUserSecrets(userSecretsKey);
+        }
 
-        return builder.Build();
+        configuration.AddEnvironmentVariables();
+
+        if (!string.IsNullOrWhiteSpace(connectionString))
+        {
+            configuration.AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["ConnectionStrings:BulkCopy"] = connectionString
+            });
+        }
+            
+        return configuration.Build();
     }
+
 }
