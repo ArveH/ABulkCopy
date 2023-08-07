@@ -2,14 +2,14 @@
 
 namespace ABulkCopy.Common;
 
-public class ImportState : IImportState
+public class TableSequencer : ITableSequencer
 {
     private readonly ILogger _logger;
     private readonly ConcurrentDictionary<string, INode> _tablesNotReadyForCreation;
     private readonly ConcurrentQueue<INode> _tablesReadyForCreation;
     private readonly ConcurrentBag<INode> _finishedTables;
 
-    public ImportState(
+    public TableSequencer(
         IEnumerable<INode> tablesLeft,
         IEnumerable<INode> tablesReadyForCreation,
         ILogger logger)
@@ -17,7 +17,7 @@ public class ImportState : IImportState
         _tablesNotReadyForCreation = new (tablesLeft.ToDictionary(n => n.Name));
         _tablesReadyForCreation = new(tablesReadyForCreation);
         _finishedTables = new();
-        _logger = logger.ForContext<ImportState>();
+        _logger = logger.ForContext<TableSequencer>();
     }
 
     public bool IsTableFinished(string tableName)

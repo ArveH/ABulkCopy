@@ -45,13 +45,13 @@ public class CopyIn : ICopyIn
         var allTables = _pgBulkCopy.DependencyGraph.BreathFirst().ToList();
 
         var errors = 0;
-        IImportState importState = new ImportState(
+        ITableSequencer tableSequencer = new TableSequencer(
             allTables.Where(t => !t.IsIndependent),
             allTables.Where(t => t.IsIndependent),
             _logger);
 
         await Parallel.ForEachAsync(
-            importState.GetTablesReadyForCreation(),
+            tableSequencer.GetTablesReadyForCreation(),
             async (node, _) =>
             {
                 if (node.TableDefinition == null) throw new ArgumentNullException(nameof(node.TableDefinition));
@@ -59,7 +59,7 @@ public class CopyIn : ICopyIn
                 {
                     Interlocked.Increment(ref errors);
                 }
-                importState.TableFinished(node);
+                tableSequencer.TableFinished(node);
             });
 
         if (errors > 0)

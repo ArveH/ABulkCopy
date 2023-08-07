@@ -3,9 +3,9 @@ using ABulkCopy.Common.Graph.Visitors;
 
 namespace Common.Test;
 
-public class TestImportState : CommonTestBase
+public class TestTableSequencer : CommonTestBase
 {
-    public TestImportState(ITestOutputHelper output)
+    public TestTableSequencer(ITestOutputHelper output)
         :base(output)
     {
     }
@@ -17,19 +17,19 @@ public class TestImportState : CommonTestBase
         const int noOfTables = 20;
         var allTables = CreateAllTables(noOfTables);
         var creationOrderQueue = new ConcurrentQueue<string>();
-        IImportState importState = new ImportState(
+        ITableSequencer tableSequencer = new TableSequencer(
             allTables.Where(t => !t.IsIndependent),
             allTables.Where(t => t.IsIndependent),
             TestLogger);
 
         // Act
         await Parallel.ForEachAsync(
-            importState.GetTablesReadyForCreation(),
+            tableSequencer.GetTablesReadyForCreation(),
             async (node, token) =>
             {
                 var tableHolder = allTables.First(t => t.Name == node.Name);
                 await Task.Delay(tableHolder.SimulatedCopyTime, token);
-                importState.TableFinished(node);
+                tableSequencer.TableFinished(node);
                 creationOrderQueue.Enqueue(node.Name);
             });
 
@@ -49,19 +49,19 @@ public class TestImportState : CommonTestBase
         CreateMoreParents(allTables, 3, 5);
 
         var creationOrderQueue = new ConcurrentQueue<string>();
-        IImportState importState = new ImportState(
+        ITableSequencer tableSequencer = new TableSequencer(
             allTables.Where(t => !t.IsIndependent),
             allTables.Where(t => t.IsIndependent), 
             TestLogger);
 
         // Act
         await Parallel.ForEachAsync(
-            importState.GetTablesReadyForCreation(),
+            tableSequencer.GetTablesReadyForCreation(),
             async (node, token) =>
             {
                 var tableHolder = allTables.First(t => t.Name == node.Name);
                 await Task.Delay(tableHolder.SimulatedCopyTime, token);
-                importState.TableFinished(node);
+                tableSequencer.TableFinished(node);
                 creationOrderQueue.Enqueue(node.Name);
             });
 

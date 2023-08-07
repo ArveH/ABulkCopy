@@ -2,7 +2,7 @@
 
 namespace ABulkCopy.Common;
 
-public interface IImportState
+public interface ITableSequencer
 {
     bool IsTableFinished(string tableName);
     bool TableReadyForCreation(string tableName);
