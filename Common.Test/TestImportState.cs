@@ -11,8 +11,9 @@ public class TestImportState : CommonTestBase
     }
 
     [Fact]
-    public async Task TestInitialization()
+    public async Task TestCreatingTablesInParallel_Then_ParentsFinishedBeforeChildren()
     {
+        // Arrange
         const int noOfTables = 20;
         var allTables = new List<TableHolder>();
         var rndDelay = new Random(1);
@@ -27,7 +28,6 @@ public class TestImportState : CommonTestBase
         allTables[3].Parents.Add(allTables[1].Name, allTables[1]); allTables[1].Children.Add(allTables[3].Name, allTables[3]);
         allTables[4].Parents.Add(allTables[3].Name, allTables[3]); allTables[3].Children.Add(allTables[4].Name, allTables[4]);
 
-        var rndChild = new Random(2);
         for (var i = 5; i < noOfTables-1; i++)
         {
             // 30% of tables depends on next table
@@ -38,7 +38,7 @@ public class TestImportState : CommonTestBase
             }
         }
 
-        var orderOfCreation = new ConcurrentQueue<string>();
+        var creationOrderQueue = new ConcurrentQueue<string>();
         IImportState importState = new ImportState(
             allTables.Where(t => !t.IsIndependent),
             allTables.Where(t => t.IsIndependent), 
@@ -51,10 +51,25 @@ public class TestImportState : CommonTestBase
                 var tableHolder = allTables.First(t => t.Name == node.Name);
                 await Task.Delay(tableHolder.SimulatedCopyTime, token);
                 importState.TableFinished(node);
-                orderOfCreation.Enqueue(node.Name);
+                creationOrderQueue.Enqueue(node.Name);
             });
-    }
 
+        var creationOrderList = creationOrderQueue.ToList();
+        ValidateParentsCreatedFirst(allTables, creationOrderList);
+    }
+    
+    private void ValidateParentsCreatedFirst(List<TableHolder> allTables, List<string> creationOrderList)
+    {
+        foreach (var table in allTables.Where(t => !t.IsIndependent))
+        {
+            var tablePos = creationOrderList.IndexOf(table.Name);
+            foreach (var parent in table.Parents)
+            {
+                var parentPos = creationOrderList.IndexOf(parent.Key);
+                parentPos.Should().BeLessThan(tablePos, $"because Parent '{parent.Key}' of '{table.Name}' should be created before {table.Name}");
+            }
+        }
+    }
 }
 
 public class TableHolder : INode

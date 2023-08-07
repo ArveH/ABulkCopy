@@ -55,7 +55,7 @@ public class ImportState : IImportState
             if (_tablesNotReadyForCreation.TryRemove(child.Value.Name, out _))
             {
                 _logger.Information("IMPORTSTATE: Table '{TableName}' removed from NotReady",
-                    node.Name);
+                    child.Value.Name);
             }
             else
             {
@@ -77,12 +77,12 @@ public class ImportState : IImportState
             }
             else
             {
-                _logger.Information("IMPORTSTATE: No more tables Ready");
+                _logger.Information("IMPORTSTATE: No more tables Ready (this message can occur several times, while waiting for tables to finish)");
             }
 
             if (!_tablesNotReadyForCreation.Any())
             {
-                _logger.Information("IMPORTSTATE: No more tables NotReady");
+                _logger.Information("IMPORTSTATE: No more tables NotReady (this message should only occur once)");
                 yield break;
             }
 
