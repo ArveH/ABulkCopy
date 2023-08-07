@@ -1,6 +1,4 @@
-﻿using ABulkCopy.Common.Types.Index;
-
-namespace ABulkCopy.Cmd;
+﻿namespace ABulkCopy.Cmd;
 
 public class CopyIn : ICopyIn
 {

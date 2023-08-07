@@ -18,6 +18,7 @@ global using Npgsql;
 global using NpgsqlTypes;
 global using Serilog;
 global using System.Data.SqlTypes;
+global using System.Diagnostics;
 global using System.Globalization;
 global using System.IO.Abstractions;
 global using System.Text;
