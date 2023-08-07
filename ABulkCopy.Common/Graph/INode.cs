@@ -3,7 +3,7 @@
 public interface INode
 {
     string Name { get; }
-    TableDefinition? Value { get; }
+    TableDefinition? TableDefinition { get; }
     bool IsRoot { get; }
     bool IsIndependent { get; }
     public Dictionary<string, INode> Parents { get; }

@@ -46,7 +46,7 @@ public class DependencyGraph : IDependencyGraph
 
     public IEnumerable<TableDefinition> GetTablesInOrder()
     {
-        var allTablesWithDuplicates = BreathFirst().Where(n => n.Value != null).Select(n => n.Value!).ToArray();
+        var allTablesWithDuplicates = BreathFirst().Where(n => n.TableDefinition != null).Select(n => n.TableDefinition!).ToArray();
         for (var i = 0; i < allTablesWithDuplicates.Length; i++)
         {
             var tabDef = allTablesWithDuplicates[i];

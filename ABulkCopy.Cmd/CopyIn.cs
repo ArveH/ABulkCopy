@@ -54,8 +54,8 @@ public class CopyIn : ICopyIn
             importState.GetTablesReadyForCreation(),
             async (node, _) =>
             {
-                if (node.Value == null) throw new ArgumentNullException(nameof(node.Value));
-                if (!await CreateTable(folder, node.Value))
+                if (node.TableDefinition == null) throw new ArgumentNullException(nameof(node.TableDefinition));
+                if (!await CreateTable(folder, node.TableDefinition))
                 {
                     Interlocked.Increment(ref errors);
                 }

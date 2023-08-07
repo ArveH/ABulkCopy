@@ -8,13 +8,13 @@ public class Node : INode
     }
     public Node(TableDefinition val)
     {
-        Value = val;
+        TableDefinition = val;
         Name = val.Header.Name;
     }
 
     public string Name { get; }
 
-    public TableDefinition? Value { get; }
+    public TableDefinition? TableDefinition { get; }
 
     public bool IsRoot => Name == "root";
     public bool IsIndependent => (Parents.Count == 1 && Parents.First().Key == "root") || Parents.Count == 0;

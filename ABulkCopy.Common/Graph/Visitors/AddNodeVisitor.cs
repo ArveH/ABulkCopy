@@ -6,9 +6,9 @@ public class AddNodeVisitor : VisitorBase, IAddNodeVisitor
 
     public AddNodeVisitor(INode newNode)
     {
-        if (newNode.Value == null)
+        if (newNode.TableDefinition == null)
             throw new ArgumentNullException(
-                nameof(newNode.Value),
+                nameof(newNode.TableDefinition),
                 "You can't create AddNodeVisitor with the root node");
         _newNode = newNode;
     }
@@ -45,13 +45,13 @@ public class AddNodeVisitor : VisitorBase, IAddNodeVisitor
 
     private bool CurrentDependsOnNewNode(INode node)
     {
-        return node.Value != null &&
-               node.Value.ForeignKeys.Any(fk => fk.TableReference == _newNode.Name);
+        return node.TableDefinition != null &&
+               node.TableDefinition.ForeignKeys.Any(fk => fk.TableReference == _newNode.Name);
     }
 
     bool NewNodeDependsOnCurrent(INode node)
     {
-        return _newNode.Value!.ForeignKeys.Any(fk => fk.TableReference == node.Name);
+        return _newNode.TableDefinition!.ForeignKeys.Any(fk => fk.TableReference == node.Name);
     }
 
     public bool IsAdded { get; private set; }
