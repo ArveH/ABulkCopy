@@ -42,16 +42,25 @@ public class CopyIn : ICopyIn
         Console.WriteLine($"Creating and filling {schemaFiles.Count} {"table".Plural(schemaFiles.Count)}.");
 
         await _pgBulkCopy.BuildDependencyGraph(rdbms, schemaFiles);
-        var tablesInOrder = _pgBulkCopy.DependencyGraph.GetTablesInOrder();
+        var allTables = _pgBulkCopy.DependencyGraph.BreathFirst().ToList();
 
         var errors = 0;
-        await Parallel.ForEachAsync(tablesInOrder, async (tabDef, _) =>
-        {
-            if (!await CreateTable(folder, tabDef))
+        IImportState importState = new ImportState(
+            allTables.Where(t => !t.IsIndependent),
+            allTables.Where(t => t.IsIndependent),
+            _logger);
+
+        await Parallel.ForEachAsync(
+            importState.GetTablesReadyForCreation(),
+            async (node, _) =>
             {
-                Interlocked.Increment(ref errors);
-            }
-        });
+                if (node.Value == null) throw new ArgumentNullException(nameof(node.Value));
+                if (!await CreateTable(folder, node.Value))
+                {
+                    Interlocked.Increment(ref errors);
+                }
+                importState.TableFinished(node);
+            });
 
         if (errors > 0)
         {

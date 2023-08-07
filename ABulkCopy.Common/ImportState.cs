@@ -80,7 +80,7 @@ public class ImportState : IImportState
                 _logger.Information("IMPORTSTATE: No more tables Ready (this message can occur several times, while waiting for tables to finish)");
             }
 
-            if (!_tablesNotReadyForCreation.Any())
+            if (!_tablesNotReadyForCreation.Any() && !_tablesReadyForCreation.Any())
             {
                 _logger.Information("IMPORTSTATE: No more tables NotReady (this message should only occur once)");
                 yield break;

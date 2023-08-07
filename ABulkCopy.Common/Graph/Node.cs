@@ -17,7 +17,7 @@ public class Node : INode
     public TableDefinition? Value { get; }
 
     public bool IsRoot => Name == "root";
-    public bool IsIndependent => Parents.Count == 0;
+    public bool IsIndependent => (Parents.Count == 1 && Parents.First().Key == "root") || Parents.Count == 0;
 
     public Dictionary<string, INode> Parents { get; } = new();
     public Dictionary<string, INode> Children { get; } = new();

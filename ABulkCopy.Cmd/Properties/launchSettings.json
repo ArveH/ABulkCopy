@@ -2,7 +2,7 @@
   "profiles": {
     "ABulkCopy.Cmd": {
       "commandName": "Project",
-      "commandLineArgs": "-d in -r Pg -c \"Server=localhost;Port=5432;Database=einar;User Id=postgres;Integrated Security=true;Include Error Detail=True;\" -l D:\\Temp\\LogFiles\\Application\\abulkcopy_in_einar.log -f e:\\temp\\einar"
+      "commandLineArgs": "-d in -r Pg -c \"Server=localhost;Port=5432;Database=einar;User Id=postgres;Integrated Security=true;Include Error Detail=True;\" -l D:\\Temp\\LogFiles\\Application\\abulkcopyexe_in_einar.log -f e:\\temp\\einar\\output"
     }
   }
 }
