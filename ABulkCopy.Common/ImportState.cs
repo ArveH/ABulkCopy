@@ -1,9 +1,11 @@
-﻿namespace ABulkCopy.Common;
+﻿using ABulkCopy.Common.Graph;
+
+namespace ABulkCopy.Common;
 
 public class ImportState : IImportState
 {
     private readonly ILogger _logger;
-    private readonly ConcurrentBag<string> _tablesLeft;
+    private readonly ConcurrentBag<string> _tablesNotReadyForCreation;
     private readonly ConcurrentQueue<string> _tablesReadyForCreation;
     private readonly ConcurrentBag<string> _finishedTables;
 
@@ -12,7 +14,7 @@ public class ImportState : IImportState
         IEnumerable<string> tablesReadyForCreation,
         ILogger logger)
     {
-        _tablesLeft = new(tablesLeft);
+        _tablesNotReadyForCreation = new(tablesLeft);
         _tablesReadyForCreation = new(tablesReadyForCreation);
         _finishedTables = new();
         _logger = logger.ForContext<ImportState>();
@@ -25,19 +27,42 @@ public class ImportState : IImportState
 
     public bool TableReadyForCreation(string tableName)
     {
-        if (_tablesLeft.TryTake(out var table))
+        if (_tablesNotReadyForCreation.TryTake(out var table))
         {
+            _logger.Information("IMPORTSTATE: Table '{TableName}' removed from NotReady", tableName);
             _tablesReadyForCreation.Enqueue(table);
+            _logger.Information("IMPORTSTATE: Table '{TableName}' added to Ready", tableName);
             return true;
         }
 
-        _logger.Error("Table '{TableName}' was not found amongst the tables that where left", tableName);
+        _logger.Error("IMPORTSTATE: Table '{TableName}' couldn't be removed from NotReady", tableName);
+
         return false;
     }
 
-    public void TableFinished(string tableName)
+    public void TableFinished(Node node)
     {
-        _finishedTables.Add(tableName);
+        _finishedTables.Add(node.Name);
+        _logger.Information("IMPORTSTATE: Table '{TableName}' added to Finished", node.Name);
+        foreach (var child in node.Children)
+        {
+            child.Value.Parents.Remove(node.Name);
+            if (!child.Value.IsIndependent) continue;
+
+            _tablesReadyForCreation.Enqueue(child.Value.Name);
+            _logger.Information("IMPORTSTATE: Table '{TableName}' added to Ready",
+                child.Value.Name);
+            if (_tablesNotReadyForCreation.TryTake(out var tableName))
+            {
+                _logger.Information("IMPORTSTATE: Table '{TableName}' removed from NotReady",
+                    tableName);
+            }
+            else
+            {
+                _logger.Error("IMPORTSTATE: Table '{TableName}' couldn't be removed from NotReady",
+                    child.Value.Name);
+            }
+        }
     }
 
     public async IAsyncEnumerable<string> GetTablesReadyForCreation()
@@ -46,16 +71,22 @@ public class ImportState : IImportState
         {
             if (_tablesReadyForCreation.TryDequeue(out var tableName))
             {
+                _logger.Information("IMPORTSTATE: Table '{TableName}' removed from Ready",
+                    tableName);
                 yield return tableName;
             }
             else
             {
-                if (!_tablesLeft.Any())
-                {
-                    yield break;
-                }
-                await Task.Delay(100);
+                _logger.Information("IMPORTSTATE: No more tables Ready");
             }
+
+            if (!_tablesNotReadyForCreation.Any())
+            {
+                _logger.Information("IMPORTSTATE: No more tables NotReady");
+                yield break;
+            }
+
+            await Task.Delay(100);
         }
     }
 }
