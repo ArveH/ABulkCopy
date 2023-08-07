@@ -6,5 +6,5 @@ public interface IDependencyGraph
     public int Count();
     public IEnumerable<TableDefinition> GetTablesInOrder();
     List<TableDepth> GetTableDepths();
-    IEnumerable<Node> BreathFirst();
+    IEnumerable<INode> BreathFirst();
 }

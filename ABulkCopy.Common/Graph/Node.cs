@@ -1,6 +1,6 @@
 ﻿namespace ABulkCopy.Common.Graph;
 
-public class Node
+public class Node : INode
 {
     public Node()
     {
@@ -19,8 +19,8 @@ public class Node
     public bool IsRoot => Name == "root";
     public bool IsIndependent => Parents.Count == 0;
 
-    public Dictionary<string, Node> Parents = new();
-    public Dictionary<string, Node> Children = new();
+    public Dictionary<string, INode> Parents { get; } = new();
+    public Dictionary<string, INode> Children { get; } = new();
 
     public void Accept(IVisitor visitor, int depth)
     {

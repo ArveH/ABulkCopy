@@ -324,6 +324,8 @@ public class DependencyGraphTests
 
     private IDependencyGraph GetDependencyGraph()
     {
-        return new DependencyGraph(new VisitorFactory());
+        return new DependencyGraph(
+            new NodeFactory(),
+            new VisitorFactory());
     }
 }

@@ -2,17 +2,22 @@
 
 public class DependencyGraph : IDependencyGraph
 {
+    private readonly INodeFactory _nodeFactory;
     private readonly IVisitorFactory _visitorFactory;
-    private readonly Node _root = new();
+    private readonly INode _root;
 
-    public DependencyGraph(IVisitorFactory visitorFactory)
+    public DependencyGraph(
+        INodeFactory nodeFactory,
+        IVisitorFactory visitorFactory)
     {
+        _nodeFactory = nodeFactory;
         _visitorFactory = visitorFactory;
+        _root = _nodeFactory.CreateRootNode();
     }
 
     public void Add(TableDefinition newTable)
     {
-        var newNode = new Node(newTable);
+        var newNode = _nodeFactory.CreateNode(newTable);
         var addNodeVisitor = _visitorFactory.GetAddNodeVisitor(newNode);
 
         _root.Accept(addNodeVisitor, 0);
@@ -66,9 +71,9 @@ public class DependencyGraph : IDependencyGraph
         return false;
     }
 
-    public IEnumerable<Node> BreathFirst()
+    public IEnumerable<INode> BreathFirst()
     {
-        var queue = new Queue<Node>();
+        var queue = new Queue<INode>();
 
         foreach (var child in _root.Children)
         {

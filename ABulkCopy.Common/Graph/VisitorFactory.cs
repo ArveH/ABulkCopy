@@ -12,7 +12,7 @@ public class VisitorFactory : IVisitorFactory
         return new DepthVisitor();
     }
 
-    public IAddNodeVisitor GetAddNodeVisitor(Node node)
+    public IAddNodeVisitor GetAddNodeVisitor(INode node)
     {
         return new AddNodeVisitor(node);
     }

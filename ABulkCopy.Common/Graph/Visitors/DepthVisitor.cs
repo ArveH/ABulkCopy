@@ -6,7 +6,7 @@ public class DepthVisitor : VisitorBase, IDepthVisitor
 
     public List<TableDepth> Result => _result;
 
-    public override void Visit(Node node, int depth)
+    public override void Visit(INode node, int depth)
     {
         if (!node.IsRoot)
         {

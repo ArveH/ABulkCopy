@@ -128,6 +128,7 @@ internal class Program
         builder.Services.AddTransient<IDataFileReader, DataFileReader>();
         builder.Services.AddTransient<IDependencyGraph, DependencyGraph>();
         builder.Services.AddTransient<IVisitorFactory, VisitorFactory>();
+        builder.Services.AddSingleton<INodeFactory, NodeFactory>();
         if (rdbms == Rdbms.Mss) builder.Services.AddMssServices();
         if (rdbms == Rdbms.Pg) builder.Services.AddPgServices();
     }

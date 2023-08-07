@@ -2,9 +2,9 @@
 
 public class AddNodeVisitor : VisitorBase, IAddNodeVisitor
 {
-    private readonly Node _newNode;
+    private readonly INode _newNode;
 
-    public AddNodeVisitor(Node newNode)
+    public AddNodeVisitor(INode newNode)
     {
         if (newNode.Value == null)
             throw new ArgumentNullException(
@@ -13,7 +13,7 @@ public class AddNodeVisitor : VisitorBase, IAddNodeVisitor
         _newNode = newNode;
     }
 
-    public override void Visit(Node node, int depth)
+    public override void Visit(INode node, int depth)
     {
         base.Visit(node, depth);
         if (CurrentDependsOnNewNode(node))
@@ -34,7 +34,7 @@ public class AddNodeVisitor : VisitorBase, IAddNodeVisitor
 
     // If a Child is added before it's Parent, it is temporarily added to Root,
     // so we must remove it from there
-    private static void RemoveFromRootIfNeeded(Node node)
+    private static void RemoveFromRootIfNeeded(INode node)
     {
         if (node.Parents.TryGetValue("root", out var root))
         {
@@ -43,13 +43,13 @@ public class AddNodeVisitor : VisitorBase, IAddNodeVisitor
         }
     }
 
-    private bool CurrentDependsOnNewNode(Node node)
+    private bool CurrentDependsOnNewNode(INode node)
     {
         return node.Value != null &&
                node.Value.ForeignKeys.Any(fk => fk.TableReference == _newNode.Name);
     }
 
-    bool NewNodeDependsOnCurrent(Node node)
+    bool NewNodeDependsOnCurrent(INode node)
     {
         return _newNode.Value!.ForeignKeys.Any(fk => fk.TableReference == node.Name);
     }

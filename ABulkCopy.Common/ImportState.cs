@@ -5,16 +5,16 @@ namespace ABulkCopy.Common;
 public class ImportState : IImportState
 {
     private readonly ILogger _logger;
-    private readonly ConcurrentBag<string> _tablesNotReadyForCreation;
-    private readonly ConcurrentQueue<string> _tablesReadyForCreation;
-    private readonly ConcurrentBag<string> _finishedTables;
+    private readonly ConcurrentDictionary<string, INode> _tablesNotReadyForCreation;
+    private readonly ConcurrentQueue<INode> _tablesReadyForCreation;
+    private readonly ConcurrentBag<INode> _finishedTables;
 
     public ImportState(
-        IEnumerable<string> tablesLeft,
-        IEnumerable<string> tablesReadyForCreation,
+        IEnumerable<INode> tablesLeft,
+        IEnumerable<INode> tablesReadyForCreation,
         ILogger logger)
     {
-        _tablesNotReadyForCreation = new(tablesLeft);
+        _tablesNotReadyForCreation = new (tablesLeft.ToDictionary(n => n.Name));
         _tablesReadyForCreation = new(tablesReadyForCreation);
         _finishedTables = new();
         _logger = logger.ForContext<ImportState>();
@@ -22,15 +22,15 @@ public class ImportState : IImportState
 
     public bool IsTableFinished(string tableName)
     {
-        return _finishedTables.Contains(tableName);
+        return _finishedTables.Any(n => n.Name == tableName);
     }
 
     public bool TableReadyForCreation(string tableName)
     {
-        if (_tablesNotReadyForCreation.TryTake(out var table))
+        if (_tablesNotReadyForCreation.TryRemove(tableName, out var node))
         {
             _logger.Information("IMPORTSTATE: Table '{TableName}' removed from NotReady", tableName);
-            _tablesReadyForCreation.Enqueue(table);
+            _tablesReadyForCreation.Enqueue(node);
             _logger.Information("IMPORTSTATE: Table '{TableName}' added to Ready", tableName);
             return true;
         }
@@ -40,22 +40,22 @@ public class ImportState : IImportState
         return false;
     }
 
-    public void TableFinished(Node node)
+    public void TableFinished(INode node)
     {
-        _finishedTables.Add(node.Name);
+        _finishedTables.Add(node);
         _logger.Information("IMPORTSTATE: Table '{TableName}' added to Finished", node.Name);
         foreach (var child in node.Children)
         {
             child.Value.Parents.Remove(node.Name);
             if (!child.Value.IsIndependent) continue;
 
-            _tablesReadyForCreation.Enqueue(child.Value.Name);
+            _tablesReadyForCreation.Enqueue(child.Value);
             _logger.Information("IMPORTSTATE: Table '{TableName}' added to Ready",
                 child.Value.Name);
-            if (_tablesNotReadyForCreation.TryTake(out var tableName))
+            if (_tablesNotReadyForCreation.TryRemove(child.Value.Name, out _))
             {
                 _logger.Information("IMPORTSTATE: Table '{TableName}' removed from NotReady",
-                    tableName);
+                    node.Name);
             }
             else
             {
@@ -65,15 +65,15 @@ public class ImportState : IImportState
         }
     }
 
-    public async IAsyncEnumerable<string> GetTablesReadyForCreation()
+    public async IAsyncEnumerable<INode> GetTablesReadyForCreation()
     {
         while (true)
         {
-            if (_tablesReadyForCreation.TryDequeue(out var tableName))
+            if (_tablesReadyForCreation.TryDequeue(out var node))
             {
                 _logger.Information("IMPORTSTATE: Table '{TableName}' removed from Ready",
-                    tableName);
-                yield return tableName;
+                    node.Name);
+                yield return node;
             }
             else
             {

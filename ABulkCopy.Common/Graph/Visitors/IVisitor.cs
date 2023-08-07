@@ -3,5 +3,5 @@
 public interface IVisitor
 {
     public int NodeCount { get; }
-    public void Visit(Node node, int depth);
+    public void Visit(INode node, int depth);
 }

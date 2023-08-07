@@ -6,6 +6,6 @@ public interface IImportState
 {
     bool IsTableFinished(string tableName);
     bool TableReadyForCreation(string tableName);
-    void TableFinished(Node node);
-    IAsyncEnumerable<string> GetTablesReadyForCreation();
+    void TableFinished(INode node);
+    IAsyncEnumerable<INode> GetTablesReadyForCreation();
 }

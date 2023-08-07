@@ -4,5 +4,5 @@ public interface IVisitorFactory
 {
     IVisitor GetCounterVisitor();
     IDepthVisitor GetDepthVisitor();
-    IAddNodeVisitor GetAddNodeVisitor(Node node);
+    IAddNodeVisitor GetAddNodeVisitor(INode node);
 }

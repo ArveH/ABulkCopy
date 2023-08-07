@@ -9,7 +9,7 @@ public abstract class VisitorBase : IVisitor
         NodeCount = 0;
     }
 
-    public virtual void Visit(Node node, int depth)
+    public virtual void Visit(INode node, int depth)
     {
         if (!node.IsRoot)
         {
