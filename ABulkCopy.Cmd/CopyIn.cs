@@ -1,4 +1,6 @@
-﻿namespace ABulkCopy.Cmd;
+﻿using ABulkCopy.Common.Types;
+
+namespace ABulkCopy.Cmd;
 
 public class CopyIn : ICopyIn
 {
@@ -22,11 +24,12 @@ public class CopyIn : ICopyIn
         _logger = logger;
     }
 
-    public async Task Run(string folder, Rdbms rdbms)
+    public async Task Run(CmdArguments cmdArguments)
     {
         var sw = new Stopwatch();
         sw.Start();
 
+        var folder = cmdArguments.Folder;
         if (!_fileSystem.Directory.Exists(folder))
         {
             _logger.Error("Folder '{Folder}' does not exist", folder);
@@ -34,12 +37,23 @@ public class CopyIn : ICopyIn
             return;
         }
 
-        var schemaFiles = _fileSystem.Directory.GetFiles(folder, $"*{Constants.SchemaSuffix}").ToList();
+        List<string>? schemaFiles;
+        if (!string.IsNullOrWhiteSpace(cmdArguments.SearchStr))
+        {
+            schemaFiles = _fileSystem.Directory.GetFiles(folder, $"*{Constants.SchemaSuffix}").AsEnumerable()
+                .Where(f => Regex.IsMatch(f, cmdArguments.SearchStr))
+                .ToList();
+        }
+        else
+        {
+            schemaFiles = _fileSystem.Directory.GetFiles(folder, $"*{Constants.SchemaSuffix}").ToList();
+        }
+
         _logger.Information($"Creating {{TableCount}} {"table".Plural(schemaFiles.Count)}",
             schemaFiles.Count);
         Console.WriteLine($"Creating {schemaFiles.Count} {"table".Plural(schemaFiles.Count)}.");
 
-        var elapsedStr = await _pgBulkCopy.BuildDependencyGraph(rdbms, schemaFiles);
+        var elapsedStr = await _pgBulkCopy.BuildDependencyGraph(cmdArguments.Rdbms, schemaFiles);
         Console.WriteLine($"Creating dependency graph took {elapsedStr}");
         var allTables = _pgBulkCopy.DependencyGraph.BreathFirst().ToList();
 

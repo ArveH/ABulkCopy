@@ -27,3 +27,4 @@ global using Microsoft.Extensions.Hosting;
 global using Serilog;
 global using System.Diagnostics;
 global using System.IO.Abstractions;
+global using System.Text.RegularExpressions;

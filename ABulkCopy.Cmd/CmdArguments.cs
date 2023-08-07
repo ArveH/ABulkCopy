@@ -17,8 +17,8 @@ public class CmdArguments
     [Option('r', "rdbms", Required = true, HelpText = "Database Management System. \"Pg\" or \"Mss\".")]
     public required Rdbms Rdbms { get; set; }
 
-    [Option('s', "search-str", Required = false, Default = "%", HelpText = "Table name(s) search string.")]
-    public string SearchStr { get; set; } = "%";
+    [Option('x', "regex", Required = false, Default = "", HelpText = "A RegEx to filter table names or file names. E.g. \"\\b(clients|scopes)\\b\" will match clients.schema and scopes.schema, but not someclients.schema nor clients2.schema")]
+    public string SearchStr { get; set; } = "";
 
     [Option('b', "batch", Required = false, Default = 1000, HelpText = "Batch size. Currently not used")]
     public int BatchSize { get; set; } = 1000;

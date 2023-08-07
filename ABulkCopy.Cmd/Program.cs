@@ -23,7 +23,7 @@ internal class Program
             if (cmdArguments.Direction == CopyDirection.In)
             {
                 var copyIn = host.Services.GetRequiredService<ICopyIn>();
-                await copyIn.Run(cmdArguments.Folder, cmdArguments.Rdbms);
+                await copyIn.Run(cmdArguments);
             }
             else
             {
