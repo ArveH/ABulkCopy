@@ -10,8 +10,9 @@ internal class Program
             userSecretsKey: "128e015d-d8ef-4ca8-ba79-5390b26c675f",
             connectionString: cmdArguments.ConnectionString);
         Log.Logger = LogConfigHelper.ConfigureLogger(configuration, cmdArguments.LogFile);
-        Log.Information("ABulkCopy.Cmd started.");
-        Console.WriteLine("ABulkCopy.Cmd started.");
+        var version = Process.GetCurrentProcess().MainModule?.FileVersionInfo.ProductVersion;
+        Log.Information("ABulkCopy.Cmd (version: {Version}) started.", version);
+        Console.WriteLine($"ABulkCopy.Cmd (version: {version}) started.");
 
         try
         {
