@@ -1,6 +1,4 @@
-﻿using ABulkCopy.Common.Types;
-
-namespace ABulkCopy.Cmd;
+﻿namespace ABulkCopy.Cmd;
 
 public class CopyIn : ICopyIn
 {
@@ -68,7 +66,7 @@ public class CopyIn : ICopyIn
             async (node, _) =>
             {
                 if (node.TableDefinition == null) throw new ArgumentNullException(nameof(node.TableDefinition));
-                if (!await CreateTable(folder, node.TableDefinition))
+                if (!await CreateTable(folder, node.TableDefinition, cmdArguments.EmptyString))
                 {
                     Interlocked.Increment(ref errors);
                 }
@@ -95,7 +93,10 @@ public class CopyIn : ICopyIn
         Console.WriteLine($"The total CopyIn operation took {sw.Elapsed:g}");
     }
 
-    private async Task<bool> CreateTable(string folder, TableDefinition tableDefinition)
+    private async Task<bool> CreateTable(
+        string folder, 
+        TableDefinition tableDefinition,
+        EmptyStringFlag emptyStringFlag)
     {
         IADataReader? dataReader = null;
         var errorOccurred = false;
@@ -105,7 +106,7 @@ public class CopyIn : ICopyIn
             await _pgCmd.CreateTable(tableDefinition);
 
             dataReader = _aDataReaderFactory.Get(tableDefinition.Rdbms);
-            var rows = await dataReader.Read(folder, tableDefinition);
+            var rows = await dataReader.Read(folder, tableDefinition, emptyStringFlag);
             Console.WriteLine($"Read {rows} {"row".Plural(rows)} for table '{tableDefinition.Header.Name}'");
             _logger.Information($"Read {{Rows}} {"row".Plural(rows)} for table '{{TableName}}'",
                 rows, tableDefinition.Header.Name);

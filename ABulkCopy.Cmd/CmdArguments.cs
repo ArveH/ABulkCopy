@@ -6,7 +6,10 @@ public class CmdArguments
     public required CopyDirection Direction { get; set; }
 
     [Option('c', "connection", Required = true, HelpText = "The connection string")]
-    public required string ConnectionString { get; set; } 
+    public required string ConnectionString { get; set; }
+
+    [Option("empty_string", Required = false, HelpText = "Trim strings containing whitespace only. Legal values are \"Single\" (an empty string is converted to single space), \"Empty\" (a single space is converted to empty string), \"ForceSingle\" (empty strings and all whitespace is converted to a single space), \"ForceEmpty\" (all whitespace is removed). NOTE: This flag has no effect during export, or if strings contains any non-whitespace characters.")]
+    public EmptyStringFlag EmptyString { get; set; } = EmptyStringFlag.Leave;
 
     [Option('f', "folder", Required = false, Default = "\\.", HelpText = "The source/destination folder for schema and data files.")]
     public string Folder { get; set; } = "\\.";
