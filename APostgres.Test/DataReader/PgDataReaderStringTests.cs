@@ -1,4 +1,7 @@
-﻿namespace APostgres.Test.DataReader;
+﻿using ABulkCopy.Common.Types;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+
+namespace APostgres.Test.DataReader;
 
 public class PgDataReaderStringTests : PgDataReaderTestBase
 {
@@ -123,5 +126,31 @@ public class PgDataReaderStringTests : PgDataReaderTestBase
             GetName(), col, $"{Constants.QuoteChar}{Constants.QuoteChar},");
 
         colValue.Should().Be("");
+    }
+
+    [Fact]
+    public async Task TestVarChar_When_EmptyStringAndEmptyStringFlag()
+    {
+        // Arrange
+        var testVal = $"{Constants.QuoteChar}{Constants.QuoteChar},";
+        var expectedVal = " ";
+        var tableName = GetName();
+        var col = new PostgresVarChar(1, ColName, false, 10);
+        var tableDefinition = await CreateTableAndDataFile(
+            tableName, 
+            new() { col }, 
+            new() {testVal});
+        var dataReader = new PgDataReader(
+            PgContext,
+            new DataFileReader(FileHelper.FileSystem, TestLogger),
+            TestLogger);
+
+        // Act
+        await dataReader.Read(FileHelper.DataFolder, tableDefinition, EmptyStringFlag.Single);
+
+        //Assert
+        var colValue = await PgDbHelper.Instance.SelectScalar<string>(
+            tableName, col);
+        colValue.Should().Be(expectedVal);
     }
 }

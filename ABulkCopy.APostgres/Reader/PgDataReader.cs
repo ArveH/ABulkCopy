@@ -16,7 +16,10 @@ public class PgDataReader : IADataReader, IDisposable
         _logger = logger.ForContext<PgDataReader>();
     }
 
-    public async Task<long> Read(string folder, TableDefinition tableDefinition)
+    public async Task<long> Read(
+        string folder, 
+        TableDefinition tableDefinition, 
+        EmptyStringFlag emptyStringFlag = EmptyStringFlag.Leave)
     {
         _logger.Information("Reading data for table '{TableName}' from '{Path}'",
             tableDefinition.Header.Name, folder);
@@ -42,7 +45,8 @@ public class PgDataReader : IADataReader, IDisposable
                     _fileReader, 
                     writer, 
                     folder,
-                    tableDefinition).ConfigureAwait(false);
+                    tableDefinition,
+                    emptyStringFlag).ConfigureAwait(false);
                 counter++;
             }
             catch (Exception ex)
@@ -69,17 +73,17 @@ public class PgDataReader : IADataReader, IDisposable
         return counter;
     }
 
-    private async Task ReadRow(
-        IDataFileReader dataFileReader,
+    private async Task ReadRow(IDataFileReader dataFileReader,
         NpgsqlBinaryImporter writer,
         string folder,
-        TableDefinition tableDefinition)
+        TableDefinition tableDefinition, 
+        EmptyStringFlag emptyStringFlag)
     {
         await writer.StartRowAsync().ConfigureAwait(false);
 
         foreach (var col in tableDefinition.Columns)
         {
-            var colValue = dataFileReader.ReadColumn(col.Name);
+            var colValue = dataFileReader.ReadColumn(col.Name, emptyStringFlag);
             if (colValue == null)
             {
                 await writer.WriteNullAsync().ConfigureAwait(false);

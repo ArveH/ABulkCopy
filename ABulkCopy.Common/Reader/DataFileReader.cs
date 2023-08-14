@@ -38,7 +38,7 @@ public class DataFileReader : IDataFileReader, IDisposable
         return _fileSystem.File.ReadAllBytes(path);
     }
 
-    public string? ReadColumn(string colName)
+    public string? ReadColumn(string colName, EmptyStringFlag emptyString = EmptyStringFlag.Leave)
     {
         _logger.Verbose("Reading value for column '{ColumnName}' row {RowCount}",
             RowCounter, colName);
@@ -46,7 +46,31 @@ public class DataFileReader : IDataFileReader, IDisposable
         if (CurrentChar == Constants.QuoteChar)
         {
             ReadQuotedValue(colName);
-            return _columnHolder.ToString();
+            if (emptyString == EmptyStringFlag.Leave)
+            {
+                return _columnHolder.ToString();
+            }
+
+            if (!_columnHolder.IsNullOrWhitespace())
+            {
+                return _columnHolder.ToString();
+            }
+
+            switch (emptyString)
+            {
+                case EmptyStringFlag.ForceSingle:
+                    return " ";
+                case EmptyStringFlag.ForceEmpty:
+                    return "";
+                case EmptyStringFlag.Single when _columnHolder.Length < 2:
+                    return " ";
+                case EmptyStringFlag.Empty when _columnHolder.Length < 2:
+                    return "";
+                default:
+                    // NOTE: When the value has several whitespaces,
+                    // but we don't force, the whitespace is considered significant
+                    return _columnHolder.ToString();
+            }
         }
 
         ReadUnquotedValue(colName);

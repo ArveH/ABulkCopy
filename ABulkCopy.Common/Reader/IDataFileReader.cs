@@ -3,7 +3,7 @@
 public interface IDataFileReader
 {
     void Open(string path);
-    public string? ReadColumn(string colName);
+    public string? ReadColumn(string colName, EmptyStringFlag emptyString = EmptyStringFlag.Leave);
     void ReadColumnSeparator(string colName);
     void ReadNewLine();
     public bool IsEndOfFile { get; }

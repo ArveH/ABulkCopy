@@ -123,6 +123,41 @@ public class DataFileReaderTests : CommonTestBase
         stringVal.Should().Be(testValue);
     }
 
+    [Theory]
+    [InlineData("Test value", EmptyStringFlag.Leave, "Test value")]
+    [InlineData("Test value", EmptyStringFlag.Single, "Test value")]
+    [InlineData("Test value", EmptyStringFlag.Empty, "Test value")]
+    [InlineData("Test value", EmptyStringFlag.ForceSingle, "Test value")]
+    [InlineData("Test value", EmptyStringFlag.ForceEmpty, "Test value")]
+    [InlineData("", EmptyStringFlag.Leave, "")]
+    [InlineData("", EmptyStringFlag.Single, " ")]
+    [InlineData("", EmptyStringFlag.Empty, "")]
+    [InlineData("", EmptyStringFlag.ForceSingle, " ")]
+    [InlineData("", EmptyStringFlag.ForceEmpty, "")]
+    [InlineData(" ", EmptyStringFlag.Leave, " ")]
+    [InlineData(" ", EmptyStringFlag.Single, " ")]
+    [InlineData(" ", EmptyStringFlag.Empty, "")]
+    [InlineData(" ", EmptyStringFlag.ForceSingle, " ")]
+    [InlineData(" ", EmptyStringFlag.ForceEmpty, "")]
+    [InlineData("  ", EmptyStringFlag.Leave, "  ")]
+    [InlineData("  ", EmptyStringFlag.Single, "  ")]
+    [InlineData("  ", EmptyStringFlag.Empty, "  ")]
+    [InlineData("  ", EmptyStringFlag.ForceSingle, " ")]
+    [InlineData("  ", EmptyStringFlag.ForceEmpty, "")]
+    public void TestReadOneRow_When_UsingEmptyStringFlag(
+        string testValue, EmptyStringFlag emptyStringFlag, string expectedValue)
+    {
+        // Arrange
+        _tableDefinition.Columns.Add(new PostgresVarChar(1, ColName, false, 100, "en_ci_as"));
+        var dataFileReader = Arrange($"{Constants.QuoteChar}{testValue}{Constants.QuoteChar},");
+
+        // Act
+        var stringVal = dataFileReader.ReadColumn(ColName, emptyStringFlag);
+
+        // Assert
+        stringVal.Should().Be(expectedValue);
+    }
+
     private IDataFileReader Arrange(string row1, string? row2 = null)
     {
         var rows = new List<string> { row1 };
