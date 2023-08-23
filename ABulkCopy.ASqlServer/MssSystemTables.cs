@@ -17,21 +17,41 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
 
     public async Task<IEnumerable<string>> GetTableNames(string searchString)
     {
-        _logger.Information("Reading tables '{searchString}'", searchString);
+        SqlCommand? command;
+        if (string.IsNullOrWhiteSpace(searchString))
+        {
+            _logger.Information("Reading all tables");
 
-        var command =
-            new SqlCommand("SELECT name FROM sys.tables WITH(NOLOCK)\r\n" +
-                           " WHERE object_id not in (\r\n" +
-                           "   SELECT major_id\r\n" +
-                           "     FROM sys.extended_properties WITH(NOLOCK)\r\n" +
-                           "    WHERE minor_id = 0\r\n" +
-                           "      AND class = 1\r\n" +
-                           "      AND name = N'microsoft_database_tools_support')\r\n" +
-                           "   AND name LIKE @SearchString\r\n" +
-                           "   AND is_ms_shipped = 0\r\n" +
-                           "   AND schema_id not in (2, 3, 4, 5)\r\n" + // guest, information_schema, sys, logs
-                           "ORDER BY name");
-        command.Parameters.AddWithValue("@SearchString", searchString);
+            command =
+                new SqlCommand("SELECT name FROM sys.tables WITH(NOLOCK)\r\n" +
+                               " WHERE object_id not in (\r\n" +
+                               "   SELECT major_id\r\n" +
+                               "     FROM sys.extended_properties WITH(NOLOCK)\r\n" +
+                               "    WHERE minor_id = 0\r\n" +
+                               "      AND class = 1\r\n" +
+                               "      AND name = N'microsoft_database_tools_support')\r\n" +
+                               "   AND is_ms_shipped = 0\r\n" +
+                               "   AND schema_id not in (2, 3, 4, 5)\r\n" + // guest, information_schema, sys, logs
+                               "ORDER BY name");
+        }
+        else
+        {
+            _logger.Information("Reading tables where search string is '{searchString}'", searchString);
+
+            command =
+                new SqlCommand("SELECT name FROM sys.tables WITH(NOLOCK)\r\n" +
+                               " WHERE object_id not in (\r\n" +
+                               "   SELECT major_id\r\n" +
+                               "     FROM sys.extended_properties WITH(NOLOCK)\r\n" +
+                               "    WHERE minor_id = 0\r\n" +
+                               "      AND class = 1\r\n" +
+                               "      AND name = N'microsoft_database_tools_support')\r\n" +
+                               "   AND name LIKE @SearchString\r\n" +
+                               "   AND is_ms_shipped = 0\r\n" +
+                               "   AND schema_id not in (2, 3, 4, 5)\r\n" + // guest, information_schema, sys, logs
+                               "ORDER BY name");
+            command.Parameters.AddWithValue("@SearchString", searchString);
+        }
 
         var tableNames = new List<string>();
         await ExecuteReader(command, reader =>

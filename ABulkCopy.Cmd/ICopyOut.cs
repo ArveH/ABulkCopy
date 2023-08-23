@@ -2,5 +2,5 @@
 
 public interface ICopyOut
 {
-    Task Run(string folder, string searchStr);
+    Task Run(CmdArguments cmdArguments);
 }

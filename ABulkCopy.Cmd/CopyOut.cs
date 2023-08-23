@@ -22,18 +22,18 @@ public class CopyOut : ICopyOut
         _logger = logger.ForContext<CopyOut>();
     }
 
-    public async Task Run(string folder, string searchStr)
+    public async Task Run(CmdArguments cmdArguments)
     {
         var sw = new Stopwatch();
         sw.Start();
-        var tableNames = (await _systemTables.GetTableNames(searchStr)).ToList();
+        var tableNames = (await _systemTables.GetTableNames(cmdArguments.SearchStr)).ToList();
         _logger.Information($"Copy out {{TableCount}} {"table".Plural(tableNames.Count)}",
             tableNames.Count);
         Console.WriteLine($"Copy out {tableNames.Count} {"table".Plural(tableNames.Count)}.");
         var errors = 0;
         await Parallel.ForEachAsync(tableNames, async (tableName, _) =>
         {
-            if (!await CopyTable(folder, tableName))
+            if (!await CopyTable(cmdArguments.Folder, tableName))
             {
                 Interlocked.Increment(ref errors);
             }

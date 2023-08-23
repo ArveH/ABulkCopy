@@ -37,7 +37,7 @@ internal class Program
                     return;
                 }
 
-                await copyOut.Run(cmdArguments.Folder, cmdArguments.SearchStr);
+                await copyOut.Run(cmdArguments);
             }
 
             Log.Information("ABulkCopy.Cmd finished.");
