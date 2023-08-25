@@ -36,10 +36,10 @@ public class CopyIn : ICopyIn
         }
 
         List<string>? schemaFiles;
-        if (!string.IsNullOrWhiteSpace(cmdArguments.SearchStr))
+        if (!string.IsNullOrWhiteSpace(cmdArguments.SearchFilter))
         {
             schemaFiles = _fileSystem.Directory.GetFiles(folder, $"*{Constants.SchemaSuffix}").AsEnumerable()
-                .Where(f => Regex.IsMatch(f, cmdArguments.SearchStr))
+                .Where(f => Regex.IsMatch(f, cmdArguments.SearchFilter))
                 .ToList();
         }
         else

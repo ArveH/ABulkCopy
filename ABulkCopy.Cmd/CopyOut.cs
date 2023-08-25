@@ -26,7 +26,7 @@ public class CopyOut : ICopyOut
     {
         var sw = new Stopwatch();
         sw.Start();
-        var tableNames = (await _systemTables.GetTableNames(cmdArguments.SearchStr)).ToList();
+        var tableNames = (await _systemTables.GetTableNames(cmdArguments.SearchFilter)).ToList();
         _logger.Information($"Copy out {{TableCount}} {"table".Plural(tableNames.Count)}",
             tableNames.Count);
         Console.WriteLine($"Copy out {tableNames.Count} {"table".Plural(tableNames.Count)}.");
