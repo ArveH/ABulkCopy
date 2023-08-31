@@ -33,20 +33,12 @@ public class PgCmd : IPgCmd
         if (!tableDefinition.ForeignKeys.Any())
             return;
 
-        var first = true;
         foreach (var fk in tableDefinition.ForeignKeys)
         {
-            if (first)
-            {
-                first = false;
-            }
-            else
-            {
-                sb.Append(", ");
-            }
-            sb.Append($"    foreign key ({fk.ColName}) ");
-            sb.Append($"references {fk.TableReference}");
-            sb.Append($"({fk.ColumnReference}) ");
+            sb.AppendLine(", ");
+            sb.Append($"    foreign key (\"{fk.ColName}\") ");
+            sb.Append($"references \"{fk.TableReference}\"");
+            sb.AppendLine($"(\"{fk.ColumnReference}\") ");
         }
     }
 
@@ -72,7 +64,7 @@ public class PgCmd : IPgCmd
             sb.Append($"\"{column.Name}\"");
         }
 
-        sb.Append(")");
+        sb.Append(") ");
     }
 
     private static void AddColumnNames(TableDefinition tableDefinition, StringBuilder sb)

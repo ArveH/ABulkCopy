@@ -249,7 +249,8 @@ public class PgCmdTests : PgTestBase
     {
         // Arrange
         var tableName = GetName() + "_primary";
-        var inputDefinition = GetParentTable(tableName);
+        var inputDefinition = GetParentTableDefinition(
+            tableName, new List<OrderColumn> { new() { Name = "id" } });
         await PgDbHelper.Instance.DropTable(tableName);
 
         try
@@ -275,7 +276,50 @@ public class PgCmdTests : PgTestBase
 
     }
 
-    private static TableDefinition GetParentTable(string tableName)
+    [Fact]
+    public async Task TestCreateTable_When_ForeignKey()
+    {
+        // Arrange
+        var parentTableName = GetName() + "_parent";
+        var childTableName = GetName() + "_child";
+        await PgDbHelper.Instance.DropTable(childTableName);
+        await PgDbHelper.Instance.DropTable(parentTableName);
+        var parentTableDefinition = GetParentTableDefinition(
+            parentTableName, new List<OrderColumn>
+            {
+                new() { Name = "id" },
+                new() { Name = "col1" },
+                new() { Name = "col2" }
+            });
+        await _pgCmd.CreateTable(parentTableDefinition);
+        var childTableDefinition = GetChildTableDefinition(parentTableName, childTableName);
+
+        try
+        {
+            // Act
+            await _pgCmd.CreateTable(childTableDefinition);
+
+            // Assert
+            IPgSystemTables systemTables = new PgSystemTables(PgContext, TestLogger);
+            var fks = (await systemTables.GetForeignKeys(new TableHeader
+            {
+                Name = parentTableName,
+                Schema = "public"
+            })).ToList();
+            fks.Count.Should().Be(2, "because there should be 2 foreign keys");
+            fks[0].Name.Should().Be("col1");
+            fks[1].Name.Should().Be("col2");
+        }
+        finally
+        {
+            await PgDbHelper.Instance.DropTable(childTableName);
+            await PgDbHelper.Instance.DropTable(parentTableName);
+        }
+
+    }
+
+    private static TableDefinition GetParentTableDefinition(
+        string tableName, List<OrderColumn> cols)
     {
         var inputDefinition = PgTestData.GetEmpty(tableName);
         inputDefinition.Columns.Add(new PostgresBigInt(1, "id", false));
@@ -283,9 +327,38 @@ public class PgCmdTests : PgTestBase
         inputDefinition.Columns.Add(new PostgresInt(3, "col2", true));
         inputDefinition.PrimaryKey = new PrimaryKey
         {
-            Name = $"PK__{tableName}__id",
+            Name = $"PK_{tableName}_id",
+            ColumnNames = cols
+        };
+        return inputDefinition;
+    }
+
+    private static TableDefinition GetChildTableDefinition(string parentName, string childName)
+    {
+        var inputDefinition = PgTestData.GetEmpty(childName);
+        inputDefinition.Columns.Add(new PostgresBigInt(1, "id", false));
+        inputDefinition.Columns.Add(new PostgresInt(2, "col1", true));
+        inputDefinition.Columns.Add(new PostgresInt(3, "col2", true));
+        inputDefinition.PrimaryKey = new PrimaryKey
+        {
+            Name = $"PK_{childName}_id",
             ColumnNames = new List<OrderColumn> { new() { Name = "id" } }
         };
+
+        inputDefinition.ForeignKeys.Add(new ForeignKey
+        {
+            Name = $"FK_{childName}_{parentName}_col1",
+            ColName = "col1",
+            TableReference = parentName,
+            ColumnReference = "col1",
+        });
+        inputDefinition.ForeignKeys.Add(new ForeignKey
+        {
+            Name = $"FK_{childName}_{parentName}_col2",
+            ColName = "col2",
+            TableReference = parentName,
+            ColumnReference = "col2",
+        });
         return inputDefinition;
     }
 }
