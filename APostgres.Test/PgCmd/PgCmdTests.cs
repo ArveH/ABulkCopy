@@ -2,8 +2,11 @@
 
 public class PgCmdTests : PgTestBase
 {
+    private readonly IPgCmd _pgCmd;
+
     public PgCmdTests(ITestOutputHelper output) : base(output)
     {
+        _pgCmd = new ABulkCopy.APostgres.PgCmd(PgContext);
     }
 
     [Fact]
@@ -68,7 +71,7 @@ public class PgCmdTests : PgTestBase
         List<string?> statusValues;
         try
         {
-            await PgDbHelper.Instance.CreateTable(inputDefinition);
+            await _pgCmd.CreateTable(inputDefinition);
             await PgDbHelper.Instance.ExecuteNonQuery($"insert into \"{tableName}\" (id) values (3)");
             statusValues = (await PgDbHelper.Instance.SelectColumn<string>(tableName, "status")).ToList();
         }
@@ -105,7 +108,7 @@ public class PgCmdTests : PgTestBase
         List<decimal> statusValues;
         try
         {
-            await PgDbHelper.Instance.CreateTable(inputDefinition);
+            await _pgCmd.CreateTable(inputDefinition);
             await PgDbHelper.Instance.ExecuteNonQuery($"insert into \"{tableName}\" (id) values (3)");
             statusValues = (await PgDbHelper.Instance.SelectColumn<decimal>(tableName, "status")).ToList();
         }
@@ -142,7 +145,7 @@ public class PgCmdTests : PgTestBase
         List<Guid> statusValues;
         try
         {
-            await PgDbHelper.Instance.CreateTable(inputDefinition);
+            await _pgCmd.CreateTable(inputDefinition);
             await PgDbHelper.Instance.ExecuteNonQuery($"insert into \"{tableName}\" (id) values (3)");
             statusValues = (await PgDbHelper.Instance.SelectColumn<Guid>(tableName, "status")).ToList();
         }
@@ -185,7 +188,7 @@ public class PgCmdTests : PgTestBase
         List<DateTime> statusValues;
         try
         {
-            await PgDbHelper.Instance.CreateTable(inputDefinition);
+            await _pgCmd.CreateTable(inputDefinition);
             await PgDbHelper.Instance.ExecuteNonQuery($"insert into \"{tableName}\" (id) values (3)");
             statusValues = (await PgDbHelper.Instance.SelectColumn<DateTime>(tableName, "status")).ToList();
         }
@@ -227,7 +230,7 @@ public class PgCmdTests : PgTestBase
         List<bool> statusValues;
         try
         {
-            await PgDbHelper.Instance.CreateTable(inputDefinition);
+            await _pgCmd.CreateTable(inputDefinition);
             await PgDbHelper.Instance.ExecuteNonQuery($"insert into \"{tableName}\" (id) values (3)");
             statusValues = (await PgDbHelper.Instance.SelectColumn<bool>(tableName, "status")).ToList();
         }
@@ -248,12 +251,11 @@ public class PgCmdTests : PgTestBase
         var tableName = GetName() + "_primary";
         var inputDefinition = GetParentTable(tableName);
         await PgDbHelper.Instance.DropTable(tableName);
-        IPgCmd pgCmd = new ABulkCopy.APostgres.PgCmd(PgContext);
 
         try
         {
             // Act
-            await pgCmd.CreateTable(inputDefinition);
+            await _pgCmd.CreateTable(inputDefinition);
 
             // Assert
             IPgSystemTables systemTables = new PgSystemTables(PgContext, TestLogger);
