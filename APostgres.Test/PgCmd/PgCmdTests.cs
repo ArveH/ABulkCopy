@@ -240,4 +240,50 @@ public class PgCmdTests : PgTestBase
         statusValues.Count.Should().Be(1);
         statusValues[0].Should().Be(expected);
     }
+
+    [Fact]
+    public async Task TestCreateTable_When_PrimaryKey()
+    {
+        // Arrange
+        var tableName = GetName() + "_primary";
+        var inputDefinition = GetParentTable(tableName);
+        await PgDbHelper.Instance.DropTable(tableName);
+        IPgCmd pgCmd = new ABulkCopy.APostgres.PgCmd(PgContext);
+
+        try
+        {
+            // Act
+            await pgCmd.CreateTable(inputDefinition);
+
+            // Assert
+            IPgSystemTables systemTables = new PgSystemTables(PgContext, TestLogger);
+            var pk = await systemTables.GetPrimaryKey(new TableHeader
+            {
+                Name = tableName,
+                Schema = "public"
+            });
+            pk.Should().NotBeNull();
+            pk!.ColumnNames.Count.Should().Be(1);
+            pk.ColumnNames[0].Name.Should().Be("id");
+        }
+        finally
+        {
+            await PgDbHelper.Instance.DropTable(tableName);
+        }
+
+    }
+
+    private static TableDefinition GetParentTable(string tableName)
+    {
+        var inputDefinition = PgTestData.GetEmpty(tableName);
+        inputDefinition.Columns.Add(new PostgresBigInt(1, "id", false));
+        inputDefinition.Columns.Add(new PostgresInt(2, "col1", true));
+        inputDefinition.Columns.Add(new PostgresInt(3, "col2", true));
+        inputDefinition.PrimaryKey = new PrimaryKey
+        {
+            Name = $"PK__{tableName}__id",
+            ColumnNames = new List<OrderColumn> { new() { Name = "id" } }
+        };
+        return inputDefinition;
+    }
 }

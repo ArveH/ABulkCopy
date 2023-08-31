@@ -41,6 +41,11 @@ public class PgTestBase
     protected string GetName()
     {
         var st = new StackTrace();
+        // Frames:
+        //   0: GetName
+        //   1: MoveNext
+        //   2: Start
+        //   3: <Should be the name of the test method>
         var sf = st.GetFrame(3);
         if (sf == null)
         {

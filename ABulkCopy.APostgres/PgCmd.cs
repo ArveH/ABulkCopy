@@ -21,6 +21,62 @@ public class PgCmd : IPgCmd
         sb.Append("create table ");
         if (addIfNotExists) sb.Append("if not exists ");
         sb.AppendLine($"\"{tableDefinition.Header.Name}\" (");
+        AddColumnNames(tableDefinition, sb);
+        AddPrimaryKeyClause(tableDefinition, sb);
+        AddForeignKeyClauses(tableDefinition, sb);
+        sb.AppendLine(");");
+        await ExecuteNonQuery(sb.ToString());
+    }
+
+    private void AddForeignKeyClauses(TableDefinition tableDefinition, StringBuilder sb)
+    {
+        if (!tableDefinition.ForeignKeys.Any())
+            return;
+
+        var first = true;
+        foreach (var fk in tableDefinition.ForeignKeys)
+        {
+            if (first)
+            {
+                first = false;
+            }
+            else
+            {
+                sb.Append(", ");
+            }
+            sb.Append($"    foreign key ({fk.ColName}) ");
+            sb.Append($"references {fk.TableReference}");
+            sb.Append($"({fk.ColumnReference}) ");
+        }
+    }
+
+    private static void AddPrimaryKeyClause(TableDefinition tableDefinition, StringBuilder sb)
+    {
+        if (tableDefinition.PrimaryKey == null)
+            return;
+
+        sb.AppendLine(",");
+        sb.Append($"    constraint \"{tableDefinition.PrimaryKey.Name}\" primary key (");
+        var first = true;
+        foreach (var column in tableDefinition.PrimaryKey.ColumnNames)
+        {
+            if (first)
+            {
+                first = false;
+            }
+            else
+            {
+                sb.Append(", ");
+            }
+
+            sb.Append($"\"{column.Name}\"");
+        }
+
+        sb.Append(")");
+    }
+
+    private static void AddColumnNames(TableDefinition tableDefinition, StringBuilder sb)
+    {
         var first = true;
         foreach (var column in tableDefinition.Columns)
         {
@@ -35,8 +91,6 @@ public class PgCmd : IPgCmd
 
             sb.Append($"    \"{column.Name}\" {column.GetNativeCreateClause()}");
         }
-        sb.AppendLine(");");
-        await ExecuteNonQuery(sb.ToString());
     }
 
     public async Task CreateIndex(string tableName, IndexDefinition indexDefinition)
