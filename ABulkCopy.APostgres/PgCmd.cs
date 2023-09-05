@@ -33,9 +33,13 @@ public class PgCmd : IPgCmd
         if (!tableDefinition.ForeignKeys.Any())
             return;
 
+        sb.AppendLine(", ");
+        sb.Append("    foreign key (");
+        sb.Append(string.Join(',', tableDefinition.ForeignKeys.Select(fk => fk.ColName)));
+        sb.Append($") references \"{fk.TableReference}\"");
+
         foreach (var fk in tableDefinition.ForeignKeys)
         {
-            sb.AppendLine(", ");
             sb.Append($"    foreign key (\"{fk.ColName}\") ");
             sb.Append($"references \"{fk.TableReference}\"");
             sb.AppendLine($"(\"{fk.ColumnReference}\") ");
@@ -49,21 +53,7 @@ public class PgCmd : IPgCmd
 
         sb.AppendLine(",");
         sb.Append($"    constraint \"{tableDefinition.PrimaryKey.Name}\" primary key (");
-        var first = true;
-        foreach (var column in tableDefinition.PrimaryKey.ColumnNames)
-        {
-            if (first)
-            {
-                first = false;
-            }
-            else
-            {
-                sb.Append(", ");
-            }
-
-            sb.Append($"\"{column.Name}\"");
-        }
-
+        sb.Append(string.Join(',', tableDefinition.PrimaryKey.ColumnNames.Select(c => c.Name)));
         sb.Append(") ");
     }
 
