@@ -2,10 +2,11 @@
 
 public class ForeignKey
 {
-    public required string Name { get; set; }
-    public required string ColName { get; set; }
-    public required string ColumnReference { get; set; }
+    public string? ConstraintName { get; set; }
+    public int? ConstraintId { get; set; }
     public required string TableReference { get; set; }
+    public List<string> ColumnNames { get; set; } = new();
+    public List<string> ColumnReferences { get; set; } = new();
     public DeleteAction DeleteAction { get; set; } = DeleteAction.NoAction;
     public UpdateAction UpdateAction { get; set; } = UpdateAction.NoAction;
 
@@ -13,10 +14,10 @@ public class ForeignKey
     {
         return new ForeignKey
         {
-            Name = Name,
-            ColName = ColName,
-            ColumnReference = ColumnReference,
+            ConstraintName = ConstraintName,
             TableReference = TableReference,
+            ColumnNames = new List<string>(ColumnNames),
+            ColumnReferences = new List<string>(ColumnReferences),
             DeleteAction = DeleteAction,
             UpdateAction = UpdateAction
         };

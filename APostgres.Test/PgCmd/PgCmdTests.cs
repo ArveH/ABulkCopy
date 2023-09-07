@@ -311,7 +311,8 @@ public class PgCmdTests : PgTestBase
             childTableName,
             new List<(string, string)>
             {
-                (parent1TableName, "Parent1Id")
+                (parent1TableName, "Parent1Id"),
+                (parent2TableName, "Parent2Id")
             });
 
         try
@@ -327,8 +328,8 @@ public class PgCmdTests : PgTestBase
                 Schema = "public"
             })).ToList();
             fks.Count.Should().Be(2, "because there should be 2 foreign keys");
-            fks[0].Name.Should().Be("col1");
-            fks[1].Name.Should().Be("col2");
+            fks[0].ConstraintName.Should().Be("col1");
+            fks[1].ConstraintName.Should().Be("col2");
         }
         finally
         {
@@ -354,8 +355,8 @@ public class PgCmdTests : PgTestBase
         }
         inputDefinition.PrimaryKey = new PrimaryKey
         {
-            Name = $"PK_{tableName}_{string.Join('_', pkCols)}_id",
-            ColumnNames = cols.Where(c => c.isKey).Select(c => new OrderColumn{Name = c.colName}).ToList()
+            Name = $"PK_{tableName}_{string.Join('_', pkCols)}",
+            ColumnNames = cols.Where(c => c.isKey).Select(c => new OrderColumn { Name = c.colName }).ToList()
         };
         return inputDefinition;
     }
@@ -371,15 +372,15 @@ public class PgCmdTests : PgTestBase
             Name = $"PK_{tableName}_id",
             ColumnNames = new List<OrderColumn> { new() { Name = "id" } }
         };
-        for (int i = 0; i < refs.Count; i++)
+        for (var i = 0; i < refs.Count; i++)
         {
-            inputDefinition.Columns.Add(new PostgresInt(i+1, refs[i].colName, false));
+            inputDefinition.Columns.Add(new PostgresInt(i + 1, refs[i].colName, false));
             inputDefinition.ForeignKeys.Add(new ForeignKey
             {
-                Name = $"FK_{tableName}_{refs[i].tabName}_{refs[i].colName}",
-                ColName = refs[i].colName,
+                ConstraintName = $"FK_{tableName}_{refs[i].tabName}_{refs[i].colName}",
+                ColumnNames = new List<string> { refs[i].colName },
                 TableReference = refs[i].tabName,
-                ColumnReference = refs[i].colName,
+                ColumnReferences = new List<string> { refs[i].colName },
             });
         }
         return inputDefinition;

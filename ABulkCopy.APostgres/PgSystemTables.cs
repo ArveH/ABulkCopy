@@ -96,15 +96,13 @@ public class PgSystemTables : IPgSystemTables
         {
             var fk = new ForeignKey
             {
-                ColName = reader.GetString(0),
                 TableReference = reader.GetString(1),
-                ColumnReference = reader.GetString(2),
-                Name = reader.GetString(3),
+                ConstraintName = reader.GetString(3),
                 UpdateAction = (UpdateAction)Enum.Parse(typeof(UpdateAction), reader.GetString(4), true),
                 DeleteAction = (DeleteAction)Enum.Parse(typeof(DeleteAction), reader.GetString(5), true)
             };
             foreignKeys.Add(fk);
-            _logger.Verbose("Added foreign key: {ForeignKey}", fk.Name);
+            _logger.Verbose("Added foreign key: {ForeignKey}", fk.ConstraintName);
         }
 
         return foreignKeys;

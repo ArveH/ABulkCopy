@@ -1,4 +1,6 @@
-﻿namespace ABulkCopy.ASqlServer;
+﻿using ABulkCopy.Common.Types.Table;
+
+namespace ABulkCopy.ASqlServer;
 
 public class MssSystemTables : MssCommandBase, IMssSystemTables
 {
@@ -233,40 +235,11 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
 
     public async Task<IEnumerable<ForeignKey>> GetForeignKeys(TableHeader tableHeader)
     {
-        var command =
-            new SqlCommand("SELECT   \r\n" +
-                           "    f.name AS foreign_key_name,  \r\n" +
-                           "    COL_NAME(fc.parent_object_id, fc.parent_column_id) AS constraint_column_name,  \r\n" +
-                           "    OBJECT_NAME (f.referenced_object_id) AS referenced_object,  \r\n" +
-                           "    COL_NAME(fc.referenced_object_id, fc.referenced_column_id) AS referenced_column_name,  \r\n" +
-                           "    f.delete_referential_action_desc,  \r\n" +
-                           "    f.update_referential_action_desc  \r\n" +
-                           "FROM sys.foreign_keys AS f  \r\n" +
-                           "INNER JOIN sys.foreign_key_columns AS fc   \r\n" +
-                           "   ON f.object_id = fc.constraint_object_id   \r\n" +
-                           "WHERE f.parent_object_id = @TableId\r\n" +
-                           "ORDER BY f.name");
-        command.Parameters.AddWithValue("@TableId", tableHeader.Id);
-
-        var foreignKeys = new List<ForeignKey>();
-        await ExecuteReader(command, reader =>
+        var foreignKeys = await GetForeignKeyReferences(tableHeader);
+        foreach (var foreignKey in foreignKeys)
         {
-            var fk = new ForeignKey
-            {
-                Name = reader.GetString(0),
-                ColName = reader.GetString(1),
-                TableReference = reader.GetString(2),
-                ColumnReference = reader.GetString(3),
-                DeleteAction = (DeleteAction)Enum.Parse(typeof(DeleteAction), reader.GetString(4).Replace("_", ""), true),
-                UpdateAction = (UpdateAction)Enum.Parse(typeof(UpdateAction), reader.GetString(5).Replace("_", ""), true)
-            };
-            foreignKeys.Add(fk);
-            _logger.Verbose("Added foreign key: {ForeignKey}", fk.Name);
-        });
-
-        _logger.Information(
-            "Retrieved {foreignKeyCount} foreign keys for table '{tableName}'",
-            foreignKeys.Capacity, tableHeader.Name);
+            await GetForeignKeyColumns(foreignKey);
+        }
 
         return foreignKeys;
     }
@@ -318,6 +291,62 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
             indexes.Capacity, tableHeader.Name);
 
         return indexes;
+    }
+
+    private async Task<List<ForeignKey>> GetForeignKeyReferences(TableHeader tableHeader)
+    {
+        var command =
+            new SqlCommand("SELECT DISTINCT  \r\n" +
+                           "    f.name AS foreign_key_name  \r\n" +
+                           "   ,object_id \r\n" +
+                           "   ,OBJECT_NAME (f.referenced_object_id) AS referenced_object  \r\n" +
+                           "   ,f.delete_referential_action_desc  \r\n" +
+                           "   ,f.update_referential_action_desc  \r\n" +
+                           "FROM sys.foreign_keys AS f  \r\n" +
+                           "WHERE f.parent_object_id = @TableId");
+        command.Parameters.AddWithValue("@TableId", tableHeader.Id);
+
+        var foreignKeys = new List<ForeignKey>();
+        await ExecuteReader(command, async reader =>
+        {
+            var fk = new ForeignKey
+            {
+                ConstraintName = reader.GetString(0),
+                ConstraintId = reader.GetInt32(1),
+                TableReference = reader.GetString(2),
+                DeleteAction = (DeleteAction)Enum.Parse(typeof(DeleteAction), reader.GetString(3).Replace("_", ""), true),
+                UpdateAction = (UpdateAction)Enum.Parse(typeof(UpdateAction), reader.GetString(4).Replace("_", ""), true)
+            };
+            await GetForeignKeyColumns(fk);
+            foreignKeys.Add(fk);
+            _logger.Information("Found foreign key: {ForeignKeyReference} on table {TableName}", 
+                fk.ConstraintName, tableHeader.Name);
+        });
+
+        return foreignKeys;
+    }
+
+    private async Task GetForeignKeyColumns(ForeignKey foreignKey)
+    {
+        var command =
+            new SqlCommand("SELECT   \r\n" +
+                           "    COL_NAME(fc.parent_object_id, fc.parent_column_id) AS constraint_column_name,  \r\n" +
+                           "    COL_NAME(fc.referenced_object_id, fc.referenced_column_id) AS referenced_column_name  \r\n" +
+                           "FROM sys.foreign_key_columns AS fc   \r\n" +
+                           "WHERE fc.constraint_object_id = @ConstraintId\r\n" +
+                           "ORDER BY fc.constraint_column_id");
+        command.Parameters.AddWithValue("@ConstraintId", foreignKey.ConstraintId);
+
+        await ExecuteReader(command, reader =>
+        {
+            foreignKey.ColumnNames.Add(reader.GetString(0));
+            foreignKey.ColumnReferences.Add(reader.GetString(1));
+        });
+
+        _logger.Debug(
+            "Added {KeyColumnCount} columns to contraint '{ConstraintName}'",
+            foreignKey.ColumnNames.Count,
+            foreignKey.ConstraintName);
     }
 
     private async Task<IEnumerable<IndexColumn>> GetIndexColumnInfo(string tableName, IndexHeader indexHeader)

@@ -33,16 +33,16 @@ public class PgCmd : IPgCmd
         if (!tableDefinition.ForeignKeys.Any())
             return;
 
-        sb.AppendLine(", ");
-        sb.Append("    foreign key (");
-        sb.Append(string.Join(',', tableDefinition.ForeignKeys.Select(fk => fk.ColName)));
-        sb.Append($") references \"{fk.TableReference}\"");
 
         foreach (var fk in tableDefinition.ForeignKeys)
         {
-            sb.Append($"    foreign key (\"{fk.ColName}\") ");
-            sb.Append($"references \"{fk.TableReference}\"");
-            sb.AppendLine($"(\"{fk.ColumnReference}\") ");
+            sb.AppendLine(", ");
+            sb.Append($"    constraint \"{fk.ConstraintName}\" foreign key (");
+            AddQuotedNames(fk.ColumnNames, sb);
+
+            sb.Append($") references \"{fk.TableReference}\" (");
+            AddQuotedNames(fk.ColumnReferences, sb);
+            sb.AppendLine(")");
         }
     }
 
@@ -53,8 +53,26 @@ public class PgCmd : IPgCmd
 
         sb.AppendLine(",");
         sb.Append($"    constraint \"{tableDefinition.PrimaryKey.Name}\" primary key (");
-        sb.Append(string.Join(',', tableDefinition.PrimaryKey.ColumnNames.Select(c => c.Name)));
+        AddQuotedNames(tableDefinition.PrimaryKey.ColumnNames.Select(c => c.Name), sb);
         sb.Append(") ");
+    }
+
+    private static void AddQuotedNames(IEnumerable<string> names, StringBuilder sb)
+    {
+        var first = true;
+        foreach (var name in names)
+        {
+            if (first)
+            {
+                first = false;
+            }
+            else
+            {
+                sb.Append(", ");
+            }
+
+            sb.Append($"\"{name}\"");
+        }
     }
 
     private static void AddColumnNames(TableDefinition tableDefinition, StringBuilder sb)

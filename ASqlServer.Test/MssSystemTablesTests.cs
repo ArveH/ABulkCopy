@@ -155,9 +155,9 @@ public class MssSystemTablesTests : MssTestBase
         var foreignKeys = fks.ToList();
         foreignKeys.Should().NotBeNull();
         foreignKeys.Count.Should().Be(2);
-        foreignKeys[0].Name.Should().Be("FK_ClientScope_ConfiguredClients_ClientId");
-        foreignKeys[0].ColName.Should().Be("ClientId");
-        foreignKeys[0].ColumnReference.Should().Be("ClientId");
+        foreignKeys[0].ConstraintName.Should().Be("FK_ClientScope_ConfiguredClients_ClientId");
+        foreignKeys[0].ColumnNames[0].Should().Be("ClientId");
+        foreignKeys[0].ColumnReferences[0].Should().Be("ClientId");
         foreignKeys[0].DeleteAction.Should().Be(DeleteAction.Cascade);
         foreignKeys[0].UpdateAction.Should().Be(UpdateAction.NoAction);
     }

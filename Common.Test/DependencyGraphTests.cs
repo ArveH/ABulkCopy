@@ -285,10 +285,10 @@ public class DependencyGraphTests
         child.Columns.Add(new SqlServerBigInt(1, $"{parentName}_Id", false));
         child.ForeignKeys.Add(new ForeignKey
         {
-            Name = $"FK_{parentName}_Id",
-            ColName = $"{parentName}_Id",
+            ConstraintName = $"FK_{parentName}_Id",
+            ColumnNames = new List<string> { $"{parentName}_Id" },
             TableReference = parentName,
-            ColumnReference = "Id"
+            ColumnReferences = new List<string> { "Id" },
         });
     }
 
