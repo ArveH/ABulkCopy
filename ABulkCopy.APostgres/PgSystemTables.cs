@@ -88,15 +88,14 @@ public class PgSystemTables : IPgSystemTables
         await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
         await using var reader = await cmd.ExecuteReaderAsync();
 
-        var isSomethingRead = await reader.ReadAsync();
-        if (!isSomethingRead) return new List<ForeignKey>();
-
         var foreignKeys = new List<ForeignKey>();
         while (await reader.ReadAsync())
         {
             var fk = new ForeignKey
             {
+                ColumnNames = new List<string> { reader.GetString(0) },
                 TableReference = reader.GetString(1),
+                ColumnReferences = new List<string> { reader.GetString(2) },
                 ConstraintName = reader.GetString(3),
                 UpdateAction = (UpdateAction)Enum.Parse(typeof(UpdateAction), reader.GetString(4), true),
                 DeleteAction = (DeleteAction)Enum.Parse(typeof(DeleteAction), reader.GetString(5), true)

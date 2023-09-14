@@ -6,7 +6,7 @@ public class PgCmdTests : PgTestBase
 
     public PgCmdTests(ITestOutputHelper output) : base(output)
     {
-        _pgCmd = new ABulkCopy.APostgres.PgCmd(PgContext);
+        _pgCmd = new ABulkCopy.APostgres.PgCmd(PgContext, TestLogger);
     }
 
     [Fact]
@@ -324,12 +324,15 @@ public class PgCmdTests : PgTestBase
             IPgSystemTables systemTables = new PgSystemTables(PgContext, TestLogger);
             var fks = (await systemTables.GetForeignKeys(new TableHeader
             {
-                Name = parent1TableName,
+                Name = childTableName,
                 Schema = "public"
             })).ToList();
             fks.Count.Should().Be(2, "because there should be 2 foreign keys");
-            fks[0].ConstraintName.Should().Be("col1");
-            fks[1].ConstraintName.Should().Be("col2");
+            fks.Select(k => k.TableReference).Should().Contain(new List<string>{parent1TableName, parent2TableName});
+            fks.First(k => k.TableReference == parent1TableName).ColumnNames.Count.Should().Be(1);
+            fks.First(k => k.TableReference == parent1TableName).ColumnNames.First().Should().Be("Parent1Id");
+            fks.First(k => k.TableReference == parent2TableName).ColumnNames.Count.Should().Be(1);
+            fks.First(k => k.TableReference == parent2TableName).ColumnNames.First().Should().Be("Parent2Id");
         }
         finally
         {

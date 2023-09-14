@@ -32,6 +32,7 @@ public class PgContext : IPgContext
     }
 
     public Rdbms Rdbms { get; }
+    public int MaxIdentifierLength => 63;
 
     private NpgsqlDataSource? _dataSource;
     public NpgsqlDataSource DataSource

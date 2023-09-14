@@ -30,4 +30,5 @@ public class MssContext : IDbContext
     }
 
     public Rdbms Rdbms { get; }
+    public int MaxIdentifierLength => 128;
 }

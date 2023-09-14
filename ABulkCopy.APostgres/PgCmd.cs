@@ -3,10 +3,14 @@
 public class PgCmd : IPgCmd
 {
     private readonly IPgContext _pgContext;
+    private readonly ILogger _logger;
 
-    public PgCmd(IPgContext pgContext)
+    public PgCmd(
+        IPgContext pgContext,
+        ILogger logger)
     {
         _pgContext = pgContext;
+        _logger = logger.ForContext<PgCmd>();
     }
 
     public async Task DropTable(string tableName)
@@ -37,13 +41,33 @@ public class PgCmd : IPgCmd
         foreach (var fk in tableDefinition.ForeignKeys)
         {
             sb.AppendLine(", ");
-            sb.Append($"    constraint \"{fk.ConstraintName}\" foreign key (");
+            sb.Append("    ");
+            AddConstraintName(fk.ConstraintName, sb);
+            sb.Append("foreign key (");
+
             AddQuotedNames(fk.ColumnNames, sb);
 
             sb.Append($") references \"{fk.TableReference}\" (");
             AddQuotedNames(fk.ColumnReferences, sb);
             sb.AppendLine(")");
         }
+    }
+
+    private void AddConstraintName(string? name, StringBuilder sb)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return;
+        }
+
+        if (name.Length > _pgContext.MaxIdentifierLength)
+        {
+            _logger.Warning("Constraint name '{Name}' is too long. Max length is {MaxIdentifierLength} characters. Constraint name is not used.",
+                name, _pgContext.MaxIdentifierLength);
+            return;
+        }
+
+        sb.Append($"constraint \"{name}\"");
     }
 
     private static void AddPrimaryKeyClause(TableDefinition tableDefinition, StringBuilder sb)
