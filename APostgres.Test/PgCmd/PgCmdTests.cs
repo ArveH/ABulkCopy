@@ -282,7 +282,7 @@ public class PgCmdTests : PgTestBase
     }
 
     [Fact]
-    public async Task TestCreateTable_When_ForeignKey()
+    public async Task TestCreateTable_When_ForeignKeysFromTwoTables()
     {
         // Arrange
         var parent1TableName = GetName() + "_parent1";
@@ -309,10 +309,10 @@ public class PgCmdTests : PgTestBase
         await _pgCmd.CreateTable(parent2TableDefinition);
         var childTableDefinition = GetChildTableDefinition(
             childTableName,
-            new List<(string, string)>
+            new List<(string, List<string>)>
             {
-                (parent1TableName, "Parent1Id"),
-                (parent2TableName, "Parent2Id")
+                (parent1TableName, new() { "Parent1Id" }),
+                (parent2TableName, new() { "Parent2Id" })
             });
 
         try
@@ -328,7 +328,7 @@ public class PgCmdTests : PgTestBase
                 Schema = "public"
             })).ToList();
             fks.Count.Should().Be(2, "because there should be 2 foreign keys");
-            fks.Select(k => k.TableReference).Should().Contain(new List<string>{parent1TableName, parent2TableName});
+            fks.Select(k => k.TableReference).Should().Contain(new List<string> { parent1TableName, parent2TableName });
             fks.First(k => k.TableReference == parent1TableName).ColumnNames.Count.Should().Be(1);
             fks.First(k => k.TableReference == parent1TableName).ColumnNames.First().Should().Be("Parent1Id");
             fks.First(k => k.TableReference == parent2TableName).ColumnNames.Count.Should().Be(1);
@@ -338,6 +338,54 @@ public class PgCmdTests : PgTestBase
         {
             await PgDbHelper.Instance.DropTable(childTableName);
             await PgDbHelper.Instance.DropTable(parent2TableName);
+            await PgDbHelper.Instance.DropTable(parent1TableName);
+        }
+
+    }
+
+    [Fact]
+    public async Task TestCreateTable_When_CompositeForeignKey()
+    {
+        // Arrange
+        var parent1TableName = GetName() + "_parent1";
+        var childTableName = GetName() + "_child";
+        await PgDbHelper.Instance.DropTable(childTableName);
+        await PgDbHelper.Instance.DropTable(parent1TableName);
+        var parent1TableDefinition = GetParentTableDefinition(
+            parent1TableName, new List<(string, bool)>
+            {
+                ("Parent1Id", true),
+                ("col1", true),
+                ("col2", false),
+            });
+        await _pgCmd.CreateTable(parent1TableDefinition);
+        var childTableDefinition = GetChildTableDefinition(
+            childTableName,
+            new List<(string, List<string>)>
+            {
+                (parent1TableName, new() { "Parent1Id", "col1" })
+            });
+
+        try
+        {
+            // Act
+            await _pgCmd.CreateTable(childTableDefinition);
+
+            // Assert
+            IPgSystemTables systemTables = new PgSystemTables(PgContext, TestLogger);
+            var fks = (await systemTables.GetForeignKeys(new TableHeader
+            {
+                Name = childTableName,
+                Schema = "public"
+            })).ToList();
+            fks.Count.Should().Be(1, "because there should be 1 foreign key");
+            fks.First().TableReference.Should().Be(parent1TableName);
+            fks.First().ColumnReferences.Count.Should().Be(2);
+            fks.First().ColumnReferences.Should().Contain(new List<string> { "Parent1Id", "col1" });
+        }
+        finally
+        {
+            await PgDbHelper.Instance.DropTable(childTableName);
             await PgDbHelper.Instance.DropTable(parent1TableName);
         }
 
@@ -366,8 +414,9 @@ public class PgCmdTests : PgTestBase
 
     private static TableDefinition GetChildTableDefinition(
         string tableName,
-        List<(string tabName, string colName)> refs)
+        List<(string tabName, List<string> colNames)> refs)
     {
+        // Create TableDefinition and add primary key
         var inputDefinition = PgTestData.GetEmpty(tableName);
         inputDefinition.Columns.Add(new PostgresBigInt(0, "id", false));
         inputDefinition.PrimaryKey = new PrimaryKey
@@ -375,17 +424,25 @@ public class PgCmdTests : PgTestBase
             Name = $"PK_{tableName}_id",
             ColumnNames = new List<OrderColumn> { new() { Name = "id" } }
         };
-        for (var i = 0; i < refs.Count; i++)
+
+        // Add columns
+        refs.SelectMany(r => r.colNames).ToList().ForEach(colName =>
         {
-            inputDefinition.Columns.Add(new PostgresInt(i + 1, refs[i].colName, false));
+            inputDefinition.Columns.Add(new PostgresInt(0, colName, false));
+        });
+
+        // Add foreign keys
+        refs.ForEach(fkInfo =>
+        {
             inputDefinition.ForeignKeys.Add(new ForeignKey
             {
-                ConstraintName = $"FK_{tableName}_{refs[i].tabName}_{refs[i].colName}",
-                ColumnNames = new List<string> { refs[i].colName },
-                TableReference = refs[i].tabName,
-                ColumnReferences = new List<string> { refs[i].colName },
+                ConstraintName = $"FK_{tableName}_{fkInfo.tabName}_{string.Join('_', fkInfo.colNames)}",
+                ColumnNames = fkInfo.colNames,
+                TableReference = fkInfo.tabName,
+                ColumnReferences = fkInfo.colNames
             });
-        }
+        });
+
         return inputDefinition;
     }
 }
