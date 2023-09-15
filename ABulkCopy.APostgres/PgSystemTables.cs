@@ -100,7 +100,7 @@ public class PgSystemTables : IPgSystemTables
         return foreignKeys;
     }
 
-    private async Task<IEnumerable<(string child, string parent)>> GetForeignKeyColumns(string constraintName)
+    private async Task<List<(string child, string parent)>> GetForeignKeyColumns(string constraintName)
     {
         var sqlString = "select \r\n" +
                         "    att2.attname as \"child_column\", \r\n" +

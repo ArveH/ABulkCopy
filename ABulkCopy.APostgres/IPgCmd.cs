@@ -7,4 +7,5 @@ public interface IPgCmd
     Task DropTable(string tableName);
     Task CreateIndex(string tableName, IndexDefinition indexDefinition);
     Task ResetIdentity(string tableName, string columnName);
+    Task<object?> SelectScalar(string sqlString);
 }

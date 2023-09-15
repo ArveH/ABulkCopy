@@ -1,7 +1,4 @@
-﻿using ABulkCopy.Common.Types;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-
-namespace APostgres.Test.DataReader;
+﻿namespace APostgres.Test.DataReader;
 
 public class PgDataReaderStringTests : PgDataReaderTestBase
 {

@@ -32,91 +32,6 @@ public class PgCmd : IPgCmd
         await ExecuteNonQuery(sb.ToString());
     }
 
-    private void AddForeignKeyClauses(TableDefinition tableDefinition, StringBuilder sb)
-    {
-        if (!tableDefinition.ForeignKeys.Any())
-            return;
-
-
-        foreach (var fk in tableDefinition.ForeignKeys)
-        {
-            sb.AppendLine(", ");
-            sb.Append("    ");
-            AddConstraintName(fk.ConstraintName, sb);
-            sb.Append("foreign key (");
-
-            AddQuotedNames(fk.ColumnNames, sb);
-
-            sb.Append($") references \"{fk.TableReference}\" (");
-            AddQuotedNames(fk.ColumnReferences, sb);
-            sb.AppendLine(")");
-        }
-    }
-
-    private void AddConstraintName(string? name, StringBuilder sb)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            return;
-        }
-
-        if (name.Length > _pgContext.MaxIdentifierLength)
-        {
-            _logger.Warning("Constraint name '{Name}' is too long. Max length is {MaxIdentifierLength} characters. Constraint name is not used.",
-                name, _pgContext.MaxIdentifierLength);
-            return;
-        }
-
-        sb.Append($"constraint \"{name}\"");
-    }
-
-    private static void AddPrimaryKeyClause(TableDefinition tableDefinition, StringBuilder sb)
-    {
-        if (tableDefinition.PrimaryKey == null)
-            return;
-
-        sb.AppendLine(",");
-        sb.Append($"    constraint \"{tableDefinition.PrimaryKey.Name}\" primary key (");
-        AddQuotedNames(tableDefinition.PrimaryKey.ColumnNames.Select(c => c.Name), sb);
-        sb.Append(") ");
-    }
-
-    private static void AddQuotedNames(IEnumerable<string> names, StringBuilder sb)
-    {
-        var first = true;
-        foreach (var name in names)
-        {
-            if (first)
-            {
-                first = false;
-            }
-            else
-            {
-                sb.Append(", ");
-            }
-
-            sb.Append($"\"{name}\"");
-        }
-    }
-
-    private static void AddColumnNames(TableDefinition tableDefinition, StringBuilder sb)
-    {
-        var first = true;
-        foreach (var column in tableDefinition.Columns)
-        {
-            if (first)
-            {
-                first = false;
-            }
-            else
-            {
-                sb.AppendLine(",");
-            }
-
-            sb.Append($"    \"{column.Name}\" {column.GetNativeCreateClause()}");
-        }
-    }
-
     public async Task CreateIndex(string tableName, IndexDefinition indexDefinition)
     {
         var sb = new StringBuilder();
@@ -193,5 +108,93 @@ public class PgCmd : IPgCmd
     {
         await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
         return await cmd.ExecuteScalarAsync();
+    }
+
+    private void AddForeignKeyClauses(TableDefinition tableDefinition, StringBuilder sb)
+    {
+        if (!tableDefinition.ForeignKeys.Any())
+            return;
+
+
+        foreach (var fk in tableDefinition.ForeignKeys)
+        {
+            sb.AppendLine(", ");
+            sb.Append("    ");
+            AddConstraintName(fk.ConstraintName, sb);
+            sb.Append("foreign key (");
+
+            AddQuotedNames(fk.ColumnNames, sb);
+
+            sb.Append($") references \"{fk.TableReference}\" (");
+            AddQuotedNames(fk.ColumnReferences, sb);
+            sb.Append(") ");
+
+            sb.Append(fk.UpdateAction.GetClause());
+            sb.Append(fk.DeleteAction.GetClause());
+        }
+    }
+
+    private void AddConstraintName(string? name, StringBuilder sb)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return;
+        }
+
+        if (name.Length > _pgContext.MaxIdentifierLength)
+        {
+            _logger.Warning("Constraint name '{Name}' is too long. Max length is {MaxIdentifierLength} characters. Constraint name is not used.",
+                name, _pgContext.MaxIdentifierLength);
+            return;
+        }
+
+        sb.Append($"constraint \"{name}\"");
+    }
+
+    private static void AddPrimaryKeyClause(TableDefinition tableDefinition, StringBuilder sb)
+    {
+        if (tableDefinition.PrimaryKey == null)
+            return;
+
+        sb.AppendLine(",");
+        sb.Append($"    constraint \"{tableDefinition.PrimaryKey.Name}\" primary key (");
+        AddQuotedNames(tableDefinition.PrimaryKey.ColumnNames.Select(c => c.Name), sb);
+        sb.Append(") ");
+    }
+
+    private static void AddQuotedNames(IEnumerable<string> names, StringBuilder sb)
+    {
+        var first = true;
+        foreach (var name in names)
+        {
+            if (first)
+            {
+                first = false;
+            }
+            else
+            {
+                sb.Append(", ");
+            }
+
+            sb.Append($"\"{name}\"");
+        }
+    }
+
+    private static void AddColumnNames(TableDefinition tableDefinition, StringBuilder sb)
+    {
+        var first = true;
+        foreach (var column in tableDefinition.Columns)
+        {
+            if (first)
+            {
+                first = false;
+            }
+            else
+            {
+                sb.AppendLine(",");
+            }
+
+            sb.Append($"    \"{column.Name}\" {column.GetNativeCreateClause()}");
+        }
     }
 }

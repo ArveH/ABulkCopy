@@ -388,7 +388,53 @@ public class PgCmdTests : PgTestBase
             await PgDbHelper.Instance.DropTable(childTableName);
             await PgDbHelper.Instance.DropTable(parent1TableName);
         }
+    }
 
+    [Fact]
+    public async Task TestCascadeDelete()
+    {
+        // Arrange
+        var parent1TableName = GetName() + "_parent1";
+        var childTableName = GetName() + "_child";
+        await PgDbHelper.Instance.DropTable(childTableName);
+        await PgDbHelper.Instance.DropTable(parent1TableName);
+        var parent1TableDefinition = GetParentTableDefinition(
+            parent1TableName, new List<(string, bool)>
+            {
+                ("Parent1Id", true),
+                ("col1", true),
+                ("col2", false),
+            });
+        await _pgCmd.CreateTable(parent1TableDefinition);
+        await _pgCmd.ExecuteNonQuery($"insert into \"{parent1TableName}\" (\"Parent1Id\", \"col1\", \"col2\") values (1, 1, 1)");
+        await _pgCmd.ExecuteNonQuery($"insert into \"{parent1TableName}\" (\"Parent1Id\", \"col1\", \"col2\") values (1, 2, 1)");
+        var childTableDefinition = GetChildTableDefinition(
+            childTableName,
+            new List<(string, List<string>)>
+            {
+                (parent1TableName, new() { "Parent1Id", "col1" })
+            });
+        childTableDefinition.ForeignKeys.First().DeleteAction = DeleteAction.Cascade;
+        await _pgCmd.CreateTable(childTableDefinition);
+        await _pgCmd.ExecuteNonQuery($"insert into \"{childTableName}\" (\"id\", \"Parent1Id\", \"col1\") values (10, 1, 1)");
+        await _pgCmd.ExecuteNonQuery($"insert into \"{childTableName}\" (\"id\", \"Parent1Id\", \"col1\") values (11, 1, 2)");
+        var beforeCount = (long)(await _pgCmd.SelectScalar($"select count(*) from \"{childTableName}\"") ?? 0);
+        beforeCount.Should().Be(2, "because child table has two rows before deleting from parent table");
+
+        try
+        {
+            // Act
+            await _pgCmd.ExecuteNonQuery($"delete from \"{parent1TableName}\" where \"col1\" = 1");
+
+            // Assert
+            var afterCount = (long)(await _pgCmd.SelectScalar($"select count(*) from \"{childTableName}\"") ?? 0);
+            afterCount.Should().Be(1, "because 1 row from child table should be delete when deleting it's foreign key");
+        }
+        finally
+        {
+            await PgDbHelper.Instance.DropTable(childTableName);
+            await PgDbHelper.Instance.DropTable(parent1TableName);
+        }
     }
 
     private static TableDefinition GetParentTableDefinition(
