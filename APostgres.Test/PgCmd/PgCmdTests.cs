@@ -6,7 +6,8 @@ public class PgCmdTests : PgTestBase
 
     public PgCmdTests(ITestOutputHelper output) : base(output)
     {
-        _pgCmd = new ABulkCopy.APostgres.PgCmd(PgContext, TestLogger);
+        _pgCmd = new ABulkCopy.APostgres.PgCmd(
+            PgContext, Quoter, TestLogger);
     }
 
     [Fact]

@@ -13,6 +13,7 @@ global using ABulkCopy.Common.Types;
 global using ABulkCopy.Common.Types.Column;
 global using ABulkCopy.Common.Types.Index;
 global using ABulkCopy.Common.Types.Table;
+global using ABulkCopy.Common.Utils;
 global using Microsoft.Extensions.Configuration;
 global using Npgsql;
 global using NpgsqlTypes;

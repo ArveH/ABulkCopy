@@ -3,19 +3,22 @@
 public class PgCmd : IPgCmd
 {
     private readonly IPgContext _pgContext;
+    private readonly IQuoter _quoter;
     private readonly ILogger _logger;
 
     public PgCmd(
         IPgContext pgContext,
+        IQuoter quoter,
         ILogger logger)
     {
         _pgContext = pgContext;
+        _quoter = quoter;
         _logger = logger.ForContext<PgCmd>();
     }
 
     public async Task DropTable(string tableName)
     {
-        var sqlString = $"drop table if exists \"{tableName}\";";
+        var sqlString = $"drop table if exists {_quoter.Quote(tableName)};";
         await ExecuteNonQuery(sqlString);
     }
 
@@ -24,7 +27,7 @@ public class PgCmd : IPgCmd
         var sb = new StringBuilder();
         sb.Append("create table ");
         if (addIfNotExists) sb.Append("if not exists ");
-        sb.AppendLine($"\"{tableDefinition.Header.Name}\" (");
+        sb.AppendLine($"{_quoter.Quote(tableDefinition.Header.Name)} (");
         AddColumnNames(tableDefinition, sb);
         AddPrimaryKeyClause(tableDefinition, sb);
         AddForeignKeyClauses(tableDefinition, sb);
@@ -38,9 +41,9 @@ public class PgCmd : IPgCmd
         sb.Append("create ");
         if (indexDefinition.Header.IsUnique) sb.Append("unique ");
         sb.Append("index ");
-        sb.AppendLine($"\"{indexDefinition.Header.Name}\" ");
+        sb.AppendLine($"{_quoter.Quote(indexDefinition.Header.Name)} ");
         sb.Append("on ");
-        sb.AppendLine($"\"{tableName}\" (");
+        sb.AppendLine($"{_quoter.Quote(tableName)} (");
         var first = true;
         foreach (var column in indexDefinition.Columns.Where(c => !c.IsIncluded))
         {
@@ -53,7 +56,7 @@ public class PgCmd : IPgCmd
                 sb.AppendLine(",");
             }
 
-            sb.Append($"    \"{column.Name}\" ");
+            sb.Append($"    {_quoter.Quote(column.Name)} ");
             if (column.Direction == Direction.Descending) sb.Append("desc ");
         }
         sb.AppendLine(")");
@@ -72,7 +75,7 @@ public class PgCmd : IPgCmd
                     sb.AppendLine(",");
                 }
 
-                sb.Append($"    \"{column.Name}\" ");
+                sb.Append($"    {_quoter.Quote(column.Name)} ");
             }
             sb.Append(")");
         }
@@ -92,7 +95,7 @@ public class PgCmd : IPgCmd
         var sb = new StringBuilder();
         sb.AppendLine("select setval(");
         sb.AppendLine($"{oid}, ");
-        sb.AppendLine($"(select max(\"{columnName}\") from \"{tableName}\") )");
+        sb.AppendLine($"(select max({_quoter.Quote(columnName)}) from {_quoter.Quote(tableName)}) )");
 
         await using var cmd = _pgContext.DataSource.CreateCommand(sb.ToString());
         await cmd.ExecuteScalarAsync();
@@ -125,7 +128,7 @@ public class PgCmd : IPgCmd
 
             AddQuotedNames(fk.ColumnNames, sb);
 
-            sb.Append($") references \"{fk.TableReference}\" (");
+            sb.Append($") references {_quoter.Quote(fk.TableReference)} (");
             AddQuotedNames(fk.ColumnReferences, sb);
             sb.Append(") ");
 
@@ -148,21 +151,21 @@ public class PgCmd : IPgCmd
             return;
         }
 
-        sb.Append($"constraint \"{name}\"");
+        sb.Append($"constraint {_quoter.Quote(name)}");
     }
 
-    private static void AddPrimaryKeyClause(TableDefinition tableDefinition, StringBuilder sb)
+    private void AddPrimaryKeyClause(TableDefinition tableDefinition, StringBuilder sb)
     {
         if (tableDefinition.PrimaryKey == null)
             return;
 
         sb.AppendLine(",");
-        sb.Append($"    constraint \"{tableDefinition.PrimaryKey.Name}\" primary key (");
+        sb.Append($"    constraint {_quoter.Quote(tableDefinition.PrimaryKey.Name)} primary key (");
         AddQuotedNames(tableDefinition.PrimaryKey.ColumnNames.Select(c => c.Name), sb);
         sb.Append(") ");
     }
 
-    private static void AddQuotedNames(IEnumerable<string> names, StringBuilder sb)
+    private void AddQuotedNames(IEnumerable<string> names, StringBuilder sb)
     {
         var first = true;
         foreach (var name in names)
@@ -176,11 +179,11 @@ public class PgCmd : IPgCmd
                 sb.Append(", ");
             }
 
-            sb.Append($"\"{name}\"");
+            sb.Append($"{_quoter.Quote(name)}");
         }
     }
 
-    private static void AddColumnNames(TableDefinition tableDefinition, StringBuilder sb)
+    private void AddColumnNames(TableDefinition tableDefinition, StringBuilder sb)
     {
         var first = true;
         foreach (var column in tableDefinition.Columns)
@@ -194,7 +197,7 @@ public class PgCmd : IPgCmd
                 sb.AppendLine(",");
             }
 
-            sb.Append($"    \"{column.Name}\" {column.GetNativeCreateClause()}");
+            sb.Append($"     {_quoter.Quote(column.Name)}  ");
         }
     }
 }

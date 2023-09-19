@@ -37,9 +37,12 @@ public class PgDbHelper
         }
     };
 
+    private readonly Quoter _quoter;
+
     private PgDbHelper()
     {
         var configuration = new ConfigHelper().GetConfiguration("128e015d-d8ef-4ca8-ba79-5390b26c675f");
+        _quoter = new Quoter(configuration);
         _pgContext = new PgContext(new NullLoggerFactory(), configuration);
     }
 
@@ -52,7 +55,9 @@ public class PgDbHelper
         await CreateTable(_tableDefinition, true);
     }
 
-    public async Task CreateTable(TableDefinition tableDefinition, bool addIfNotExists = false)
+    public async Task CreateTable(TableDefinition tableDefinition, 
+        bool addQuote = true, 
+        bool addIfNotExists = false)
     {
         var sb = new StringBuilder();
         sb.Append("create table ");

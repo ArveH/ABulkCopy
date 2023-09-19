@@ -139,6 +139,7 @@ public class PgDataReaderStringTests : PgDataReaderTestBase
             new() {testVal});
         var dataReader = new PgDataReader(
             PgContext,
+            Quoter,
             new DataFileReader(FileHelper.FileSystem, TestLogger),
             TestLogger);
 

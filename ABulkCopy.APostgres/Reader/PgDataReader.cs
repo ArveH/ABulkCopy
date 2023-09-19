@@ -3,15 +3,18 @@
 public class PgDataReader : IADataReader, IDisposable
 {
     private readonly IPgContext _context;
+    private readonly IQuoter _quoter;
     private readonly IDataFileReader _fileReader;
     private readonly ILogger _logger;
 
     public PgDataReader(
         IPgContext context,
+        IQuoter quoter,
         IDataFileReader dataFileReader,
         ILogger logger)
     {
         _context = context;
+        _quoter = quoter;
         _fileReader = dataFileReader;
         _logger = logger.ForContext<PgDataReader>();
     }
@@ -112,11 +115,11 @@ public class PgDataReader : IADataReader, IDisposable
         dataFileReader.ReadNewLine();
     }
 
-    private static string CreateCopyStmt(TableDefinition tableDefinition)
+    private string CreateCopyStmt(TableDefinition tableDefinition)
     {
         var sb = new StringBuilder();
         sb.Append("COPY ");
-        sb.Append($"\"{tableDefinition.Header.Name}\" (");
+        sb.Append($"{_quoter.Quote(tableDefinition.Header.Name)} (");
         var first = true;
         foreach (var column in tableDefinition.Columns)
         {
@@ -129,7 +132,7 @@ public class PgDataReader : IADataReader, IDisposable
                 sb.Append(",");
             }
 
-            sb.Append($"\"{column.Name}\"");
+            sb.Append($"{_quoter.Quote(column.Name)}");
         }
 
         sb.Append(") FROM STDIN (FORMAT BINARY)");
