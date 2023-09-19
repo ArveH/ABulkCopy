@@ -13,5 +13,6 @@ public static class Constants
     public struct Config
     {
         public const string DbKey = "BulkCopy";
+        public const string AddQuotes = "AddQuotes";
     }
 }
