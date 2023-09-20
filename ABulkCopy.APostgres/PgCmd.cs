@@ -3,47 +3,50 @@
 public class PgCmd : IPgCmd
 {
     private readonly IPgContext _pgContext;
-    private readonly IQuoter _quoter;
+    private readonly IQueryBuilderFactory _queryBuilderFactory;
     private readonly ILogger _logger;
 
     public PgCmd(
         IPgContext pgContext,
-        IQuoter quoter,
+        IQueryBuilderFactory queryBuilderFactory,
         ILogger logger)
     {
         _pgContext = pgContext;
-        _quoter = quoter;
+        _queryBuilderFactory = queryBuilderFactory;
         _logger = logger.ForContext<PgCmd>();
     }
 
     public async Task DropTable(string tableName)
     {
-        var sqlString = $"drop table if exists {_quoter.Quote(tableName)};";
-        await ExecuteNonQuery(sqlString);
+        var qb = _queryBuilderFactory.GetQueryBuilder();
+        await ExecuteNonQuery(qb.CreateDropTableStmt(tableName));
     }
 
     public async Task CreateTable(TableDefinition tableDefinition, bool addIfNotExists = false)
     {
-        var sb = new StringBuilder();
-        sb.Append("create table ");
-        if (addIfNotExists) sb.Append("if not exists ");
-        sb.AppendLine($"{_quoter.Quote(tableDefinition.Header.Name)} (");
-        AddColumnNames(tableDefinition, sb);
-        AddPrimaryKeyClause(tableDefinition, sb);
-        AddForeignKeyClauses(tableDefinition, sb);
-        sb.AppendLine(");");
-        await ExecuteNonQuery(sb.ToString());
+        var qb = _queryBuilderFactory.GetQueryBuilder();
+        qb.Append("create table ");
+        if (addIfNotExists) qb.Append("if not exists ");
+        qb.AppendIdentifier(tableDefinition.Header.Name);
+        qb.AppendLine(" (");
+        qb.AppendColumnNames(tableDefinition);
+        AddPrimaryKeyClause(tableDefinition, qb);
+        AddForeignKeyClauses(tableDefinition, qb);
+        qb.AppendLine(");");
+        await ExecuteNonQuery(qb.ToString());
     }
 
     public async Task CreateIndex(string tableName, IndexDefinition indexDefinition)
     {
-        var sb = new StringBuilder();
-        sb.Append("create ");
-        if (indexDefinition.Header.IsUnique) sb.Append("unique ");
-        sb.Append("index ");
-        sb.AppendLine($"{_quoter.Quote(indexDefinition.Header.Name)} ");
-        sb.Append("on ");
-        sb.AppendLine($"{_quoter.Quote(tableName)} (");
+        var qb = _queryBuilderFactory.GetQueryBuilder();
+        qb.Append("create ");
+        if (indexDefinition.Header.IsUnique) qb.Append("unique ");
+        qb.Append("index ");
+        qb.AppendIdentifier(indexDefinition.Header.Name);
+        qb.AppendLine(" ");
+        qb.Append("on ");
+        qb.AppendIdentifier(tableName);
+        qb.AppendLine(" (");
         var first = true;
         foreach (var column in indexDefinition.Columns.Where(c => !c.IsIncluded))
         {
@@ -53,16 +56,18 @@ public class PgCmd : IPgCmd
             }
             else
             {
-                sb.AppendLine(",");
+                qb.AppendLine(",");
             }
 
-            sb.Append($"    {_quoter.Quote(column.Name)} ");
-            if (column.Direction == Direction.Descending) sb.Append("desc ");
+            qb.Append("    ");
+            qb.AppendIdentifier(column.Name);
+            qb.Append(" ");
+            if (column.Direction == Direction.Descending) qb.Append("desc ");
         }
-        sb.AppendLine(")");
+        qb.AppendLine(")");
         if (indexDefinition.Columns.Any(c => c.IsIncluded))
         {
-            sb.AppendLine(" include (");
+            qb.AppendLine(" include (");
             first = true;
             foreach (var column in indexDefinition.Columns.Where(c => c.IsIncluded))
             {
@@ -72,15 +77,17 @@ public class PgCmd : IPgCmd
                 }
                 else
                 {
-                    sb.AppendLine(",");
+                    qb.AppendLine(",");
                 }
 
-                sb.Append($"    {_quoter.Quote(column.Name)} ");
+                qb.Append("    ");
+                qb.AppendIdentifier(column.Name);
+                qb.Append(" ");
             }
-            sb.Append(")");
+            qb.Append(")");
         }
 
-        await ExecuteNonQuery(sb.ToString());
+        await ExecuteNonQuery(qb.ToString());
     }
 
     public async Task ResetIdentity(string tableName, string columnName)
@@ -92,12 +99,16 @@ public class PgCmd : IPgCmd
             throw new SqlNullValueException($"Sequence {seqName} not found");
         }
 
-        var sb = new StringBuilder();
-        sb.AppendLine("select setval(");
-        sb.AppendLine($"{oid}, ");
-        sb.AppendLine($"(select max({_quoter.Quote(columnName)}) from {_quoter.Quote(tableName)}) )");
+        var qb = _queryBuilderFactory.GetQueryBuilder();
+        qb.AppendLine("select setval(");
+        qb.AppendLine($"{oid}, ");
+        qb.Append("(select max(");
+        qb.AppendIdentifier(columnName);
+        qb.Append(") from ");
+        qb.AppendIdentifier(tableName);
+        qb.AppendLine(") )");
 
-        await using var cmd = _pgContext.DataSource.CreateCommand(sb.ToString());
+        await using var cmd = _pgContext.DataSource.CreateCommand(qb.ToString());
         await cmd.ExecuteScalarAsync();
     }
 
@@ -113,7 +124,7 @@ public class PgCmd : IPgCmd
         return await cmd.ExecuteScalarAsync();
     }
 
-    private void AddForeignKeyClauses(TableDefinition tableDefinition, StringBuilder sb)
+    private void AddForeignKeyClauses(TableDefinition tableDefinition, IQueryBuilder qb)
     {
         if (!tableDefinition.ForeignKeys.Any())
             return;
@@ -121,23 +132,25 @@ public class PgCmd : IPgCmd
 
         foreach (var fk in tableDefinition.ForeignKeys)
         {
-            sb.AppendLine(", ");
-            sb.Append("    ");
-            AddConstraintName(fk.ConstraintName, sb);
-            sb.Append("foreign key (");
+            qb.AppendLine(", ");
+            qb.Append("    ");
+            AddConstraintName(fk.ConstraintName, qb);
+            qb.Append(" foreign key (");
 
-            AddQuotedNames(fk.ColumnNames, sb);
+            qb.AppendIdentifierList(fk.ColumnNames);
 
-            sb.Append($") references {_quoter.Quote(fk.TableReference)} (");
-            AddQuotedNames(fk.ColumnReferences, sb);
-            sb.Append(") ");
+            qb.Append(") references ");
+            qb.AppendIdentifier(fk.TableReference);
+            qb.Append(" (");
+            qb.AppendIdentifierList(fk.ColumnReferences);
+            qb.Append(") ");
 
-            sb.Append(fk.UpdateAction.GetClause());
-            sb.Append(fk.DeleteAction.GetClause());
+            qb.Append(fk.UpdateAction.GetClause());
+            qb.Append(fk.DeleteAction.GetClause());
         }
     }
 
-    private void AddConstraintName(string? name, StringBuilder sb)
+    private void AddConstraintName(string? name, IQueryBuilder qb)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -151,53 +164,20 @@ public class PgCmd : IPgCmd
             return;
         }
 
-        sb.Append($"constraint {_quoter.Quote(name)}");
+        qb.Append("constraint ");
+        qb.AppendIdentifier(name);
     }
 
-    private void AddPrimaryKeyClause(TableDefinition tableDefinition, StringBuilder sb)
+    private void AddPrimaryKeyClause(TableDefinition tableDefinition, IQueryBuilder qb)
     {
         if (tableDefinition.PrimaryKey == null)
             return;
 
-        sb.AppendLine(",");
-        sb.Append($"    constraint {_quoter.Quote(tableDefinition.PrimaryKey.Name)} primary key (");
-        AddQuotedNames(tableDefinition.PrimaryKey.ColumnNames.Select(c => c.Name), sb);
-        sb.Append(") ");
-    }
-
-    private void AddQuotedNames(IEnumerable<string> names, StringBuilder sb)
-    {
-        var first = true;
-        foreach (var name in names)
-        {
-            if (first)
-            {
-                first = false;
-            }
-            else
-            {
-                sb.Append(", ");
-            }
-
-            sb.Append($"{_quoter.Quote(name)}");
-        }
-    }
-
-    private void AddColumnNames(TableDefinition tableDefinition, StringBuilder sb)
-    {
-        var first = true;
-        foreach (var column in tableDefinition.Columns)
-        {
-            if (first)
-            {
-                first = false;
-            }
-            else
-            {
-                sb.AppendLine(",");
-            }
-
-            sb.Append($"     {_quoter.Quote(column.Name)}  ");
-        }
+        qb.AppendLine(",");
+        qb.Append("    constraint ");
+        qb.AppendIdentifier(tableDefinition.PrimaryKey.Name);
+        qb.Append(" primary key (");
+        qb.AppendIdentifierList(tableDefinition.PrimaryKey.ColumnNames.Select(c => c.Name));
+        qb.Append(") ");
     }
 }

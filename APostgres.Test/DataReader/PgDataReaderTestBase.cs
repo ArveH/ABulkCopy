@@ -40,7 +40,7 @@ public class PgDataReaderTestBase : PgTestBase
         var tableDefinition = await CreateTableAndDataFile(tableName, cols, fileData);
         var dataReader = new PgDataReader(
             PgContext, 
-            Quoter,
+            QBFactory,
             new DataFileReader(FileHelper.FileSystem, TestLogger), 
             TestLogger);
         await dataReader.Read(FileHelper.DataFolder, tableDefinition);

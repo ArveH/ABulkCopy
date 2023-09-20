@@ -6,7 +6,7 @@ public class PgTestBase
     protected readonly Microsoft.Extensions.Logging.ILoggerFactory TestLoggerFactory;
     protected readonly IConfiguration TestConfiguration;
     protected readonly IPgContext PgContext;
-    protected readonly QuoterForTest Quoter = new();
+    protected readonly QBFactoryForTest QBFactory = new();
 
     protected PgTestBase(ITestOutputHelper output)
     {

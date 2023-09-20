@@ -344,7 +344,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         });
 
         _logger.Debug(
-            "Added {KeyColumnCount} columns to contraint '{ConstraintName}'",
+            "Added {KeyColumnCount} columns to constraint '{ConstraintName}'",
             foreignKey.ColumnNames.Count,
             foreignKey.ConstraintName);
     }

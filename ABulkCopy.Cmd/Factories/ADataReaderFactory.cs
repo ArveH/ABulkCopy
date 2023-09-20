@@ -3,18 +3,18 @@
 public class ADataReaderFactory : IADataReaderFactory
 {
     private readonly IPgContext _pgContext;
-    private readonly IQuoter _quoter;
+    private readonly IQueryBuilderFactory _queryBuilderFactory;
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
 
     public ADataReaderFactory(
         IPgContext pgContext,
-        IQuoter quoter,
+        IQueryBuilderFactory queryBuilderFactory,
         IFileSystem fileSystem,
         ILogger logger)
     {
         _pgContext = pgContext;
-        _quoter = quoter;
+        _queryBuilderFactory = queryBuilderFactory;
         _fileSystem = fileSystem;
         _logger = logger;
     }
@@ -25,7 +25,7 @@ public class ADataReaderFactory : IADataReaderFactory
         {
             return new PgDataReader(
             _pgContext,
-            _quoter,
+            _queryBuilderFactory,
             new DataFileReader(_fileSystem, _logger),
             _logger);
         }

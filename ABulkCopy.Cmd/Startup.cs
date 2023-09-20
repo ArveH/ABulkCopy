@@ -32,7 +32,7 @@ public static class Startup
         builder.Services.AddTransient<IDependencyGraph, DependencyGraph>();
         builder.Services.AddTransient<IVisitorFactory, VisitorFactory>();
         builder.Services.AddSingleton<INodeFactory, NodeFactory>();
-        builder.Services.AddSingleton<IQuoter, Quoter>();
+        builder.Services.AddSingleton<IQueryBuilderFactory, QueryBuilderFactory>();
         if (rdbms == Rdbms.Mss) builder.Services.AddMssServices();
         if (rdbms == Rdbms.Pg) builder.Services.AddPgServices();
 

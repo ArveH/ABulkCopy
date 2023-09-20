@@ -3,18 +3,18 @@
 public class PgDataReader : IADataReader, IDisposable
 {
     private readonly IPgContext _context;
-    private readonly IQuoter _quoter;
+    private readonly IQueryBuilderFactory _queryBuilderFactory;
     private readonly IDataFileReader _fileReader;
     private readonly ILogger _logger;
 
     public PgDataReader(
         IPgContext context,
-        IQuoter quoter,
+        IQueryBuilderFactory queryBuilderFactory,
         IDataFileReader dataFileReader,
         ILogger logger)
     {
         _context = context;
-        _quoter = quoter;
+        _queryBuilderFactory = queryBuilderFactory;
         _fileReader = dataFileReader;
         _logger = logger.ForContext<PgDataReader>();
     }
@@ -117,9 +117,10 @@ public class PgDataReader : IADataReader, IDisposable
 
     private string CreateCopyStmt(TableDefinition tableDefinition)
     {
-        var sb = new StringBuilder();
-        sb.Append("COPY ");
-        sb.Append($"{_quoter.Quote(tableDefinition.Header.Name)} (");
+        var qb = _queryBuilderFactory.GetQueryBuilder();
+        qb.Append("COPY ");
+        qb.AppendIdentifier(tableDefinition.Header.Name);
+        qb.Append(" (");
         var first = true;
         foreach (var column in tableDefinition.Columns)
         {
@@ -129,14 +130,13 @@ public class PgDataReader : IADataReader, IDisposable
             }
             else
             {
-                sb.Append(",");
+                qb.Append(",");
             }
-
-            sb.Append($"{_quoter.Quote(column.Name)}");
+            qb.AppendIdentifier(column.Name);
         }
 
-        sb.Append(") FROM STDIN (FORMAT BINARY)");
-        return sb.ToString();
+        qb.Append(") FROM STDIN (FORMAT BINARY)");
+        return qb.ToString();
     }
 
     public void Dispose()
