@@ -46,45 +46,11 @@ public class PgCmd : IPgCmd
         qb.AppendLine(" ");
         qb.Append("on ");
         qb.AppendIdentifier(tableName);
-        qb.AppendLine(" (");
-        var first = true;
-        foreach (var column in indexDefinition.Columns.Where(c => !c.IsIncluded))
-        {
-            if (first)
-            {
-                first = false;
-            }
-            else
-            {
-                qb.AppendLine(",");
-            }
-
-            qb.Append("    ");
-            qb.AppendIdentifier(column.Name);
-            qb.Append(" ");
-            if (column.Direction == Direction.Descending) qb.Append("desc ");
-        }
-        qb.AppendLine(")");
+        AddIndexColumns(qb, indexDefinition.Columns, true);
         if (indexDefinition.Columns.Any(c => c.IsIncluded))
         {
-            qb.AppendLine(" include (");
-            first = true;
-            foreach (var column in indexDefinition.Columns.Where(c => c.IsIncluded))
-            {
-                if (first)
-                {
-                    first = false;
-                }
-                else
-                {
-                    qb.AppendLine(",");
-                }
-
-                qb.Append("    ");
-                qb.AppendIdentifier(column.Name);
-                qb.Append(" ");
-            }
-            qb.Append(")");
+            qb.AppendLine(" include ");
+            AddIndexColumns(qb, indexDefinition.Columns);
         }
 
         await ExecuteNonQuery(qb.ToString());
@@ -179,5 +145,32 @@ public class PgCmd : IPgCmd
         qb.Append(" primary key (");
         qb.AppendIdentifierList(tableDefinition.PrimaryKey.ColumnNames.Select(c => c.Name));
         qb.Append(") ");
+    }
+
+    private static void AddIndexColumns(
+        IQueryBuilder qb,
+        IEnumerable<IndexColumn> columns,
+        bool addDirection = false)
+    {
+        qb.AppendLine(" (");
+        var first = true;
+        foreach (var column in columns.Where(c => !c.IsIncluded))
+        {
+            if (first)
+            {
+                first = false;
+            }
+            else
+            {
+                qb.AppendLine(",");
+            }
+
+            qb.Append("    ");
+            qb.AppendIdentifier(column.Name);
+            qb.Append(" ");
+            if (addDirection && column.Direction == Direction.Descending) qb.Append("desc ");
+        }
+
+        qb.AppendLine(")");
     }
 }
