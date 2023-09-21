@@ -17,7 +17,7 @@ public abstract class MssDataWriterTestBase : MssTestBase
         MockFileSystem.AddDirectory(TestPath);
         TestDataWriter = new DataWriter(
             MssDbContext,
-            new TableReaderFactory(new SelectCreator(TestLogger), TestLogger),
+            new TableReaderFactoryForTest(new SelectCreator(TestLogger), TestLogger),
             MockFileSystem, TestLogger);
     }
 
