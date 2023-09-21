@@ -6,6 +6,7 @@
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <DebugType>embedded</DebugType>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UserSecretsId>128e015d-d8ef-4ca8-ba79-5390b26c675f</UserSecretsId>
@@ -29,6 +30,12 @@
     <ProjectReference Include="..\ABulkCopy.APostgres\ABulkCopy.APostgres.csproj" />
     <ProjectReference Include="..\ABulkCopy.ASqlServer\ABulkCopy.ASqlServer.csproj" />
     <ProjectReference Include="..\ABulkCopy.Common\ABulkCopy.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

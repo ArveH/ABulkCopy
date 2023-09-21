@@ -1,4 +1,6 @@
-﻿namespace ABulkCopy.Cmd.Config;
+﻿using Serilog.Settings.Configuration;
+
+namespace ABulkCopy.Cmd.Config;
 
 public class LogConfigHelper
 {
@@ -9,7 +11,8 @@ public class LogConfigHelper
         const string outputTemplate =
             "{Timestamp:HH:mm:ss.fff} [{Level:u3}] {Message}    {Timestamp:yyyy-MM-dd }{Properties}{NewLine}{Exception}{NewLine}";
         var loggerConfig = new LoggerConfiguration()
-            .ReadFrom.Configuration(configuration)
+            .ReadFrom.Configuration(configuration, 
+                new ConfigurationReaderOptions(ConfigurationAssemblySource.AlwaysScanDllFiles))
             .Enrich.FromLogContext()
             .Enrich.WithMachineName()
             .WriteTo.File(fileFullPath,
