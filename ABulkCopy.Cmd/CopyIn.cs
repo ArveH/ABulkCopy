@@ -158,7 +158,7 @@ public class CopyIn : ICopyIn
             {
                 Console.WriteLine(
                     $"Created index '{indexDefinition.Header.Name}' for table '{tableDefinition.Header.Name}' failed");
-                _logger.Information(ex, "Created index '{IndexName}' for table '{TableName}' failed",
+                _logger.Error(ex, "Created index '{IndexName}' for table '{TableName}' failed",
                     indexDefinition.Header.Name, tableDefinition.Header.Name);
                 errorOccurred = true;
             }
