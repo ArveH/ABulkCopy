@@ -3,13 +3,16 @@
 public class PgSystemTables : IPgSystemTables
 {
     private readonly IPgContext _pgContext;
+    private readonly IIdentifier _identifier;
     private readonly ILogger _logger;
 
     public PgSystemTables(
         IPgContext pgContext,
+        IIdentifier identifier,
         ILogger logger)
     {
         _pgContext = pgContext;
+        _identifier = identifier;
         _logger = logger.ForContext<PgSystemTables>();
     }
 
@@ -25,7 +28,7 @@ public class PgSystemTables : IPgSystemTables
                         "    JOIN information_schema.key_column_usage AS kcu\r\n" +
                         "    ON tc.constraint_name = kcu.constraint_name\r\n" +
                         "        AND tc.table_schema = kcu.table_schema\r\n" +
-                       $"WHERE tc.constraint_type = 'PRIMARY KEY' AND tc.table_name='{tableHeader.Name}'";
+                       $"WHERE tc.constraint_type = 'PRIMARY KEY' AND tc.table_name='{_identifier.AdjustForSystemTable(tableHeader.Name)}'";
         await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
         await using var reader = await cmd.ExecuteReaderAsync();
 
@@ -70,7 +73,7 @@ public class PgSystemTables : IPgSystemTables
                         "        pg_class cl\r\n" +
                         "        join pg_constraint con1 on con1.conrelid = cl.oid\r\n" +
                         "    where\r\n" +
-                       $"        cl.relname = '{tableHeader.Name}'\r\n" +
+                       $"        cl.relname = '{_identifier.AdjustForSystemTable(tableHeader.Name)}'\r\n" +
                         "        and con1.contype = 'f'\r\n" +
                         "   ) con\r\n" +
                         "   join pg_class cl on\r\n" +
@@ -98,6 +101,19 @@ public class PgSystemTables : IPgSystemTables
         }
 
         return foreignKeys;
+    }
+
+    public async Task<uint?> GetOid(char kind, string name)
+    {
+        await using var cmd = _pgContext.DataSource.CreateCommand(
+            $"select oid from pg_class where relkind = '{kind}' and relname = '{_identifier.AdjustForSystemTable(name)}'");
+        var oid = await cmd.ExecuteScalarAsync();
+        if (oid == null || oid == DBNull.Value)
+        {
+            return null;
+        }
+
+        return (uint?)oid;
     }
 
     private async Task<List<(string child, string parent)>> GetForeignKeyColumns(string constraintName)

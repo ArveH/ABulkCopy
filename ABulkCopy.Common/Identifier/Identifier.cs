@@ -19,13 +19,18 @@ public class Identifier : IIdentifier
         _rdbms = dbContext.Rdbms;
     }
 
+    public string AdjustForSystemTable(string name)
+    {
+        return ShouldAddQuotes(name) ? name : name.ToLower();
+    }
+
     public string Get(string name)
     {
-        if (_rdbms == Rdbms.Mss || _addQuotes || _keywords.Contains(name))
-        {
-            return "\"" + name + "\"";
-        }
+        return ShouldAddQuotes(name) ? "\"" + name + "\"" : name;
+    }
 
-        return name;
+    private bool ShouldAddQuotes(string name)
+    {
+        return _rdbms == Rdbms.Mss || _addQuotes || _keywords.Contains(name);
     }
 }

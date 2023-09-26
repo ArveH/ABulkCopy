@@ -1,6 +1,4 @@
-﻿using ABulkCopy.Common.Identifier;
-
-namespace ABulkCopy.APostgres;
+﻿namespace ABulkCopy.APostgres;
 
 public class QueryBuilder : IQueryBuilder
 {

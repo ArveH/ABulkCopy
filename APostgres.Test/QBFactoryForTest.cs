@@ -27,6 +27,11 @@ public class QBFactoryForTest : IQueryBuilderFactory
                 return $"\"{identifier}\"";
             return identifier;
         }
+
+        public string AdjustForSystemTable(string name)
+        {
+            return _addQuotes ? name : name.ToLower();
+        }
     }
 }
 
