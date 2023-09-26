@@ -1,16 +1,18 @@
-﻿namespace ABulkCopy.Cmd.Factories;
+﻿using ABulkCopy.Common.Identifier;
+
+namespace ABulkCopy.Cmd.Factories;
 
 public class QueryBuilderFactory : IQueryBuilderFactory
 {
-    private readonly bool _addQuotes;
+    private readonly IIdentifier _identifier;
 
-    public QueryBuilderFactory(IConfiguration config)
+    public QueryBuilderFactory(IIdentifier identifier)
     {
-        _addQuotes = Convert.ToBoolean(config[Constants.Config.AddQuotes]);
+        _identifier = identifier;
     }
 
     public IQueryBuilder GetQueryBuilder()
     {
-        return new QueryBuilder(_addQuotes);
+        return new QueryBuilder(_identifier);
     }
 }

@@ -1,29 +1,21 @@
-﻿namespace ABulkCopy.APostgres;
+﻿using ABulkCopy.Common.Identifier;
+
+namespace ABulkCopy.APostgres;
 
 public class QueryBuilder : IQueryBuilder
 {
+    private readonly IIdentifier _identifier;
     private readonly StringBuilder _sb = new();
 
-    public QueryBuilder(bool addQuotes)
+    public QueryBuilder(IIdentifier identifier)
     {
-        AddQuotes = addQuotes;
+        _identifier = identifier;
     }
 
     public void AppendIdentifier(string identifier)
     {
-        if (AddQuotes)
-        {
-            _sb.Append('"');
-            _sb.Append(identifier);
-            _sb.Append('"');
-        }
-        else
-        {
-            _sb.Append(identifier);
-        }
+        _sb.Append(_identifier.Get(identifier));
     }
-
-    public bool AddQuotes { get; }
 
     public void Append(string str) => _sb.Append(str);
     public void AppendLine(string str) => _sb.AppendLine(str);

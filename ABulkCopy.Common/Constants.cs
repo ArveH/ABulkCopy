@@ -14,5 +14,6 @@ public static class Constants
     {
         public const string DbKey = "BulkCopy";
         public const string AddQuotes = "AddQuotes";
+        public const string QuoteIdentifiers = "QuoteIdentifiers";
     }
 }

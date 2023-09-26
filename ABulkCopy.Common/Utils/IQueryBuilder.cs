@@ -2,7 +2,6 @@
 
 public interface IQueryBuilder
 {
-    bool AddQuotes { get; }
     void AppendIdentifier(string identifier);
     void Append(string str);
     void AppendLine(string str);
