@@ -4,15 +4,18 @@ public class PgCmd : IPgCmd
 {
     private readonly IPgContext _pgContext;
     private readonly IQueryBuilderFactory _queryBuilderFactory;
+    private readonly IPgSystemTables _systemTables;
     private readonly ILogger _logger;
 
     public PgCmd(
         IPgContext pgContext,
         IQueryBuilderFactory queryBuilderFactory,
+        IPgSystemTables systemTables,
         ILogger logger)
     {
         _pgContext = pgContext;
         _queryBuilderFactory = queryBuilderFactory;
+        _systemTables = systemTables;
         _logger = logger.ForContext<PgCmd>();
     }
 
@@ -58,11 +61,10 @@ public class PgCmd : IPgCmd
 
     public async Task ResetIdentity(string tableName, string columnName)
     {
-        var seqName = $"{tableName}_{columnName}_seq";
-        var oid = await SelectScalar($"select oid from pg_class where relkind = 'S' and relname = '{seqName}'");
-        if (oid == null || oid == DBNull.Value)
+        var oid = _systemTables.GetIdentityOid(tableName, columnName);
+        if (oid == null)
         {
-            throw new SqlNullValueException($"Sequence {seqName} not found");
+            throw new SqlNullValueException("Sequence not found");
         }
 
         var qb = _queryBuilderFactory.GetQueryBuilder();

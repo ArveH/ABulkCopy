@@ -103,10 +103,12 @@ public class PgSystemTables : IPgSystemTables
         return foreignKeys;
     }
 
-    public async Task<uint?> GetOid(char kind, string name)
+    public async Task<uint?> GetIdentityOid(string tableName, string columnName)
     {
+        var seqName = $"{tableName}_{columnName}_seq";
+
         await using var cmd = _pgContext.DataSource.CreateCommand(
-            $"select oid from pg_class where relkind = '{kind}' and relname = '{_identifier.AdjustForSystemTable(name)}'");
+            $"select oid from pg_class where relkind = 'S' and relname = '{_identifier.AdjustForSystemTable(seqName)}'");
         var oid = await cmd.ExecuteScalarAsync();
         if (oid == null || oid == DBNull.Value)
         {

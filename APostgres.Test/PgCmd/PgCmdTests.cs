@@ -3,6 +3,7 @@
 public class PgCmdTests : PgTestBase
 {
     private readonly Mock<IQueryBuilderFactory> _qbFactoryMock = new();
+    private readonly Mock<IPgSystemTables> _systemTablesMock = new();
 
     public PgCmdTests(ITestOutputHelper output) : base(output)
     {
@@ -524,6 +525,7 @@ public class PgCmdTests : PgTestBase
         return new ABulkCopy.APostgres.PgCmd(
             PgContext,
             _qbFactoryMock.Object,
+            _systemTablesMock.Object,
             TestLogger);
     }
 }
