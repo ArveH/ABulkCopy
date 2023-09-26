@@ -6,7 +6,6 @@ public class PgTestBase
     protected readonly Microsoft.Extensions.Logging.ILoggerFactory TestLoggerFactory;
     protected readonly IConfiguration TestConfiguration;
     protected readonly IPgContext PgContext;
-    protected readonly QBFactoryForTest QBFactory = new();
 
     protected PgTestBase(ITestOutputHelper output)
     {
@@ -58,5 +57,18 @@ public class PgTestBase
         var machineName20 = Environment.MachineName.Length > 20 ? Environment.MachineName[..20] : Environment.MachineName;
 
         return machineName20 + methodName20;
+    }
+
+    protected static Identifier GetIdentifier(
+        Dictionary<string, string?> appSettings,
+        Rdbms rdbms = Rdbms.Pg)
+    {
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(appSettings)
+            .Build();
+        var dbContextMock = new Mock<IDbContext>();
+        dbContextMock.Setup(x => x.Rdbms).Returns(rdbms);
+        var identifier = new Identifier(config, dbContextMock.Object);
+        return identifier;
     }
 }

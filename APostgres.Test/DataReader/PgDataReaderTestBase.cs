@@ -5,10 +5,13 @@ namespace APostgres.Test.DataReader;
 public class PgDataReaderTestBase : PgTestBase
 {
     protected readonly FileHelper FileHelper = new ();
+    protected readonly Mock<IQueryBuilderFactory> QBFactoryMock = new();
 
     protected PgDataReaderTestBase(ITestOutputHelper output)
         : base(output)
     {
+        QBFactoryMock.Setup(f => f.GetQueryBuilder())
+            .Returns(() => new QueryBuilder(new Identifier(TestConfiguration, PgContext)));
     }
 
     protected async Task<T?> TestDataReader<T>(
@@ -39,8 +42,8 @@ public class PgDataReaderTestBase : PgTestBase
     {
         var tableDefinition = await CreateTableAndDataFile(tableName, cols, fileData);
         var dataReader = new PgDataReader(
-            PgContext, 
-            QBFactory,
+            PgContext,
+            QBFactoryMock.Object,
             new DataFileReader(FileHelper.FileSystem, TestLogger), 
             TestLogger);
         await dataReader.Read(FileHelper.DataFolder, tableDefinition);

@@ -2,12 +2,10 @@
 
 public class PgCmdTests : PgTestBase
 {
-    private readonly IPgCmd _pgCmd;
+    private readonly Mock<IQueryBuilderFactory> _qbFactoryMock = new();
 
     public PgCmdTests(ITestOutputHelper output) : base(output)
     {
-        _pgCmd = new ABulkCopy.APostgres.PgCmd(
-            PgContext, QBFactory, TestLogger);
     }
 
     [Fact]
@@ -67,12 +65,13 @@ public class PgCmdTests : PgTestBase
         inputDefinition.Columns.Add(new PostgresBigInt(1, "id", false));
         inputDefinition.Columns.Add(defCol);
         await PgDbHelper.Instance.DropTable(tableName);
+        var pgCmd = GetPgCmd();
 
         // Act
         List<string?> statusValues;
         try
         {
-            await _pgCmd.CreateTable(inputDefinition);
+            await pgCmd.CreateTable(inputDefinition);
             await PgDbHelper.Instance.ExecuteNonQuery($"insert into \"{tableName}\" (id) values (3)");
             statusValues = (await PgDbHelper.Instance.SelectColumn<string>(tableName, "status")).ToList();
         }
@@ -104,12 +103,13 @@ public class PgCmdTests : PgTestBase
         inputDefinition.Columns.Add(new PostgresBigInt(1, "id", false));
         inputDefinition.Columns.Add(defCol);
         await PgDbHelper.Instance.DropTable(tableName);
+        var pgCmd = GetPgCmd();
 
         // Act
         List<decimal> statusValues;
         try
         {
-            await _pgCmd.CreateTable(inputDefinition);
+            await pgCmd.CreateTable(inputDefinition);
             await PgDbHelper.Instance.ExecuteNonQuery($"insert into \"{tableName}\" (id) values (3)");
             statusValues = (await PgDbHelper.Instance.SelectColumn<decimal>(tableName, "status")).ToList();
         }
@@ -141,12 +141,13 @@ public class PgCmdTests : PgTestBase
         inputDefinition.Columns.Add(new PostgresBigInt(1, "id", false));
         inputDefinition.Columns.Add(defCol);
         await PgDbHelper.Instance.DropTable(tableName);
+        var pgCmd = GetPgCmd();
 
         // Act
         List<Guid> statusValues;
         try
         {
-            await _pgCmd.CreateTable(inputDefinition);
+            await pgCmd.CreateTable(inputDefinition);
             await PgDbHelper.Instance.ExecuteNonQuery($"insert into \"{tableName}\" (id) values (3)");
             statusValues = (await PgDbHelper.Instance.SelectColumn<Guid>(tableName, "status")).ToList();
         }
@@ -184,12 +185,13 @@ public class PgCmdTests : PgTestBase
         inputDefinition.Columns.Add(new PostgresBigInt(1, "id", false));
         inputDefinition.Columns.Add(defCol);
         await PgDbHelper.Instance.DropTable(tableName);
+        var pgCmd = GetPgCmd();
 
         // Act
         List<DateTime> statusValues;
         try
         {
-            await _pgCmd.CreateTable(inputDefinition);
+            await pgCmd.CreateTable(inputDefinition);
             await PgDbHelper.Instance.ExecuteNonQuery($"insert into \"{tableName}\" (id) values (3)");
             statusValues = (await PgDbHelper.Instance.SelectColumn<DateTime>(tableName, "status")).ToList();
         }
@@ -226,12 +228,13 @@ public class PgCmdTests : PgTestBase
         inputDefinition.Columns.Add(new PostgresBigInt(1, "id", false));
         inputDefinition.Columns.Add(defCol);
         await PgDbHelper.Instance.DropTable(tableName);
+        var pgCmd = GetPgCmd();
 
         // Act
         List<bool> statusValues;
         try
         {
-            await _pgCmd.CreateTable(inputDefinition);
+            await pgCmd.CreateTable(inputDefinition);
             await PgDbHelper.Instance.ExecuteNonQuery($"insert into \"{tableName}\" (id) values (3)");
             statusValues = (await PgDbHelper.Instance.SelectColumn<bool>(tableName, "status")).ToList();
         }
@@ -258,14 +261,14 @@ public class PgCmdTests : PgTestBase
                 ("col2", false)
             });
         await PgDbHelper.Instance.DropTable(tableName);
+        var pgCmd = GetPgCmd();
+        var systemTables = GetPgSystemTables();
 
         try
         {
-            // Act
-            await _pgCmd.CreateTable(inputDefinition);
+            await pgCmd.CreateTable(inputDefinition);
 
-            // Assert
-            IPgSystemTables systemTables = new PgSystemTables(PgContext, TestLogger);
+            // Act
             var pk = await systemTables.GetPrimaryKey(new TableHeader
             {
                 Name = tableName,
@@ -299,7 +302,8 @@ public class PgCmdTests : PgTestBase
                 ("col1", false),
                 ("col2", false),
             });
-        await _pgCmd.CreateTable(parent1TableDefinition);
+        var pgCmd = GetPgCmd();
+        await pgCmd.CreateTable(parent1TableDefinition);
         var parent2TableDefinition = GetParentTableDefinition(
             parent2TableName, new List<(string, bool)>
             {
@@ -307,7 +311,7 @@ public class PgCmdTests : PgTestBase
                 ("col1", false),
                 ("col2", false),
             });
-        await _pgCmd.CreateTable(parent2TableDefinition);
+        await pgCmd.CreateTable(parent2TableDefinition);
         var childTableDefinition = GetChildTableDefinition(
             childTableName,
             new List<(string, List<string>)>
@@ -319,10 +323,10 @@ public class PgCmdTests : PgTestBase
         try
         {
             // Act
-            await _pgCmd.CreateTable(childTableDefinition);
+            await pgCmd.CreateTable(childTableDefinition);
 
             // Assert
-            IPgSystemTables systemTables = new PgSystemTables(PgContext, TestLogger);
+            var systemTables = GetPgSystemTables();
             var fks = (await systemTables.GetForeignKeys(new TableHeader
             {
                 Name = childTableName,
@@ -359,7 +363,8 @@ public class PgCmdTests : PgTestBase
                 ("col1", true),
                 ("col2", false),
             });
-        await _pgCmd.CreateTable(parent1TableDefinition);
+        var pgCmd = GetPgCmd();
+        await pgCmd.CreateTable(parent1TableDefinition);
         var childTableDefinition = GetChildTableDefinition(
             childTableName,
             new List<(string, List<string>)>
@@ -370,10 +375,10 @@ public class PgCmdTests : PgTestBase
         try
         {
             // Act
-            await _pgCmd.CreateTable(childTableDefinition);
+            await pgCmd.CreateTable(childTableDefinition);
 
             // Assert
-            IPgSystemTables systemTables = new PgSystemTables(PgContext, TestLogger);
+            var systemTables = GetPgSystemTables();
             var fks = (await systemTables.GetForeignKeys(new TableHeader
             {
                 Name = childTableName,
@@ -406,9 +411,10 @@ public class PgCmdTests : PgTestBase
                 ("col1", true),
                 ("col2", false),
             });
-        await _pgCmd.CreateTable(parent1TableDefinition);
-        await _pgCmd.ExecuteNonQuery($"insert into \"{parent1TableName}\" (\"Parent1Id\", \"col1\", \"col2\") values (1, 1, 1)");
-        await _pgCmd.ExecuteNonQuery($"insert into \"{parent1TableName}\" (\"Parent1Id\", \"col1\", \"col2\") values (1, 2, 1)");
+        var pgCmd = GetPgCmd();
+        await pgCmd.CreateTable(parent1TableDefinition);
+        await pgCmd.ExecuteNonQuery($"insert into \"{parent1TableName}\" (\"Parent1Id\", \"col1\", \"col2\") values (1, 1, 1)");
+        await pgCmd.ExecuteNonQuery($"insert into \"{parent1TableName}\" (\"Parent1Id\", \"col1\", \"col2\") values (1, 2, 1)");
         var childTableDefinition = GetChildTableDefinition(
             childTableName,
             new List<(string, List<string>)>
@@ -416,19 +422,19 @@ public class PgCmdTests : PgTestBase
                 (parent1TableName, new() { "Parent1Id", "col1" })
             });
         childTableDefinition.ForeignKeys.First().DeleteAction = DeleteAction.Cascade;
-        await _pgCmd.CreateTable(childTableDefinition);
-        await _pgCmd.ExecuteNonQuery($"insert into \"{childTableName}\" (\"id\", \"Parent1Id\", \"col1\") values (10, 1, 1)");
-        await _pgCmd.ExecuteNonQuery($"insert into \"{childTableName}\" (\"id\", \"Parent1Id\", \"col1\") values (11, 1, 2)");
-        var beforeCount = (long)(await _pgCmd.SelectScalar($"select count(*) from \"{childTableName}\"") ?? 0);
+        await pgCmd.CreateTable(childTableDefinition);
+        await pgCmd.ExecuteNonQuery($"insert into \"{childTableName}\" (\"id\", \"Parent1Id\", \"col1\") values (10, 1, 1)");
+        await pgCmd.ExecuteNonQuery($"insert into \"{childTableName}\" (\"id\", \"Parent1Id\", \"col1\") values (11, 1, 2)");
+        var beforeCount = (long)(await pgCmd.SelectScalar($"select count(*) from \"{childTableName}\"") ?? 0);
         beforeCount.Should().Be(2, "because child table has two rows before deleting from parent table");
 
         try
         {
             // Act
-            await _pgCmd.ExecuteNonQuery($"delete from \"{parent1TableName}\" where \"col1\" = 1");
+            await pgCmd.ExecuteNonQuery($"delete from \"{parent1TableName}\" where \"col1\" = 1");
 
             // Assert
-            var afterCount = (long)(await _pgCmd.SelectScalar($"select count(*) from \"{childTableName}\"") ?? 0);
+            var afterCount = (long)(await pgCmd.SelectScalar($"select count(*) from \"{childTableName}\"") ?? 0);
             afterCount.Should().Be(1, "because 1 row from child table should be delete when deleting it's foreign key");
         }
         finally
@@ -491,5 +497,33 @@ public class PgCmdTests : PgTestBase
         });
 
         return inputDefinition;
+    }
+
+    private IPgSystemTables GetPgSystemTables(Dictionary<string, string?>? appSettings = null)
+    {
+        appSettings ??= new()
+        {
+            { "AddQuotes", "true" },
+        };
+
+        return new PgSystemTables(PgContext, GetIdentifier(appSettings), TestLogger);
+    }
+
+    private IPgCmd GetPgCmd(Dictionary<string, string?>? appSettings=null)
+    {
+        appSettings ??= new()
+        {
+            { "AddQuotes", "true" },
+        };
+        appSettings.Add(
+            "ConnectionStrings:BulkCopy", 
+            TestConfiguration.GetConnectionString(Constants.Config.DbKey));
+        _qbFactoryMock
+            .Setup(f => f.GetQueryBuilder())
+            .Returns(() => new QueryBuilder(GetIdentifier(appSettings)));
+        return new ABulkCopy.APostgres.PgCmd(
+            PgContext,
+            _qbFactoryMock.Object,
+            TestLogger);
     }
 }
