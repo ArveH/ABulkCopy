@@ -17,8 +17,8 @@ public class CmdArguments
     [Option('l', "log-file", Required = false, HelpText = "Full path for log file.")]
     public string? LogFile { get; set; }
 
-    [Option('q', "add-quotes", Required = false, HelpText = "")]
-    public bool? AddQuotes { get; set; }
+    [Option('q', "add-quotes", Required = false, HelpText = "Flag to quote all identifiers. Only applicable for Postgres, where there is a significant difference in behaviour when quoting identifiers. NOTE: Postgres reserved words are always quoted. For SQL Server, this flag is ignored, and identifiers will always be quoted.")]
+    public bool AddQuotes { get; set; }
 
     [Option('s', "search-filter", Required = false, HelpText = "A string to filter table names or file names. Note that the syntax of the SearchFilter is different depending on the context. For copy in from a file system, use a RegEx in .NET format. E.g. \"\\b(clients|scopes)\\b\" will match \"clients.schema\" and \"scopes.schema\", but not \"someclients.schema\" nor \"clients2.schema\". For copy out from SQL Server, the SearchFilter is the rhs of a LIKE clause. E.g. \"a[sa][ya][sg]%\" to get all tables that starts with 'a' followed by \"sys\" or \"aag\" (but also \"asas\", \"aayg\", and other combinations). If you don't use search-filter, all tables are copied.")]
     public string? SearchFilter { get; set; }
