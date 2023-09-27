@@ -18,7 +18,7 @@ public class PgTestBase
             .WriteTo.Console(outputTemplate: outputTemplate)
             .WriteTo.TestOutput(output);
 
-        var fileFullPath = TestConfiguration["LogFile"];
+        var fileFullPath = TestConfiguration[Constants.Config.LogFile];
         if (!string.IsNullOrWhiteSpace(fileFullPath))
         {
             loggerConfig

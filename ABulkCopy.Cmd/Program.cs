@@ -8,8 +8,8 @@ internal class Program
         if (cmdArguments == null) return;
         var configuration = new ConfigHelper().GetConfiguration(
             userSecretsKey: "128e015d-d8ef-4ca8-ba79-5390b26c675f",
-            connectionString: cmdArguments.ConnectionString);
-        Log.Logger = LogConfigHelper.ConfigureLogger(configuration, cmdArguments.LogFile);
+            cmdArguments.ToAppSettings());
+        Log.Logger = LogConfigHelper.ConfigureLogger(configuration, configuration.Check(Constants.Config.LogFile));
         var version = Process.GetCurrentProcess().MainModule?.FileVersionInfo.ProductVersion;
         Log.Information("ABulkCopy.Cmd (version: {Version}) started.", version);
         Console.WriteLine($"ABulkCopy.Cmd (version: {version}) started.");
@@ -24,20 +24,21 @@ internal class Program
             if (cmdArguments.Direction == CopyDirection.In)
             {
                 var copyIn = host.Services.GetRequiredService<ICopyIn>();
-                await copyIn.Run(cmdArguments);
+                await copyIn.Run(cmdArguments.Rdbms);
             }
             else
             {
                 var copyOut = host.Services.GetRequiredService<ICopyOut>();
-                if (DataFolder.CreateIfNotExists(cmdArguments.Folder) == CmdStatus.ShouldExit)
+                var folder = configuration.Check(Constants.Config.Folder);
+                if (DataFolder.CreateIfNotExists(folder) == CmdStatus.ShouldExit)
                 {
                     Log.Information("Folder {Folder} didn't exist. ABulkCopy.Cmd finished.",
-                        cmdArguments.Folder);
-                    Console.WriteLine($"Folder {cmdArguments.Folder} didn't exist. ABulkCopy.Cmd finished.");
+                        folder);
+                    Console.WriteLine($"Folder {folder} didn't exist. ABulkCopy.Cmd finished.");
                     return;
                 }
 
-                await copyOut.Run(cmdArguments);
+                await copyOut.Run();
             }
 
             Log.Information("ABulkCopy.Cmd finished.");

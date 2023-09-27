@@ -61,7 +61,7 @@ public class PgCmd : IPgCmd
 
     public async Task ResetIdentity(string tableName, string columnName)
     {
-        var oid = _systemTables.GetIdentityOid(tableName, columnName);
+        var oid = await _systemTables.GetIdentityOid(tableName, columnName);
         if (oid == null)
         {
             throw new SqlNullValueException("Sequence not found");

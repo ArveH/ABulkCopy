@@ -10,7 +10,7 @@ public class MssDbHelper
     private MssDbHelper()
     {
         var configuration = new ConfigHelper().GetConfiguration("128e015d-d8ef-4ca8-ba79-5390b26c675f");
-        _connectionString = configuration.GetConnectionString(TestConstants.Config.DbKey);
+        _connectionString = configuration.Check(TestConstants.Config.ConnectionString);
     }
 
     public static MssDbHelper Instance => LazyInstance.Value;

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using ABulkCopy.Common.Identifier;
+using Microsoft.Extensions.Logging;
 
 namespace ABulkCopy.Cmd;
 
@@ -33,6 +34,7 @@ public static class Startup
         builder.Services.AddTransient<IVisitorFactory, VisitorFactory>();
         builder.Services.AddSingleton<INodeFactory, NodeFactory>();
         builder.Services.AddSingleton<IQueryBuilderFactory, QueryBuilderFactory>();
+        builder.Services.AddSingleton<IIdentifier, Identifier>();
         if (rdbms == Rdbms.Mss) builder.Services.AddMssServices();
         if (rdbms == Rdbms.Pg) builder.Services.AddPgServices();
 

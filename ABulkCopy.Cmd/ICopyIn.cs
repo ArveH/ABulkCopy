@@ -2,5 +2,5 @@
 
 internal interface ICopyIn
 {
-    Task Run(CmdArguments cmdArguments);
+    Task Run(Rdbms rdbms);
 }

@@ -24,7 +24,7 @@ public abstract class MssTestBase
 
     private IMssSystemTables CreateMssSystemTables()
     {
-        var connectionString = TestConfiguration.GetConnectionString(TestConstants.Config.DbKey);
+        var connectionString = TestConfiguration.Check(TestConstants.Config.ConnectionString);
         connectionString.Should()
             .NotBeNullOrWhiteSpace("because the connection string should be set");
         IMssColumnFactory colFactory = new MssColumnFactory();

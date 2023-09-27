@@ -13,8 +13,8 @@ public class IdentifierTest : CommonTestBase
         // Arrange
         var appSettings = new Dictionary<string, string?>
         {
-            {"AddQuotes", "false"},
-            {"QuoteIdentifiers:0", "select"}
+            {Constants.Config.AddQuotes, "false"},
+            {$"{Constants.Config.PgKeywords}:0", "select"}
         };
         var identifier = GetIdentifier(appSettings);
 
@@ -31,7 +31,7 @@ public class IdentifierTest : CommonTestBase
         // Arrange
         var appSettings = new Dictionary<string, string?>
         {
-            {"AddQuotes", "false"}
+            {Constants.Config.AddQuotes, "false"}
         };
         var identifier = GetIdentifier(appSettings);
 
@@ -48,7 +48,7 @@ public class IdentifierTest : CommonTestBase
         // Arrange
         var appSettings = new Dictionary<string, string?>
         {
-            {"AddQuotes", "true"}
+            {Constants.Config.AddQuotes, "true"}
         };
         var identifier = GetIdentifier(appSettings);
 
@@ -65,7 +65,7 @@ public class IdentifierTest : CommonTestBase
         // Arrange
         var appSettings = new Dictionary<string, string?>
         {
-            {"AddQuotes", "true"}
+            {Constants.Config.AddQuotes, "true"}
         };
         var identifier = GetIdentifier(appSettings);
 
@@ -82,7 +82,7 @@ public class IdentifierTest : CommonTestBase
         // Arrange
         var appSettings = new Dictionary<string, string?>
         {
-            {"AddQuotes", "false"}
+            {Constants.Config.AddQuotes, "false"}
         };
         var identifier = GetIdentifier(appSettings);
 
@@ -99,8 +99,8 @@ public class IdentifierTest : CommonTestBase
         // Arrange
         var appSettings = new Dictionary<string, string?>
         {
-            {"AddQuotes", "false"},
-            {"QuoteIdentifiers:0", "select"}
+            {Constants.Config.AddQuotes, "false"},
+            {$"{Constants.Config.PgKeywords}:0", "select"}
         };
         var identifier = GetIdentifier(appSettings);
 

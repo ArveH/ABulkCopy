@@ -3,5 +3,6 @@
 public interface IConfigHelper
 {
     IConfigurationRoot GetConfiguration(
-        string? userSecretsKey = null, string? connectionString = null);
+        string? userSecretsKey = null,
+        Dictionary<string, string?>? appSettings = null);
 }

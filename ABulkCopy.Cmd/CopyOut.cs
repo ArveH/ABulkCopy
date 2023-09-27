@@ -2,6 +2,7 @@
 
 public class CopyOut : ICopyOut
 {
+    private readonly IConfiguration _config;
     private readonly IMssSystemTables _systemTables;
     private readonly IMssTableSchema _tableSchema;
     private readonly IDataWriter _dataWriter;
@@ -9,12 +10,14 @@ public class CopyOut : ICopyOut
     private readonly ILogger _logger;
 
     public CopyOut(
+        IConfiguration config,
         IMssSystemTables systemTables,
         IMssTableSchema tableSchema,
         IDataWriter dataWriter,
         ISchemaWriter schemaWriter,
         ILogger logger)
     {
+        _config = config;
         _systemTables = systemTables;
         _tableSchema = tableSchema;
         _dataWriter = dataWriter;
@@ -22,18 +25,18 @@ public class CopyOut : ICopyOut
         _logger = logger.ForContext<CopyOut>();
     }
 
-    public async Task Run(CmdArguments cmdArguments)
+    public async Task Run()
     {
         var sw = new Stopwatch();
         sw.Start();
-        var tableNames = (await _systemTables.GetTableNames(cmdArguments.SearchFilter)).ToList();
+        var tableNames = (await _systemTables.GetTableNames(_config.SafeGet(Constants.Config.SearchFilter))).ToList();
         _logger.Information($"Copy out {{TableCount}} {"table".Plural(tableNames.Count)}",
             tableNames.Count);
         Console.WriteLine($"Copy out {tableNames.Count} {"table".Plural(tableNames.Count)}.");
         var errors = 0;
         await Parallel.ForEachAsync(tableNames, async (tableName, _) =>
         {
-            if (!await CopyTable(cmdArguments.Folder, tableName))
+            if (!await CopyTable(_config.Check(Constants.Config.Folder), tableName))
             {
                 Interlocked.Increment(ref errors);
             }

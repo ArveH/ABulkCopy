@@ -11,7 +11,7 @@ public class Identifier : IIdentifier
         IDbContext dbContext)
     {
         _addQuotes = Convert.ToBoolean(config[Constants.Config.AddQuotes]);
-        var keywords = config.GetSection(Constants.Config.QuoteIdentifiers)
+        var keywords = config.GetSection(Constants.Config.PgKeywords)
                            .Get<List<string>>()
                        ?? new List<string>();
 

@@ -22,6 +22,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IPgCmd, PgCmd>();
         services.AddSingleton<ITypeConverter, PgTypeMapper>();
         services.AddSingleton<IPgColumnFactory, PgColumnFactory>();
+        services.AddSingleton<IPgSystemTables, PgSystemTables>();
         services.AddTransient<IPgBulkCopy, PgBulkCopy>();
 
         return services;

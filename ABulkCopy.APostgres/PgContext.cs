@@ -21,7 +21,7 @@ public class PgContext : IPgContext
         {
             if (_connectionString != null) return _connectionString;
 
-            _connectionString = _config.GetConnectionString(Constants.Config.DbKey);
+            _connectionString = _config[Constants.Config.ConnectionString];
             if (string.IsNullOrEmpty(_connectionString))
             {
                 throw new ArgumentException("Connection string is null or empty", nameof(ConnectionString));

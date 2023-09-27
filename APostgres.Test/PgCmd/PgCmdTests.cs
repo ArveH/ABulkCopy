@@ -504,7 +504,7 @@ public class PgCmdTests : PgTestBase
     {
         appSettings ??= new()
         {
-            { "AddQuotes", "true" },
+            { Constants.Config.AddQuotes, "true" },
         };
 
         return new PgSystemTables(PgContext, GetIdentifier(appSettings), TestLogger);
@@ -514,11 +514,11 @@ public class PgCmdTests : PgTestBase
     {
         appSettings ??= new()
         {
-            { "AddQuotes", "true" },
+            { Constants.Config.AddQuotes, "true" },
         };
         appSettings.Add(
-            "ConnectionStrings:BulkCopy", 
-            TestConfiguration.GetConnectionString(Constants.Config.DbKey));
+            Constants.Config.ConnectionString, 
+            TestConfiguration.SafeGet(Constants.Config.ConnectionString));
         _qbFactoryMock
             .Setup(f => f.GetQueryBuilder())
             .Returns(() => new QueryBuilder(GetIdentifier(appSettings)));

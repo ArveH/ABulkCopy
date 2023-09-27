@@ -2,5 +2,5 @@
 
 public interface ICopyOut
 {
-    Task Run(CmdArguments cmdArguments);
+    Task Run();
 }

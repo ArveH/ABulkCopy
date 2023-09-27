@@ -138,7 +138,7 @@ public class PgDbHelper
     {
         var appSettings = new Dictionary<string, string?>
         {
-            {"AddQuotes", addQuote.ToString()}
+            {Constants.Config.AddQuotes, addQuote.ToString()}
         };
         var config = new ConfigurationBuilder()
             .AddInMemoryCollection(appSettings)

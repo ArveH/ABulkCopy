@@ -20,7 +20,7 @@ public class MssReaderTests
     public async Task TestDataReader_ReadBigint()
     {
         // Arrange
-        var connectionString = _configuration.GetConnectionString(TestConstants.Config.DbKey);
+        var connectionString = _configuration.Check(TestConstants.Config.ConnectionString);
         connectionString.Should()
             .NotBeNullOrWhiteSpace("because the connection string should be set in the user secrets file");
         var selectCreatorMock = new Mock<ISelectCreator>();

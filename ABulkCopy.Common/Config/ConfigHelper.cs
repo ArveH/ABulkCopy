@@ -5,7 +5,7 @@ public class ConfigHelper : IConfigHelper
 
     public IConfigurationRoot GetConfiguration(
         string? userSecretsKey = null,
-        string? connectionString = null)
+        Dictionary<string, string?>? appSettings = null)
     {
         var configuration = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
@@ -18,12 +18,9 @@ public class ConfigHelper : IConfigHelper
 
         configuration.AddEnvironmentVariables();
 
-        if (!string.IsNullOrWhiteSpace(connectionString))
+        if (appSettings != null)
         {
-            configuration.AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["ConnectionStrings:BulkCopy"] = connectionString
-            });
+            configuration.AddInMemoryCollection(appSettings);
         }
             
         return configuration.Build();

@@ -2,6 +2,7 @@
 
 public class CopyIn : ICopyIn
 {
+    private readonly IConfiguration _config;
     private readonly IPgCmd _pgCmd;
     private readonly IPgBulkCopy _pgBulkCopy;
     private readonly IADataReaderFactory _aDataReaderFactory;
@@ -9,12 +10,14 @@ public class CopyIn : ICopyIn
     private readonly ILogger _logger;
 
     public CopyIn(
+        IConfiguration config,
         IPgCmd pgCmd,
         IPgBulkCopy pgBulkCopy,
         IADataReaderFactory aDataReaderFactory,
         IFileSystem fileSystem,
         ILogger logger)
     {
+        _config = config;
         _pgCmd = pgCmd;
         _pgBulkCopy = pgBulkCopy;
         _aDataReaderFactory = aDataReaderFactory;
@@ -22,12 +25,12 @@ public class CopyIn : ICopyIn
         _logger = logger;
     }
 
-    public async Task Run(CmdArguments cmdArguments)
+    public async Task Run(Rdbms rdbms)
     {
         var sw = new Stopwatch();
         sw.Start();
 
-        var folder = cmdArguments.Folder;
+        var folder = _config.Check(Constants.Config.Folder);
         if (!_fileSystem.Directory.Exists(folder))
         {
             _logger.Error("Folder '{Folder}' does not exist", folder);
@@ -36,10 +39,11 @@ public class CopyIn : ICopyIn
         }
 
         List<string>? schemaFiles;
-        if (!string.IsNullOrWhiteSpace(cmdArguments.SearchFilter))
+        var searchFilter = _config[Constants.Config.SearchFilter];
+        if (!string.IsNullOrWhiteSpace(searchFilter))
         {
             schemaFiles = _fileSystem.Directory.GetFiles(folder, $"*{Constants.SchemaSuffix}").AsEnumerable()
-                .Where(f => Regex.IsMatch(f, cmdArguments.SearchFilter))
+                .Where(f => Regex.IsMatch(f, searchFilter))
                 .ToList();
         }
         else
@@ -51,7 +55,7 @@ public class CopyIn : ICopyIn
             schemaFiles.Count);
         Console.WriteLine($"Creating {schemaFiles.Count} {"table".Plural(schemaFiles.Count)}.");
 
-        var elapsedStr = await _pgBulkCopy.BuildDependencyGraph(cmdArguments.Rdbms, schemaFiles);
+        var elapsedStr = await _pgBulkCopy.BuildDependencyGraph(rdbms, schemaFiles);
         Console.WriteLine($"Creating dependency graph took {elapsedStr}");
         var allTables = _pgBulkCopy.DependencyGraph.BreathFirst().ToList();
 
@@ -66,7 +70,7 @@ public class CopyIn : ICopyIn
             async (node, _) =>
             {
                 if (node.TableDefinition == null) throw new ArgumentNullException(nameof(node.TableDefinition));
-                if (!await CreateTable(folder, node.TableDefinition, cmdArguments.EmptyString))
+                if (!await CreateTable(folder, node.TableDefinition, _config.ToEnum(Constants.Config.EmptyString)))
                 {
                     Interlocked.Increment(ref errors);
                 }
