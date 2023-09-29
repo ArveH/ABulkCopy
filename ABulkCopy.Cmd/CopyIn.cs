@@ -61,7 +61,7 @@ public class CopyIn : ICopyIn
 
         var errors = 0;
         ITableSequencer tableSequencer = new TableSequencer(
-            allTables.Where(t => !t.IsIndependent),
+            allTables.Where(t => !t.IsIndependent).DistinctBy(n => n.Name), 
             allTables.Where(t => t.IsIndependent),
             _logger);
 
