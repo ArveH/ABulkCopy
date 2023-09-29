@@ -4,21 +4,36 @@ The plan is to create a general SQL parser for parsing default clauses, function
 
 ## Expressions Bacus-Naur Form
 
-I'm using the same simple Extended Backus-Naur Form (EBNF) notation as [W3C Extensible Markup Language (XML) 1.0 (Fifth Edition)](https://www.w3.org/TR/xml/#sec-notation)
+I'm using Extended Backus-Naur Form (EBNF) notation. I'm not following the spec 100%, but more like this: [W3C Extensible Markup Language (XML) 1.0 (Fifth Edition)](https://www.w3.org/TR/xml/#sec-notation)
 
-```ebnf
-expression ::= parenteces 
-                | function 
-                | type 
-                | constant
+NOTE: Currently, whitespace is not specified in the grammar, but it could occur anywhere except in the middle of a token.
 
-parenteces ::= '(' expression ')'
+## Syntax
+``` ebnf
+Expression ::= Parentheses 
+                | Function 
+                | Type 
+                | Constant
 
-function ::= functionName '(' expression (',' expression)* ')'
-functionName ::= 'convert'
-type ::= '[' typeName ']' | typeName
-typeName ::= 'bit'
+Parentheses ::= LeftParenthesesToken Expression RightParenthesesToken
 
-constant ::= numberConstant
-numberConstant ::= [0-9]+
+Function ::= NameToken LeftParenthesesToken Expression (CommaToken Expression)* RightParenthesesToken
+Type ::= SquareLeftParenthesesToken NameToken SquareRightParenthesesToken | NameToken
+
+Constant ::= NumberToken
+FunctionName ::= NameToken
+```
+
+### Tokens
+
+``` ebnf
+Whitespace ::= ' ' | '\t' | '\n' | '\r'
+LeftParenthesesToken ::= '('
+RightParenthesesToken ::= ')'
+SquareLeftParenthesesToken ::= '['
+SquareRightParenthesesToken ::= ']'
+CommaToken ::= ','
+
+NumberToken ::= [0-9]+
+NameToken ::= [a-zA-Z_][a-zA-Z0-9_]*
 ```
