@@ -1,4 +1,4 @@
 // Global using directives
 
 global using AParser.Exceptions;
-global using AParser.KnownTokens;
+global using AParser.Tokens;

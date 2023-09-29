@@ -1,4 +1,4 @@
-﻿namespace AParser.KnownTokens;
+﻿namespace AParser.Tokens;
 
 public class EofToken : IToken
 {
