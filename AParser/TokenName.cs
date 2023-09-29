@@ -3,11 +3,13 @@
 public enum TokenName
 {
     CommaToken,
-    FunctionNameToken,
     LeftParenthesesToken,
+    NameToken,
     NumberToken,
     RightParenthesesToken,
     SquareLeftParenthesesToken,
     SquareRightParenthesesToken,
-    TypeNameToken
+
+    EofToken,
+    UndefinedToken
 }

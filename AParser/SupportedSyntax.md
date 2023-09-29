@@ -21,7 +21,6 @@ Function ::= NameToken LeftParenthesesToken Expression (CommaToken Expression)* 
 Type ::= SquareLeftParenthesesToken NameToken SquareRightParenthesesToken | NameToken
 
 Constant ::= NumberToken
-FunctionName ::= NameToken
 ```
 
 ### Tokens
