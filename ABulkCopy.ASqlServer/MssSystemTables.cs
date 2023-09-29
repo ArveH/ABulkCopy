@@ -1,6 +1,4 @@
-﻿using ABulkCopy.Common.Types.Table;
-
-namespace ABulkCopy.ASqlServer;
+﻿namespace ABulkCopy.ASqlServer;
 
 public class MssSystemTables : MssCommandBase, IMssSystemTables
 {
@@ -236,10 +234,6 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
     public async Task<IEnumerable<ForeignKey>> GetForeignKeys(TableHeader tableHeader)
     {
         var foreignKeys = await GetForeignKeyReferences(tableHeader);
-        foreach (var foreignKey in foreignKeys)
-        {
-            await GetForeignKeyColumns(foreignKey);
-        }
 
         return foreignKeys;
     }
@@ -272,7 +266,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
                         Location = reader.IsDBNull(5) ? "PRIMARY" : reader.GetString(5)
                     }
                 };
-                
+
                 var indexColumns = await GetIndexColumnInfo(tableHeader.Name, index.Header);
                 index.Columns.AddRange(indexColumns);
                 indexes.Add(index);
@@ -319,7 +313,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
             };
             await GetForeignKeyColumns(fk);
             foreignKeys.Add(fk);
-            _logger.Information("Found foreign key: {ForeignKeyReference} on table {TableName}", 
+            _logger.Information("Found foreign key: {ForeignKeyReference} on table {TableName}",
                 fk.ConstraintName, tableHeader.Name);
         });
 
