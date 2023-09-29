@@ -1,12 +1,13 @@
-﻿using AParser.KnownTokens;
-
-namespace AParser;
+﻿namespace AParser;
 
 public class Tokenizer : ITokenizer
 {
     private readonly ITokenFactory _tokenFactory;
     private string? _original;
     private int _position;
+
+    private char CurrentChar => _position >= Original.Length ? '\0' : Original[_position];
+    private char NextChar => _position + 1 >= Original.Length ? '\0' : Original[_position + 1];
 
     public Tokenizer(ITokenFactory tokenFactory)
     {
@@ -16,7 +17,7 @@ public class Tokenizer : ITokenizer
     public string Original
     {
         get => _original ?? throw new ArgumentNullException(nameof(Original), "Can't use Original string before Initialize is called");
-        
+
         private set => _original = value;
     }
 
@@ -34,7 +35,7 @@ public class Tokenizer : ITokenizer
             return new EofToken(_position);
         }
 
-        switch (Original[_position])
+        switch (CurrentChar)
         {
             case '(':
                 return _tokenFactory.GetToken(TokenName.LeftParenthesesToken, _position++);
@@ -48,7 +49,7 @@ public class Tokenizer : ITokenizer
                 return _tokenFactory.GetToken(TokenName.CommaToken, _position++);
         }
 
-        if (char.IsLetter(Original[_position]))
+        if (IsNameStartingChar(CurrentChar))
         {
             var token = _tokenFactory.GetToken(TokenName.NameToken, _position);
             SkipToEndOfName();
@@ -69,7 +70,7 @@ public class Tokenizer : ITokenizer
 
     private void SkipWhitespace()
     {
-        while (_position >= Original.Length && char.IsWhiteSpace(Original[_position]))
+        while (char.IsWhiteSpace(CurrentChar))
         {
             _position++;
         }
@@ -77,7 +78,7 @@ public class Tokenizer : ITokenizer
 
     private void SkipToEndOfName()
     {
-        while (_position < Original.Length && char.IsLetterOrDigit(Original[_position]))
+        while (char.IsLetterOrDigit(CurrentChar))
         {
             _position++;
         }
@@ -85,9 +86,19 @@ public class Tokenizer : ITokenizer
 
     private void SkipToEndOfNumber()
     {
-        while (_position < Original.Length && char.IsLetterOrDigit(Original[_position]))
+        while (char.IsLetterOrDigit(CurrentChar))
         {
             _position++;
         }
+    }
+
+    private bool IsNameStartingChar(char c)
+    {
+        return char.IsLetter(c) || c == '_';
+    }
+
+    private bool IsNameChar(char c)
+    {
+        return char.IsLetterOrDigit(c) || c == '_';
     }
 }

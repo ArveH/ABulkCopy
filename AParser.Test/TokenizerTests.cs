@@ -27,10 +27,10 @@ public class TokenizerTests
     [InlineData("a_0",  TokenName.NameToken)]
     [InlineData("Aa0",  TokenName.NameToken)]
     [InlineData("a099",  TokenName.NameToken)]
-    [InlineData("_", TokenName.UndefinedToken)]
-    [InlineData("0aA",  TokenName.UndefinedToken)]
+    [InlineData("_", TokenName.NameToken)]
+    [InlineData("0aA",  TokenName.NumberToken)]
     [InlineData(".90",  TokenName.UndefinedToken)]
-    public void TestGetNext_Then_TokenNameIsCorrect(string input, TokenName expected)
+    public void TestGetNext(string input, TokenName expected)
     {
         ITokenizer tokenizer = new Tokenizer(new TokenFactory());
         tokenizer.Initialize(input);
