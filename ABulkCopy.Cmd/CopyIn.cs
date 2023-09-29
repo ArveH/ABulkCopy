@@ -106,14 +106,34 @@ public class CopyIn : ICopyIn
         var errorOccurred = false;
         try
         {
-            await _pgCmd.DropTable(tableDefinition.Header.Name);
-            await _pgCmd.CreateTable(tableDefinition);
+            try
+            {
+                await _pgCmd.DropTable(tableDefinition.Header.Name);
+                await _pgCmd.CreateTable(tableDefinition);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Couldn't create table '{TableName}'",
+                    tableDefinition.Header.Name);
+                Console.WriteLine($"Couldn't create table '{tableDefinition.Header.Name}'");
+                return false;
+            }
 
-            dataReader = _aDataReaderFactory.Get(tableDefinition.Rdbms);
-            var rows = await dataReader.Read(folder, tableDefinition, emptyStringFlag);
-            Console.WriteLine($"Read {rows} {"row".Plural(rows)} for table '{tableDefinition.Header.Name}'");
-            _logger.Information($"Read {{Rows}} {"row".Plural(rows)} for table '{{TableName}}'",
-                rows, tableDefinition.Header.Name);
+            try
+            {
+                dataReader = _aDataReaderFactory.Get(tableDefinition.Rdbms);
+                var rows = await dataReader.Read(folder, tableDefinition, emptyStringFlag);
+                Console.WriteLine($"Read {rows} {"row".Plural(rows)} for table '{tableDefinition.Header.Name}'");
+                _logger.Information($"Read {{Rows}} {"row".Plural(rows)} for table '{{TableName}}'",
+                    rows, tableDefinition.Header.Name);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Read data for table '{TableName}' failed",
+                    tableDefinition.Header.Name);
+                Console.WriteLine($"Read data for table '{tableDefinition.Header.Name}' failed");
+                return false;
+            }
 
             foreach (var columnName in tableDefinition.Columns
                          .Where(c => c.Identity != null)
@@ -136,9 +156,9 @@ public class CopyIn : ICopyIn
         }
         catch (Exception ex)
         {
-            _logger.Error(ex, "Read data for table '{TableName}' failed",
+            _logger.Error(ex, "Unexpected error for table '{TableName}'",
                 tableDefinition.Header.Name);
-            Console.WriteLine($"Read data for table '{tableDefinition.Header.Name}' failed");
+            Console.WriteLine($"Unexpected error for table '{tableDefinition.Header.Name}'");
             return false;
         }
         finally
