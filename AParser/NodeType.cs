@@ -2,9 +2,16 @@
 
 public enum NodeType
 {
-    ConstantNode,
+    CommaLeafNode,
+    ConstantLeafNode,
+    ConvertFunctionNode,
     ExpressionNode,
     FunctionNode,
+    LeftParenthesesLeafNode,
+    NameLeafNode,
     ParenthesesNode,
-    TypeNode
+    RightParenthesesLeafNode,
+    SquareLeftParenthesesLeafNode,
+    SquareRightParenthesesLeafNode,
+    TypeLeafNode
 }

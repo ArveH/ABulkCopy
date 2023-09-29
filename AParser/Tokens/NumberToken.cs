@@ -8,7 +8,6 @@ public class NumberToken : IToken
         Name = TokenName.NumberToken;
     }
     public TokenName Name { get; }
-    public string? ExpectedSpelling => null;
     public int StartPos { get; }
     public int Length { get; set; }
 }

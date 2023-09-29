@@ -8,7 +8,6 @@ public class CommaToken : IToken
         Name = TokenName.CommaToken;
     }
     public TokenName Name { get; }
-    public string? ExpectedSpelling => ",";
     public int StartPos { get; }
     public int Length
     {

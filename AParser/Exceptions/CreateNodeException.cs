@@ -2,8 +2,12 @@
 
 public class CreateNodeException : Exception
 {
-    public CreateNodeException(string message) : base()
+    public TokenName ExpectedToken { get; }
+    public IToken ActualToken { get; }
+
+    public CreateNodeException(TokenName expectedToken, IToken actualToken)
     {
-        
+        ExpectedToken = expectedToken;
+        ActualToken = actualToken;
     }
 }

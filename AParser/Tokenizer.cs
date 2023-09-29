@@ -14,6 +14,11 @@ public class Tokenizer : ITokenizer
         _tokenFactory = tokenFactory;
     }
 
+    public ReadOnlySpan<char> GetSpelling(IToken token)
+    {
+        return Original.AsSpan(token.StartPos, token.Length);
+    }
+
     public string Original
     {
         get => _original ?? throw new ArgumentNullException(nameof(Original), "Can't use Original string before Initialize is called");

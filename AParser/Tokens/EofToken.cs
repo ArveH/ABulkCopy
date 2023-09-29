@@ -7,7 +7,6 @@ public class EofToken : IToken
         StartPos = startPos;
     }
     public TokenName Name => TokenName.EofToken;
-    public string? ExpectedSpelling => null;
     public int StartPos { get; }
     public int Length
     {

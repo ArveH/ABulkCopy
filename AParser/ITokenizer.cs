@@ -5,4 +5,5 @@ public interface ITokenizer
     string Original { get; }
     void Initialize(string input);
     IToken GetNext();
+    ReadOnlySpan<char> GetSpelling(IToken token);
 }

@@ -8,7 +8,6 @@ public class SquareRightParenthesesToken : IToken
         Name = TokenName.SquareRightParenthesesToken;
     }
     public TokenName Name { get; }
-    public string? ExpectedSpelling => "]";
     public int StartPos { get; }
     public int Length
     {
