@@ -2,5 +2,5 @@
 
 public interface INodeFactory
 {
-    INode CreateNode(NodeType nodeType, ITokenizer tokenizer);
+    INode CreateNode(NodeType nodeType);
 }

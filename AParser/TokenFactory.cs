@@ -23,7 +23,7 @@ public class TokenFactory : ITokenFactory
             case TokenName.EofToken:
                 return new EofToken(startPos);
             case TokenName.UndefinedToken:
-                return new UndefinedToken();
+                return UndefinedToken.Instance;
             default:
                 throw new ArgumentOutOfRangeException(nameof(name), name, null);
         }

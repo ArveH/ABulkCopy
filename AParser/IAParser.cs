@@ -2,5 +2,5 @@
 
 public interface IAParser
 {
-    void Parse(string sql);
+    INode Parse(string sql);
 }

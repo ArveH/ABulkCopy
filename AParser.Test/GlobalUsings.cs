@@ -1,4 +1,5 @@
 global using AParser.Exceptions;
+global using AParser.ParseTree;
 global using FluentAssertions;
 global using Moq;
 global using Serilog;

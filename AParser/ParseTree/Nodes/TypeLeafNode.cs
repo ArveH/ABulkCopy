@@ -9,10 +9,5 @@ public class TypeLeafNode : ILeafNode
 
     public NodeType Type => NodeType.TypeLeafNode;
     public bool IsLeafNode => true;
-    public void Create(ITokenizer tokenizer)
-    {
-        throw new NotImplementedException();
-    }
-
     public IToken Token { get; }
 }

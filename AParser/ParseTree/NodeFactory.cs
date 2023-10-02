@@ -2,7 +2,7 @@
 
 public class NodeFactory : INodeFactory
 {
-    public INode CreateNode(NodeType nodeType, ITokenizer tokenizer)
+    public INode CreateNode(NodeType nodeType)
     {
         INode node = nodeType switch
         {
@@ -11,7 +11,6 @@ public class NodeFactory : INodeFactory
             _ => throw new Exception($"Unknown node type: {nodeType}")
         };
 
-        node.Create(tokenizer);
         return node;
     }
 }

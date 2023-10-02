@@ -9,10 +9,5 @@ public class SquareLeftParenthesesLeafNode : ILeafNode
 
     public NodeType Type => NodeType.SquareLeftParenthesesLeafNode;
     public bool IsLeafNode => true;
-    public void Create(ITokenizer tokenizer)
-    {
-        throw new NotImplementedException();
-    }
-
     public IToken Token { get; }
 }

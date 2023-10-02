@@ -9,10 +9,5 @@ public class ConstantLeafNode : ILeafNode
 
     public NodeType Type => NodeType.ConstantLeafNode;
     public bool IsLeafNode => true;
-    public void Create(ITokenizer tokenizer)
-    {
-        throw new NotImplementedException();
-    }
-
     public IToken Token { get; }
 }
