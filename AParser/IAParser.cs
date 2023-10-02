@@ -2,4 +2,5 @@
 
 public interface IAParser
 {
+    void Parse(string sql);
 }
