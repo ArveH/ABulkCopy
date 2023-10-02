@@ -18,7 +18,7 @@ public class FunctionNode : INode
         var currentToken = tokenizer.GetNext();
         if (currentToken.Name != TokenName.NameToken)
         {
-            throw new CreateNodeException(TokenName.NameToken, currentToken);
+            throw new UnexpectedTokenException(TokenName.NameToken, currentToken);
         }
 
         switch (tokenizer.GetSpelling(currentToken))
