@@ -3,12 +3,12 @@
 public enum NodeType
 {
     CommaLeafNode,
-    ConstantLeafNode,
     ConvertFunctionNode,
     ExpressionNode,
     FunctionNode,
     LeftParenthesesLeafNode,
     NameLeafNode,
+    NumberLeafNode,
     ParenthesesNode,
     QuotedNameNode,
     RightParenthesesLeafNode,

@@ -97,7 +97,12 @@ public class AParser : IAParser
 
     private INode ParseNumber()
     {
-        throw new NotImplementedException();
+        if (_currentToken.Name != TokenName.NumberToken)
+        {
+            throw new UnexpectedTokenException(NodeType.NumberLeafNode, _currentToken.Name);
+        }
+
+        return CreateLeafNode(NodeType.NumberLeafNode, _currentToken);
     }
 
     private INode ParseParentheses()

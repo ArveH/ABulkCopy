@@ -1,3 +1,5 @@
+using AParser.Tokens;
+
 namespace AParser.Test
 {
     public class AParserTests
@@ -10,31 +12,9 @@ namespace AParser.Test
         }
 
         [Fact]
-        public void TestParseParentheses_When_EmptyString_Then_Exception()
-        {
-            var parser = GetParser();
-            
-            var action = () => parser.Parse("");
-
-            action.Should().Throw<AParserException>().WithMessage(ErrorMessages.EmptySql);
-        }
-
-        [Fact]
-        public void TestParseParentheses_When_EmptyParentheses_Then_Exception()
-        {
-            var parser = GetParser();
-
-            var action = () => parser.Parse("()");
-
-            action.Should().Throw<UnexpectedTokenException>()
-                .Where(e => e.ExpectedNodeType == NodeType.ExpressionNode && 
-                            e.CurrentTokenName == TokenName.RightParenthesesToken);
-        }
-
-        [Fact]
         public void TestParseName()
         {
-            var tokenizer = new Tokenizer(new TokenFactory());
+            var tokenizer = GetTokenizer();
             var parser = GetParser(tokenizer);
             const string name = "arve";
 
@@ -47,7 +27,7 @@ namespace AParser.Test
         [Fact]
         public void TestParseQuotedName()
         {
-            var tokenizer = new Tokenizer(new TokenFactory());
+            var tokenizer = GetTokenizer();
             var parser = GetParser(tokenizer);
             const string name = "arve";
 
@@ -68,6 +48,41 @@ namespace AParser.Test
                 TokenName.SquareRightParenthesesToken);
         }
 
+        [Fact]
+        public void TestParseNumber()
+        {
+            var tokenizer = GetTokenizer();
+            var parser = GetParser(tokenizer);
+            const string num = "123";
+
+            var rootNode = parser.Parse(num);
+
+            VerifyRootNode(rootNode);
+            VerifyNumberNode(rootNode.Children![0], num, tokenizer);
+        }
+
+        [Fact]
+        public void TestParseParentheses_When_EmptyString_Then_Exception()
+        {
+            var parser = GetParser();
+
+            var action = () => parser.Parse("");
+
+            action.Should().Throw<AParserException>().WithMessage(ErrorMessages.EmptySql);
+        }
+
+        [Fact]
+        public void TestParseParentheses_When_EmptyParentheses_Then_Exception()
+        {
+            var parser = GetParser();
+
+            var action = () => parser.Parse("()");
+
+            action.Should().Throw<UnexpectedTokenException>()
+                .Where(e => e.ExpectedNodeType == NodeType.ExpressionNode &&
+                            e.CurrentTokenName == TokenName.RightParenthesesToken);
+        }
+
         private static void VerifyRootNode(INode rootNode)
         {
             rootNode.Should().NotBeNull("because we should have a root node");
@@ -76,17 +91,22 @@ namespace AParser.Test
             rootNode.Children.Should().HaveCount(1, "because the root node should have one child");
         }
 
-        private static void VerifyNameNode(INode node, string name, Tokenizer tokenizer)
+        private static void VerifyNameNode(INode node, string name, ITokenizer tokenizer)
         {
-            node.Type.Should().Be(NodeType.NameLeafNode);
-            node.Token.Should().NotBeNull("because a NameLeafNode should have a token");
-            node.Token!.Name.Should().Be(TokenName.NameToken);
-            node.Children.Should().BeNull("because a NameLeafNode should not have any children");
-            tokenizer.GetSpelling(node.Token).ToString().Should().Be(name);
+            VerifyLeafNode(node, NodeType.NameLeafNode, TokenName.NameToken);
+            tokenizer.GetSpelling(node.Token!).ToString().Should().Be(name);
+        }
+
+        private static void VerifyNumberNode(INode node, string number, ITokenizer tokenizer)
+        {
+            VerifyLeafNode(node, NodeType.NumberLeafNode, TokenName.NumberToken);
+            tokenizer.GetSpelling(node.Token!).ToString().Should().Be(number);
         }
 
         private static void VerifyLeafNode(
-            INode node, NodeType expectedNodeType, TokenName expectedTokenName)
+            INode node, 
+            NodeType expectedNodeType, 
+            TokenName expectedTokenName)
         {
             node.Type.Should().Be(expectedNodeType);
             node.Token.Should().NotBeNull($"because a {expectedNodeType} should have a token");
@@ -94,11 +114,16 @@ namespace AParser.Test
             node.Children.Should().BeNull($"because a {expectedNodeType} should not have any children");
         }
 
+        private ITokenizer GetTokenizer()
+        {
+            return new Tokenizer(new TokenFactory());
+        }
+
         private IAParser GetParser(ITokenizer? tokenizer = null)
         {
             return new AParser(
                 new NodeFactory(),
-                tokenizer ?? new Tokenizer(new TokenFactory()));
+                tokenizer ?? GetTokenizer());
         }
     }
 }

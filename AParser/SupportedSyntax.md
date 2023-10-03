@@ -26,16 +26,17 @@ SquareRightParenthesesToken ::= ']'
 ``` ebnf
 ExpressionNode ::= ParenthesesNode 
                     | NameNode
+                    | NumberNode
                     | QuotedNameNode
-                    | FunctionNode 
-                    | TypeNode 
-                    | ConstantNode
+                    | FunctionNode
 
 ParenthesesNode ::= LeftParenthesesLeafNode ExpressionNode RightParenthesesLeafNode
 
 FunctionNode ::= ConvertFunctionNode
-ConvertFunctionNode ::= NameLeafNode LeftParenthesesLeafNode TypeLeafNode CommaLeafNode ConstantLeafNode RightParenthesesLeafToken
+ConvertFunctionNode ::= NameLeafNode LeftParenthesesLeafNode type CommaLeafNode ExpressionNode RightParenthesesLeafToken
 QuotedNameNode ::= LeftParenthesesLeafNode NameLeafNode RightParenthesesLeafNode
+
+type ::= NameLeafNode | QuotedNameNode
 ```
 
 ### LeafNodes
@@ -47,6 +48,5 @@ SquareLeftParenthesesLeafNode ::= SquareLeftParenthesesToken
 SquareRightParenthesesLeafNode ::= SquareRightParenthesesToken
 CommaLeafNode ::= CommaToken
 NameLeafNode ::= NameToken
-TypeLeafNode ::= TypeToken
-ConstantLeafNode ::= ConstantToken
+NumberLeafNode ::= NumberToken
 ```

@@ -7,12 +7,12 @@ public class NodeFactory : INodeFactory
         return nodeType switch
         {
             NodeType.CommaLeafNode => new CommaLeafNode(token ?? throw new TokenArgumentNullException(TokenName.CommaToken)),
-            NodeType.ConstantLeafNode => new ConstantLeafNode(token ?? throw new TokenArgumentNullException("constant token")),
             NodeType.ConvertFunctionNode => new FunctionNode(),
             NodeType.ExpressionNode => new ExpressionNode(),
             NodeType.FunctionNode => new FunctionNode(),
             NodeType.LeftParenthesesLeafNode => new LeftParenthesesLeafNode(token ?? throw new TokenArgumentNullException(TokenName.LeftParenthesesToken)),
             NodeType.NameLeafNode => new NameLeafNode(token ?? throw new TokenArgumentNullException("name token")),
+            NodeType.NumberLeafNode => new NumberLeafNode(token ?? throw new TokenArgumentNullException("constant token")),
             NodeType.ParenthesesNode => new ParenthesesNode(),
             NodeType.QuotedNameNode => new QuotedNameNode(),
             NodeType.RightParenthesesLeafNode => new RightParenthesesLeafNode(token ?? throw new TokenArgumentNullException(TokenName.RightParenthesesToken)),
