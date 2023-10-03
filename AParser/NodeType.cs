@@ -10,6 +10,7 @@ public enum NodeType
     LeftParenthesesLeafNode,
     NameLeafNode,
     ParenthesesNode,
+    QuotedNameNode,
     RightParenthesesLeafNode,
     SquareLeftParenthesesLeafNode,
     SquareRightParenthesesLeafNode,

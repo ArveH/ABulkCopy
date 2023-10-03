@@ -33,6 +33,7 @@ public class AParser : IAParser
         switch (_currentToken.Name)
         {
             case TokenName.NameToken:
+            case TokenName.SquareLeftParenthesesToken:
                 expressionNode.Children!.Add(ParseName());
                 break;
             case TokenName.NumberToken:
@@ -40,9 +41,6 @@ public class AParser : IAParser
                 break;
             case TokenName.LeftParenthesesToken:
                 expressionNode.Children!.Add(ParseParentheses());
-                break;
-            case TokenName.SquareLeftParenthesesToken:
-                expressionNode.Children!.Add(ParseSquareParentheses());
                 break;
             default:
                 throw new UnexpectedTokenException(NodeType.ExpressionNode, _currentToken.Name);
@@ -53,7 +51,48 @@ public class AParser : IAParser
 
     private INode ParseName()
     {
-        throw new NotImplementedException();
+        if (_currentToken.Name == TokenName.SquareLeftParenthesesToken)
+        {
+            return ParseQuotedNameNode();
+        }
+
+        if (_currentToken.Name != TokenName.NameToken)
+        {
+            throw new UnexpectedTokenException(NodeType.NameLeafNode, _currentToken.Name);
+        }
+
+        return CreateLeafNode(NodeType.NameLeafNode, _currentToken);
+    }
+
+    private INode ParseQuotedNameNode()
+    {
+        if (_currentToken.Name != TokenName.SquareLeftParenthesesToken)
+        {
+            throw new UnexpectedTokenException(NodeType.SquareLeftParenthesesLeafNode, _currentToken.Name);
+        }
+
+        var quotedNameNode = CreateNode(NodeType.QuotedNameNode);
+        quotedNameNode.Children!.Add(
+            CreateLeafNode(NodeType.SquareLeftParenthesesLeafNode, _currentToken));
+        GetNextToken();
+
+        if (_currentToken.Name != TokenName.NameToken)
+        {
+            throw new UnexpectedTokenException(NodeType.NameLeafNode, _currentToken.Name);
+        }
+
+        quotedNameNode.Children!.Add(CreateLeafNode(NodeType.NameLeafNode, _currentToken));
+        GetNextToken();
+
+        if (_currentToken.Name != TokenName.SquareRightParenthesesToken)
+        {
+            throw new UnexpectedTokenException(NodeType.SquareRightParenthesesLeafNode, _currentToken.Name);
+        }
+
+        quotedNameNode.Children!.Add(
+            CreateLeafNode(NodeType.SquareRightParenthesesLeafNode, _currentToken));
+
+        return quotedNameNode;
     }
 
     private INode ParseNumber()
@@ -68,20 +107,17 @@ public class AParser : IAParser
         {
             throw new UnexpectedTokenException(NodeType.LeftParenthesesLeafNode, _currentToken.Name);
         }
+
         parenthesesNode.Children!.Add(CreateLeafNode(NodeType.LeftParenthesesLeafNode, _currentToken));
         parenthesesNode.Children.Add(ParseExpression());
         if (_currentToken.Name != TokenName.RightParenthesesToken)
         {
             throw new UnexpectedTokenException(NodeType.RightParenthesesLeafNode, _currentToken.Name);
         }
+
         parenthesesNode.Children!.Add(CreateLeafNode(NodeType.RightParenthesesLeafNode, _currentToken));
 
         return parenthesesNode;
-    }
-
-    private INode ParseSquareParentheses()
-    {
-        throw new NotImplementedException();
     }
 
     private void GetNextToken()

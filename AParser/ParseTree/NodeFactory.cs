@@ -14,6 +14,7 @@ public class NodeFactory : INodeFactory
             NodeType.LeftParenthesesLeafNode => new LeftParenthesesLeafNode(token ?? throw new TokenArgumentNullException(TokenName.LeftParenthesesToken)),
             NodeType.NameLeafNode => new NameLeafNode(token ?? throw new TokenArgumentNullException("name token")),
             NodeType.ParenthesesNode => new ParenthesesNode(),
+            NodeType.QuotedNameNode => new QuotedNameNode(),
             NodeType.RightParenthesesLeafNode => new RightParenthesesLeafNode(token ?? throw new TokenArgumentNullException(TokenName.RightParenthesesToken)),
             NodeType.SquareLeftParenthesesLeafNode => new SquareLeftParenthesesLeafNode(token ?? throw new TokenArgumentNullException(TokenName.SquareLeftParenthesesToken)),
             NodeType.SquareRightParenthesesLeafNode => new SquareRightParenthesesLeafNode(token ?? throw new TokenArgumentNullException(TokenName.SquareRightParenthesesToken)),

@@ -9,32 +9,15 @@ I'm using Extended Backus-Naur Form (EBNF) notation. I'm not following the spec 
 NOTE: Currently, whitespace is not specified in the grammar, but it could occur anywhere except in the middle of a token.
 
 ## Tokenizer
-``` ebnf
-Expression ::= Parentheses 
-                | Function 
-                | Type 
-                | Constant
-
-Parentheses ::= LeftParenthesesToken Expression RightParenthesesToken
-
-Function ::= NameToken LeftParenthesesToken Expression (CommaToken Expression)* RightParenthesesToken
-Type ::= SquareLeftParenthesesToken NameToken SquareRightParenthesesToken | NameToken
-
-Constant ::= NumberToken
-```
-
-### Tokens
 
 ``` ebnf
-Whitespace ::= ' ' | '\t' | '\n' | '\r'
+CommaToken ::= ','
 LeftParenthesesToken ::= '('
+NameToken ::= [a-zA-Z_][a-zA-Z0-9_]*
+NumberToken ::= [0-9]+
 RightParenthesesToken ::= ')'
 SquareLeftParenthesesToken ::= '['
 SquareRightParenthesesToken ::= ']'
-CommaToken ::= ','
-
-NumberToken ::= [0-9]+
-NameToken ::= [a-zA-Z_][a-zA-Z0-9_]*
 ```
 
 ## ParseTree
@@ -42,6 +25,8 @@ NameToken ::= [a-zA-Z_][a-zA-Z0-9_]*
 ### Nodes
 ``` ebnf
 ExpressionNode ::= ParenthesesNode 
+                    | NameNode
+                    | QuotedNameNode
                     | FunctionNode 
                     | TypeNode 
                     | ConstantNode
@@ -50,6 +35,7 @@ ParenthesesNode ::= LeftParenthesesLeafNode ExpressionNode RightParenthesesLeafN
 
 FunctionNode ::= ConvertFunctionNode
 ConvertFunctionNode ::= NameLeafNode LeftParenthesesLeafNode TypeLeafNode CommaLeafNode ConstantLeafNode RightParenthesesLeafToken
+QuotedNameNode ::= LeftParenthesesLeafNode NameLeafNode RightParenthesesLeafNode
 ```
 
 ### LeafNodes
