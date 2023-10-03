@@ -68,12 +68,13 @@ public class AParser : IAParser
         {
             throw new UnexpectedTokenException(NodeType.LeftParenthesesLeafNode, _currentToken.Name);
         }
-        parenthesesNode.Children!.Add(CreateNode(NodeType.LeftParenthesesLeafNode));
+        parenthesesNode.Children!.Add(CreateLeafNode(NodeType.LeftParenthesesLeafNode, _currentToken));
         parenthesesNode.Children.Add(ParseExpression());
         if (_currentToken.Name != TokenName.RightParenthesesToken)
         {
             throw new UnexpectedTokenException(NodeType.RightParenthesesLeafNode, _currentToken.Name);
         }
+        parenthesesNode.Children!.Add(CreateLeafNode(NodeType.RightParenthesesLeafNode, _currentToken));
 
         return parenthesesNode;
     }
@@ -91,5 +92,10 @@ public class AParser : IAParser
     private INode CreateNode(NodeType nodeType)
     {
         return _nodeFactory.CreateNode(nodeType);
+    }
+
+    private INode CreateLeafNode(NodeType nodeType, IToken token)
+    {
+        return _nodeFactory.CreateNode(nodeType, token);
     }
 }
