@@ -1,6 +1,9 @@
 ﻿namespace AParser.ParseTree;
 
-public interface INode : INodeBase
+public interface INode
 {
-    List<INode> Children { get; }
+    NodeType Type { get; }
+    bool IsLeafNode { get; }
+    List<INode>? Children { get; }
+    IToken? Token { get; protected set; }
 }

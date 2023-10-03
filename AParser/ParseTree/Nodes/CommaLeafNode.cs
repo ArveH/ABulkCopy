@@ -1,13 +1,12 @@
 ﻿namespace AParser.ParseTree.Nodes;
 
-public class CommaLeafNode : ILeafNode
+public class CommaLeafNode : NodeBase
 {
     public CommaLeafNode(IToken token)
     {
         Token = token;
     }
 
-    public NodeType Type => NodeType.CommaLeafNode;
-    public bool IsLeafNode => true;
-    public IToken Token { get; }
+    public override NodeType Type => NodeType.CommaLeafNode;
+    public sealed override IToken? Token { get; set; }
 }

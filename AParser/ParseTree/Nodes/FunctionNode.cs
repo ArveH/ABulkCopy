@@ -1,8 +1,7 @@
 ﻿namespace AParser.ParseTree.Nodes;
 
-public class FunctionNode : INode
+public class FunctionNode : NodeBase
 {
-    public NodeType Type => NodeType.FunctionNode;
-    public bool IsLeafNode => false;
-    public List<INode> Children { get; } = new();
+    public override NodeType Type => NodeType.FunctionNode;
+    public override List<INode>? Children { get; set; } = new();
 }

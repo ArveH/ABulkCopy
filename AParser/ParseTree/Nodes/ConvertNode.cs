@@ -1,8 +1,7 @@
 ﻿namespace AParser.ParseTree.Nodes;
 
-public class ConvertNode : INode
+public class ConvertNode : NodeBase
 {
-    public NodeType Type => NodeType.ConvertFunctionNode;
-    public bool IsLeafNode => false;
-    public List<INode> Children { get; } = new();
+    public override NodeType Type => NodeType.ConvertFunctionNode;
+    public override List<INode>? Children { get; set; } = new();
 }

@@ -1,8 +1,7 @@
 ﻿namespace AParser.ParseTree.Nodes;
 
-public class ExpressionNode : INode
+public class ExpressionNode : NodeBase
 {
-    public NodeType Type => NodeType.ExpressionNode;
-    public bool IsLeafNode => false;
-    public List<INode> Children { get; } = new();
+    public override NodeType Type => NodeType.ExpressionNode;
+    public override List<INode>? Children { get; set; } = new();
 }

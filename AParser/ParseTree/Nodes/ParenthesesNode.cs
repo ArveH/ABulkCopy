@@ -1,8 +1,7 @@
 ﻿namespace AParser.ParseTree.Nodes;
 
-public class ParenthesesNode : INode
+public class ParenthesesNode : NodeBase
 {
-    public NodeType Type => NodeType.ParenthesesNode;
-    public bool IsLeafNode => false;
-    public List<INode> Children { get; } = new();
+    public override NodeType Type => NodeType.ParenthesesNode;
+    public override List<INode>? Children { get; set; } = new();
 }

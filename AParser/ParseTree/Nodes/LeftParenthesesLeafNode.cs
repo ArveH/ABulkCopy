@@ -1,13 +1,12 @@
 ﻿namespace AParser.ParseTree.Nodes;
 
-public class LeftParenthesesLeafNode : ILeafNode
+public class LeftParenthesesLeafNode : NodeBase
 {
     public LeftParenthesesLeafNode(IToken token)
     {
         Token = token;
     }
 
-    public NodeType Type => NodeType.LeftParenthesesLeafNode;
-    public bool IsLeafNode => true;
-    public IToken Token { get; }
+    public override NodeType Type => NodeType.LeftParenthesesLeafNode;
+    public sealed override IToken? Token { get; set; }
 }

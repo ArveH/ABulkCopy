@@ -22,22 +22,41 @@ public class AParser : IAParser
         }
 
         _tokenizer.Initialize(sql);
-        _currentToken = _tokenizer.GetNext();
-        var rootNode = CreateNode(NodeType.ExpressionNode);
-
-        switch (_currentToken.Name)
-        {
-            case TokenName.LeftParenthesesToken:
-                rootNode.Children.Add(ParseParentheses());
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
-
-        return rootNode;
+        return ParseExpression();
     }
 
     private INode ParseExpression()
+    {
+        var expressionNode = CreateNode(NodeType.ExpressionNode);
+        GetNextToken();
+
+        switch (_currentToken.Name)
+        {
+            case TokenName.NameToken:
+                expressionNode.Children!.Add(ParseName());
+                break;
+            case TokenName.NumberToken:
+                expressionNode.Children!.Add(ParseNumber());
+                break;
+            case TokenName.LeftParenthesesToken:
+                expressionNode.Children!.Add(ParseParentheses());
+                break;
+            case TokenName.SquareLeftParenthesesToken:
+                expressionNode.Children!.Add(ParseSquareParentheses());
+                break;
+            default:
+                throw new UnexpectedTokenException(NodeType.ExpressionNode, _currentToken.Name);
+        }
+
+        return expressionNode;
+    }
+
+    private INode ParseName()
+    {
+        throw new NotImplementedException();
+    }
+
+    private INode ParseNumber()
     {
         throw new NotImplementedException();
     }
@@ -49,7 +68,7 @@ public class AParser : IAParser
         {
             throw new UnexpectedTokenException(NodeType.LeftParenthesesLeafNode, _currentToken.Name);
         }
-        parenthesesNode.Children.Add(CreateNode(NodeType.LeftParenthesesLeafNode));
+        parenthesesNode.Children!.Add(CreateNode(NodeType.LeftParenthesesLeafNode));
         parenthesesNode.Children.Add(ParseExpression());
         if (_currentToken.Name != TokenName.RightParenthesesToken)
         {
@@ -57,6 +76,16 @@ public class AParser : IAParser
         }
 
         return parenthesesNode;
+    }
+
+    private INode ParseSquareParentheses()
+    {
+        throw new NotImplementedException();
+    }
+
+    private void GetNextToken()
+    {
+        _currentToken = _tokenizer.GetNext();
     }
 
     private INode CreateNode(NodeType nodeType)
