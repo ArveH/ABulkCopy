@@ -22,25 +22,28 @@ public class AParser : IAParser
         }
 
         _tokenizer.Initialize(sql);
+        GetNextToken();
         return ParseExpression();
     }
 
     private INode ParseExpression()
     {
         var expressionNode = CreateNode(NodeType.ExpressionNode);
-        GetNextToken();
 
         switch (_currentToken.Name)
         {
             case TokenName.NameToken:
             case TokenName.SquareLeftParenthesesToken:
                 expressionNode.Children!.Add(ParseName());
+                GetNextToken();
                 break;
             case TokenName.NumberToken:
                 expressionNode.Children!.Add(ParseNumber());
+                GetNextToken();
                 break;
             case TokenName.LeftParenthesesToken:
                 expressionNode.Children!.Add(ParseParentheses());
+                GetNextToken();
                 break;
             default:
                 throw new UnexpectedTokenException(NodeType.ExpressionNode, _currentToken.Name);
@@ -114,6 +117,7 @@ public class AParser : IAParser
         }
 
         parenthesesNode.Children!.Add(CreateLeafNode(NodeType.LeftParenthesesLeafNode, _currentToken));
+        GetNextToken();
         parenthesesNode.Children.Add(ParseExpression());
         if (_currentToken.Name != TokenName.RightParenthesesToken)
         {

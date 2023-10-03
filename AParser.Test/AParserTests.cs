@@ -1,5 +1,3 @@
-using AParser.Tokens;
-
 namespace AParser.Test
 {
     public class AParserTests
@@ -20,7 +18,7 @@ namespace AParser.Test
 
             var rootNode = parser.Parse(name);
 
-            VerifyRootNode(rootNode);
+            VerifyExpressionNode(rootNode);
             VerifyNameNode(rootNode.Children![0], name, tokenizer);
         }
 
@@ -33,18 +31,18 @@ namespace AParser.Test
 
             var rootNode = parser.Parse($"[{name}]");
 
-            VerifyRootNode(rootNode);
+            VerifyExpressionNode(rootNode);
             var quotedName = rootNode.Children![0];
             quotedName.Type.Should().Be(NodeType.QuotedNameNode);
             quotedName.Children.Should().HaveCount(3, "because the quoted name node should have 3 children");
             VerifyLeafNode(
-                quotedName.Children![0], 
-                NodeType.SquareLeftParenthesesLeafNode, 
+                quotedName.Children![0],
+                NodeType.SquareLeftParenthesesLeafNode,
                 TokenName.SquareLeftParenthesesToken);
             VerifyNameNode(quotedName.Children![1], name, tokenizer);
             VerifyLeafNode(
-                quotedName.Children![2], 
-                NodeType.SquareRightParenthesesLeafNode, 
+                quotedName.Children![2],
+                NodeType.SquareRightParenthesesLeafNode,
                 TokenName.SquareRightParenthesesToken);
         }
 
@@ -57,7 +55,7 @@ namespace AParser.Test
 
             var rootNode = parser.Parse(num);
 
-            VerifyRootNode(rootNode);
+            VerifyExpressionNode(rootNode);
             VerifyNumberNode(rootNode.Children![0], num, tokenizer);
         }
 
@@ -83,12 +81,38 @@ namespace AParser.Test
                             e.CurrentTokenName == TokenName.RightParenthesesToken);
         }
 
-        private static void VerifyRootNode(INode rootNode)
+        [Fact]
+        public void TestParseParentheses_When_ContainsName()
         {
-            rootNode.Should().NotBeNull("because we should have a root node");
-            rootNode.Type.Should().Be(NodeType.ExpressionNode);
-            rootNode.Children.Should().NotBeNull("because the root node should have one child");
-            rootNode.Children.Should().HaveCount(1, "because the root node should have one child");
+            var tokenizer = GetTokenizer();
+            var parser = GetParser(tokenizer);
+            const string name = "arve";
+
+            var rootNode = parser.Parse($"({name})");
+
+            VerifyExpressionNode(rootNode);
+            var parenthesesNode = rootNode.Children![0];
+            parenthesesNode.Type.Should().Be(NodeType.ParenthesesNode);
+            parenthesesNode.Children.Should().HaveCount(3, "because the parentheses node should have 3 children");
+            VerifyLeafNode(
+                parenthesesNode.Children![0], 
+                NodeType.LeftParenthesesLeafNode, 
+                TokenName.LeftParenthesesToken);
+            VerifyLeafNode(
+                parenthesesNode.Children![2],
+                NodeType.RightParenthesesLeafNode,
+                TokenName.RightParenthesesToken);
+            var expressionNode = parenthesesNode.Children![1];
+            VerifyExpressionNode(expressionNode);
+            VerifyNameNode(expressionNode.Children![0], name, tokenizer);
+        }
+
+        private static void VerifyExpressionNode(INode expressionNode)
+        {
+            expressionNode.Should().NotBeNull("because we should have an ExpressionNode");
+            expressionNode.Type.Should().Be(NodeType.ExpressionNode);
+            expressionNode.Children.Should().NotBeNull("because the ExpressionNode should have one child");
+            expressionNode.Children.Should().HaveCount(1, "because the ExpressionNode should have one child");
         }
 
         private static void VerifyNameNode(INode node, string name, ITokenizer tokenizer)
@@ -104,13 +128,14 @@ namespace AParser.Test
         }
 
         private static void VerifyLeafNode(
-            INode node, 
-            NodeType expectedNodeType, 
+            INode node,
+            NodeType expectedNodeType,
             TokenName expectedTokenName)
         {
             node.Type.Should().Be(expectedNodeType);
             node.Token.Should().NotBeNull($"because a {expectedNodeType} should have a token");
-            node.Token!.Name.Should().Be(expectedTokenName, $"because TokenName for {expectedNodeType} should be {expectedTokenName}");
+            node.Token!.Name.Should().Be(expectedTokenName,
+                $"because TokenName for {expectedNodeType} should be {expectedTokenName}");
             node.Children.Should().BeNull($"because a {expectedNodeType} should not have any children");
         }
 
