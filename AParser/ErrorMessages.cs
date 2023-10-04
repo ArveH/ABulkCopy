@@ -1,14 +1,17 @@
-﻿using System.Runtime.Serialization;
-
-namespace AParser;
+﻿namespace AParser;
 
 public static class ErrorMessages
 {
     public const string EmptySql = "String to parse can't be empty";
 
-    public static string UnexpectedNode(NodeType expectedNodeType, TokenName currentTokenName)
+    public static string UnexpectedToken(TokenName current)
     {
-        return $"Expected to create a {expectedNodeType} node, but current token is: {currentTokenName}";
+        return $"Did not expect a {current} token at this point";
+    }
+
+    public static string UnexpectedToken(TokenName expected, TokenName current)
+    {
+        return $"Expected to get a {expected} token, but current token is: {current}";
     }
 
     public static string NullToken(string expected)

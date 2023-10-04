@@ -7,14 +7,14 @@ public class Tokenizer : ITokenizer
     private int _position;
 
     private char CurrentChar => _position >= Original.Length ? '\0' : Original[_position];
-    private char NextChar => _position + 1 >= Original.Length ? '\0' : Original[_position + 1];
 
     public Tokenizer(ITokenFactory tokenFactory)
     {
         _tokenFactory = tokenFactory;
+        CurrentToken = UndefinedToken.Instance;
     }
 
-    public ReadOnlySpan<char> GetSpelling(IToken token)
+    public ReadOnlySpan<char> GetSpan(IToken token)
     {
         return Original.AsSpan(token.StartPos, token.Length);
     }
@@ -28,8 +28,32 @@ public class Tokenizer : ITokenizer
 
     public void Initialize(string input)
     {
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            throw new AParserException(ErrorMessages.EmptySql);
+        }
+
         _original = input;
         _position = 0;
+    }
+
+    public IToken CurrentToken
+    {
+        get;
+        private set;
+    }
+
+    public string CurrentTokenText => GetSpan(CurrentToken).ToString();
+
+    public IToken GetExpected(TokenName expectedToken)
+    {
+        var token = GetNext();
+        if (token.Name != expectedToken)
+        {
+            throw new UnexpectedTokenException(expectedToken, token.Name);
+        }
+
+        return token;
     }
 
     public IToken GetNext()
@@ -37,40 +61,47 @@ public class Tokenizer : ITokenizer
         SkipWhitespace();
         if (_position >= Original.Length)
         {
-            return new EofToken(_position);
+            CurrentToken = new EofToken(_position);
+            return CurrentToken;
         }
 
         switch (CurrentChar)
         {
             case '(':
-                return _tokenFactory.GetToken(TokenName.LeftParenthesesToken, _position++);
+                CurrentToken = _tokenFactory.GetToken(TokenName.LeftParenthesesToken, _position++);
+                return CurrentToken;
             case ')':
-                return _tokenFactory.GetToken(TokenName.RightParenthesesToken, _position++);
+                CurrentToken = _tokenFactory.GetToken(TokenName.RightParenthesesToken, _position++);
+                return CurrentToken;
             case '[':
-                return _tokenFactory.GetToken(TokenName.SquareLeftParenthesesToken, _position++);
+                CurrentToken = _tokenFactory.GetToken(TokenName.SquareLeftParenthesesToken, _position++);
+                return CurrentToken;
             case ']':
-                return _tokenFactory.GetToken(TokenName.SquareRightParenthesesToken, _position++);
+                CurrentToken = _tokenFactory.GetToken(TokenName.SquareRightParenthesesToken, _position++);
+                return CurrentToken;
             case ',':
-                return _tokenFactory.GetToken(TokenName.CommaToken, _position++);
+                CurrentToken = _tokenFactory.GetToken(TokenName.CommaToken, _position++);
+                return CurrentToken;
         }
 
         if (IsNameStartingChar(CurrentChar))
         {
-            var token = _tokenFactory.GetToken(TokenName.NameToken, _position);
+            CurrentToken = _tokenFactory.GetToken(TokenName.NameToken, _position);
             SkipToEndOfName();
-            token.Length = _position - token.StartPos;
-            return token;
+            CurrentToken.Length = _position - CurrentToken.StartPos;
+            return CurrentToken;
         }
 
         if (char.IsDigit(Original[_position]))
         {
-            var token = _tokenFactory.GetToken(TokenName.NumberToken, _position);
+            CurrentToken = _tokenFactory.GetToken(TokenName.NumberToken, _position);
             SkipToEndOfNumber();
-            token.Length = _position - token.StartPos;
-            return token;
+            CurrentToken.Length = _position - CurrentToken.StartPos;
+            return CurrentToken;
         }
 
-        return _tokenFactory.GetToken(TokenName.UndefinedToken, _position++);
+        CurrentToken = _tokenFactory.GetToken(TokenName.UndefinedToken, _position++);
+        return CurrentToken;
     }
 
     private void SkipWhitespace()

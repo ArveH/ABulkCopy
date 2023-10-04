@@ -3,7 +3,10 @@
 public interface ITokenizer
 {
     string Original { get; }
+    IToken CurrentToken { get; }
+    string CurrentTokenText { get; }
     void Initialize(string input);
     IToken GetNext();
-    ReadOnlySpan<char> GetSpelling(IToken token);
+    IToken GetExpected(TokenName expectedToken);
+    ReadOnlySpan<char> GetSpan(IToken token);
 }

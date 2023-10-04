@@ -2,13 +2,19 @@
 
 public class UnexpectedTokenException : Exception
 {
-    public NodeType ExpectedNodeType { get; }
-    public TokenName CurrentTokenName { get; }
+    public TokenName? Expected { get; }
+    public TokenName Current { get; }
 
-    public UnexpectedTokenException(NodeType expectedNodeType, TokenName currentTokenName)
-    : base(ErrorMessages.UnexpectedNode(expectedNodeType, currentTokenName))
+    public UnexpectedTokenException(TokenName expected, TokenName current)
+    : base(ErrorMessages.UnexpectedToken(expected, current))
     {
-        ExpectedNodeType = expectedNodeType;
-        CurrentTokenName = currentTokenName;
+        Expected = expected;
+        Current = current;
+    }
+
+    public UnexpectedTokenException(TokenName current)
+        : base(ErrorMessages.UnexpectedToken(current))
+    {
+        Current = current;
     }
 }
