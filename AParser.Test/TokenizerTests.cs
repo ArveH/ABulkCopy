@@ -61,4 +61,15 @@ public class TokenizerTests
 
         action.Should().Throw<UnclosedException>().WithMessage(ErrorMessages.Unclosed(']'));
     }
+
+    [Fact]
+    public void TestGetNext_When_EmptyQuote()
+    {
+        ITokenizer tokenizer = new Tokenizer(new TokenFactory());
+        tokenizer.Initialize("[]");
+
+        var action = () => tokenizer.GetNext();
+
+        action.Should().Throw<TokenException>().WithMessage(ErrorMessages.EmptyQuote);
+    }
 }

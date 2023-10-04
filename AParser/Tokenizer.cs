@@ -84,7 +84,14 @@ public class Tokenizer : ITokenizer
         if (IsQuotedNameStartingChar(CurrentChar))
         {
             CurrentToken = _tokenFactory.GetToken(TokenType.QuotedNameToken, _position);
+            _position++;
             SkipToEndOfQuotedName();
+            _position++;
+            if (_position == CurrentToken.StartPos + 2)
+            {
+                throw new TokenException(ErrorMessages.EmptyQuote);
+            }
+
             CurrentToken.Length = _position - CurrentToken.StartPos;
             return CurrentToken;
         }

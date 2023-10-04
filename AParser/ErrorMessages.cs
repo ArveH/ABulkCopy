@@ -3,6 +3,7 @@
 public static class ErrorMessages
 {
     public const string EmptySql = "String to parse can't be empty";
+    public const string EmptyQuote = "No characters found between quotes";
 
     public static string UnexpectedToken(TokenType current)
     {

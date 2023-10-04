@@ -15,9 +15,8 @@ CommaToken ::= ','
 LeftParenthesesToken ::= '('
 NameToken ::= [a-zA-Z_][a-zA-Z0-9_]*
 NumberToken ::= [0-9]+
+QuotedNameToken ::= '[' [a-zA-Z0-9_ -.]+ ']'
 RightParenthesesToken ::= ')'
-SquareLeftParenthesesToken ::= '['
-SquareRightParenthesesToken ::= ']'
 ```
 
 ## ParseTree
