@@ -14,12 +14,10 @@ public class TokenFactory : ITokenFactory
                 return new NameToken(startPos);
             case TokenName.NumberToken:
                 return new NumberToken(startPos);
+            case TokenName.QuotedNameToken: 
+                return new QuotedNameToken(startPos);
             case TokenName.RightParenthesesToken:
                 return new RightParenthesesToken(startPos);
-            case TokenName.SquareLeftParenthesesToken:
-                return new SquareLeftParenthesesToken(startPos);
-            case TokenName.SquareRightParenthesesToken:
-                return new SquareRightParenthesesToken(startPos);
             case TokenName.EofToken:
                 return new EofToken(startPos);
             case TokenName.UndefinedToken:

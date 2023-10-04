@@ -18,7 +18,7 @@ public class AParser : IAParser
         switch (tokenizer.CurrentToken.Name)
         {
             case TokenName.NameToken:
-            case TokenName.SquareLeftParenthesesToken:
+            case TokenName.QuotedNameToken:
                 ParseName(tokenizer, parseTree);
                 if (IsFunction(tokenizer.CurrentTokenText))
                 {
@@ -85,23 +85,7 @@ public class AParser : IAParser
 
     public void ParseName(ITokenizer tokenizer, IParseTree parseTree)
     {
-        var isQuoted = false;
-        if (tokenizer.CurrentToken.Name == TokenName.SquareLeftParenthesesToken)
-        {
-            isQuoted = true;
-            tokenizer.GetNext();
-        }
-
-        if (tokenizer.CurrentToken.Name != TokenName.NameToken)
-        {
-            throw new UnexpectedTokenException(
-                TokenName.NameToken, tokenizer.CurrentToken.Name);
-        }
-
-        if (isQuoted)
-        {
-            tokenizer.GetExpected(TokenName.SquareRightParenthesesToken);
-        }
+        tokenizer.GetExpected(TokenName.NameToken);
     }
 
     private bool IsFunction(string name)

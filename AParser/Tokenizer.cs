@@ -2,6 +2,9 @@
 
 public class Tokenizer : ITokenizer
 {
+    private const char QuoteStartChar = '[';
+    private const char QuoteEndChar = ']';
+
     private readonly ITokenFactory _tokenFactory;
     private string? _original;
     private int _position;
@@ -73,15 +76,17 @@ public class Tokenizer : ITokenizer
             case ')':
                 CurrentToken = _tokenFactory.GetToken(TokenName.RightParenthesesToken, _position++);
                 return CurrentToken;
-            case '[':
-                CurrentToken = _tokenFactory.GetToken(TokenName.SquareLeftParenthesesToken, _position++);
-                return CurrentToken;
-            case ']':
-                CurrentToken = _tokenFactory.GetToken(TokenName.SquareRightParenthesesToken, _position++);
-                return CurrentToken;
             case ',':
                 CurrentToken = _tokenFactory.GetToken(TokenName.CommaToken, _position++);
                 return CurrentToken;
+        }
+
+        if (IsQuotedNameStartingChar(CurrentChar))
+        {
+            CurrentToken = _tokenFactory.GetToken(TokenName.QuotedNameToken, _position);
+            SkipToEndOfQuotedName();
+            CurrentToken.Length = _position - CurrentToken.StartPos;
+            return CurrentToken;
         }
 
         if (IsNameStartingChar(CurrentChar))
@@ -120,12 +125,30 @@ public class Tokenizer : ITokenizer
         }
     }
 
+    private void SkipToEndOfQuotedName()
+    {
+        while (_position < Original.Length && CurrentChar != QuoteEndChar)
+        {
+            _position++;
+        }
+
+        if (CurrentChar != QuoteEndChar)
+        {
+            throw new UnclosedException(QuoteEndChar);
+        }
+    }
+
     private void SkipToEndOfNumber()
     {
         while (char.IsLetterOrDigit(CurrentChar))
         {
             _position++;
         }
+    }
+
+    private bool IsQuotedNameStartingChar(char c)
+    {
+        return c == QuoteStartChar;
     }
 
     private bool IsNameStartingChar(char c)

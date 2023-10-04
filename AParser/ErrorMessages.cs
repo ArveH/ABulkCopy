@@ -33,4 +33,9 @@ public static class ErrorMessages
     {
         return $"Illegal type name: {name}";
     }
+
+    public static string Unclosed(char expectedChar)
+    {
+        return $"Didn't find expected closing character: {expectedChar}";
+    }
 }

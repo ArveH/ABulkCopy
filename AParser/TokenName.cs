@@ -6,9 +6,8 @@ public enum TokenName
     LeftParenthesesToken,
     NameToken,
     NumberToken,
+    QuotedNameToken,
     RightParenthesesToken,
-    SquareLeftParenthesesToken,
-    SquareRightParenthesesToken,
 
     EofToken,
     UndefinedToken

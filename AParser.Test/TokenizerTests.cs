@@ -13,11 +13,9 @@ public class TokenizerTests
     }
 
     [Theory]
-    [InlineData("",  TokenName.EofToken)]
     [InlineData("(",  TokenName.LeftParenthesesToken)]
     [InlineData(")",  TokenName.RightParenthesesToken)]
-    [InlineData("[",  TokenName.SquareLeftParenthesesToken)]
-    [InlineData("]",  TokenName.SquareRightParenthesesToken)]
+    [InlineData("]",  TokenName.UndefinedToken)]
     [InlineData("1",  TokenName.NumberToken)]
     [InlineData("123",  TokenName.NumberToken)]
     [InlineData(",",  TokenName.CommaToken)]
@@ -30,6 +28,9 @@ public class TokenizerTests
     [InlineData("_", TokenName.NameToken)]
     [InlineData("0aA",  TokenName.NumberToken)]
     [InlineData(".90",  TokenName.UndefinedToken)]
+    [InlineData("[arve]",  TokenName.QuotedNameToken)]
+    [InlineData("[.90]",  TokenName.QuotedNameToken)]
+    [InlineData("[ arve]",  TokenName.QuotedNameToken)]
     public void TestGetNext(string input, TokenName expected)
     {
         ITokenizer tokenizer = new Tokenizer(new TokenFactory());
@@ -40,4 +41,24 @@ public class TokenizerTests
         result.Name.Should().Be(expected, $"because \"{input}\" should produce {expected}");
     }
 
+    [Fact]
+    public void TestGetNext_When_EmptyString()
+    {
+        ITokenizer tokenizer = new Tokenizer(new TokenFactory());
+        
+        var action = () => tokenizer.Initialize("");
+
+        action.Should().Throw<AParserException>().WithMessage(ErrorMessages.EmptySql);
+    }
+
+    [Fact]
+    public void TestGetNext_When_NoEndQuote()
+    {
+        ITokenizer tokenizer = new Tokenizer(new TokenFactory());
+        tokenizer.Initialize("[arve");
+
+        var action = () => tokenizer.GetNext();
+
+        action.Should().Throw<UnclosedException>().WithMessage(ErrorMessages.Unclosed(']'));
+    }
 }
