@@ -75,6 +75,44 @@ namespace AParser.Test
 
         }
 
+        [Fact]
+        public void TestParseConvertFunction_When_SqlTypeNotQuoted()
+        {
+            const string testVal = "convert ( bit  ,0 ) ";
+            _tokenizer.Initialize(testVal);
+            _tokenizer.GetNext();
+
+            _parser.ParseExpression(_tokenizer, _parseTree);
+
+        }
+
+        [Fact]
+        public void TestParseFunction_When_UnknownFunction()
+        {
+            const string testVal = "(CAST([bit],(0)))";
+            _tokenizer.Initialize(testVal);
+            _tokenizer.GetNext();
+
+            var action = () => _parser.ParseExpression(_tokenizer, _parseTree);
+
+            action.Should().Throw<UnknownFunctionException>()
+                .WithMessage(ErrorMessages.UnknownFunction("cast"));
+        }
+
+        [Fact]
+        public void TestParseFunction_When_UnknownType()
+        {
+            const string testVal = "(CONVERT([paper],(0)))";
+            _tokenizer.Initialize(testVal);
+            _tokenizer.GetNext();
+
+            var action = () => _parser.ParseExpression(_tokenizer, _parseTree);
+
+            action.Should().Throw<UnknownSqlTypeException>()
+                .WithMessage(ErrorMessages.UnknownSqlType(
+                    "paper"));
+        }
+
         private IParseTree GetParseTree()
         {
             return new ParseTree();
