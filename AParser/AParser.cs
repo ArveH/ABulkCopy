@@ -6,6 +6,16 @@ public class AParser : IAParser
     private readonly ITokenizer _tokenizer;
     private IToken _currentToken = UndefinedToken.Instance;
 
+    private static readonly HashSet<string> FunctionNames = new(StringComparer.InvariantCultureIgnoreCase)
+    {
+        "convert"
+    };
+
+    private static readonly HashSet<string> SqlTypes = new(StringComparer.InvariantCultureIgnoreCase)
+    {
+        "bit"
+    };
+
     public AParser(
         INodeFactory nodeFactory,
         ITokenizer tokenizer)
@@ -33,30 +43,77 @@ public class AParser : IAParser
         switch (_currentToken.Name)
         {
             case TokenName.NameToken:
+                var name = GetCurrentTokenSpelling();
+                expressionNode.Children!.Add(IsFunction(name)
+                    ? ParseFunction(name)
+                    : CreateLeafNode(NodeType.NameLeafNode, _currentToken));
+                break;
             case TokenName.SquareLeftParenthesesToken:
-                expressionNode.Children!.Add(ParseName());
-                GetNextToken();
+                expressionNode.Children!.Add(ParseQuotedName());
                 break;
             case TokenName.NumberToken:
                 expressionNode.Children!.Add(ParseNumber());
-                GetNextToken();
                 break;
             case TokenName.LeftParenthesesToken:
                 expressionNode.Children!.Add(ParseParentheses());
-                GetNextToken();
                 break;
             default:
                 throw new UnexpectedTokenException(NodeType.ExpressionNode, _currentToken.Name);
         }
 
+        GetNextToken();
         return expressionNode;
+    }
+
+    private INode ParseFunction(string name)
+    {
+        if (name.Equals("convert", StringComparison.InvariantCultureIgnoreCase))
+        {
+            return ParseConvertFunction();
+        }
+
+        throw new UnknownFunctionException(name);
+    }
+
+    private INode ParseConvertFunction()
+    {
+        var functionNode = CreateNode(NodeType.ConvertFunctionNode);
+        GetNextToken();
+        if (_currentToken.Name != TokenName.LeftParenthesesToken)
+        {
+            throw new UnexpectedTokenException(NodeType.LeftParenthesesLeafNode, _currentToken.Name);
+        }
+        functionNode.Children!.Add(CreateLeafNode(NodeType.LeftParenthesesLeafNode, _currentToken));
+        GetNextToken();
+        functionNode.Children.Add(ParseName());
+        if (!IsSqlType(functionNode.Children.Last()))
+        {
+            throw new UnknownSqlTypeException(GetCurrentTokenSpelling());
+        }
+        GetNextToken();
+        if (_currentToken.Name != TokenName.CommaToken)
+        {
+            throw new UnexpectedTokenException(NodeType.CommaLeafNode, _currentToken.Name);
+        }
+        functionNode.Children.Add(CreateLeafNode(NodeType.CommaLeafNode, _currentToken));
+        GetNextToken();
+        functionNode.Children.Add(ParseExpression());
+        GetNextToken();
+        if (_currentToken.Name != TokenName.RightParenthesesToken)
+        {
+            throw new UnexpectedTokenException(NodeType.RightParenthesesLeafNode, _currentToken.Name);
+        }
+        functionNode.Children.Add(CreateLeafNode(NodeType.RightParenthesesLeafNode, _currentToken));
+        GetNextToken();
+
+        return functionNode;
     }
 
     private INode ParseName()
     {
         if (_currentToken.Name == TokenName.SquareLeftParenthesesToken)
         {
-            return ParseQuotedNameNode();
+            return ParseQuotedName();
         }
 
         if (_currentToken.Name != TokenName.NameToken)
@@ -67,7 +124,7 @@ public class AParser : IAParser
         return CreateLeafNode(NodeType.NameLeafNode, _currentToken);
     }
 
-    private INode ParseQuotedNameNode()
+    private INode ParseQuotedName()
     {
         if (_currentToken.Name != TokenName.SquareLeftParenthesesToken)
         {
@@ -94,6 +151,7 @@ public class AParser : IAParser
 
         quotedNameNode.Children!.Add(
             CreateLeafNode(NodeType.SquareRightParenthesesLeafNode, _currentToken));
+        GetNextToken();
 
         return quotedNameNode;
     }
@@ -127,6 +185,27 @@ public class AParser : IAParser
         parenthesesNode.Children!.Add(CreateLeafNode(NodeType.RightParenthesesLeafNode, _currentToken));
 
         return parenthesesNode;
+    }
+
+    private string GetCurrentTokenSpelling()
+    {
+        return _tokenizer.GetSpelling(_currentToken).ToString();
+    }
+
+    private bool IsFunction(string name)
+    {
+        return FunctionNames.Contains(name);
+    }
+
+    private bool IsSqlType(INode node)
+    {
+        if (node.IsLeafNode)
+            return SqlTypes.Contains(node.Token!.Name.ToString());
+
+        if (node.Children!.Count == 3 && node.Children[1].IsLeafNode)
+            return SqlTypes.Contains(_tokenizer.GetSpelling(node.Children[1].Token!).ToString());
+
+        return false;
     }
 
     private void GetNextToken()

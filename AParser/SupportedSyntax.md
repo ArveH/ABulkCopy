@@ -25,17 +25,17 @@ SquareRightParenthesesToken ::= ']'
 ### Nodes
 ``` ebnf
 ExpressionNode ::= ParenthesesNode 
-                    | NameNode
+                    | function
+                    | name
                     | NumberNode
-                    | QuotedNameNode
-                    | FunctionNode
 
 ParenthesesNode ::= LeftParenthesesLeafNode ExpressionNode RightParenthesesLeafNode
 
-FunctionNode ::= ConvertFunctionNode
 ConvertFunctionNode ::= NameLeafNode LeftParenthesesLeafNode type CommaLeafNode ExpressionNode RightParenthesesLeafToken
 QuotedNameNode ::= LeftParenthesesLeafNode NameLeafNode RightParenthesesLeafNode
 
+function ::= ConvertFunctionNode
+name ::= NameLeafNode | QuotedNameNode
 type ::= NameLeafNode | QuotedNameNode
 ```
 

@@ -31,19 +31,8 @@ namespace AParser.Test
 
             var rootNode = parser.Parse($"[{name}]");
 
-            VerifyExpressionNode(rootNode);
-            var quotedName = rootNode.Children![0];
-            quotedName.Type.Should().Be(NodeType.QuotedNameNode);
-            quotedName.Children.Should().HaveCount(3, "because the quoted name node should have 3 children");
-            VerifyLeafNode(
-                quotedName.Children![0],
-                NodeType.SquareLeftParenthesesLeafNode,
-                TokenName.SquareLeftParenthesesToken);
-            VerifyNameNode(quotedName.Children![1], name, tokenizer);
-            VerifyLeafNode(
-                quotedName.Children![2],
-                NodeType.SquareRightParenthesesLeafNode,
-                TokenName.SquareRightParenthesesToken);
+            var quotedName = VerifyQuotedNameExpression(rootNode);
+            VerifyNameNode(quotedName, name, tokenizer);
         }
 
         [Fact]
@@ -90,21 +79,21 @@ namespace AParser.Test
 
             var rootNode = parser.Parse($"({name})");
 
-            VerifyExpressionNode(rootNode);
-            var parenthesesNode = rootNode.Children![0];
-            parenthesesNode.Type.Should().Be(NodeType.ParenthesesNode);
-            parenthesesNode.Children.Should().HaveCount(3, "because the parentheses node should have 3 children");
-            VerifyLeafNode(
-                parenthesesNode.Children![0], 
-                NodeType.LeftParenthesesLeafNode, 
-                TokenName.LeftParenthesesToken);
-            VerifyLeafNode(
-                parenthesesNode.Children![2],
-                NodeType.RightParenthesesLeafNode,
-                TokenName.RightParenthesesToken);
-            var expressionNode = parenthesesNode.Children![1];
-            VerifyExpressionNode(expressionNode);
-            VerifyNameNode(expressionNode.Children![0], name, tokenizer);
+            var child = VerifyParenthesesExpression(rootNode);
+            VerifyNameNode(child, name, tokenizer);
+        }
+
+        [Fact]
+        public void TestConvertFunction()
+        {
+            var tokenizer = GetTokenizer();
+            var parser = GetParser(tokenizer);
+            const string sqlString = "(CONVERT([bit],(0)))";
+
+            var rootNode = parser.Parse(sqlString);
+
+            var child = VerifyParenthesesExpression(rootNode);
+            child.Type.Should().Be(NodeType.ConvertFunctionNode);
         }
 
         private static void VerifyExpressionNode(INode expressionNode)
@@ -113,6 +102,42 @@ namespace AParser.Test
             expressionNode.Type.Should().Be(NodeType.ExpressionNode);
             expressionNode.Children.Should().NotBeNull("because the ExpressionNode should have one child");
             expressionNode.Children.Should().HaveCount(1, "because the ExpressionNode should have one child");
+        }
+
+        private static INode VerifyParenthesesExpression(INode rootNode)
+        {
+            VerifyExpressionNode(rootNode);
+            var parenthesesNode = rootNode.Children![0];
+            parenthesesNode.Type.Should().Be(NodeType.ParenthesesNode);
+            parenthesesNode.Children.Should().HaveCount(3, "because the parentheses node should have 3 children");
+            VerifyLeafNode(
+                parenthesesNode.Children![0],
+                NodeType.LeftParenthesesLeafNode,
+                TokenName.LeftParenthesesToken);
+            VerifyLeafNode(
+                parenthesesNode.Children![2],
+                NodeType.RightParenthesesLeafNode,
+                TokenName.RightParenthesesToken);
+            var expressionNode = parenthesesNode.Children![1];
+            VerifyExpressionNode(expressionNode);
+            return expressionNode.Children![0];
+        }
+
+        private static INode VerifyQuotedNameExpression(INode rootNode)
+        {
+            VerifyExpressionNode(rootNode);
+            var quotedName = rootNode.Children![0];
+            quotedName.Type.Should().Be(NodeType.QuotedNameNode);
+            quotedName.Children.Should().HaveCount(3, "because the quoted name node should have 3 children");
+            VerifyLeafNode(
+                quotedName.Children![0],
+                NodeType.SquareLeftParenthesesLeafNode,
+                TokenName.SquareLeftParenthesesToken);
+            VerifyLeafNode(
+                quotedName.Children![2],
+                NodeType.SquareRightParenthesesLeafNode,
+                TokenName.SquareRightParenthesesToken);
+            return quotedName.Children![1];
         }
 
         private static void VerifyNameNode(INode node, string name, ITokenizer tokenizer)

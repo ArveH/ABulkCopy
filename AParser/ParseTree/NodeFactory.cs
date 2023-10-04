@@ -7,9 +7,8 @@ public class NodeFactory : INodeFactory
         return nodeType switch
         {
             NodeType.CommaLeafNode => new CommaLeafNode(token ?? throw new TokenArgumentNullException(TokenName.CommaToken)),
-            NodeType.ConvertFunctionNode => new FunctionNode(),
+            NodeType.ConvertFunctionNode => new ConvertFunctionNode(),
             NodeType.ExpressionNode => new ExpressionNode(),
-            NodeType.FunctionNode => new FunctionNode(),
             NodeType.LeftParenthesesLeafNode => new LeftParenthesesLeafNode(token ?? throw new TokenArgumentNullException(TokenName.LeftParenthesesToken)),
             NodeType.NameLeafNode => new NameLeafNode(token ?? throw new TokenArgumentNullException("name token")),
             NodeType.NumberLeafNode => new NumberLeafNode(token ?? throw new TokenArgumentNullException("constant token")),

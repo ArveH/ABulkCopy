@@ -5,7 +5,6 @@ public enum NodeType
     CommaLeafNode,
     ConvertFunctionNode,
     ExpressionNode,
-    FunctionNode,
     LeftParenthesesLeafNode,
     NameLeafNode,
     NumberLeafNode,

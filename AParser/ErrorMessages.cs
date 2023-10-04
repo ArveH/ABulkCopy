@@ -1,4 +1,6 @@
-﻿namespace AParser;
+﻿using System.Runtime.Serialization;
+
+namespace AParser;
 
 public static class ErrorMessages
 {
@@ -17,5 +19,15 @@ public static class ErrorMessages
     public static string CreateNode(NodeType nodeType)
     {
         return $"Can't create node of type {nodeType}";
+    }
+
+    public static string UnknownFunction(string name)
+    {
+        return $"Can't parse function {name}";
+    }
+
+    public static string UnknownSqlType(string name)
+    {
+        return $"Illegal type name: {name}";
     }
 }
