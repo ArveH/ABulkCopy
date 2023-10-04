@@ -26,18 +26,7 @@ namespace AParser.Test
             _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
 
-            _parser.ParseExpression(_tokenizer, _parseTree);
-
-        }
-
-        [Fact]
-        public void TestParseQuotedName()
-        {
-            const string testVal = "arve";
-            _tokenizer.Initialize($"[{testVal}]");
-            _tokenizer.GetNext();
-
-            _parser.ParseExpression(_tokenizer, _parseTree);
+            _parser.ParseName(_tokenizer, _parseTree);
 
         }
 
@@ -45,22 +34,11 @@ namespace AParser.Test
         public void TestParseNumber()
         {
             const string testVal = "123";
-            _tokenizer.Initialize($"[{testVal}]");
+            _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
 
-            _parser.ParseExpression(_tokenizer, _parseTree);
+            _parser.ParseNumber(_tokenizer, _parseTree);
 
-        }
-
-        [Fact]
-        public void TestParseParentheses_When_EmptyString_Then_Exception()
-        {
-            _tokenizer.Initialize("");
-            _tokenizer.GetNext();
-
-            var action = () => _parser.ParseExpression(_tokenizer, _parseTree);
-
-            action.Should().Throw<AParserException>().WithMessage(ErrorMessages.EmptySql);
         }
 
         [Fact]
@@ -71,15 +49,14 @@ namespace AParser.Test
 
             var action = () => _parser.ParseExpression(_tokenizer, _parseTree);
 
-            action.Should().Throw<UnexpectedTokenException>()
-                .Where(e => e.Expected == null &&
-                            e.Current == TokenType.RightParenthesesToken);
+            action.Should().Throw<AParserException>()
+                .WithMessage(ErrorMessages.UnexpectedToken(TokenType.RightParenthesesToken));
         }
 
         [Fact]
-        public void TestParseParentheses_When_ContainsName()
+        public void TestParseExpression_When_ContainsParenthesesAndNumber()
         {
-            const string testVal = "(arve)";
+            const string testVal = "(123)";
             _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
 
@@ -88,11 +65,13 @@ namespace AParser.Test
         }
 
         [Fact]
-        public void TestConvertFunction()
+        public void TestParseConvertFunction()
         {
             const string testVal = "(CONVERT([bit],(0)))";
             _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
+
+            _parser.ParseExpression(_tokenizer, _parseTree);
 
         }
 
@@ -108,7 +87,7 @@ namespace AParser.Test
 
         private IAParser GetParser()
         {
-            return new AParser(new SqlFunctions(), new SqlTypes());
+            return new AParser(new SqlTypes());
         }
     }
 }

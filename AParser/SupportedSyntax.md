@@ -21,31 +21,18 @@ RightParenthesesToken ::= ')'
 
 ## ParseTree
 
-### Nodes
 ``` ebnf
-ExpressionNode ::= ParenthesesNode 
-                    | function
-                    | name
-                    | NumberNode
+Expression ::= Parentheses 
+                    | Function
+                    | Number
 
-ParenthesesNode ::= LeftParenthesesLeafNode ExpressionNode RightParenthesesLeafNode
+Parentheses ::= LeftParenthesesToken Expression RightParenthesesToken
+Function ::= ConvertFunction
+ConvertFunction ::= 'convert' LeftParenthesesToken Type CommaToken Expression RightParenthesesToken
+Number ::= NumberToken
 
-ConvertFunctionNode ::= NameLeafNode LeftParenthesesLeafNode type CommaLeafNode ExpressionNode RightParenthesesLeafToken
-QuotedNameNode ::= LeftParenthesesLeafNode NameLeafNode RightParenthesesLeafNode
-
-function ::= ConvertFunctionNode
 name ::= NameLeafNode | QuotedNameNode
-type ::= NameLeafNode | QuotedNameNode
+Type ::= 'bit'
 ```
 
-### LeafNodes
 
-``` ebnf
-LeftParenthesesLeafNode ::= LeftParenthesesToken
-RightParenthesesLeafNode ::= RightParenthesesToken
-SquareLeftParenthesesLeafNode ::= SquareLeftParenthesesToken
-SquareRightParenthesesLeafNode ::= SquareRightParenthesesToken
-CommaLeafNode ::= CommaToken
-NameLeafNode ::= NameToken
-NumberLeafNode ::= NumberToken
-```

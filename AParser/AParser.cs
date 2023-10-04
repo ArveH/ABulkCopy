@@ -2,14 +2,10 @@
 
 public class AParser : IAParser
 {
-    private readonly ISqlFunctions _sqlFunctions;
     private readonly ISqlTypes _sqlTypes;
 
-    public AParser(
-        ISqlFunctions sqlFunctions,
-        ISqlTypes sqlTypes)
+    public AParser(ISqlTypes sqlTypes)
     {
-        _sqlFunctions = sqlFunctions;
         _sqlTypes = sqlTypes;
     }
 
@@ -17,19 +13,14 @@ public class AParser : IAParser
     {
         switch (tokenizer.CurrentToken.Type)
         {
+            case TokenType.LeftParenthesesToken:
+                ParseParentheses(tokenizer, parseTree);
+                break;
             case TokenType.NameToken:
-            case TokenType.QuotedNameToken:
-                ParseName(tokenizer, parseTree);
-                if (IsFunction(tokenizer.CurrentTokenText))
-                {
-                    ParseFunction(tokenizer, parseTree);
-                }
+                ParseFunction(tokenizer, parseTree);
                 break;
             case TokenType.NumberToken:
                 ParseNumber(tokenizer, parseTree);
-                break;
-            case TokenType.LeftParenthesesToken:
-                ParseParentheses(tokenizer, parseTree);
                 break;
             default:
                 throw new AParserException(ErrorMessages.UnexpectedToken(tokenizer.CurrentToken.Type));
@@ -38,7 +29,8 @@ public class AParser : IAParser
 
     public void ParseFunction(ITokenizer tokenizer, IParseTree parseTree)
     {
-        switch (tokenizer.CurrentTokenText)
+        var functionName = tokenizer.CurrentTokenText.ToLower();
+        switch (functionName)
         {
             case "convert":
                 ParseConvertFunction(tokenizer, parseTree);
@@ -65,31 +57,41 @@ public class AParser : IAParser
 
     public void ParseParentheses(ITokenizer tokenizer, IParseTree parseTree)
     {
-        throw new NotImplementedException();
+        if (tokenizer.CurrentToken.Type != TokenType.LeftParenthesesToken)
+        {
+            throw new UnexpectedTokenException(TokenType.LeftParenthesesToken, tokenizer.CurrentToken.Type);
+        }
+        tokenizer.GetNext();
+
+        ParseExpression(tokenizer, parseTree);
+
+        tokenizer.GetExpected(TokenType.RightParenthesesToken);
     }
 
     public void ParseNumber(ITokenizer tokenizer, IParseTree parseTree)
     {
-        throw new NotImplementedException();
-    }
-
-    public void ParseQuotedName(ITokenizer tokenizer, IParseTree parseTree)
-    {
-        throw new NotImplementedException();
+        if (tokenizer.CurrentToken.Type != TokenType.NumberToken)
+        {
+            throw new UnexpectedTokenException(TokenType.NumberToken, tokenizer.CurrentToken.Type);
+        }
     }
 
     public void ParseType(ITokenizer tokenizer, IParseTree parseTree)
     {
-        throw new NotImplementedException();
+        var type = tokenizer.CurrentToken.Type == TokenType.QuotedNameToken
+            ? tokenizer.CurrentTokenText[1..^1]
+                : tokenizer.CurrentTokenText;
+        if (!_sqlTypes.Exist(type))
+        {
+            throw new UnknownSqlTypeException(type);
+        }
     }
 
     public void ParseName(ITokenizer tokenizer, IParseTree parseTree)
     {
-        tokenizer.GetExpected(TokenType.NameToken);
-    }
-
-    private bool IsFunction(string name)
-    {
-        return _sqlFunctions.Exist(name);
+        if (tokenizer.CurrentToken.Type != TokenType.NameToken)
+        {
+            throw new UnexpectedTokenException(TokenType.NameToken, tokenizer.CurrentToken.Type);
+        }
     }
 }

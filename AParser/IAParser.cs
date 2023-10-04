@@ -7,7 +7,6 @@ public interface IAParser
     void ParseConvertFunction(ITokenizer tokenizer, IParseTree parseTree);
     void ParseParentheses(ITokenizer tokenizer, IParseTree parseTree);
     void ParseNumber(ITokenizer tokenizer, IParseTree parseTree);
-    void ParseQuotedName(ITokenizer tokenizer, IParseTree parseTree);
     void ParseType(ITokenizer tokenizer, IParseTree parseTree);
     void ParseName(ITokenizer tokenizer, IParseTree parseTree);
 }
