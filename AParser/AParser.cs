@@ -15,24 +15,24 @@ public class AParser : IAParser
 
     public void ParseExpression(ITokenizer tokenizer, IParseTree parseTree)
     {
-        switch (tokenizer.CurrentToken.Name)
+        switch (tokenizer.CurrentToken.Type)
         {
-            case TokenName.NameToken:
-            case TokenName.QuotedNameToken:
+            case TokenType.NameToken:
+            case TokenType.QuotedNameToken:
                 ParseName(tokenizer, parseTree);
                 if (IsFunction(tokenizer.CurrentTokenText))
                 {
                     ParseFunction(tokenizer, parseTree);
                 }
                 break;
-            case TokenName.NumberToken:
+            case TokenType.NumberToken:
                 ParseNumber(tokenizer, parseTree);
                 break;
-            case TokenName.LeftParenthesesToken:
+            case TokenType.LeftParenthesesToken:
                 ParseParentheses(tokenizer, parseTree);
                 break;
             default:
-                throw new AParserException(ErrorMessages.UnexpectedToken(tokenizer.CurrentToken.Name));
+                throw new AParserException(ErrorMessages.UnexpectedToken(tokenizer.CurrentToken.Type));
         }
     }
 
@@ -50,17 +50,17 @@ public class AParser : IAParser
 
     public void ParseConvertFunction(ITokenizer tokenizer, IParseTree parseTree)
     {
-        tokenizer.GetExpected(TokenName.LeftParenthesesToken);
+        tokenizer.GetExpected(TokenType.LeftParenthesesToken);
         tokenizer.GetNext();
 
         ParseType(tokenizer, parseTree);
 
-        tokenizer.GetExpected(TokenName.CommaToken);
+        tokenizer.GetExpected(TokenType.CommaToken);
         tokenizer.GetNext();
 
         ParseExpression(tokenizer, parseTree);
 
-        tokenizer.GetExpected(TokenName.RightParenthesesToken);
+        tokenizer.GetExpected(TokenType.RightParenthesesToken);
     }
 
     public void ParseParentheses(ITokenizer tokenizer, IParseTree parseTree)
@@ -85,7 +85,7 @@ public class AParser : IAParser
 
     public void ParseName(ITokenizer tokenizer, IParseTree parseTree)
     {
-        tokenizer.GetExpected(TokenName.NameToken);
+        tokenizer.GetExpected(TokenType.NameToken);
     }
 
     private bool IsFunction(string name)

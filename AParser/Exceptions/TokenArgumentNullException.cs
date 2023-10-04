@@ -7,8 +7,8 @@ public class TokenArgumentNullException : Exception
     {
     }
 
-    public TokenArgumentNullException(TokenName tokenName)
-        : base(ErrorMessages.NullToken(tokenName.ToString()))
+    public TokenArgumentNullException(TokenType tokenType)
+        : base(ErrorMessages.NullToken(tokenType.ToString()))
     {
     }
 }

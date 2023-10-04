@@ -2,7 +2,7 @@
 
 public class SetLengthException : Exception
 {
-    public SetLengthException(TokenName tokenName) : 
-        base($"Can't set length for token {tokenName}")
+    public SetLengthException(TokenType tokenType) : 
+        base($"Can't set length for token {tokenType}")
     { }
 }

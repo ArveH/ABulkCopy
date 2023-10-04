@@ -5,13 +5,13 @@ public class RightParenthesesToken : IToken
     public RightParenthesesToken(int startPos)
     {
         StartPos = startPos;
-        Name = TokenName.RightParenthesesToken;
+        Type = TokenType.RightParenthesesToken;
     }
-    public TokenName Name { get; }
+    public TokenType Type { get; }
     public int StartPos { get; }
     public int Length
     {
         get => 1;
-        set => throw new SetLengthException(TokenName.RightParenthesesToken);
+        set => throw new SetLengthException(TokenType.RightParenthesesToken);
     }
 }

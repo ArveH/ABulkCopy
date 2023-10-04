@@ -5,13 +5,13 @@ public class LeftParenthesesToken : IToken
     public LeftParenthesesToken(int startPos)
     {
         StartPos = startPos;
-        Name = TokenName.LeftParenthesesToken;
+        Type = TokenType.LeftParenthesesToken;
     }
-    public TokenName Name { get; }
+    public TokenType Type { get; }
     public int StartPos { get; }
     public int Length
     {
         get => 1;
-        set => throw new SetLengthException(TokenName.LeftParenthesesToken);
+        set => throw new SetLengthException(TokenType.LeftParenthesesToken);
     }
 }

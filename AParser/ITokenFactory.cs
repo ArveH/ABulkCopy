@@ -2,5 +2,5 @@
 
 public interface ITokenFactory
 {
-    IToken GetToken(TokenName name, int startPos);
+    IToken GetToken(TokenType type, int startPos);
 }

@@ -2,7 +2,7 @@
 
 public interface IToken
 {
-    public TokenName Name { get; }
+    public TokenType Type { get; }
     public int StartPos { get; }
     public int Length { get; set; }
 }

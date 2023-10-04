@@ -73,7 +73,7 @@ namespace AParser.Test
 
             action.Should().Throw<UnexpectedTokenException>()
                 .Where(e => e.Expected == null &&
-                            e.Current == TokenName.RightParenthesesToken);
+                            e.Current == TokenType.RightParenthesesToken);
         }
 
         [Fact]

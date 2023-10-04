@@ -1,6 +1,6 @@
 ﻿namespace AParser;
 
-public enum TokenName
+public enum TokenType
 {
     CommaToken,
     LeftParenthesesToken,

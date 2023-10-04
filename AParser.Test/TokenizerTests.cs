@@ -13,32 +13,32 @@ public class TokenizerTests
     }
 
     [Theory]
-    [InlineData("(",  TokenName.LeftParenthesesToken)]
-    [InlineData(")",  TokenName.RightParenthesesToken)]
-    [InlineData("]",  TokenName.UndefinedToken)]
-    [InlineData("1",  TokenName.NumberToken)]
-    [InlineData("123",  TokenName.NumberToken)]
-    [InlineData(",",  TokenName.CommaToken)]
-    [InlineData("a",  TokenName.NameToken)]
-    [InlineData("abc",  TokenName.NameToken)]
-    [InlineData("_a",  TokenName.NameToken)]
-    [InlineData("a_0",  TokenName.NameToken)]
-    [InlineData("Aa0",  TokenName.NameToken)]
-    [InlineData("a099",  TokenName.NameToken)]
-    [InlineData("_", TokenName.NameToken)]
-    [InlineData("0aA",  TokenName.NumberToken)]
-    [InlineData(".90",  TokenName.UndefinedToken)]
-    [InlineData("[arve]",  TokenName.QuotedNameToken)]
-    [InlineData("[.90]",  TokenName.QuotedNameToken)]
-    [InlineData("[ arve]",  TokenName.QuotedNameToken)]
-    public void TestGetNext(string input, TokenName expected)
+    [InlineData("(",  TokenType.LeftParenthesesToken)]
+    [InlineData(")",  TokenType.RightParenthesesToken)]
+    [InlineData("]",  TokenType.UndefinedToken)]
+    [InlineData("1",  TokenType.NumberToken)]
+    [InlineData("123",  TokenType.NumberToken)]
+    [InlineData(",",  TokenType.CommaToken)]
+    [InlineData("a",  TokenType.NameToken)]
+    [InlineData("abc",  TokenType.NameToken)]
+    [InlineData("_a",  TokenType.NameToken)]
+    [InlineData("a_0",  TokenType.NameToken)]
+    [InlineData("Aa0",  TokenType.NameToken)]
+    [InlineData("a099",  TokenType.NameToken)]
+    [InlineData("_", TokenType.NameToken)]
+    [InlineData("0aA",  TokenType.NumberToken)]
+    [InlineData(".90",  TokenType.UndefinedToken)]
+    [InlineData("[arve]",  TokenType.QuotedNameToken)]
+    [InlineData("[.90]",  TokenType.QuotedNameToken)]
+    [InlineData("[ arve]",  TokenType.QuotedNameToken)]
+    public void TestGetNext(string input, TokenType expected)
     {
         ITokenizer tokenizer = new Tokenizer(new TokenFactory());
         tokenizer.Initialize(input);
 
         var result = tokenizer.GetNext();
 
-        result.Name.Should().Be(expected, $"because \"{input}\" should produce {expected}");
+        result.Type.Should().Be(expected, $"because \"{input}\" should produce {expected}");
     }
 
     [Fact]

@@ -2,28 +2,28 @@
 
 public class TokenFactory : ITokenFactory
 {
-    public IToken GetToken(TokenName name, int startPos)
+    public IToken GetToken(TokenType type, int startPos)
     {
-        switch (name)
+        switch (type)
         {
-            case TokenName.CommaToken:
+            case TokenType.CommaToken:
                 return new CommaToken(startPos);
-            case TokenName.LeftParenthesesToken:
+            case TokenType.LeftParenthesesToken:
                 return new LeftParenthesesToken(startPos);
-            case TokenName.NameToken:
+            case TokenType.NameToken:
                 return new NameToken(startPos);
-            case TokenName.NumberToken:
+            case TokenType.NumberToken:
                 return new NumberToken(startPos);
-            case TokenName.QuotedNameToken: 
+            case TokenType.QuotedNameToken: 
                 return new QuotedNameToken(startPos);
-            case TokenName.RightParenthesesToken:
+            case TokenType.RightParenthesesToken:
                 return new RightParenthesesToken(startPos);
-            case TokenName.EofToken:
+            case TokenType.EofToken:
                 return new EofToken(startPos);
-            case TokenName.UndefinedToken:
+            case TokenType.UndefinedToken:
                 return UndefinedToken.Instance;
             default:
-                throw new ArgumentOutOfRangeException(nameof(name), name, null);
+                throw new ArgumentOutOfRangeException(nameof(type), type, null);
         }
     }
 }

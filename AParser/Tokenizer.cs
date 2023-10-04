@@ -48,12 +48,12 @@ public class Tokenizer : ITokenizer
 
     public string CurrentTokenText => GetSpan(CurrentToken).ToString();
 
-    public IToken GetExpected(TokenName expectedToken)
+    public IToken GetExpected(TokenType expectedToken)
     {
         var token = GetNext();
-        if (token.Name != expectedToken)
+        if (token.Type != expectedToken)
         {
-            throw new UnexpectedTokenException(expectedToken, token.Name);
+            throw new UnexpectedTokenException(expectedToken, token.Type);
         }
 
         return token;
@@ -71,19 +71,19 @@ public class Tokenizer : ITokenizer
         switch (CurrentChar)
         {
             case '(':
-                CurrentToken = _tokenFactory.GetToken(TokenName.LeftParenthesesToken, _position++);
+                CurrentToken = _tokenFactory.GetToken(TokenType.LeftParenthesesToken, _position++);
                 return CurrentToken;
             case ')':
-                CurrentToken = _tokenFactory.GetToken(TokenName.RightParenthesesToken, _position++);
+                CurrentToken = _tokenFactory.GetToken(TokenType.RightParenthesesToken, _position++);
                 return CurrentToken;
             case ',':
-                CurrentToken = _tokenFactory.GetToken(TokenName.CommaToken, _position++);
+                CurrentToken = _tokenFactory.GetToken(TokenType.CommaToken, _position++);
                 return CurrentToken;
         }
 
         if (IsQuotedNameStartingChar(CurrentChar))
         {
-            CurrentToken = _tokenFactory.GetToken(TokenName.QuotedNameToken, _position);
+            CurrentToken = _tokenFactory.GetToken(TokenType.QuotedNameToken, _position);
             SkipToEndOfQuotedName();
             CurrentToken.Length = _position - CurrentToken.StartPos;
             return CurrentToken;
@@ -91,7 +91,7 @@ public class Tokenizer : ITokenizer
 
         if (IsNameStartingChar(CurrentChar))
         {
-            CurrentToken = _tokenFactory.GetToken(TokenName.NameToken, _position);
+            CurrentToken = _tokenFactory.GetToken(TokenType.NameToken, _position);
             SkipToEndOfName();
             CurrentToken.Length = _position - CurrentToken.StartPos;
             return CurrentToken;
@@ -99,13 +99,13 @@ public class Tokenizer : ITokenizer
 
         if (char.IsDigit(Original[_position]))
         {
-            CurrentToken = _tokenFactory.GetToken(TokenName.NumberToken, _position);
+            CurrentToken = _tokenFactory.GetToken(TokenType.NumberToken, _position);
             SkipToEndOfNumber();
             CurrentToken.Length = _position - CurrentToken.StartPos;
             return CurrentToken;
         }
 
-        CurrentToken = _tokenFactory.GetToken(TokenName.UndefinedToken, _position++);
+        CurrentToken = _tokenFactory.GetToken(TokenType.UndefinedToken, _position++);
         return CurrentToken;
     }
 

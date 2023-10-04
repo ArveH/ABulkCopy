@@ -5,9 +5,9 @@ public class QuotedNameToken : IToken
     public QuotedNameToken(int startPos)
     {
         StartPos = startPos;
-        Name = TokenName.QuotedNameToken;
+        Type = TokenType.QuotedNameToken;
     }
-    public TokenName Name { get; }
+    public TokenType Type { get; }
     public int StartPos { get; }
     public int Length { get; set; }
 }

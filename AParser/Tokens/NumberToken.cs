@@ -5,9 +5,9 @@ public class NumberToken : IToken
     public NumberToken(int startPos)
     {
         StartPos = startPos;
-        Name = TokenName.NumberToken;
+        Type = TokenType.NumberToken;
     }
-    public TokenName Name { get; }
+    public TokenType Type { get; }
     public int StartPos { get; }
     public int Length { get; set; }
 }

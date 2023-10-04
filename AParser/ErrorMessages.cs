@@ -4,12 +4,12 @@ public static class ErrorMessages
 {
     public const string EmptySql = "String to parse can't be empty";
 
-    public static string UnexpectedToken(TokenName current)
+    public static string UnexpectedToken(TokenType current)
     {
         return $"Did not expect a {current} token at this point";
     }
 
-    public static string UnexpectedToken(TokenName expected, TokenName current)
+    public static string UnexpectedToken(TokenType expected, TokenType current)
     {
         return $"Expected to get a {expected} token, but current token is: {current}";
     }

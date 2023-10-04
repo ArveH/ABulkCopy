@@ -6,11 +6,11 @@ public class EofToken : IToken
     {
         StartPos = startPos;
     }
-    public TokenName Name => TokenName.EofToken;
+    public TokenType Type => TokenType.EofToken;
     public int StartPos { get; }
     public int Length
     {
         get => 0;
-        set => throw new SetLengthException(TokenName.EofToken);
+        set => throw new SetLengthException(TokenType.EofToken);
     }
 }

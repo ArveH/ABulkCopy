@@ -2,17 +2,17 @@
 
 public class UnexpectedTokenException : Exception
 {
-    public TokenName? Expected { get; }
-    public TokenName Current { get; }
+    public TokenType? Expected { get; }
+    public TokenType Current { get; }
 
-    public UnexpectedTokenException(TokenName expected, TokenName current)
+    public UnexpectedTokenException(TokenType expected, TokenType current)
     : base(ErrorMessages.UnexpectedToken(expected, current))
     {
         Expected = expected;
         Current = current;
     }
 
-    public UnexpectedTokenException(TokenName current)
+    public UnexpectedTokenException(TokenType current)
         : base(ErrorMessages.UnexpectedToken(current))
     {
         Current = current;

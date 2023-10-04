@@ -5,13 +5,13 @@ public class CommaToken : IToken
     public CommaToken(int startPos)
     {
         StartPos = startPos;
-        Name = TokenName.CommaToken;
+        Type = TokenType.CommaToken;
     }
-    public TokenName Name { get; }
+    public TokenType Type { get; }
     public int StartPos { get; }
     public int Length
     {
         get => 1;
-        set => throw new SetLengthException(TokenName.CommaToken);
+        set => throw new SetLengthException(TokenType.CommaToken);
     }
 }
