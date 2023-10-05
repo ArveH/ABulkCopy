@@ -2,5 +2,5 @@
 
 public class CommaNode : NodeBase
 {
-    public override NodeType NodeType => NodeType.CommaNode;
+    public override NodeType Type => NodeType.CommaNode;
 }

@@ -2,9 +2,9 @@
 
 public class NodeFactory : INodeFactory
 {
-    public INode Create(NodeType nodeType)
+    public INode Create(NodeType type)
     {
-        return nodeType switch
+        return type switch
         {
             NodeType.CommaNode => new CommaNode(),
             NodeType.ConvertFunctionNode => new ConvertFunctionNode(),
@@ -15,7 +15,7 @@ public class NodeFactory : INodeFactory
             NodeType.QuotedNameNode => new QuotedNameNode(),
             NodeType.RightParenthesesNode => new RightParenthesesNode(),
             NodeType.TypeNode => new TypeNode(),
-            _ => throw new NodeFactoryException(nodeType)
+            _ => throw new NodeFactoryException(type)
         };
     }
 }

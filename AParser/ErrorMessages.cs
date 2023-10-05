@@ -22,9 +22,9 @@ public static class ErrorMessages
         return $"Expected argument to be {expected}, but found null";
     }
 
-    public static string CreateNode(NodeType nodeType)
+    public static string CreateNode(NodeType type)
     {
-        return $"Can't create node of type {nodeType}";
+        return $"Can't create node of type {type}";
     }
 
     public static string UnknownFunction(string name)

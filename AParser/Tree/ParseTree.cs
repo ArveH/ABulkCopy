@@ -123,9 +123,9 @@ public class ParseTree : IParseTree
         return CreateLeafNode(tokenizer.CurrentToken);
     }
 
-    private INode CreateLeafNode(IToken token, NodeType? nodeType = null)
+    private INode CreateLeafNode(IToken token, NodeType? type = null)
     {
-        var node = _nodeFactory.Create(nodeType ?? token.Type.ToNodeType());
+        var node = _nodeFactory.Create(type ?? token.Type.ToNodeType());
         node.Tokens.Add(token);
         return node;
     }

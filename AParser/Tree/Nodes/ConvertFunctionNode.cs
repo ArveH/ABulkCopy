@@ -2,5 +2,5 @@
 
 public class ConvertFunctionNode : NodeBase
 {
-    public override NodeType NodeType => NodeType.ConvertFunctionNode;
+    public override NodeType Type => NodeType.ConvertFunctionNode;
 }

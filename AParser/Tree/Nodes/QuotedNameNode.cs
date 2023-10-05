@@ -2,5 +2,5 @@
 
 public class QuotedNameNode : NodeBase
 {
-    public override NodeType NodeType => NodeType.QuotedNameNode;
+    public override NodeType Type => NodeType.QuotedNameNode;
 }

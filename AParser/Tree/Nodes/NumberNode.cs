@@ -2,5 +2,5 @@
 
 public class NumberNode : NodeBase
 {
-    public override NodeType NodeType => NodeType.NumberNode;
+    public override NodeType Type => NodeType.NumberNode;
 }

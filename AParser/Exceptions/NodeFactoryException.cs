@@ -2,8 +2,8 @@
 
 public class NodeFactoryException : Exception
 {
-    public NodeFactoryException(NodeType nodeType)
-        : base(ErrorMessages.CreateNode(nodeType))
+    public NodeFactoryException(NodeType type)
+        : base(ErrorMessages.CreateNode(type))
     {
     }
 }

@@ -27,7 +27,7 @@ namespace AParser.Test
             var node = _tree.CreateName(_tokenizer);
 
             node.Children.Count.Should().Be(0);
-            node.NodeType.Should().Be(NodeType.NameNode);
+            node.Type.Should().Be(NodeType.NameNode);
         }
 
         [Fact]
@@ -40,7 +40,7 @@ namespace AParser.Test
             var node = _tree.CreateNumber(_tokenizer);
 
             node.Children.Count.Should().Be(0);
-            node.NodeType.Should().Be(NodeType.NumberNode);
+            node.Type.Should().Be(NodeType.NumberNode);
         }
 
         [Fact]
@@ -123,20 +123,20 @@ namespace AParser.Test
         private static void ValidateParenthesesNode(INode node)
         {
             node.Children.Count.Should().Be(3);
-            node.NodeType.Should().Be(NodeType.ParenthesesNode);
-            node.Children[0].NodeType.Should().Be(NodeType.LeftParenthesesNode);
-            node.Children[2].NodeType.Should().Be(NodeType.RightParenthesesNode);
+            node.Type.Should().Be(NodeType.ParenthesesNode);
+            node.Children[0].Type.Should().Be(NodeType.LeftParenthesesNode);
+            node.Children[2].Type.Should().Be(NodeType.RightParenthesesNode);
         }
 
         private static void ValidateConvertFunctionNode(INode node)
         {
             node.Children.Count.Should().Be(6);
-            node.NodeType.Should().Be(NodeType.ConvertFunctionNode);
-            node.Children[0].NodeType.Should().Be(NodeType.NameNode);
-            node.Children[1].NodeType.Should().Be(NodeType.LeftParenthesesNode);
-            node.Children[2].NodeType.Should().Be(NodeType.TypeNode);
-            node.Children[3].NodeType.Should().Be(NodeType.CommaNode);
-            node.Children[5].NodeType.Should().Be(NodeType.RightParenthesesNode);
+            node.Type.Should().Be(NodeType.ConvertFunctionNode);
+            node.Children[0].Type.Should().Be(NodeType.NameNode);
+            node.Children[1].Type.Should().Be(NodeType.LeftParenthesesNode);
+            node.Children[2].Type.Should().Be(NodeType.TypeNode);
+            node.Children[3].Type.Should().Be(NodeType.CommaNode);
+            node.Children[5].Type.Should().Be(NodeType.RightParenthesesNode);
         }
 
         private ITokenizer GetTokenizer()

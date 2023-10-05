@@ -2,5 +2,5 @@
 
 public class ParenthesesNode : NodeBase
 {
-    public override NodeType NodeType => NodeType.ParenthesesNode;
+    public override NodeType Type => NodeType.ParenthesesNode;
 }

@@ -2,5 +2,5 @@
 
 public class TypeNode : NodeBase
 {
-    public override NodeType NodeType => NodeType.TypeNode;
+    public override NodeType Type => NodeType.TypeNode;
 }
