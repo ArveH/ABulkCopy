@@ -26,10 +26,10 @@ namespace AParser.Test
             _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
 
-            var tokens = _parser.ParseName(_tokenizer, _parseTree).ToList();
+            var node = _parser.ParseName(_tokenizer, _parseTree);
 
-            tokens.Count.Should().Be(1);
-            tokens[0].Type.Should().Be(TokenType.NameToken);
+            node.Children.Count.Should().Be(0);
+            node.NodeType.Should().Be(NodeType.NameNode);
         }
 
         [Fact]
@@ -39,10 +39,10 @@ namespace AParser.Test
             _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
 
-            var tokens = _parser.ParseNumber(_tokenizer, _parseTree).ToList();
+            var node = _parser.ParseNumber(_tokenizer, _parseTree);
 
-            tokens.Count.Should().Be(1);
-            tokens[0].Type.Should().Be(TokenType.NumberToken);
+            node.Children.Count.Should().Be(0);
+            node.NodeType.Should().Be(NodeType.NumberNode);
         }
 
         [Fact]
@@ -51,7 +51,7 @@ namespace AParser.Test
             _tokenizer.Initialize("()");
             _tokenizer.GetNext();
 
-            var action = () => _parser.ParseExpression(_tokenizer, _parseTree).ToList();
+            var action = () => _parser.ParseExpression(_tokenizer, _parseTree);
 
             action.Should().Throw<AParserException>()
                 .WithMessage(ErrorMessages.UnexpectedToken(TokenType.RightParenthesesToken));
@@ -64,12 +64,9 @@ namespace AParser.Test
             _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
 
-            var tokens = _parser.ParseExpression(_tokenizer, _parseTree).ToList();
+            var node = _parser.ParseParentheses(_tokenizer, _parseTree);
 
-            tokens.Count.Should().Be(3);
-            tokens[0].Type.Should().Be(TokenType.LeftParenthesesToken);
-            tokens[1].Type.Should().Be(TokenType.NumberToken);
-            tokens[2].Type.Should().Be(TokenType.RightParenthesesToken);
+            ValidateParenthesesNode(node);
         }
 
         [Fact]
@@ -79,19 +76,11 @@ namespace AParser.Test
             _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
 
-            var tokens = _parser.ParseExpression(_tokenizer, _parseTree).ToList();
+            var parenthesesNode = _parser.ParseExpression(_tokenizer, _parseTree);
 
-            tokens.Count.Should().Be(10);
-            tokens[0].Type.Should().Be(TokenType.LeftParenthesesToken);
-            tokens[1].Type.Should().Be(TokenType.NameToken);
-            tokens[2].Type.Should().Be(TokenType.LeftParenthesesToken);
-            tokens[3].Type.Should().Be(TokenType.QuotedNameToken);
-            tokens[4].Type.Should().Be(TokenType.CommaToken);
-            tokens[5].Type.Should().Be(TokenType.LeftParenthesesToken);
-            tokens[6].Type.Should().Be(TokenType.NumberToken);
-            tokens[7].Type.Should().Be(TokenType.RightParenthesesToken);
-            tokens[8].Type.Should().Be(TokenType.RightParenthesesToken);
-            tokens[9].Type.Should().Be(TokenType.RightParenthesesToken);
+            ValidateParenthesesNode(parenthesesNode);
+            var convertFunctionNode = parenthesesNode.Children[1];
+            ValidateConvertFunctionNode(convertFunctionNode);
         }
 
         [Fact]
@@ -101,15 +90,9 @@ namespace AParser.Test
             _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
 
-            var tokens = _parser.ParseExpression(_tokenizer, _parseTree).ToList();
+            var convertFunctionNode = _parser.ParseConvertFunction(_tokenizer, _parseTree);
 
-            tokens.Count.Should().Be(6);
-            tokens[0].Type.Should().Be(TokenType.NameToken);
-            tokens[1].Type.Should().Be(TokenType.LeftParenthesesToken);
-            tokens[2].Type.Should().Be(TokenType.NameToken);
-            tokens[3].Type.Should().Be(TokenType.CommaToken);
-            tokens[4].Type.Should().Be(TokenType.NumberToken);
-            tokens[5].Type.Should().Be(TokenType.RightParenthesesToken);
+            ValidateConvertFunctionNode(convertFunctionNode);
         }
 
         [Fact]
@@ -119,7 +102,7 @@ namespace AParser.Test
             _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
 
-            var action = () => _parser.ParseExpression(_tokenizer, _parseTree).ToList();
+            var action = () => _parser.ParseExpression(_tokenizer, _parseTree);
 
             action.Should().Throw<UnknownFunctionException>()
                 .WithMessage(ErrorMessages.UnknownFunction("cast"));
@@ -132,11 +115,30 @@ namespace AParser.Test
             _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
 
-            var action = () => _parser.ParseExpression(_tokenizer, _parseTree).ToList();
+            var action = () => _parser.ParseExpression(_tokenizer, _parseTree);
 
             action.Should().Throw<UnknownSqlTypeException>()
                 .WithMessage(ErrorMessages.UnknownSqlType(
                     "paper"));
+        }
+
+        private static void ValidateParenthesesNode(INode node)
+        {
+            node.Children.Count.Should().Be(3);
+            node.NodeType.Should().Be(NodeType.ParenthesesNode);
+            node.Children[0].NodeType.Should().Be(NodeType.LeftParenthesesNode);
+            node.Children[2].NodeType.Should().Be(NodeType.RightParenthesesNode);
+        }
+
+        private static void ValidateConvertFunctionNode(INode node)
+        {
+            node.Children.Count.Should().Be(6);
+            node.NodeType.Should().Be(NodeType.ConvertFunctionNode);
+            node.Children[0].NodeType.Should().Be(NodeType.NameNode);
+            node.Children[1].NodeType.Should().Be(NodeType.LeftParenthesesNode);
+            node.Children[2].NodeType.Should().Be(NodeType.TypeNode);
+            node.Children[3].NodeType.Should().Be(NodeType.CommaNode);
+            node.Children[5].NodeType.Should().Be(NodeType.RightParenthesesNode);
         }
 
         private IParseTree GetParseTree()
@@ -151,7 +153,7 @@ namespace AParser.Test
 
         private IAParser GetParser()
         {
-            return new AParser(new SqlTypes());
+            return new AParser(new NodeFactory(), new SqlTypes());
         }
     }
 }

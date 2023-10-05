@@ -1,15 +1,21 @@
-﻿namespace AParser;
+﻿using AParser.Tree;
+
+namespace AParser;
 
 public class AParser : IAParser
 {
+    private readonly INodeFactory _nodeFactory;
     private readonly ISqlTypes _sqlTypes;
 
-    public AParser(ISqlTypes sqlTypes)
+    public AParser(
+        INodeFactory nodeFactory,
+        ISqlTypes sqlTypes)
     {
+        _nodeFactory = nodeFactory;
         _sqlTypes = sqlTypes;
     }
 
-    public IEnumerable<IToken> ParseExpression(ITokenizer tokenizer, IParseTree parseTree)
+    public INode ParseExpression(ITokenizer tokenizer, IParseTree parseTree)
     {
         switch (tokenizer.CurrentToken.Type)
         {
@@ -24,7 +30,7 @@ public class AParser : IAParser
         }
     }
 
-    public IEnumerable<IToken> ParseFunction(ITokenizer tokenizer, IParseTree parseTree)
+    public INode ParseFunction(ITokenizer tokenizer, IParseTree parseTree)
     {
         var functionName = tokenizer.CurrentTokenText.ToLower();
         switch (functionName)
@@ -36,59 +42,64 @@ public class AParser : IAParser
         }
     }
 
-    public IEnumerable<IToken> ParseConvertFunction(ITokenizer tokenizer, IParseTree parseTree)
+    public INode ParseConvertFunction(ITokenizer tokenizer, IParseTree parseTree)
     {
-        yield return tokenizer.CurrentToken;
-        tokenizer.GetExpected(TokenType.LeftParenthesesToken);
-        yield return tokenizer.CurrentToken;
+        var convertFunctionNode = _nodeFactory.Create(NodeType.ConvertFunctionNode);
+        convertFunctionNode.Children.Add(ParseName(tokenizer, parseTree));
+
         tokenizer.GetNext();
+        convertFunctionNode.Children.Add(ParseLeftParentheses(tokenizer, parseTree));
 
-        foreach (var token in ParseType(tokenizer, parseTree))
-        {
-            yield return token;
-        }
-
-        tokenizer.GetExpected(TokenType.CommaToken);
-        yield return tokenizer.CurrentToken;
         tokenizer.GetNext();
+        convertFunctionNode.Children.Add(ParseType(tokenizer, parseTree));
 
-        foreach (var token in ParseExpression(tokenizer, parseTree))
-        {
-            yield return token;
-        }
+        tokenizer.GetNext();
+        convertFunctionNode.Children.Add(ParseComma(tokenizer, parseTree));
 
-        tokenizer.GetExpected(TokenType.RightParenthesesToken);
-        yield return tokenizer.CurrentToken;
+        tokenizer.GetNext();
+        convertFunctionNode.Children.Add(ParseExpression(tokenizer, parseTree));
+
+        tokenizer.GetNext();
+        convertFunctionNode.Children.Add(ParseRightParentheses(tokenizer, parseTree));
+
+        return convertFunctionNode;
     }
 
-    public IEnumerable<IToken> ParseParentheses(ITokenizer tokenizer, IParseTree parseTree)
+    public INode ParseParentheses(ITokenizer tokenizer, IParseTree parseTree)
     {
-        if (tokenizer.CurrentToken.Type != TokenType.LeftParenthesesToken)
-        {
-            throw new UnexpectedTokenException(TokenType.LeftParenthesesToken, tokenizer.CurrentToken.Type);
-        }
-        yield return tokenizer.CurrentToken;
+        var parenthesesNode = _nodeFactory.Create(NodeType.ParenthesesNode);
+        parenthesesNode.Children.Add(ParseLeftParentheses(tokenizer, parseTree));
+
         tokenizer.GetNext();
+        parenthesesNode.Children.Add(ParseExpression(tokenizer, parseTree));
 
-        foreach (var token in ParseExpression(tokenizer, parseTree))
-        {
-            yield return token;
-        }
+        tokenizer.GetNext();
+        parenthesesNode.Children.Add(ParseRightParentheses(tokenizer, parseTree));
 
-        tokenizer.GetExpected(TokenType.RightParenthesesToken);
-        yield return tokenizer.CurrentToken;
+        return parenthesesNode;
     }
 
-    public IEnumerable<IToken> ParseNumber(ITokenizer tokenizer, IParseTree parseTree)
+    public INode ParseLeftParentheses(ITokenizer tokenizer, IParseTree parseTree)
     {
-        if (tokenizer.CurrentToken.Type != TokenType.NumberToken)
-        {
-            throw new UnexpectedTokenException(TokenType.NumberToken, tokenizer.CurrentToken.Type);
-        }
-        yield return tokenizer.CurrentToken;
+        return ParseLeafNode(TokenType.LeftParenthesesToken, tokenizer, parseTree);
     }
 
-    public IEnumerable<IToken> ParseType(ITokenizer tokenizer, IParseTree parseTree)
+    public INode ParseRightParentheses(ITokenizer tokenizer, IParseTree parseTree)
+    {
+        return ParseLeafNode(TokenType.RightParenthesesToken, tokenizer, parseTree);
+    }
+
+    public INode ParseNumber(ITokenizer tokenizer, IParseTree parseTree)
+    {
+        return ParseLeafNode(TokenType.NumberToken, tokenizer, parseTree);
+    }
+
+    public INode ParseComma(ITokenizer tokenizer, IParseTree parseTree)
+    {
+        return ParseLeafNode(TokenType.CommaToken, tokenizer, parseTree);
+    }
+
+    public INode ParseType(ITokenizer tokenizer, IParseTree parseTree)
     {
         var type = tokenizer.CurrentToken.Type == TokenType.QuotedNameToken
             ? tokenizer.CurrentTokenText[1..^1]
@@ -97,15 +108,27 @@ public class AParser : IAParser
         {
             throw new UnknownSqlTypeException(type);
         }
-        yield return tokenizer.CurrentToken;
+        return CreateLeafNode(tokenizer.CurrentToken, NodeType.TypeNode);
     }
 
-    public IEnumerable<IToken> ParseName(ITokenizer tokenizer, IParseTree parseTree)
+    public INode ParseName(ITokenizer tokenizer, IParseTree parseTree)
     {
-        if (tokenizer.CurrentToken.Type != TokenType.NameToken)
+        return ParseLeafNode(TokenType.NameToken, tokenizer, parseTree);
+    }
+
+    private INode ParseLeafNode(TokenType type, ITokenizer tokenizer, IParseTree parseTree)
+    {
+        if (tokenizer.CurrentToken.Type != type)
         {
-            throw new UnexpectedTokenException(TokenType.NameToken, tokenizer.CurrentToken.Type);
+            throw new UnexpectedTokenException(type, tokenizer.CurrentToken.Type);
         }
-        yield return tokenizer.CurrentToken;
+        return CreateLeafNode(tokenizer.CurrentToken);
+    }
+
+    private INode CreateLeafNode(IToken token, NodeType? nodeType = null)
+    {
+        var node = _nodeFactory.Create(nodeType ?? token.Type.ToNodeType());
+        node.Tokens.Add(token);
+        return node;
     }
 }

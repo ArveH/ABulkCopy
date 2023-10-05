@@ -1,4 +1,6 @@
-﻿namespace AParser;
+﻿using System.Runtime.Serialization;
+
+namespace AParser;
 
 public static class ErrorMessages
 {
@@ -38,5 +40,10 @@ public static class ErrorMessages
     public static string Unclosed(char expectedChar)
     {
         return $"Didn't find expected closing character: {expectedChar}";
+    }
+
+    public static string Conversion(string from, string toTypeName)
+    {
+        return $"Can't convert {from} to {toTypeName}";
     }
 }
