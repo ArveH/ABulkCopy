@@ -1,80 +1,80 @@
 namespace AParser.Test
 {
-    public class AParserTests
+    public class ParseTreeTests
     {
         private readonly ITokenizer _tokenizer;
-        private readonly IAParser _parser;
+        private readonly IParseTree _tree;
 
-        public AParserTests()
+        public ParseTreeTests()
         {
             _tokenizer = GetTokenizer();
-            _parser = GetParser();
+            _tree = GetParseTree();
         }
 
         [Fact]
-        public void TestAParser_Initialization()
+        public void TestCreateTree_Initialization()
         {
-            _parser.Should().NotBeNull();
+            _tree.Should().NotBeNull();
         }
 
         [Fact]
-        public void TestParseName()
+        public void TestCreateName()
         {
             const string testVal = "arve";
             _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
 
-            var node = _parser.ParseName(_tokenizer);
+            var node = _tree.CreateName(_tokenizer);
 
             node.Children.Count.Should().Be(0);
             node.NodeType.Should().Be(NodeType.NameNode);
         }
 
         [Fact]
-        public void TestParseNumber()
+        public void TestCreateNumber()
         {
             const string testVal = "123";
             _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
 
-            var node = _parser.ParseNumber(_tokenizer);
+            var node = _tree.CreateNumber(_tokenizer);
 
             node.Children.Count.Should().Be(0);
             node.NodeType.Should().Be(NodeType.NumberNode);
         }
 
         [Fact]
-        public void TestParseParentheses_When_EmptyParentheses_Then_Exception()
+        public void TestCreateParentheses_When_EmptyParentheses_Then_Exception()
         {
             _tokenizer.Initialize("()");
             _tokenizer.GetNext();
 
-            var action = () => _parser.ParseExpression(_tokenizer);
+            var action = () => _tree.CreateExpression(_tokenizer);
 
             action.Should().Throw<AParserException>()
                 .WithMessage(ErrorMessages.UnexpectedToken(TokenType.RightParenthesesToken));
         }
 
         [Fact]
-        public void TestParseExpression_When_ContainsParenthesesAndNumber()
+        public void TestCreateParentheses_When_ContainsParenthesesAndNumber()
         {
             const string testVal = "(123)";
             _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
 
-            var node = _parser.ParseParentheses(_tokenizer);
+            var node = _tree.CreateParentheses(_tokenizer);
 
             ValidateParenthesesNode(node);
         }
 
         [Fact]
-        public void TestParseConvertFunction()
+        public void TestCreateExpression_When_ConvertFunction()
         {
             const string testVal = "(CONVERT([bit],(0)))";
             _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
 
-            var parenthesesNode = _parser.ParseExpression(_tokenizer);
+            var parenthesesNode = _tree.CreateExpression(_tokenizer);
 
             ValidateParenthesesNode(parenthesesNode);
             var convertFunctionNode = parenthesesNode.Children[1];
@@ -82,38 +82,38 @@ namespace AParser.Test
         }
 
         [Fact]
-        public void TestParseConvertFunction_When_SqlTypeNotQuoted()
+        public void TestCreateConvertFunction_When_SqlTypeNotQuoted()
         {
             const string testVal = "convert ( bit  ,0 ) ";
             _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
 
-            var convertFunctionNode = _parser.ParseConvertFunction(_tokenizer);
+            var convertFunctionNode = _tree.CreateConvertFunction(_tokenizer);
 
             ValidateConvertFunctionNode(convertFunctionNode);
         }
 
         [Fact]
-        public void TestParseFunction_When_UnknownFunction()
+        public void TestCreateExpression_When_UnknownFunction()
         {
             const string testVal = "(CAST([bit],(0)))";
             _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
 
-            var action = () => _parser.ParseExpression(_tokenizer);
+            var action = () => _tree.CreateExpression(_tokenizer);
 
             action.Should().Throw<UnknownFunctionException>()
                 .WithMessage(ErrorMessages.UnknownFunction("cast"));
         }
 
         [Fact]
-        public void TestParseFunction_When_UnknownType()
+        public void TestCreateExpression_When_UnknownType()
         {
             const string testVal = "(CONVERT([paper],(0)))";
             _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
 
-            var action = () => _parser.ParseExpression(_tokenizer);
+            var action = () => _tree.CreateExpression(_tokenizer);
 
             action.Should().Throw<UnknownSqlTypeException>()
                 .WithMessage(ErrorMessages.UnknownSqlType(
@@ -144,9 +144,9 @@ namespace AParser.Test
             return new Tokenizer(new TokenFactory());
         }
 
-        private IAParser GetParser()
+        private IParseTree GetParseTree()
         {
-            return new AParser(new NodeFactory(), new SqlTypes());
+            return new ParseTree(new NodeFactory(), new SqlTypes());
         }
     }
 }

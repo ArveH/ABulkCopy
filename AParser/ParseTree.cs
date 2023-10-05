@@ -1,11 +1,11 @@
 ﻿namespace AParser;
 
-public class AParser : IAParser
+public class ParseTree : IParseTree
 {
     private readonly INodeFactory _nodeFactory;
     private readonly ISqlTypes _sqlTypes;
 
-    public AParser(
+    public ParseTree(
         INodeFactory nodeFactory,
         ISqlTypes sqlTypes)
     {
@@ -13,49 +13,49 @@ public class AParser : IAParser
         _sqlTypes = sqlTypes;
     }
 
-    public INode ParseExpression(ITokenizer tokenizer)
+    public INode CreateExpression(ITokenizer tokenizer)
     {
         switch (tokenizer.CurrentToken.Type)
         {
             case TokenType.LeftParenthesesToken:
-                return ParseParentheses(tokenizer);
+                return CreateParentheses(tokenizer);
             case TokenType.NameToken:
-                return ParseFunction(tokenizer);
+                return CreateFunction(tokenizer);
             case TokenType.NumberToken:
-                return ParseNumber(tokenizer);
+                return CreateNumber(tokenizer);
             default:
                 throw new AParserException(ErrorMessages.UnexpectedToken(tokenizer.CurrentToken.Type));
         }
     }
 
-    public INode ParseFunction(ITokenizer tokenizer)
+    public INode CreateFunction(ITokenizer tokenizer)
     {
         var functionName = tokenizer.CurrentTokenText.ToLower();
         switch (functionName)
         {
             case "convert":
-                return ParseConvertFunction(tokenizer);
+                return CreateConvertFunction(tokenizer);
             default:
                 throw new UnknownFunctionException(tokenizer.CurrentTokenText);
         }
     }
 
-    public INode ParseConvertFunction(ITokenizer tokenizer)
+    public INode CreateConvertFunction(ITokenizer tokenizer)
     {
         var convertFunctionNode = _nodeFactory.Create(NodeType.ConvertFunctionNode);
-        convertFunctionNode.Children.Add(ParseName(tokenizer));
+        convertFunctionNode.Children.Add(CreateName(tokenizer));
 
         tokenizer.GetNext();
         convertFunctionNode.Children.Add(ParseLeftParentheses(tokenizer));
 
         tokenizer.GetNext();
-        convertFunctionNode.Children.Add(ParseType(tokenizer));
+        convertFunctionNode.Children.Add(CreateType(tokenizer));
 
         tokenizer.GetNext();
         convertFunctionNode.Children.Add(ParseComma(tokenizer));
 
         tokenizer.GetNext();
-        convertFunctionNode.Children.Add(ParseExpression(tokenizer));
+        convertFunctionNode.Children.Add(CreateExpression(tokenizer));
 
         tokenizer.GetNext();
         convertFunctionNode.Children.Add(ParseRightParentheses(tokenizer));
@@ -63,13 +63,13 @@ public class AParser : IAParser
         return convertFunctionNode;
     }
 
-    public INode ParseParentheses(ITokenizer tokenizer)
+    public INode CreateParentheses(ITokenizer tokenizer)
     {
         var parenthesesNode = _nodeFactory.Create(NodeType.ParenthesesNode);
         parenthesesNode.Children.Add(ParseLeftParentheses(tokenizer));
 
         tokenizer.GetNext();
-        parenthesesNode.Children.Add(ParseExpression(tokenizer));
+        parenthesesNode.Children.Add(CreateExpression(tokenizer));
 
         tokenizer.GetNext();
         parenthesesNode.Children.Add(ParseRightParentheses(tokenizer));
@@ -87,7 +87,7 @@ public class AParser : IAParser
         return ParseLeafNode(TokenType.RightParenthesesToken, tokenizer);
     }
 
-    public INode ParseNumber(ITokenizer tokenizer)
+    public INode CreateNumber(ITokenizer tokenizer)
     {
         return ParseLeafNode(TokenType.NumberToken, tokenizer);
     }
@@ -97,7 +97,7 @@ public class AParser : IAParser
         return ParseLeafNode(TokenType.CommaToken, tokenizer);
     }
 
-    public INode ParseType(ITokenizer tokenizer)
+    public INode CreateType(ITokenizer tokenizer)
     {
         var type = tokenizer.CurrentToken.Type == TokenType.QuotedNameToken
             ? tokenizer.CurrentTokenText[1..^1]
@@ -109,7 +109,7 @@ public class AParser : IAParser
         return CreateLeafNode(tokenizer.CurrentToken, NodeType.TypeNode);
     }
 
-    public INode ParseName(ITokenizer tokenizer)
+    public INode CreateName(ITokenizer tokenizer)
     {
         return ParseLeafNode(TokenType.NameToken, tokenizer);
     }
