@@ -3,13 +3,11 @@ namespace AParser.Test
     public class AParserTests
     {
         private readonly ITokenizer _tokenizer;
-        private readonly IParseTree _parseTree;
         private readonly IAParser _parser;
 
         public AParserTests()
         {
             _tokenizer = GetTokenizer();
-            _parseTree = GetParseTree();
             _parser = GetParser();
         }
 
@@ -26,7 +24,7 @@ namespace AParser.Test
             _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
 
-            var node = _parser.ParseName(_tokenizer, _parseTree);
+            var node = _parser.ParseName(_tokenizer);
 
             node.Children.Count.Should().Be(0);
             node.NodeType.Should().Be(NodeType.NameNode);
@@ -39,7 +37,7 @@ namespace AParser.Test
             _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
 
-            var node = _parser.ParseNumber(_tokenizer, _parseTree);
+            var node = _parser.ParseNumber(_tokenizer);
 
             node.Children.Count.Should().Be(0);
             node.NodeType.Should().Be(NodeType.NumberNode);
@@ -51,7 +49,7 @@ namespace AParser.Test
             _tokenizer.Initialize("()");
             _tokenizer.GetNext();
 
-            var action = () => _parser.ParseExpression(_tokenizer, _parseTree);
+            var action = () => _parser.ParseExpression(_tokenizer);
 
             action.Should().Throw<AParserException>()
                 .WithMessage(ErrorMessages.UnexpectedToken(TokenType.RightParenthesesToken));
@@ -64,7 +62,7 @@ namespace AParser.Test
             _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
 
-            var node = _parser.ParseParentheses(_tokenizer, _parseTree);
+            var node = _parser.ParseParentheses(_tokenizer);
 
             ValidateParenthesesNode(node);
         }
@@ -76,7 +74,7 @@ namespace AParser.Test
             _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
 
-            var parenthesesNode = _parser.ParseExpression(_tokenizer, _parseTree);
+            var parenthesesNode = _parser.ParseExpression(_tokenizer);
 
             ValidateParenthesesNode(parenthesesNode);
             var convertFunctionNode = parenthesesNode.Children[1];
@@ -90,7 +88,7 @@ namespace AParser.Test
             _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
 
-            var convertFunctionNode = _parser.ParseConvertFunction(_tokenizer, _parseTree);
+            var convertFunctionNode = _parser.ParseConvertFunction(_tokenizer);
 
             ValidateConvertFunctionNode(convertFunctionNode);
         }
@@ -102,7 +100,7 @@ namespace AParser.Test
             _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
 
-            var action = () => _parser.ParseExpression(_tokenizer, _parseTree);
+            var action = () => _parser.ParseExpression(_tokenizer);
 
             action.Should().Throw<UnknownFunctionException>()
                 .WithMessage(ErrorMessages.UnknownFunction("cast"));
@@ -115,7 +113,7 @@ namespace AParser.Test
             _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
 
-            var action = () => _parser.ParseExpression(_tokenizer, _parseTree);
+            var action = () => _parser.ParseExpression(_tokenizer);
 
             action.Should().Throw<UnknownSqlTypeException>()
                 .WithMessage(ErrorMessages.UnknownSqlType(
@@ -139,11 +137,6 @@ namespace AParser.Test
             node.Children[2].NodeType.Should().Be(NodeType.TypeNode);
             node.Children[3].NodeType.Should().Be(NodeType.CommaNode);
             node.Children[5].NodeType.Should().Be(NodeType.RightParenthesesNode);
-        }
-
-        private IParseTree GetParseTree()
-        {
-            return new ParseTree();
         }
 
         private ITokenizer GetTokenizer()
