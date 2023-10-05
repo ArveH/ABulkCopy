@@ -1,11 +1,5 @@
 global using AParser.Exceptions;
-global using FluentAssertions;
-global using Moq;
-global using Serilog;
-global using System.Text.Encodings.Web;
-global using System.Text.Json;
-global using System.Text.Json.Serialization;
+global using AParser.Parsers.Pg;
 global using AParser.Tree;
-global using AParser.Tree.Nodes;
+global using FluentAssertions;
 global using Xunit;
-global using Xunit.Abstractions;

@@ -1,6 +1,6 @@
 namespace AParser.Test
 {
-    public class ParseTreeTests
+    public class ParseTreeTests : ParserTestBase
     {
         private readonly ITokenizer _tokenizer;
         private readonly IParseTree _tree;
@@ -137,16 +137,6 @@ namespace AParser.Test
             node.Children[2].Type.Should().Be(NodeType.TypeNode);
             node.Children[3].Type.Should().Be(NodeType.CommaNode);
             node.Children[5].Type.Should().Be(NodeType.RightParenthesesNode);
-        }
-
-        private ITokenizer GetTokenizer()
-        {
-            return new Tokenizer(new TokenFactory());
-        }
-
-        private IParseTree GetParseTree()
-        {
-            return new ParseTree(new NodeFactory(), new SqlTypes());
         }
     }
 }

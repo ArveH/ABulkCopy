@@ -46,4 +46,9 @@ public static class ErrorMessages
     {
         return $"Can't convert {from} to {toTypeName}";
     }
+
+    public static string UnexpectedNode(NodeType type)
+    {
+        return $"Unexpected node type: {type}";
+    }
 }
