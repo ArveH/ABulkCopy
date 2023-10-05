@@ -26,8 +26,10 @@ namespace AParser.Test
             _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
 
-            _parser.ParseName(_tokenizer, _parseTree);
+            var tokens = _parser.ParseName(_tokenizer, _parseTree).ToList();
 
+            tokens.Count.Should().Be(1);
+            tokens[0].Type.Should().Be(TokenType.NameToken);
         }
 
         [Fact]
@@ -37,8 +39,10 @@ namespace AParser.Test
             _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
 
-            _parser.ParseNumber(_tokenizer, _parseTree);
+            var tokens = _parser.ParseNumber(_tokenizer, _parseTree).ToList();
 
+            tokens.Count.Should().Be(1);
+            tokens[0].Type.Should().Be(TokenType.NumberToken);
         }
 
         [Fact]
@@ -47,7 +51,7 @@ namespace AParser.Test
             _tokenizer.Initialize("()");
             _tokenizer.GetNext();
 
-            var action = () => _parser.ParseExpression(_tokenizer, _parseTree);
+            var action = () => _parser.ParseExpression(_tokenizer, _parseTree).ToList();
 
             action.Should().Throw<AParserException>()
                 .WithMessage(ErrorMessages.UnexpectedToken(TokenType.RightParenthesesToken));
@@ -60,8 +64,12 @@ namespace AParser.Test
             _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
 
-            _parser.ParseExpression(_tokenizer, _parseTree);
+            var tokens = _parser.ParseExpression(_tokenizer, _parseTree).ToList();
 
+            tokens.Count.Should().Be(3);
+            tokens[0].Type.Should().Be(TokenType.LeftParenthesesToken);
+            tokens[1].Type.Should().Be(TokenType.NumberToken);
+            tokens[2].Type.Should().Be(TokenType.RightParenthesesToken);
         }
 
         [Fact]
@@ -71,8 +79,19 @@ namespace AParser.Test
             _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
 
-            _parser.ParseExpression(_tokenizer, _parseTree);
+            var tokens = _parser.ParseExpression(_tokenizer, _parseTree).ToList();
 
+            tokens.Count.Should().Be(10);
+            tokens[0].Type.Should().Be(TokenType.LeftParenthesesToken);
+            tokens[1].Type.Should().Be(TokenType.NameToken);
+            tokens[2].Type.Should().Be(TokenType.LeftParenthesesToken);
+            tokens[3].Type.Should().Be(TokenType.QuotedNameToken);
+            tokens[4].Type.Should().Be(TokenType.CommaToken);
+            tokens[5].Type.Should().Be(TokenType.LeftParenthesesToken);
+            tokens[6].Type.Should().Be(TokenType.NumberToken);
+            tokens[7].Type.Should().Be(TokenType.RightParenthesesToken);
+            tokens[8].Type.Should().Be(TokenType.RightParenthesesToken);
+            tokens[9].Type.Should().Be(TokenType.RightParenthesesToken);
         }
 
         [Fact]
@@ -82,8 +101,15 @@ namespace AParser.Test
             _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
 
-            _parser.ParseExpression(_tokenizer, _parseTree);
+            var tokens = _parser.ParseExpression(_tokenizer, _parseTree).ToList();
 
+            tokens.Count.Should().Be(6);
+            tokens[0].Type.Should().Be(TokenType.NameToken);
+            tokens[1].Type.Should().Be(TokenType.LeftParenthesesToken);
+            tokens[2].Type.Should().Be(TokenType.NameToken);
+            tokens[3].Type.Should().Be(TokenType.CommaToken);
+            tokens[4].Type.Should().Be(TokenType.NumberToken);
+            tokens[5].Type.Should().Be(TokenType.RightParenthesesToken);
         }
 
         [Fact]
@@ -93,7 +119,7 @@ namespace AParser.Test
             _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
 
-            var action = () => _parser.ParseExpression(_tokenizer, _parseTree);
+            var action = () => _parser.ParseExpression(_tokenizer, _parseTree).ToList();
 
             action.Should().Throw<UnknownFunctionException>()
                 .WithMessage(ErrorMessages.UnknownFunction("cast"));
@@ -106,7 +132,7 @@ namespace AParser.Test
             _tokenizer.Initialize(testVal);
             _tokenizer.GetNext();
 
-            var action = () => _parser.ParseExpression(_tokenizer, _parseTree);
+            var action = () => _parser.ParseExpression(_tokenizer, _parseTree).ToList();
 
             action.Should().Throw<UnknownSqlTypeException>()
                 .WithMessage(ErrorMessages.UnknownSqlType(

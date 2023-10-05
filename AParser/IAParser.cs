@@ -2,11 +2,11 @@
 
 public interface IAParser
 {
-    void ParseExpression(ITokenizer tokenizer, IParseTree parseTree);
-    void ParseFunction(ITokenizer tokenizer, IParseTree parseTree);
-    void ParseConvertFunction(ITokenizer tokenizer, IParseTree parseTree);
-    void ParseParentheses(ITokenizer tokenizer, IParseTree parseTree);
-    void ParseNumber(ITokenizer tokenizer, IParseTree parseTree);
-    void ParseType(ITokenizer tokenizer, IParseTree parseTree);
-    void ParseName(ITokenizer tokenizer, IParseTree parseTree);
+    IEnumerable<IToken> ParseExpression(ITokenizer tokenizer, IParseTree parseTree);
+    IEnumerable<IToken> ParseFunction(ITokenizer tokenizer, IParseTree parseTree);
+    IEnumerable<IToken> ParseConvertFunction(ITokenizer tokenizer, IParseTree parseTree);
+    IEnumerable<IToken> ParseParentheses(ITokenizer tokenizer, IParseTree parseTree);
+    IEnumerable<IToken> ParseNumber(ITokenizer tokenizer, IParseTree parseTree);
+    IEnumerable<IToken> ParseType(ITokenizer tokenizer, IParseTree parseTree);
+    IEnumerable<IToken> ParseName(ITokenizer tokenizer, IParseTree parseTree);
 }

@@ -9,74 +9,86 @@ public class AParser : IAParser
         _sqlTypes = sqlTypes;
     }
 
-    public void ParseExpression(ITokenizer tokenizer, IParseTree parseTree)
+    public IEnumerable<IToken> ParseExpression(ITokenizer tokenizer, IParseTree parseTree)
     {
         switch (tokenizer.CurrentToken.Type)
         {
             case TokenType.LeftParenthesesToken:
-                ParseParentheses(tokenizer, parseTree);
-                break;
+                return ParseParentheses(tokenizer, parseTree);
             case TokenType.NameToken:
-                ParseFunction(tokenizer, parseTree);
-                break;
+                return ParseFunction(tokenizer, parseTree);
             case TokenType.NumberToken:
-                ParseNumber(tokenizer, parseTree);
-                break;
+                return ParseNumber(tokenizer, parseTree);
             default:
                 throw new AParserException(ErrorMessages.UnexpectedToken(tokenizer.CurrentToken.Type));
         }
     }
 
-    public void ParseFunction(ITokenizer tokenizer, IParseTree parseTree)
+    public IEnumerable<IToken> ParseFunction(ITokenizer tokenizer, IParseTree parseTree)
     {
         var functionName = tokenizer.CurrentTokenText.ToLower();
         switch (functionName)
         {
             case "convert":
-                ParseConvertFunction(tokenizer, parseTree);
-                return;
+                return ParseConvertFunction(tokenizer, parseTree);
             default:
                 throw new UnknownFunctionException(tokenizer.CurrentTokenText);
         }
     }
 
-    public void ParseConvertFunction(ITokenizer tokenizer, IParseTree parseTree)
+    public IEnumerable<IToken> ParseConvertFunction(ITokenizer tokenizer, IParseTree parseTree)
     {
+        yield return tokenizer.CurrentToken;
         tokenizer.GetExpected(TokenType.LeftParenthesesToken);
+        yield return tokenizer.CurrentToken;
         tokenizer.GetNext();
 
-        ParseType(tokenizer, parseTree);
+        foreach (var token in ParseType(tokenizer, parseTree))
+        {
+            yield return token;
+        }
 
         tokenizer.GetExpected(TokenType.CommaToken);
+        yield return tokenizer.CurrentToken;
         tokenizer.GetNext();
 
-        ParseExpression(tokenizer, parseTree);
+        foreach (var token in ParseExpression(tokenizer, parseTree))
+        {
+            yield return token;
+        }
 
         tokenizer.GetExpected(TokenType.RightParenthesesToken);
+        yield return tokenizer.CurrentToken;
     }
 
-    public void ParseParentheses(ITokenizer tokenizer, IParseTree parseTree)
+    public IEnumerable<IToken> ParseParentheses(ITokenizer tokenizer, IParseTree parseTree)
     {
         if (tokenizer.CurrentToken.Type != TokenType.LeftParenthesesToken)
         {
             throw new UnexpectedTokenException(TokenType.LeftParenthesesToken, tokenizer.CurrentToken.Type);
         }
+        yield return tokenizer.CurrentToken;
         tokenizer.GetNext();
 
-        ParseExpression(tokenizer, parseTree);
+        foreach (var token in ParseExpression(tokenizer, parseTree))
+        {
+            yield return token;
+        }
 
         tokenizer.GetExpected(TokenType.RightParenthesesToken);
+        yield return tokenizer.CurrentToken;
     }
 
-    public void ParseNumber(ITokenizer tokenizer, IParseTree parseTree)
+    public IEnumerable<IToken> ParseNumber(ITokenizer tokenizer, IParseTree parseTree)
     {
         if (tokenizer.CurrentToken.Type != TokenType.NumberToken)
         {
             throw new UnexpectedTokenException(TokenType.NumberToken, tokenizer.CurrentToken.Type);
         }
+        yield return tokenizer.CurrentToken;
     }
 
-    public void ParseType(ITokenizer tokenizer, IParseTree parseTree)
+    public IEnumerable<IToken> ParseType(ITokenizer tokenizer, IParseTree parseTree)
     {
         var type = tokenizer.CurrentToken.Type == TokenType.QuotedNameToken
             ? tokenizer.CurrentTokenText[1..^1]
@@ -85,13 +97,15 @@ public class AParser : IAParser
         {
             throw new UnknownSqlTypeException(type);
         }
+        yield return tokenizer.CurrentToken;
     }
 
-    public void ParseName(ITokenizer tokenizer, IParseTree parseTree)
+    public IEnumerable<IToken> ParseName(ITokenizer tokenizer, IParseTree parseTree)
     {
         if (tokenizer.CurrentToken.Type != TokenType.NameToken)
         {
             throw new UnexpectedTokenException(TokenType.NameToken, tokenizer.CurrentToken.Type);
         }
+        yield return tokenizer.CurrentToken;
     }
 }
