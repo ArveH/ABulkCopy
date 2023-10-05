@@ -1,4 +1,4 @@
-﻿namespace AParser;
+﻿namespace AParser.Tree;
 
 public class ParseTree : IParseTree
 {
