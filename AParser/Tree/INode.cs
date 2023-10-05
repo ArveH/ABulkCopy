@@ -3,5 +3,6 @@
 public interface INode
 {
     public NodeType NodeType { get; }
-    public T Create<T>();
+    public List<IToken> Tokens { get; }
+    public List<INode> Children { get; }
 }
