@@ -23,9 +23,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ABulkCopy.ASqlServer", "ABu
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "APostgres.Test", "APostgres.Test\APostgres.Test.csproj", "{63EB203D-04CB-4167-9909-9F958DE77777}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AParser", "AParser\AParser.csproj", "{C11AF6ED-8BB9-45F8-80C1-40EB984DEABD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AParser", "AParser\AParser.csproj", "{C11AF6ED-8BB9-45F8-80C1-40EB984DEABD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AParser.Test", "AParser.Test\AParser.Test.csproj", "{42C9FF62-862C-44A9-B998-297A33EFA678}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AParser.Test", "AParser.Test\AParser.Test.csproj", "{42C9FF62-862C-44A9-B998-297A33EFA678}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmark.Test", "Benchmark.Test\Benchmark.Test.csproj", "{095845AB-F82F-4C05-A554-19BF9C8726E3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -77,6 +79,10 @@ Global
 		{42C9FF62-862C-44A9-B998-297A33EFA678}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{42C9FF62-862C-44A9-B998-297A33EFA678}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{42C9FF62-862C-44A9-B998-297A33EFA678}.Release|Any CPU.Build.0 = Release|Any CPU
+		{095845AB-F82F-4C05-A554-19BF9C8726E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{095845AB-F82F-4C05-A554-19BF9C8726E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{095845AB-F82F-4C05-A554-19BF9C8726E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{095845AB-F82F-4C05-A554-19BF9C8726E3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -87,6 +93,7 @@ Global
 		{476DDC45-1F27-4275-BF3E-98A0DB42C29D} = {68E6AC7A-B6D6-4060-AC5C-0493C1CAF093}
 		{63EB203D-04CB-4167-9909-9F958DE77777} = {68E6AC7A-B6D6-4060-AC5C-0493C1CAF093}
 		{42C9FF62-862C-44A9-B998-297A33EFA678} = {68E6AC7A-B6D6-4060-AC5C-0493C1CAF093}
+		{095845AB-F82F-4C05-A554-19BF9C8726E3} = {68E6AC7A-B6D6-4060-AC5C-0493C1CAF093}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FE8442EC-5938-4FC6-87FD-AA949B4EC6B0}
