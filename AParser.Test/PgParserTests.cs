@@ -5,6 +5,8 @@ public class PgParserTests : ParserTestBase
     [Theory]
     [InlineData("123", "123")]
     [InlineData("(123)", "(123)")]
+    [InlineData("(CONVERT([bit],(0)))", "(to_number((0)))")]
+    [InlineData("convert(bit, 0)", "to_number(0)")]
     public void TestParseExpression(string testSql, string expected)
     {
         var tokenizer = GetTokenizer();
