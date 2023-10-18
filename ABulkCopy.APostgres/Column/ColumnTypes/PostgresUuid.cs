@@ -17,7 +17,7 @@ public class PostgresUuid : PgDefaultColumn
         return new Guid(value);
     }
 
-    protected override string GetDefaultClause()
+    public override string GetDefaultClause()
     {
         if (DefaultConstraint == null) return "";
 

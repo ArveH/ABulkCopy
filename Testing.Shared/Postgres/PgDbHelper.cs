@@ -49,7 +49,7 @@ public class PgDbHelper
 
     public async Task VerifyTestTable()
     {
-        await CreateTable(_tableDefinition, true);
+        await CreateTable(_tableDefinition);
     }
 
     public async Task CreateTable(TableDefinition tableDefinition, 
@@ -74,7 +74,11 @@ public class PgDbHelper
                 sb.AppendLine(",");
             }
 
-            sb.Append($"    {identifier.Get(column.Name)} {column.GetNativeCreateClause()}");
+            sb.Append($"    {identifier.Get(column.Name)} ");
+            sb.Append(column.GetTypeClause());
+            sb.Append(column.GetIdentityClause());
+            sb.Append(column.GetDefaultClause());
+            sb.Append(column.GetNullableClause());
         }
         sb.AppendLine(");");
         await ExecuteNonQuery(sb.ToString());

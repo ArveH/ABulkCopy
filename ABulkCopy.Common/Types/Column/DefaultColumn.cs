@@ -37,11 +37,6 @@ public class DefaultColumn : IColumn
         return Type;
     }
 
-    public virtual string GetNativeCreateClause()
-    {
-        return GetTypeClause() + GetIdentityClause() + GetDefaultClause() + GetNullableClause();
-    }
-
     public virtual object ToInternalType(string value)
     {
         throw new NotImplementedException();
@@ -67,17 +62,17 @@ public class DefaultColumn : IColumn
         };
     }
 
-    protected string GetNullableClause()
+    public string GetNullableClause()
     {
         return IsNullable ? " NULL" : " NOT NULL";
     }
 
-    protected virtual string GetIdentityClause() 
+    public virtual string GetIdentityClause() 
     {
         throw new NotImplementedException();
     }
 
-    protected virtual string GetDefaultClause()
+    public virtual string GetDefaultClause()
     {
         return DefaultConstraint == null ? " " : $" DEFAULT {DefaultConstraint.Definition.TrimParentheses()}";
     }

@@ -1,5 +1,4 @@
-﻿using ABulkCopy.Common.Identifier;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
 namespace ABulkCopy.Cmd;
 

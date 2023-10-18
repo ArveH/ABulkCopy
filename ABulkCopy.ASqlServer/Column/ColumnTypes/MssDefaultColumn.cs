@@ -6,7 +6,7 @@ public class MssDefaultColumn : DefaultColumn
     {
     }
 
-    protected override string GetIdentityClause() {
+    public override string GetIdentityClause() {
         return Identity != null ? $" IDENTITY({Identity.Seed},{Identity.Increment})" : string.Empty;
     }
 }

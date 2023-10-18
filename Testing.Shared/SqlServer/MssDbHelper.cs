@@ -32,7 +32,11 @@ public class MssDbHelper
                 sb.AppendLine(",");
             }
 
-            sb.Append($"    {column.Name} {column.GetNativeCreateClause()}");
+            sb.Append($"    {column.Name} ");
+            sb.Append(column.GetTypeClause());
+            sb.Append(column.GetIdentityClause());
+            sb.Append(column.GetDefaultClause());
+            sb.Append(column.GetNullableClause());
         }
         sb.AppendLine(");");
         await ExecuteNonQuery(sb.ToString());

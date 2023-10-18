@@ -28,7 +28,7 @@ public class PostgresTimestamp : PgDefaultColumn
         return typeof(DateTime);
     }
 
-    protected override string GetDefaultClause()
+    public override string GetDefaultClause()
     {
         if (DefaultConstraint == null) return "";
 

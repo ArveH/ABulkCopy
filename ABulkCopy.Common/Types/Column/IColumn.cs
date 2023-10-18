@@ -18,7 +18,9 @@ public interface IColumn
 
     string ToString(object value);
     string GetTypeClause();
-    string GetNativeCreateClause();
     object ToInternalType(string value);
+    string GetNullableClause();
+    string GetIdentityClause();
+    string GetDefaultClause();
     Type GetDotNetType();
 }

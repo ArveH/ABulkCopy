@@ -6,7 +6,7 @@ public class PgDefaultColumn : DefaultColumn
     {
     }
 
-    protected override string GetIdentityClause()
+    public override string GetIdentityClause()
     {
         return Identity == null ? string.Empty
             : $" GENERATED ALWAYS AS IDENTITY (INCREMENT BY {Identity.Increment} START WITH {Identity.Seed})";
