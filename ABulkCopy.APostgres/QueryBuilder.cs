@@ -77,6 +77,7 @@ public class QueryBuilder : IQueryBuilder
                 tokenizer.GetNext();
                 IParseTree parseTree = new ParseTree(new AParser.Tree.NodeFactory(), new SqlTypes());
                 var root = parseTree.CreateExpression(tokenizer);
+                _sb.Append(" default ");
                 _sb.Append(_pgParser.Parse(tokenizer, root));
             }
             _sb.Append(column.GetNullableClause());

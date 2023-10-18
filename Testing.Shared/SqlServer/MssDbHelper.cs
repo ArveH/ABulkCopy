@@ -43,6 +43,7 @@ public class MssDbHelper
                 tokenizer.GetNext();
                 IParseTree parseTree = new ParseTree(new AParser.Tree.NodeFactory(), new SqlTypes());
                 var root = parseTree.CreateExpression(tokenizer);
+                sb.Append(" default ");
                 sb.Append(new PgParser().Parse(tokenizer, root));
             }
             sb.Append(column.GetNullableClause());

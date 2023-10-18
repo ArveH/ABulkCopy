@@ -27,7 +27,7 @@ public class TokenizerTests
     [InlineData("a099",  TokenType.NameToken)]
     [InlineData("_", TokenType.NameToken)]
     [InlineData("0aA",  TokenType.NumberToken)]
-    [InlineData(".90",  TokenType.UndefinedToken)]
+    [InlineData(".90",  TokenType.NumberToken)]
     [InlineData("[arve]",  TokenType.QuotedNameToken)]
     [InlineData("[.90]",  TokenType.QuotedNameToken)]
     [InlineData("[ arve]",  TokenType.QuotedNameToken)]

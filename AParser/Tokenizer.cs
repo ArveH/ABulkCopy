@@ -10,6 +10,7 @@ public class Tokenizer : ITokenizer
     private int _position;
 
     private char CurrentChar => _position >= Original.Length ? '\0' : Original[_position];
+    private char PeekNextChar => _position + 1 >= Original.Length ? '\0' : Original[_position + 1];
 
     public Tokenizer(ITokenFactory tokenFactory)
     {
@@ -104,7 +105,15 @@ public class Tokenizer : ITokenizer
             return CurrentToken;
         }
 
-        if (char.IsDigit(Original[_position]))
+        if (char.IsDigit(CurrentChar))
+        {
+            CurrentToken = _tokenFactory.GetToken(TokenType.NumberToken, _position);
+            SkipToEndOfNumber();
+            CurrentToken.Length = _position - CurrentToken.StartPos;
+            return CurrentToken;
+        }
+
+        if (CurrentChar == '.' && char.IsDigit(PeekNextChar))
         {
             CurrentToken = _tokenFactory.GetToken(TokenType.NumberToken, _position);
             SkipToEndOfNumber();
@@ -147,7 +156,18 @@ public class Tokenizer : ITokenizer
 
     private void SkipToEndOfNumber()
     {
-        while (char.IsLetterOrDigit(CurrentChar))
+        while (char.IsDigit(CurrentChar))
+        {
+            _position++;
+        }
+
+        if (CurrentChar != '.')
+        {
+            return;
+        }
+
+        _position++;
+        while (char.IsDigit(CurrentChar))
         {
             _position++;
         }
@@ -161,6 +181,11 @@ public class Tokenizer : ITokenizer
     private bool IsNameStartingChar(char c)
     {
         return char.IsLetter(c) || c == '_';
+    }
+
+    private bool IsNumberChar(char c)
+    {
+        return char.IsDigit(c) || c == '.';
     }
 
     private bool IsNameChar(char c)

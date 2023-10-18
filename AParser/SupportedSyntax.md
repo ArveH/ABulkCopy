@@ -14,7 +14,7 @@ NOTE: Currently, whitespace is not specified in the grammar, but it could occur 
 CommaToken ::= ','
 LeftParenthesesToken ::= '('
 NameToken ::= [a-zA-Z_][a-zA-Z0-9_]*
-NumberToken ::= [0-9]+
+NumberToken ::= [0-9\.]+
 QuotedNameToken ::= '[' [a-zA-Z0-9_ -.]+ ']'
 RightParenthesesToken ::= ')'
 StringToken ::= ['] [.]* ['] // NOTE: The string can contain any character. A single quote is escaped by using two single quotes.

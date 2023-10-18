@@ -5,6 +5,10 @@ public class PgParserTests : ParserTestBase
     [Theory]
     [InlineData("123", "123")]
     [InlineData("(123)", "(123)")]
+    [InlineData("((99.9))", "((99.9))")]
+    [InlineData("123.2444", "123.2444")]
+    [InlineData("1.arve", "1.")]
+    [InlineData(".1", ".1")]
     [InlineData("(CONVERT([bit],(0)))", "(to_number((0)))")]
     [InlineData("convert(bit, 0)", "to_number(0)")]
     public void TestParseExpression(string testSql, string expected)

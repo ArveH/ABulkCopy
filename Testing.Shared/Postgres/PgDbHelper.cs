@@ -85,6 +85,7 @@ public class PgDbHelper
                 tokenizer.GetNext();
                 IParseTree parseTree = new ParseTree(new NodeFactory(), new SqlTypes());
                 var root = parseTree.CreateExpression(tokenizer);
+                sb.Append(" default ");
                 sb.Append(new PgParser().Parse(tokenizer, root));
             }
             sb.Append(column.GetNullableClause());
