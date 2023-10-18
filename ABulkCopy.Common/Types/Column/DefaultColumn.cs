@@ -71,9 +71,4 @@ public class DefaultColumn : IColumn
     {
         throw new NotImplementedException();
     }
-
-    public virtual string GetDefaultClause()
-    {
-        return DefaultConstraint == null ? " " : $" DEFAULT {DefaultConstraint.Definition.TrimParentheses()}";
-    }
 }

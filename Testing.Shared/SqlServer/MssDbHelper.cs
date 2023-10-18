@@ -35,7 +35,16 @@ public class MssDbHelper
             sb.Append($"    {column.Name} ");
             sb.Append(column.GetTypeClause());
             sb.Append(column.GetIdentityClause());
-            sb.Append(column.GetDefaultClause());
+            if (column.HasDefault)
+            {
+                // TODO: Inject factories or otherwise remove all 'new' statements
+                ITokenizer tokenizer = new Tokenizer(new TokenFactory());
+                tokenizer.Initialize(column.DefaultConstraint!.Definition);
+                tokenizer.GetNext();
+                IParseTree parseTree = new ParseTree(new AParser.Tree.NodeFactory(), new SqlTypes());
+                var root = parseTree.CreateExpression(tokenizer);
+                sb.Append(new PgParser().Parse(tokenizer, root));
+            }
             sb.Append(column.GetNullableClause());
         }
         sb.AppendLine(");");

@@ -23,7 +23,8 @@ public class PostgresBoolean : PgTemplateNumberColumn
         return typeof(bool);
     }
 
-    public override string GetDefaultClause()
+    // TODO: Remove
+    public string GetDefaultClause()
     {
         if (DefaultConstraint == null) return "";
 

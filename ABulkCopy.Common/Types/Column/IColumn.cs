@@ -21,6 +21,5 @@ public interface IColumn
     object ToInternalType(string value);
     string GetNullableClause();
     string GetIdentityClause();
-    string GetDefaultClause();
     Type GetDotNetType();
 }

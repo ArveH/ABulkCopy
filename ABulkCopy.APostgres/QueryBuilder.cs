@@ -69,7 +69,16 @@ public class QueryBuilder : IQueryBuilder
             _sb.Append(" ");
             _sb.Append(column.GetTypeClause());
             _sb.Append(column.GetIdentityClause());
-            _sb.Append(column.GetDefaultClause());
+            if (column.HasDefault)
+            {
+                // TODO: Inject factories or otherwise remove all 'new' statements
+                ITokenizer tokenizer = new Tokenizer(new TokenFactory());
+                tokenizer.Initialize(column.DefaultConstraint!.Definition);
+                tokenizer.GetNext();
+                IParseTree parseTree = new ParseTree(new AParser.Tree.NodeFactory(), new SqlTypes());
+                var root = parseTree.CreateExpression(tokenizer);
+                _sb.Append(_pgParser.Parse(tokenizer, root));
+            }
             _sb.Append(column.GetNullableClause());
         }
     }
