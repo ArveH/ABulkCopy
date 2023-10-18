@@ -17,20 +17,27 @@ NameToken ::= [a-zA-Z_][a-zA-Z0-9_]*
 NumberToken ::= [0-9]+
 QuotedNameToken ::= '[' [a-zA-Z0-9_ -.]+ ']'
 RightParenthesesToken ::= ')'
+StringToken ::= ['] [.]* ['] // NOTE: The string can contain any character. A single quote is escaped by using two single quotes.
+NStringToken ::= 'N'StringToken  // NOTE: No space between the 'N' and the string
 ```
 
 ## Parsing
 
 ``` ebnf
-ConvertFunction ::= 'convert' LeftParenthesesToken Type CommaToken Expression RightParenthesesToken
+ConvertFunction ::= ConvertToNumberFunction | ConvertToDateTimeFunction
+ConvertToNumberFunction ::= 'convert' LeftParenthesesToken Type CommaToken Expression RightParenthesesToken
+ConvertToDateTimeFunction ::= 'convert' LeftParenthesesToken Type CommaToken Expression [commaToken Expression] RightParenthesesToken
+RightParenthesesToken
 Expression ::= Parentheses 
                     | Function
                     | Number
+                    | String
 Function ::= ConvertFunction
 Name ::= NameToken | QuotedNameToken
 Number ::= NumberToken
+String ::= StringToken | NStringToken
 Parentheses ::= LeftParenthesesToken Expression RightParenthesesToken
-Type ::= 'bit'
+Type ::= 'bit' | 'datetime'
 ```
 
 ### Nodes

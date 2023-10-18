@@ -521,7 +521,9 @@ public class PgCmdTests : PgTestBase
             TestConfiguration.SafeGet(Constants.Config.ConnectionString));
         _qbFactoryMock
             .Setup(f => f.GetQueryBuilder())
-            .Returns(() => new QueryBuilder(GetIdentifier(appSettings)));
+            .Returns(() => new QueryBuilder(
+                new PgParser(),
+                GetIdentifier(appSettings)));
         return new ABulkCopy.APostgres.PgCmd(
             PgContext,
             _qbFactoryMock.Object,

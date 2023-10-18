@@ -1,5 +1,3 @@
-// Global using directives
-
 global using ABulkCopy.APostgres.Column;
 global using ABulkCopy.APostgres.Column.ColumnTypes;
 global using ABulkCopy.APostgres.Extensions;
@@ -15,6 +13,7 @@ global using ABulkCopy.Common.Types.Column;
 global using ABulkCopy.Common.Types.Index;
 global using ABulkCopy.Common.Types.Table;
 global using ABulkCopy.Common.Utils;
+global using AParser.Parsers.Pg;
 global using Microsoft.Extensions.Configuration;
 global using Npgsql;
 global using NpgsqlTypes;

@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ABulkCopy.Common\ABulkCopy.Common.csproj" />
+    <ProjectReference Include="..\AParser\AParser.csproj" />
   </ItemGroup>
 
   <ItemGroup>

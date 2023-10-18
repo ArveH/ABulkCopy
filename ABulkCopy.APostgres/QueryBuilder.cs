@@ -2,11 +2,15 @@
 
 public class QueryBuilder : IQueryBuilder
 {
+    private readonly IPgParser _pgParser;
     private readonly IIdentifier _identifier;
     private readonly StringBuilder _sb = new();
 
-    public QueryBuilder(IIdentifier identifier)
+    public QueryBuilder(
+        IPgParser pgParser,
+        IIdentifier identifier)
     {
+        _pgParser = pgParser;
         _identifier = identifier;
     }
 
@@ -24,7 +28,7 @@ public class QueryBuilder : IQueryBuilder
         _sb.Clear();
         _sb.Append("drop table if exists ");
         AppendIdentifier(tableName);
-        _sb.Append(";");
+        _sb.Append(';');
         return _sb.ToString();
     }
 
@@ -63,7 +67,10 @@ public class QueryBuilder : IQueryBuilder
             _sb.Append("     ");
             AppendIdentifier(column.Name);
             _sb.Append(" ");
-            _sb.Append(column.GetNativeCreateClause());
+            _sb.Append(column.GetTypeClause());
+            _sb.Append(column.GetIdentityClause());
+            _sb.Append(column.GetDefaultClause());
+            _sb.Append(column.GetNullableClause());
         }
     }
 }

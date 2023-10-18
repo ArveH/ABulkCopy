@@ -38,18 +38,27 @@ public class PgParser : IPgParser
     {
         var sqlType = tokenizer.GetSpan(node.Children[2].Tokens.First())
             .ToString().ToLower();
-        string pgConvertFunction;
-        switch (sqlType)
+        return sqlType switch
         {
-            case "bit":
-            case "[bit]":
-                pgConvertFunction = "to_number";
-                break;
-            default:
-                throw new UnknownSqlTypeException(ErrorMessages.UnknownSqlType(sqlType));
-        }
+            "bit" => ParseConvertToNumber(tokenizer, node),
+            "[bit]" => ParseConvertToNumber(tokenizer, node),
+            "datetime" => ParseConvertToDateTime(tokenizer, node),
+            "[datetime]" => ParseConvertToDateTime(tokenizer, node),
+            _ => throw new UnknownSqlTypeException(ErrorMessages.UnknownSqlType(sqlType))
+        };
+    }
 
-        return pgConvertFunction + 
+    private string ParseConvertToDateTime(ITokenizer tokenizer, INode node)
+    {
+        return "to_timestamp" +
+               ParseLeafNode(tokenizer, node.Children[1]) +
+               ParseExpression(tokenizer, node.Children[4]) +
+               ParseLeafNode(tokenizer, node.Children[5]);
+    }
+
+    public string ParseConvertToNumber(ITokenizer tokenizer, INode node)
+    {
+        return "to_number" +
                ParseLeafNode(tokenizer, node.Children[1]) +
                ParseExpression(tokenizer, node.Children[4]) +
                ParseLeafNode(tokenizer, node.Children[5]);
