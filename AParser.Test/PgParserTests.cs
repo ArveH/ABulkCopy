@@ -12,6 +12,12 @@ public class PgParserTests : ParserTestBase
     [InlineData("(CONVERT([bit],(0)))", "(to_number((0)))")]
     [InlineData("convert(bit, 0)", "to_number(0)")]
     [InlineData("'arve'", "'arve'")]
+    [InlineData("''", "''")]
+    [InlineData("' '", "' '")]
+    [InlineData("''''", "''''")]
+    [InlineData("'5'''", "'5'''")]
+    [InlineData("'''5'", "'''5'")]
+    [InlineData("'s''5'", "'s''5'")]
     public void TestParseExpression(string testSql, string expected)
     {
         var tokenizer = GetTokenizer();

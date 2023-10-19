@@ -9,9 +9,11 @@ public class PgParser : IPgParser
             case NodeType.CommaNode:
             case NodeType.LeftParenthesesNode:
             case NodeType.NameNode:
+            case NodeType.NStringNode:
             case NodeType.NumberNode:
             case NodeType.QuotedNameNode:
             case NodeType.RightParenthesesNode:
+            case NodeType.StringNode:
             case NodeType.TypeNode:
                 return ParseLeafNode(tokenizer, node);
             default:

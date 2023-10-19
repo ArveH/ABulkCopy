@@ -10,10 +10,12 @@ public class NodeFactory : INodeFactory
             NodeType.ConvertFunctionNode => new ConvertFunctionNode(),
             NodeType.LeftParenthesesNode => new LeftParenthesesNode(),
             NodeType.NameNode => new NameNode(),
+            NodeType.NStringNode => new NStringNode(),
             NodeType.NumberNode => new NumberNode(),
             NodeType.ParenthesesNode => new ParenthesesNode(),
             NodeType.QuotedNameNode => new QuotedNameNode(),
             NodeType.RightParenthesesNode => new RightParenthesesNode(),
+            NodeType.StringNode => new StringNode(),
             NodeType.TypeNode => new TypeNode(),
             _ => throw new NodeFactoryException(type)
         };

@@ -18,6 +18,10 @@ public static class TokenTypeExtensions
                 return NodeType.QuotedNameNode;
             case TokenType.RightParenthesesToken:
                 return NodeType.RightParenthesesNode;
+            case TokenType.StringToken:
+                return NodeType.StringNode;
+            case TokenType.NStringToken:
+                return NodeType.NStringNode;
             default:
                 throw new ConversionException(type.ToString(), nameof(NodeType));
         }

@@ -169,6 +169,7 @@ public class Tokenizer : ITokenizer
             }
             else if (CurrentChar == '\'')
             {
+                _position++;
                 return;
             }
             else

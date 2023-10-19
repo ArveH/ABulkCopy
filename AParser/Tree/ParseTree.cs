@@ -23,6 +23,10 @@ public class ParseTree : IParseTree
                 return CreateFunction(tokenizer);
             case TokenType.NumberToken:
                 return CreateNumber(tokenizer);
+            case TokenType.StringToken:
+                return CreateString(tokenizer);
+            case TokenType.NStringToken:
+                return CreateNString(tokenizer);
             default:
                 throw new AParserException(ErrorMessages.UnexpectedToken(tokenizer.CurrentToken.Type));
         }
@@ -46,19 +50,19 @@ public class ParseTree : IParseTree
         convertFunctionNode.Children.Add(CreateName(tokenizer));
 
         tokenizer.GetNext();
-        convertFunctionNode.Children.Add(ParseLeftParentheses(tokenizer));
+        convertFunctionNode.Children.Add(CreateLeafNode(TokenType.LeftParenthesesToken, tokenizer));
 
         tokenizer.GetNext();
         convertFunctionNode.Children.Add(CreateType(tokenizer));
 
         tokenizer.GetNext();
-        convertFunctionNode.Children.Add(ParseComma(tokenizer));
+        convertFunctionNode.Children.Add(CreateLeafNode(TokenType.CommaToken, tokenizer));
 
         tokenizer.GetNext();
         convertFunctionNode.Children.Add(CreateExpression(tokenizer));
 
         tokenizer.GetNext();
-        convertFunctionNode.Children.Add(ParseRightParentheses(tokenizer));
+        convertFunctionNode.Children.Add(CreateLeafNode(TokenType.RightParenthesesToken, tokenizer));
 
         return convertFunctionNode;
     }
@@ -66,42 +70,27 @@ public class ParseTree : IParseTree
     public INode CreateParentheses(ITokenizer tokenizer)
     {
         var parenthesesNode = _nodeFactory.Create(NodeType.ParenthesesNode);
-        parenthesesNode.Children.Add(ParseLeftParentheses(tokenizer));
+        parenthesesNode.Children.Add(CreateLeafNode(TokenType.LeftParenthesesToken, tokenizer));
 
         tokenizer.GetNext();
         parenthesesNode.Children.Add(CreateExpression(tokenizer));
 
         tokenizer.GetNext();
-        parenthesesNode.Children.Add(ParseRightParentheses(tokenizer));
+        parenthesesNode.Children.Add(CreateLeafNode(TokenType.RightParenthesesToken, tokenizer));
 
         return parenthesesNode;
     }
 
-    public INode ParseLeftParentheses(ITokenizer tokenizer)
-    {
-        return ParseLeafNode(TokenType.LeftParenthesesToken, tokenizer);
-    }
-
-    public INode ParseRightParentheses(ITokenizer tokenizer)
-    {
-        return ParseLeafNode(TokenType.RightParenthesesToken, tokenizer);
-    }
-
     public INode CreateNumber(ITokenizer tokenizer)
     {
-        return ParseLeafNode(TokenType.NumberToken, tokenizer);
-    }
-
-    public INode ParseComma(ITokenizer tokenizer)
-    {
-        return ParseLeafNode(TokenType.CommaToken, tokenizer);
+        return CreateLeafNode(TokenType.NumberToken, tokenizer);
     }
 
     public INode CreateType(ITokenizer tokenizer)
     {
         var type = tokenizer.CurrentToken.Type == TokenType.QuotedNameToken
             ? tokenizer.CurrentTokenText[1..^1]
-                : tokenizer.CurrentTokenText;
+            : tokenizer.CurrentTokenText;
         if (!_sqlTypes.Exist(type))
         {
             throw new UnknownSqlTypeException(type);
@@ -111,10 +100,20 @@ public class ParseTree : IParseTree
 
     public INode CreateName(ITokenizer tokenizer)
     {
-        return ParseLeafNode(TokenType.NameToken, tokenizer);
+        return CreateLeafNode(TokenType.NameToken, tokenizer);
     }
 
-    private INode ParseLeafNode(TokenType type, ITokenizer tokenizer)
+    public INode CreateString(ITokenizer tokenizer)
+    {
+        return CreateLeafNode(tokenizer.CurrentToken.Type, tokenizer);
+    }
+
+    public INode CreateNString(ITokenizer tokenizer)
+    {
+        return CreateLeafNode(tokenizer.CurrentToken.Type, tokenizer);
+    }
+
+    private INode CreateLeafNode(TokenType type, ITokenizer tokenizer)
     {
         if (tokenizer.CurrentToken.Type != type)
         {

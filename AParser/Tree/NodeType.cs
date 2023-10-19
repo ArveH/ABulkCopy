@@ -6,9 +6,11 @@ public enum NodeType
     CommaNode,
     LeftParenthesesNode,
     NameNode,
+    NStringNode,
     NumberNode,
     ParenthesesNode,
     QuotedNameNode,
     RightParenthesesNode,
+    StringNode,
     TypeNode,
 }
