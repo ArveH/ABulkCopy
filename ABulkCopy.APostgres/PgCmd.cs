@@ -32,7 +32,7 @@ public class PgCmd : IPgCmd
         if (addIfNotExists) qb.Append("if not exists ");
         qb.AppendIdentifier(tableDefinition.Header.Name);
         qb.AppendLine(" (");
-        qb.AppendColumnNames(tableDefinition);
+        qb.AppendColumns(tableDefinition);
         AddPrimaryKeyClause(tableDefinition, qb);
         AddForeignKeyClauses(tableDefinition, qb);
         qb.AppendLine(");");

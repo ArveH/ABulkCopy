@@ -50,7 +50,7 @@ public class QueryBuilder : IQueryBuilder
         }
     }
 
-    public void AppendColumnNames(TableDefinition tableDefinition)
+    public void AppendColumns(TableDefinition tableDefinition)
     {
         var first = true;
         foreach (var column in tableDefinition.Columns)

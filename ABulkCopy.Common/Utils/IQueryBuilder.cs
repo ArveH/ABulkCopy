@@ -8,5 +8,5 @@ public interface IQueryBuilder
     string ToString();
     string CreateDropTableStmt(string tableName);
     void AppendIdentifierList(IEnumerable<string> names);
-    void AppendColumnNames(TableDefinition tableDefinition);
+    void AppendColumns(TableDefinition tableDefinition);
 }
