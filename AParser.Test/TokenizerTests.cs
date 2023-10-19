@@ -31,6 +31,9 @@ public class TokenizerTests
     [InlineData("[arve]",  TokenType.QuotedNameToken)]
     [InlineData("[.90]",  TokenType.QuotedNameToken)]
     [InlineData("[ arve]",  TokenType.QuotedNameToken)]
+    [InlineData("'arve'",  TokenType.StringToken)]
+    [InlineData("N'arve'",  TokenType.NStringToken)]
+    [InlineData("N 'arve'",  TokenType.NameToken)] // NOTE: The space after N means that we have two tokens
     public void TestGetNext(string input, TokenType expected)
     {
         ITokenizer tokenizer = new Tokenizer(new TokenFactory());

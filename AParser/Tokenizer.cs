@@ -82,6 +82,24 @@ public class Tokenizer : ITokenizer
                 return CurrentToken;
         }
 
+        if (CurrentChar == 'N' && PeekNextChar == '\'')
+        {
+            CurrentToken = _tokenFactory.GetToken(TokenType.NStringToken, _position);
+            _position++;
+            SkipToEndOfString();
+            CurrentToken.Length = _position - CurrentToken.StartPos;
+            return CurrentToken;
+        }
+
+        if (CurrentChar == '\'')
+        {
+            CurrentToken = _tokenFactory.GetToken(TokenType.StringToken, _position);
+            _position++;
+            SkipToEndOfString();
+            CurrentToken.Length = _position - CurrentToken.StartPos;
+            return CurrentToken;
+        }
+
         if (IsQuotedNameStartingChar(CurrentChar))
         {
             CurrentToken = _tokenFactory.GetToken(TokenType.QuotedNameToken, _position);
@@ -138,6 +156,25 @@ public class Tokenizer : ITokenizer
         while (char.IsLetterOrDigit(CurrentChar))
         {
             _position++;
+        }
+    }
+
+    private void SkipToEndOfString()
+    {
+        while (CurrentChar != '\0')
+        {
+            if (CurrentChar == '\'' && PeekNextChar == '\'')
+            {
+                _position += 2;
+            }
+            else if (CurrentChar == '\'')
+            {
+                return;
+            }
+            else
+            {
+                _position++;
+            }
         }
     }
 

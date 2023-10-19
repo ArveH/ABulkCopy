@@ -8,6 +8,8 @@ public enum TokenType
     NumberToken,
     QuotedNameToken,
     RightParenthesesToken,
+    StringToken,
+    NStringToken,
 
     EofToken,
     UndefinedToken

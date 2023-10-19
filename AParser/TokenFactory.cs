@@ -12,12 +12,16 @@ public class TokenFactory : ITokenFactory
                 return new LeftParenthesesToken(startPos);
             case TokenType.NameToken:
                 return new NameToken(startPos);
+            case TokenType.NStringToken:
+                return new NStringToken(startPos);
             case TokenType.NumberToken:
                 return new NumberToken(startPos);
             case TokenType.QuotedNameToken: 
                 return new QuotedNameToken(startPos);
             case TokenType.RightParenthesesToken:
                 return new RightParenthesesToken(startPos);
+            case TokenType.StringToken:
+                return new StringToken(startPos);
             case TokenType.EofToken:
                 return new EofToken(startPos);
             case TokenType.UndefinedToken:

@@ -11,6 +11,7 @@ public class PgParserTests : ParserTestBase
     [InlineData(".1", ".1")]
     [InlineData("(CONVERT([bit],(0)))", "(to_number((0)))")]
     [InlineData("convert(bit, 0)", "to_number(0)")]
+    [InlineData("'arve'", "'arve'")]
     public void TestParseExpression(string testSql, string expected)
     {
         var tokenizer = GetTokenizer();
