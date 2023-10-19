@@ -2,13 +2,16 @@
 
 public class PgTypeMapper : ITypeConverter
 {
+    private readonly IPgParser _pgParser;
     private readonly IPgColumnFactory _columnFactory;
     private readonly IMappingFactory _mappingFactory;
 
     public PgTypeMapper(
+        IPgParser pgParser,
         IPgColumnFactory columnFactory,
         IMappingFactory mappingFactory)
     {
+        _pgParser = pgParser;
         _columnFactory = columnFactory;
         _mappingFactory = mappingFactory;
     }
@@ -67,7 +70,23 @@ public class PgTypeMapper : ITypeConverter
                 sourceCol.IsNullable,
                 mappings.Collations.ReplaceGetNull(sourceCol.Collation));
             newColumn.Identity = sourceCol.Identity?.Clone();
-            newColumn.DefaultConstraint = sourceCol.DefaultConstraint?.Clone();
+
+            if (sourceCol.DefaultConstraint != null)
+            {
+                // TODO: Inject factories or somehow remove all 'new' statements
+                ITokenizer tokenizer = new Tokenizer(new TokenFactory());
+                tokenizer.Initialize(sourceCol.DefaultConstraint!.Definition);
+                tokenizer.GetNext();
+                IParseTree parseTree = new ParseTree(new AParser.Tree.NodeFactory(), new SqlTypes());
+                var root = parseTree.CreateExpression(tokenizer);
+                newColumn.DefaultConstraint = new()
+                {
+                    Name = sourceCol.DefaultConstraint.Name,
+                    Definition = new PgParser().Parse(tokenizer, root),
+                    IsSystemNamed = sourceCol.DefaultConstraint.IsSystemNamed
+                };
+            }
+
             newColumn.ComputedDefinition = sourceCol.ComputedDefinition;
             newColumns.Add(newColumn);
         }

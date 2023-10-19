@@ -10,9 +10,10 @@ public class PgSchemaReaderBase : PgTestBase
         : base(output)
     {
         FileHelper = new FileHelper();
-        var columnFactory = new PgColumnFactory();
-        var mappingFactory = new MappingFactory();
-        var typeConverter = new PgTypeMapper(columnFactory, mappingFactory);
+        var typeConverter = new PgTypeMapper(
+            new PgParser(),
+            new PgColumnFactory(), 
+            new MappingFactory());
         SchemaReader = new PgSchemaReader(typeConverter, FileHelper.FileSystem, TestLogger);
     }
 

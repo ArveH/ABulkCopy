@@ -2,19 +2,15 @@
 
 public class QueryBuilderFactory : IQueryBuilderFactory
 {
-    private readonly IPgParser _pgParser;
     private readonly IIdentifier _identifier;
 
-    public QueryBuilderFactory(
-        IPgParser pgParser,
-        IIdentifier identifier)
+    public QueryBuilderFactory(IIdentifier identifier)
     {
-        _pgParser = pgParser;
         _identifier = identifier;
     }
 
     public IQueryBuilder GetQueryBuilder()
     {
-        return new QueryBuilder(_pgParser, _identifier);
+        return new QueryBuilder(_identifier);
     }
 }

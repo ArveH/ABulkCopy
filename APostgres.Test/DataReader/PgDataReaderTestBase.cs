@@ -1,6 +1,4 @@
-﻿using Testing.Shared.SqlServer;
-
-namespace APostgres.Test.DataReader;
+﻿namespace APostgres.Test.DataReader;
 
 public class PgDataReaderTestBase : PgTestBase
 {
@@ -12,7 +10,6 @@ public class PgDataReaderTestBase : PgTestBase
     {
         QBFactoryMock.Setup(f => f.GetQueryBuilder())
             .Returns(() => new QueryBuilder(
-                new PgParser(),
                 new Identifier(TestConfiguration, PgContext)));
     }
 

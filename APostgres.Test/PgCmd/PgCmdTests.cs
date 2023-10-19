@@ -162,93 +162,6 @@ public class PgCmdTests : PgTestBase
         statusValues[0].Should().NotBe(Guid.Empty);
     }
 
-    [Theory]
-    [InlineData("(CONVERT([datetime],N'19000101 00:00:00:000',(9)))", "19000101 00:00:00:000")]
-    [InlineData("(CONVERT([datetime],'JAN 1 1900 00:00:01:000',(9)))", "19000101 00:00:01:000")]
-    [InlineData("(CONVERT([datetime],'20991231 23:59:59:998',(9)))", "20991231 23:59:59:998")]
-    [InlineData("(CONVERT([datetime],'JAN 1 1900',(9)))", "19000101 00:00:00:000")]
-    [InlineData("(getdate())", "today")]
-    public async Task TestCreateTable_When_MssDateTimeDefault(string val, string expected)
-    {
-        // Arrange
-        var tableName = GetName();
-        var inputDefinition = PgTestData.GetEmpty(tableName);
-        var defCol = new PostgresTimestamp(2, "status", false)
-        {
-            DefaultConstraint = new DefaultDefinition
-            {
-                Name = "DF__atswbstas__activ__1DE5A643",
-                Definition = val,
-                IsSystemNamed = true
-            }
-        };
-
-        inputDefinition.Columns.Add(new PostgresBigInt(1, "id", false));
-        inputDefinition.Columns.Add(defCol);
-        await PgDbHelper.Instance.DropTable(tableName);
-        var pgCmd = GetPgCmd();
-
-        // Act
-        List<DateTime> statusValues;
-        try
-        {
-            await pgCmd.CreateTable(inputDefinition);
-            await PgDbHelper.Instance.ExecuteNonQuery($"insert into \"{tableName}\" (id) values (3)");
-            statusValues = (await PgDbHelper.Instance.SelectColumn<DateTime>(tableName, "status")).ToList();
-        }
-        finally
-        {
-            await PgDbHelper.Instance.DropTable(tableName);
-        }
-
-        // Assert
-        statusValues.Count.Should().Be(1);
-        var actual = statusValues[0].ToString("yyyyMMdd HH:mm:ss:fff");
-        if (expected == "today") expected = DateTime.Today.ToString("yyyyMMdd HH:mm:ss:fff");
-        actual.Should().Be(expected);
-    }
-
-    [Theory]
-    [InlineData("((0))", false)]
-    [InlineData("((1))", true)]
-    public async Task TestCreateTable_When_MssBitDefault(string val, bool expected)
-    {
-        // Arrange
-        var tableName = GetName();
-        var inputDefinition = PgTestData.GetEmpty(tableName);
-        var defCol = new PostgresBoolean(2, "status", false)
-        {
-            DefaultConstraint = new DefaultDefinition
-            {
-                Name = "DF__atswbstas__activ__1DE5A643",
-                Definition = val,
-                IsSystemNamed = true
-            }
-        };
-
-        inputDefinition.Columns.Add(new PostgresBigInt(1, "id", false));
-        inputDefinition.Columns.Add(defCol);
-        await PgDbHelper.Instance.DropTable(tableName);
-        var pgCmd = GetPgCmd();
-
-        // Act
-        List<bool> statusValues;
-        try
-        {
-            await pgCmd.CreateTable(inputDefinition);
-            await PgDbHelper.Instance.ExecuteNonQuery($"insert into \"{tableName}\" (id) values (3)");
-            statusValues = (await PgDbHelper.Instance.SelectColumn<bool>(tableName, "status")).ToList();
-        }
-        finally
-        {
-            await PgDbHelper.Instance.DropTable(tableName);
-        }
-
-        // Assert
-        statusValues.Count.Should().Be(1);
-        statusValues[0].Should().Be(expected);
-    }
-
     [Fact]
     public async Task TestCreateTable_When_PrimaryKey()
     {
@@ -522,7 +435,6 @@ public class PgCmdTests : PgTestBase
         _qbFactoryMock
             .Setup(f => f.GetQueryBuilder())
             .Returns(() => new QueryBuilder(
-                new PgParser(),
                 GetIdentifier(appSettings)));
         return new ABulkCopy.APostgres.PgCmd(
             PgContext,

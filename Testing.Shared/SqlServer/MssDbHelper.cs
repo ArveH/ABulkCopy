@@ -37,7 +37,7 @@ public class MssDbHelper
             sb.Append(column.GetIdentityClause());
             if (column.HasDefault)
             {
-                // TODO: Inject factories or otherwise remove all 'new' statements
+                // TODO: Inject factories or somehow remove all 'new' statements
                 ITokenizer tokenizer = new Tokenizer(new TokenFactory());
                 tokenizer.Initialize(column.DefaultConstraint!.Definition);
                 tokenizer.GetNext();

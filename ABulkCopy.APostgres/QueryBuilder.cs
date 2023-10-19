@@ -2,15 +2,11 @@
 
 public class QueryBuilder : IQueryBuilder
 {
-    private readonly IPgParser _pgParser;
     private readonly IIdentifier _identifier;
     private readonly StringBuilder _sb = new();
 
-    public QueryBuilder(
-        IPgParser pgParser,
-        IIdentifier identifier)
+    public QueryBuilder(IIdentifier identifier)
     {
-        _pgParser = pgParser;
         _identifier = identifier;
     }
 
@@ -71,14 +67,8 @@ public class QueryBuilder : IQueryBuilder
             _sb.Append(column.GetIdentityClause());
             if (column.HasDefault)
             {
-                // TODO: Inject factories or otherwise remove all 'new' statements
-                ITokenizer tokenizer = new Tokenizer(new TokenFactory());
-                tokenizer.Initialize(column.DefaultConstraint!.Definition);
-                tokenizer.GetNext();
-                IParseTree parseTree = new ParseTree(new AParser.Tree.NodeFactory(), new SqlTypes());
-                var root = parseTree.CreateExpression(tokenizer);
                 _sb.Append(" default ");
-                _sb.Append(_pgParser.Parse(tokenizer, root));
+                _sb.Append(column.DefaultConstraint!.Definition);
             }
             _sb.Append(column.GetNullableClause());
         }
