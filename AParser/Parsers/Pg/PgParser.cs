@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace AParser.Parsers.Pg;
+﻿namespace AParser.Parsers.Pg;
 
 public class PgParser : IPgParser
 {
@@ -28,19 +26,21 @@ public class PgParser : IPgParser
         switch (node.Type)
         {
             case NodeType.ConvertFunctionNode:
-                return ParseConvertFunctionNode(tokenizer, node);
+                return ParseConvertFunction(tokenizer, node);
+            case NodeType.TodayFunctionNode:
+                return ParseTodayFunction(tokenizer, node);
             case NodeType.NumberNode:
             case NodeType.NStringNode:
             case NodeType.StringNode:
                 return ParseLeafNode(tokenizer, node);
             case NodeType.ParenthesesNode:
-                return ParseParenthesesNode(tokenizer, node);
+                return ParseParentheses(tokenizer, node);
             default:
                 throw new AParserException(ErrorMessages.UnexpectedNode(node.Type));
         }
     }
 
-    public string ParseConvertFunctionNode(ITokenizer tokenizer, INode node)
+    public string ParseConvertFunction(ITokenizer tokenizer, INode node)
     {
         var sqlType = tokenizer.GetSpan(node.Children[2].Tokens.First())
             .ToString().ToLower();
@@ -83,7 +83,12 @@ public class PgParser : IPgParser
                ")";
     }
 
-    public string ParseParenthesesNode(ITokenizer tokenizer, INode node)
+    public string ParseTodayFunction(ITokenizer tokenizer, INode node)
+    {
+        return "localtimestamp";
+    }
+
+    public string ParseParentheses(ITokenizer tokenizer, INode node)
     {
         return "(" + 
                Parse(tokenizer, node.Children[1]) + 

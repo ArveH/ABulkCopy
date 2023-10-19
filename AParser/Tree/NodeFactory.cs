@@ -16,6 +16,7 @@ public class NodeFactory : INodeFactory
             NodeType.QuotedNameNode => new QuotedNameNode(),
             NodeType.RightParenthesesNode => new RightParenthesesNode(),
             NodeType.StringNode => new StringNode(),
+            NodeType.TodayFunctionNode => new TodayFunctionNode(),
             NodeType.TypeNode => new TypeNode(),
             _ => throw new NodeFactoryException(type)
         };

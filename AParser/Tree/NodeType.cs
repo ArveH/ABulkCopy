@@ -12,5 +12,6 @@ public enum NodeType
     QuotedNameNode,
     RightParenthesesNode,
     StringNode,
+    TodayFunctionNode,
     TypeNode,
 }

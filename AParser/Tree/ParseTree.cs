@@ -39,9 +39,25 @@ public class ParseTree : IParseTree
         {
             case "convert":
                 return CreateConvertFunction(tokenizer);
+            case "getdate":
+                return CreateTodayFunction(tokenizer);
             default:
                 throw new UnknownFunctionException(tokenizer.CurrentTokenText);
         }
+    }
+
+    private INode CreateTodayFunction(ITokenizer tokenizer)
+    {
+        var todayFunctionNode = _nodeFactory.Create(NodeType.TodayFunctionNode);
+        todayFunctionNode.Children.Add(CreateName(tokenizer));
+
+        tokenizer.GetNext();
+        todayFunctionNode.Children.Add(CreateLeafNode(TokenType.LeftParenthesesToken, tokenizer));
+
+        tokenizer.GetNext();
+        todayFunctionNode.Children.Add(CreateLeafNode(TokenType.RightParenthesesToken, tokenizer));
+
+        return todayFunctionNode;
     }
 
     public INode CreateConvertFunction(ITokenizer tokenizer)
