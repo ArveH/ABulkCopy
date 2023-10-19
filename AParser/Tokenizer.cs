@@ -23,6 +23,17 @@ public class Tokenizer : ITokenizer
         return Original.AsSpan(token.StartPos, token.Length);
     }
 
+    public ReadOnlySpan<char> GetUnquotedSpan(IToken token)
+    {
+        return token.Type switch
+        {
+            TokenType.QuotedNameToken => Original.AsSpan(token.StartPos + 1, token.Length - 2),
+            TokenType.StringToken => Original.AsSpan(token.StartPos + 1, token.Length - 2),
+            TokenType.NStringToken => Original.AsSpan(token.StartPos + 2, token.Length - 3),
+            _ => Original.AsSpan(token.StartPos, token.Length)
+        };
+    }
+
     public string Original
     {
         get => _original ?? throw new ArgumentNullException(nameof(Original), "Can't use Original string before Initialize is called");
@@ -85,7 +96,7 @@ public class Tokenizer : ITokenizer
         if (CurrentChar == 'N' && PeekNextChar == '\'')
         {
             CurrentToken = _tokenFactory.GetToken(TokenType.NStringToken, _position);
-            _position++;
+            _position+=2;
             SkipToEndOfString();
             CurrentToken.Length = _position - CurrentToken.StartPos;
             return CurrentToken;

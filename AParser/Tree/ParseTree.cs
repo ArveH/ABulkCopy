@@ -62,6 +62,15 @@ public class ParseTree : IParseTree
         convertFunctionNode.Children.Add(CreateExpression(tokenizer));
 
         tokenizer.GetNext();
+        if (tokenizer.CurrentToken.Type == TokenType.CommaToken)
+        {
+            convertFunctionNode.Children.Add(CreateLeafNode(TokenType.CommaToken, tokenizer));
+
+            tokenizer.GetNext();
+            convertFunctionNode.Children.Add(CreateExpression(tokenizer));
+
+            tokenizer.GetNext();
+        }
         convertFunctionNode.Children.Add(CreateLeafNode(TokenType.RightParenthesesToken, tokenizer));
 
         return convertFunctionNode;

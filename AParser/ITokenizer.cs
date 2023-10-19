@@ -9,4 +9,5 @@ public interface ITokenizer
     IToken GetNext();
     IToken GetExpected(TokenType expectedToken);
     ReadOnlySpan<char> GetSpan(IToken token);
+    ReadOnlySpan<char> GetUnquotedSpan(IToken token);
 }

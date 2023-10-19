@@ -1,4 +1,6 @@
-﻿namespace AParser.Parsers.Pg;
+﻿using System;
+
+namespace AParser.Parsers.Pg;
 
 public class PgParser : IPgParser
 {
@@ -28,6 +30,8 @@ public class PgParser : IPgParser
             case NodeType.ConvertFunctionNode:
                 return ParseConvertFunctionNode(tokenizer, node);
             case NodeType.NumberNode:
+            case NodeType.NStringNode:
+            case NodeType.StringNode:
                 return ParseLeafNode(tokenizer, node);
             case NodeType.ParenthesesNode:
                 return ParseParenthesesNode(tokenizer, node);
@@ -44,33 +48,46 @@ public class PgParser : IPgParser
         {
             "bit" => ParseConvertToNumber(tokenizer, node),
             "[bit]" => ParseConvertToNumber(tokenizer, node),
-            "datetime" => ParseConvertToDateTime(tokenizer, node),
-            "[datetime]" => ParseConvertToDateTime(tokenizer, node),
+            "datetime" => ParseConvertToTimestamp(tokenizer, node),
+            "[datetime]" => ParseConvertToTimestamp(tokenizer, node),
             _ => throw new UnknownSqlTypeException(ErrorMessages.UnknownSqlType(sqlType))
         };
     }
 
-    private string ParseConvertToDateTime(ITokenizer tokenizer, INode node)
+    private string ParseConvertToTimestamp(ITokenizer tokenizer, INode node)
     {
-        return "to_timestamp" +
-               ParseLeafNode(tokenizer, node.Children[1]) +
-               ParseExpression(tokenizer, node.Children[4]) +
-               ParseLeafNode(tokenizer, node.Children[5]);
+        var dateToken = node.Children[4].Tokens.FirstOrDefault();
+        if (dateToken?.Type != TokenType.StringToken && dateToken?.Type != TokenType.NStringToken)
+        {
+            return "cast(" +
+                ParseExpression(tokenizer, node.Children[4]) +
+                " as timestamp)";
+        }
+
+        var dateStr = tokenizer.GetUnquotedSpan(dateToken).ToString();
+
+        var longDate = dateStr.ExtractLongDateString();
+        if (longDate == null)
+        {
+            // CAST doesn't accept strings with milliseconds
+            return $"cast('{dateStr.Replace(":000", "")}' as timestamp)";
+        }
+        return $"to_timestamp('{longDate}', 'YYYYMMDD HH24:MI:SS:FF3')";
+
     }
 
     public string ParseConvertToNumber(ITokenizer tokenizer, INode node)
     {
-        return "to_number" +
-               ParseLeafNode(tokenizer, node.Children[1]) +
+        return "to_number(" +
                ParseExpression(tokenizer, node.Children[4]) +
-               ParseLeafNode(tokenizer, node.Children[5]);
+               ")";
     }
 
     public string ParseParenthesesNode(ITokenizer tokenizer, INode node)
     {
-        return ParseLeafNode(tokenizer, node.Children[0]) + 
+        return "(" + 
                Parse(tokenizer, node.Children[1]) + 
-               ParseLeafNode(tokenizer, node.Children[2]);
+               ")";
     }
 
     public static string ParseLeafNode(ITokenizer tokenizer, INode node)

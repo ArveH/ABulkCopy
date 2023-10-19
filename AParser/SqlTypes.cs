@@ -4,7 +4,8 @@ public class SqlTypes : ISqlTypes
 {
     private static readonly HashSet<string> TypeNames = new(StringComparer.InvariantCultureIgnoreCase)
     {
-        "bit"
+        "bit",
+        "datetime"
     };
 
     public bool Exist(string name)
