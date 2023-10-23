@@ -8,6 +8,7 @@ public class NodeFactory : INodeFactory
         {
             NodeType.CommaNode => new CommaNode(),
             NodeType.ConvertFunctionNode => new ConvertFunctionNode(),
+            NodeType.GuidFunctionNode => new GuidFunctionNode(),
             NodeType.LeftParenthesesNode => new LeftParenthesesNode(),
             NodeType.NameNode => new NameNode(),
             NodeType.NStringNode => new NStringNode(),

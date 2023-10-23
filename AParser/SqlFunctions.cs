@@ -1,14 +1,15 @@
 ﻿namespace AParser;
 
-public class SqlFunctions : ISqlFunctions
+public class SqlFunctions
 {
     private static readonly HashSet<string> FunctionNames = new(StringComparer.InvariantCultureIgnoreCase)
     {
-        "convert"
+        Convert,
+        GetDate,
+        NewId
     };
 
-    public bool Exist(string name)
-    {
-        return FunctionNames.Contains(name);
-    }
+    public const string Convert = "convert";
+    public const string GetDate = "getdate";
+    public const string NewId = "newid";
 }

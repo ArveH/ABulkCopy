@@ -24,6 +24,7 @@ public class PgParserTests : ParserTestBase
     [InlineData("(CONVERT([datetime],'20991231 23:59:59:998',(9)))", "(to_timestamp('20991231 23:59:59:998', 'YYYYMMDD HH24:MI:SS:FF3'))")]
     [InlineData("(CONVERT([datetime],'JAN 1 1900',(9)))", "(cast('JAN 1 1900' as timestamp))")]
     [InlineData("(getdate())", "(localtimestamp)")]
+    [InlineData("(newid())", "(gen_random_uuid())")]
     public void TestParseExpression(string testSql, string expected)
     {
         var tokenizer = GetTokenizer();

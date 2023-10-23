@@ -4,6 +4,7 @@ public enum NodeType
 {
     ConvertFunctionNode,
     CommaNode,
+    GuidFunctionNode,
     LeftParenthesesNode,
     NameNode,
     NStringNode,

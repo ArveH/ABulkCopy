@@ -37,27 +37,39 @@ public class ParseTree : IParseTree
         var functionName = tokenizer.CurrentTokenText.ToLower();
         switch (functionName)
         {
-            case "convert":
+            case SqlFunctions.Convert:
                 return CreateConvertFunction(tokenizer);
-            case "getdate":
+            case SqlFunctions.GetDate:
                 return CreateTodayFunction(tokenizer);
+            case SqlFunctions.NewId:
+                return CreateGuidFunction(tokenizer);
             default:
                 throw new UnknownFunctionException(tokenizer.CurrentTokenText);
         }
     }
 
+    private INode CreateFunctionWithNoParameters(ITokenizer tokenizer, NodeType nodeType)
+    {
+        var functionNode = _nodeFactory.Create(nodeType);
+        functionNode.Children.Add(CreateName(tokenizer));
+
+        tokenizer.GetNext();
+        functionNode.Children.Add(CreateLeafNode(TokenType.LeftParenthesesToken, tokenizer));
+
+        tokenizer.GetNext();
+        functionNode.Children.Add(CreateLeafNode(TokenType.RightParenthesesToken, tokenizer));
+
+        return functionNode;
+    }
+
+    private INode CreateGuidFunction(ITokenizer tokenizer)
+    {
+        return CreateFunctionWithNoParameters(tokenizer, NodeType.GuidFunctionNode);
+    }
+
     private INode CreateTodayFunction(ITokenizer tokenizer)
     {
-        var todayFunctionNode = _nodeFactory.Create(NodeType.TodayFunctionNode);
-        todayFunctionNode.Children.Add(CreateName(tokenizer));
-
-        tokenizer.GetNext();
-        todayFunctionNode.Children.Add(CreateLeafNode(TokenType.LeftParenthesesToken, tokenizer));
-
-        tokenizer.GetNext();
-        todayFunctionNode.Children.Add(CreateLeafNode(TokenType.RightParenthesesToken, tokenizer));
-
-        return todayFunctionNode;
+        return CreateFunctionWithNoParameters(tokenizer, NodeType.TodayFunctionNode);
     }
 
     public INode CreateConvertFunction(ITokenizer tokenizer)

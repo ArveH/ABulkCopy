@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-
-namespace APostgres.Test;
+﻿namespace APostgres.Test;
 
 public class PgTypeMapperTests : PgTestBase
 {
@@ -73,4 +71,34 @@ public class PgTypeMapperTests : PgTestBase
         tableDefinition.Columns[1].DefaultConstraint!.Definition.Should().Be(expected);
     }
 
+    [Theory]
+    [InlineData("(newid())", "(gen_random_uuid())")]
+    public void TestConvert_When_MssGuidDefault(string val, string expected)
+    {
+        // Arrange
+        var tableName = GetName();
+        var inputDefinition = MssTestData.GetEmpty(tableName);
+        var defCol = new SqlServerUniqueIdentifier(2, "Guid", false)
+        {
+            DefaultConstraint = new DefaultDefinition
+            {
+                Name = "DF__atswbstas__activ__1DE5A643",
+                Definition = val,
+                IsSystemNamed = true
+            }
+        };
+
+        inputDefinition.Columns.Add(new SqlServerBigInt(1, "id", false));
+        inputDefinition.Columns.Add(defCol);
+        var typeConverter = new PgTypeMapper(
+            new PgParser(), new PgColumnFactory(), new MappingFactory());
+
+        // Act
+        var tableDefinition = typeConverter.Convert(inputDefinition);
+
+        // Assert
+        tableDefinition.Columns[1].Type.Should().Be("uuid");
+        tableDefinition.Columns[1].HasDefault.Should().BeTrue();
+        tableDefinition.Columns[1].DefaultConstraint!.Definition.Should().Be(expected);
+    }
 }

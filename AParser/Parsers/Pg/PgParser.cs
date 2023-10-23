@@ -27,6 +27,8 @@ public class PgParser : IPgParser
         {
             case NodeType.ConvertFunctionNode:
                 return ParseConvertFunction(tokenizer, node);
+            case NodeType.GuidFunctionNode:
+                return ParseGuidFunction(tokenizer, node);
             case NodeType.TodayFunctionNode:
                 return ParseTodayFunction(tokenizer, node);
             case NodeType.NumberNode:
@@ -86,6 +88,11 @@ public class PgParser : IPgParser
     public string ParseTodayFunction(ITokenizer tokenizer, INode node)
     {
         return "localtimestamp";
+    }
+
+    public string ParseGuidFunction(ITokenizer tokenizer, INode node)
+    {
+        return "gen_random_uuid()";
     }
 
     public string ParseParentheses(ITokenizer tokenizer, INode node)
