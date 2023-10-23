@@ -16,17 +16,4 @@ public class PostgresUuid : PgDefaultColumn
     {
         return new Guid(value);
     }
-
-    // TODO: Remove
-    public string GetDefaultClause()
-    {
-        if (DefaultConstraint == null) return "";
-
-        if (DefaultConstraint.Definition.Contains("newid", StringComparison.InvariantCultureIgnoreCase))
-        {
-            return " DEFAULT gen_random_uuid()";
-        }
-
-        return $" DEFAULT {DefaultConstraint.Definition}";
-    }
 }

@@ -27,31 +27,4 @@ public class PostgresTimestamp : PgDefaultColumn
     {
         return typeof(DateTime);
     }
-
-    // TODO: Remove
-    public string GetDefaultClause()
-    {
-        if (DefaultConstraint == null) return "";
-
-        var dateStr = DefaultConstraint.Definition.ExtractSingleQuoteString();
-
-        if (DefaultConstraint.Definition.Contains("Convert", StringComparison.InvariantCultureIgnoreCase) &&
-            dateStr != null)
-        {
-            var longDate = dateStr.ExtractLongDateString();
-            if (longDate == null || longDate.EndsWith(":000'"))
-            {
-                // CAST doesn't accept strings with milliseconds
-                return $" DEFAULT CAST({dateStr.Replace(":000", "")} AS timestamp)";
-            }
-            return $" DEFAULT to_timestamp({longDate}, 'YYYYMMDD HH24:MI:SS:FF3')";
-        }
-
-        if (DefaultConstraint.Definition.Contains("getdate", StringComparison.InvariantCultureIgnoreCase))
-        {
-            return " DEFAULT CURRENT_DATE";
-        }
-
-        return $" DEFAULT {DefaultConstraint.Definition}";
-    }
 }

@@ -12,6 +12,8 @@ public class PgSchemaReaderBase : PgTestBase
         FileHelper = new FileHelper();
         var typeConverter = new PgTypeMapper(
             new PgParser(),
+            new ParseTree(new NodeFactory(), new SqlTypes()),
+            new TokenizerFactory(new TokenFactory()),
             new PgColumnFactory(), 
             new MappingFactory());
         SchemaReader = new PgSchemaReader(typeConverter, FileHelper.FileSystem, TestLogger);

@@ -13,6 +13,10 @@ public class MssDbHelper
         _connectionString = configuration.Check(TestConstants.Config.ConnectionString);
     }
 
+    private readonly IParseTree _parseTree = new ParseTree(new NodeFactory(), new SqlTypes());
+    private readonly IPgParser _parser = new PgParser();
+    private readonly ITokenizerFactory _tokenizerFactory = new TokenizerFactory(new TokenFactory());
+
     public static MssDbHelper Instance => LazyInstance.Value;
     public string ConnectionString => _connectionString ?? throw new ArgumentNullException(nameof(ConnectionString));
 
@@ -37,14 +41,12 @@ public class MssDbHelper
             sb.Append(column.GetIdentityClause());
             if (column.HasDefault)
             {
-                // TODO: Inject factories or somehow remove all 'new' statements
-                ITokenizer tokenizer = new Tokenizer(new TokenFactory());
+                var tokenizer = _tokenizerFactory.GetTokenizer();
                 tokenizer.Initialize(column.DefaultConstraint!.Definition);
                 tokenizer.GetNext();
-                IParseTree parseTree = new ParseTree(new AParser.Tree.NodeFactory(), new SqlTypes());
-                var root = parseTree.CreateExpression(tokenizer);
+                var root = _parseTree.CreateExpression(tokenizer);
                 sb.Append(" default ");
-                sb.Append(new PgParser().Parse(tokenizer, root));
+                sb.Append(_parser.Parse(tokenizer, root));
             }
             sb.Append(column.GetNullableClause());
         }

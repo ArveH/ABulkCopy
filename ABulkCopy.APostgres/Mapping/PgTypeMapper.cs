@@ -3,15 +3,21 @@
 public class PgTypeMapper : ITypeConverter
 {
     private readonly IPgParser _pgParser;
+    private readonly IParseTree _parseTree;
+    private readonly ITokenizerFactory _tokenizerFactory;
     private readonly IPgColumnFactory _columnFactory;
     private readonly IMappingFactory _mappingFactory;
 
     public PgTypeMapper(
         IPgParser pgParser,
+        IParseTree parseTree,
+        ITokenizerFactory tokenizerFactory,
         IPgColumnFactory columnFactory,
         IMappingFactory mappingFactory)
     {
         _pgParser = pgParser;
+        _parseTree = parseTree;
+        _tokenizerFactory = tokenizerFactory;
         _columnFactory = columnFactory;
         _mappingFactory = mappingFactory;
     }
@@ -30,7 +36,7 @@ public class PgTypeMapper : ITypeConverter
             Header = new TableHeader
             {
                 Name = sourceDefinition.Header.Name,
-                Location = mappings.Locations.NullGet(sourceDefinition.Header.Location),
+                Location = mappings.Locations.NullableGet(sourceDefinition.Header.Location),
                 Schema = mappings.Schemas[sourceDefinition.Header.Schema],
             },
             Columns = ConvertColumns(sourceDefinition, mappings).ToList()
@@ -63,26 +69,24 @@ public class PgTypeMapper : ITypeConverter
             var newColumn = _columnFactory.Create(
                 sourceCol.Id,
                 sourceCol.Name,
-                mappings.Columns.ReplaceGet(sourceCol.Type),
+                mappings.Columns.GetKeyIfValueNotExist(sourceCol.Type),
                 sourceCol.Length,
                 newPrecision,
                 newScale,
                 sourceCol.IsNullable,
-                mappings.Collations.ReplaceGetNull(sourceCol.Collation));
+                mappings.Collations.NullableGetKeyIfValueNotExist(sourceCol.Collation));
             newColumn.Identity = sourceCol.Identity?.Clone();
 
             if (sourceCol.DefaultConstraint != null)
             {
-                // TODO: Inject factories or somehow remove all 'new' statements
-                ITokenizer tokenizer = new Tokenizer(new TokenFactory());
+                var tokenizer = _tokenizerFactory.GetTokenizer();
                 tokenizer.Initialize(sourceCol.DefaultConstraint!.Definition);
                 tokenizer.GetNext();
-                IParseTree parseTree = new ParseTree(new AParser.Tree.NodeFactory(), new SqlTypes());
-                var root = parseTree.CreateExpression(tokenizer);
+                var root = _parseTree.CreateExpression(tokenizer);
                 newColumn.DefaultConstraint = new()
                 {
                     Name = sourceCol.DefaultConstraint.Name,
-                    Definition = new PgParser().Parse(tokenizer, root),
+                    Definition = _pgParser.Parse(tokenizer, root),
                     IsSystemNamed = sourceCol.DefaultConstraint.IsSystemNamed
                 };
             }

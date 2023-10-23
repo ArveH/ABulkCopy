@@ -70,7 +70,10 @@ public class PgTypeMapperTests : PgTestBase
         inputDefinition.Columns.Add(new SqlServerBigInt(1, "id", false));
         inputDefinition.Columns.Add(defCol);
         var typeConverter = new PgTypeMapper(
-            new PgParser(), new PgColumnFactory(), new MappingFactory());
+            new PgParser(),
+            new ParseTree(new NodeFactory(), new SqlTypes()),
+            new TokenizerFactory(new TokenFactory()),
+            new PgColumnFactory(), new MappingFactory());
 
         // Act
         var tableDefinition = typeConverter.Convert(inputDefinition);

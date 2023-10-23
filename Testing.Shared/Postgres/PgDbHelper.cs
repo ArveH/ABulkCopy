@@ -37,6 +37,10 @@ public class PgDbHelper
         }
     };
 
+    private readonly IParseTree _parseTree = new ParseTree(new NodeFactory(), new SqlTypes());
+    private readonly IPgParser _parser = new PgParser();
+    private readonly ITokenizerFactory _tokenizerFactory = new TokenizerFactory(new TokenFactory());
+
     private PgDbHelper()
     {
         IConfiguration configuration = new ConfigHelper().GetConfiguration("128e015d-d8ef-4ca8-ba79-5390b26c675f");
@@ -79,14 +83,12 @@ public class PgDbHelper
             sb.Append(column.GetIdentityClause());
             if (column.HasDefault)
             {
-                // TODO: Inject factories or somehow remove all 'new' statements
-                ITokenizer tokenizer = new Tokenizer(new TokenFactory());
+                var tokenizer = _tokenizerFactory.GetTokenizer();
                 tokenizer.Initialize(column.DefaultConstraint!.Definition);
                 tokenizer.GetNext();
-                IParseTree parseTree = new ParseTree(new NodeFactory(), new SqlTypes());
-                var root = parseTree.CreateExpression(tokenizer);
+                var root = _parseTree.CreateExpression(tokenizer);
                 sb.Append(" default ");
-                sb.Append(new PgParser().Parse(tokenizer, root));
+                sb.Append(_parser.Parse(tokenizer, root));
             }
             sb.Append(column.GetNullableClause());
         }
