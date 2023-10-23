@@ -11,7 +11,7 @@ public class PgTypeMapperTests : PgTestBase
     [Theory]
     [InlineData("((0))", "((0))")]
     [InlineData("((1))", "((1))")]
-    public void TestCreateTable_When_MssBitDefault(string val, string expected)
+    public void TestConvert_When_MssBitDefault(string val, string expected)
     {
         // Arrange
         var tableName = GetName();
@@ -39,12 +39,12 @@ public class PgTypeMapperTests : PgTestBase
     }
 
     [Theory]
-    [InlineData("(CONVERT([datetime],N'19000101 00:00:00:000',(9)))", "19000101 00:00:00:000")]
-    [InlineData("(CONVERT([datetime],'JAN 1 1900 00:00:01:000',(9)))", "19000101 00:00:01:000")]
-    [InlineData("(CONVERT([datetime],'20991231 23:59:59:998',(9)))", "20991231 23:59:59:998")]
-    [InlineData("(CONVERT([datetime],'JAN 1 1900',(9)))", "19000101 00:00:00:000")]
-    [InlineData("(getdate())", "today")]
-    public void TestCreateTable_When_MssDateTimeDefault(string val, string expected)
+    [InlineData("(CONVERT([datetime],N'19000101 00:00:00:000',(9)))", "(to_timestamp('19000101 00:00:00:000', 'YYYYMMDD HH24:MI:SS:FF3'))")]
+    [InlineData("(CONVERT([datetime],'JAN 1 1900 00:00:01:000',(9)))", "(cast('JAN 1 1900 00:00:01' as timestamp))")]
+    [InlineData("(CONVERT([datetime],'20991231 23:59:59:998',(9)))", "(to_timestamp('20991231 23:59:59:998', 'YYYYMMDD HH24:MI:SS:FF3'))")]
+    [InlineData("(CONVERT([datetime],'JAN 1 1900',(9)))", "(cast('JAN 1 1900' as timestamp))")]
+    [InlineData("(getdate())", "(localtimestamp)")]
+    public void TestConvert_When_MssDateTimeDefault(string val, string expected)
     {
         // Arrange
         var tableName = GetName();
