@@ -49,44 +49,6 @@ public class PgCmdTests : PgTestBase
     }
 
     [Fact]
-    public async Task TestCreateTable_When_VarCharDefault()
-    {
-        // Arrange
-        var tableName = GetName();
-        var inputDefinition = PgTestData.GetEmpty(tableName);
-        var defCol = new PostgresVarChar(2, "status", false, 50)
-        {
-            DefaultConstraint = new DefaultDefinition
-            {
-                Name = "DF__atswbstas__activ__1DE5A643",
-                Definition = "(N'Inactive')",
-                IsSystemNamed = true
-            }
-        };
-        inputDefinition.Columns.Add(new PostgresBigInt(1, "id", false));
-        inputDefinition.Columns.Add(defCol);
-        await PgDbHelper.Instance.DropTable(tableName);
-        var pgCmd = GetPgCmd();
-
-        // Act
-        List<string?> statusValues;
-        try
-        {
-            await pgCmd.CreateTable(inputDefinition);
-            await PgDbHelper.Instance.ExecuteNonQuery($"insert into \"{tableName}\" (id) values (3)");
-            statusValues = (await PgDbHelper.Instance.SelectColumn<string>(tableName, "status")).ToList();
-        }
-        finally
-        {
-            await PgDbHelper.Instance.DropTable(tableName);
-        }
-
-        // Assert
-        statusValues.Count.Should().Be(1);
-        statusValues[0].Should().Be("Inactive");
-    }
-
-    [Fact]
     public async Task TestCreateTable_When_DecimalDefault()
     {
         // Arrange

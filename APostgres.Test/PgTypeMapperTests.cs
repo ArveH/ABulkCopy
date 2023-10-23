@@ -11,9 +11,6 @@ public class PgTypeMapperTests : PgTestBase
     [InlineData("((1))", "((1))")]
     public void TestConvert_When_MssBitDefault(string val, string expected)
     {
-        // Arrange
-        var tableName = GetName();
-        var inputDefinition = MssTestData.GetEmpty(tableName);
         var defCol = new SqlServerBit(2, "status", false)
         {
             DefaultConstraint = new DefaultDefinition
@@ -23,17 +20,8 @@ public class PgTypeMapperTests : PgTestBase
                 IsSystemNamed = true
             }
         };
-        inputDefinition.Columns.Add(defCol);
-        var typeConverter = new PgTypeMapper(
-            new PgParser(), new PgColumnFactory(), new MappingFactory());
 
-        // Act
-        var tableDefinition = typeConverter.Convert(inputDefinition);
-
-        // Assert
-        tableDefinition.Columns[0].Type.Should().Be("smallint");
-        tableDefinition.Columns[0].HasDefault.Should().BeTrue();
-        tableDefinition.Columns[0].DefaultConstraint!.Definition.Should().Be(expected);
+        TestConvert(GetName(), defCol, "smallint", expected);
     }
 
     [Theory]
@@ -44,9 +32,6 @@ public class PgTypeMapperTests : PgTestBase
     [InlineData("(getdate())", "(localtimestamp)")]
     public void TestConvert_When_MssDateTimeDefault(string val, string expected)
     {
-        // Arrange
-        var tableName = GetName();
-        var inputDefinition = MssTestData.GetEmpty(tableName);
         var defCol = new SqlServerDateTime2(2, "LastUpdate", false)
         {
             DefaultConstraint = new DefaultDefinition
@@ -57,27 +42,13 @@ public class PgTypeMapperTests : PgTestBase
             }
         };
 
-        inputDefinition.Columns.Add(new SqlServerBigInt(1, "id", false));
-        inputDefinition.Columns.Add(defCol);
-        var typeConverter = new PgTypeMapper(
-            new PgParser(), new PgColumnFactory(), new MappingFactory());
-
-        // Act
-        var tableDefinition = typeConverter.Convert(inputDefinition);
-
-        // Assert
-        tableDefinition.Columns[1].Type.Should().Be("timestamp");
-        tableDefinition.Columns[1].HasDefault.Should().BeTrue();
-        tableDefinition.Columns[1].DefaultConstraint!.Definition.Should().Be(expected);
+        TestConvert(GetName(), defCol, "timestamp", expected);
     }
 
     [Theory]
     [InlineData("(newid())", "(gen_random_uuid())")]
     public void TestConvert_When_MssGuidDefault(string val, string expected)
     {
-        // Arrange
-        var tableName = GetName();
-        var inputDefinition = MssTestData.GetEmpty(tableName);
         var defCol = new SqlServerUniqueIdentifier(2, "Guid", false)
         {
             DefaultConstraint = new DefaultDefinition
@@ -88,6 +59,14 @@ public class PgTypeMapperTests : PgTestBase
             }
         };
 
+        TestConvert(GetName(), defCol, "uuid", expected);
+    }
+
+    private void TestConvert(string tableName, IColumn defCol, string expectedType, string expectedDefault)
+    {
+        // Arrange
+        var inputDefinition = MssTestData.GetEmpty(tableName);
+
         inputDefinition.Columns.Add(new SqlServerBigInt(1, "id", false));
         inputDefinition.Columns.Add(defCol);
         var typeConverter = new PgTypeMapper(
@@ -97,8 +76,8 @@ public class PgTypeMapperTests : PgTestBase
         var tableDefinition = typeConverter.Convert(inputDefinition);
 
         // Assert
-        tableDefinition.Columns[1].Type.Should().Be("uuid");
+        tableDefinition.Columns[1].Type.Should().Be(expectedType);
         tableDefinition.Columns[1].HasDefault.Should().BeTrue();
-        tableDefinition.Columns[1].DefaultConstraint!.Definition.Should().Be(expected);
+        tableDefinition.Columns[1].DefaultConstraint!.Definition.Should().Be(expectedDefault);
     }
 }
