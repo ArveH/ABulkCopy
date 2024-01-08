@@ -25,7 +25,7 @@ public class SchemaWriterTests
         _originalTableDefinition.Columns.Add(new SqlServerBigInt(101, "Id", false));
         
         // Act
-        await _schemaWriter.Write(_originalTableDefinition, TestPath);
+        await _schemaWriter.WriteAsync(_originalTableDefinition, TestPath);
 
         // Assert
         var jsonTxt = await GetJsonText();
@@ -50,7 +50,7 @@ public class SchemaWriterTests
         });
         
         // Act
-        await _schemaWriter.Write(_originalTableDefinition, TestPath);
+        await _schemaWriter.WriteAsync(_originalTableDefinition, TestPath);
 
         // Assert
         var jsonTxt = await GetJsonText();
@@ -79,7 +79,7 @@ public class SchemaWriterTests
         };
         
         // Act
-        await _schemaWriter.Write(_originalTableDefinition, TestPath);
+        await _schemaWriter.WriteAsync(_originalTableDefinition, TestPath);
 
         // Assert
         return await GetJsonText();

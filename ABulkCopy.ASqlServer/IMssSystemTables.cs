@@ -2,10 +2,10 @@
 
 public interface IMssSystemTables
 {
-    Task<IEnumerable<string>> GetTableNames(string searchString);
-    Task<TableHeader?> GetTableHeader(string tableName);
-    Task<IEnumerable<IColumn>> GetTableColumnInfo(TableHeader tableHeader);
-    Task<PrimaryKey?> GetPrimaryKey(TableHeader tableHeader);
-    Task<IEnumerable<ForeignKey>> GetForeignKeys(TableHeader tableHeader);
-    Task<IEnumerable<IndexDefinition>> GetIndexes(TableHeader tableHeader);
+    Task<IEnumerable<string>> GetTableNamesAsync(string searchString);
+    Task<TableHeader?> GetTableHeaderAsync(string tableName);
+    Task<IEnumerable<IColumn>> GetTableColumnInfoAsync(TableHeader tableHeader);
+    Task<PrimaryKey?> GetPrimaryKeyAsync(TableHeader tableHeader);
+    Task<IEnumerable<ForeignKey>> GetForeignKeysAsync(TableHeader tableHeader);
+    Task<IEnumerable<IndexDefinition>> GetIndexesAsync(TableHeader tableHeader);
 }

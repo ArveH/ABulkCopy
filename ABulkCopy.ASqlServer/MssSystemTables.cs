@@ -15,7 +15,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         _logger = logger.ForContext<MssSystemTables>();
     }
 
-    public async Task<IEnumerable<string>> GetTableNames(string searchString)
+    public async Task<IEnumerable<string>> GetTableNamesAsync(string searchString)
     {
         SqlCommand? command;
         if (string.IsNullOrWhiteSpace(searchString))
@@ -54,7 +54,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         }
 
         var tableNames = new List<string>();
-        await ExecuteReader(command, reader =>
+        await ExecuteReaderAsync(command, reader =>
         {
             tableNames.Add(reader.GetString(0));
         });
@@ -63,7 +63,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         return tableNames;
     }
 
-    public async Task<TableHeader?> GetTableHeader(string tableName)
+    public async Task<TableHeader?> GetTableHeaderAsync(string tableName)
     {
         var command =
             new SqlCommand("SELECT o.object_id AS id, " +
@@ -82,7 +82,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         command.Parameters.AddWithValue("@TableName", tableName);
 
         var tableHeaders = new List<TableHeader>();
-        await ExecuteReader(command, reader =>
+        await ExecuteReaderAsync(command, reader =>
             {
                 Identity? identity = null;
                 if (!reader.IsDBNull(3))
@@ -118,7 +118,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         return null;
     }
 
-    public async Task<IEnumerable<IColumn>> GetTableColumnInfo(TableHeader tableHeader)
+    public async Task<IEnumerable<IColumn>> GetTableColumnInfoAsync(TableHeader tableHeader)
     {
         var command =
             new SqlCommand("WITH cte AS (\r\n" +
@@ -154,7 +154,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         command.Parameters.AddWithValue("@TableName", tableHeader.Name);
 
         var columnDefinitions = new List<IColumn>();
-        await ExecuteReader(command, reader =>
+        await ExecuteReaderAsync(command, reader =>
         {
             var columnDef = _columnFactory.Create(
                 reader.GetInt32(0),
@@ -200,7 +200,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         return columnDefinitions;
     }
 
-    public async Task<PrimaryKey?> GetPrimaryKey(TableHeader tableHeader)
+    public async Task<PrimaryKey?> GetPrimaryKeyAsync(TableHeader tableHeader)
     {
         var command =
             new SqlCommand("SELECT c.name, \r\n" +
@@ -215,7 +215,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         command.Parameters.AddWithValue("@TableId", tableHeader.Id);
 
         PrimaryKey? pk = null;
-        await ExecuteReader(command, reader =>
+        await ExecuteReaderAsync(command, reader =>
         {
             pk ??= new PrimaryKey { Name = reader.GetString(0) };
 
@@ -231,14 +231,14 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         return pk;
     }
 
-    public async Task<IEnumerable<ForeignKey>> GetForeignKeys(TableHeader tableHeader)
+    public async Task<IEnumerable<ForeignKey>> GetForeignKeysAsync(TableHeader tableHeader)
     {
-        var foreignKeys = await GetForeignKeyReferences(tableHeader);
+        var foreignKeys = await GetForeignKeyReferencesAsync(tableHeader);
 
         return foreignKeys;
     }
 
-    public async Task<IEnumerable<IndexDefinition>> GetIndexes(TableHeader tableHeader)
+    public async Task<IEnumerable<IndexDefinition>> GetIndexesAsync(TableHeader tableHeader)
     {
         var command =
             new SqlCommand("select i.index_id, i.object_id, i.name, i.type, i.is_unique, f.name\r\n" +
@@ -250,7 +250,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         command.Parameters.AddWithValue("@TableId", tableHeader.Id);
 
         var indexes = new List<IndexDefinition>();
-        await ExecuteReader(command, async reader =>
+        await ExecuteReaderAsync(command, async reader =>
         {
             try
             {
@@ -267,7 +267,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
                     }
                 };
 
-                var indexColumns = await GetIndexColumnInfo(tableHeader.Name, index.Header);
+                var indexColumns = await GetIndexColumnInfoAsync(tableHeader.Name, index.Header);
                 index.Columns.AddRange(indexColumns);
                 indexes.Add(index);
 
@@ -287,7 +287,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         return indexes;
     }
 
-    private async Task<List<ForeignKey>> GetForeignKeyReferences(TableHeader tableHeader)
+    private async Task<List<ForeignKey>> GetForeignKeyReferencesAsync(TableHeader tableHeader)
     {
         var command =
             new SqlCommand("SELECT DISTINCT  \r\n" +
@@ -301,7 +301,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         command.Parameters.AddWithValue("@TableId", tableHeader.Id);
 
         var foreignKeys = new List<ForeignKey>();
-        await ExecuteReader(command, async reader =>
+        await ExecuteReaderAsync(command, async reader =>
         {
             var fk = new ForeignKey
             {
@@ -311,7 +311,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
                 DeleteAction = (DeleteAction)Enum.Parse(typeof(DeleteAction), reader.GetString(3).Replace("_", ""), true),
                 UpdateAction = (UpdateAction)Enum.Parse(typeof(UpdateAction), reader.GetString(4).Replace("_", ""), true)
             };
-            await GetForeignKeyColumns(fk);
+            await GetForeignKeyColumnsAsync(fk);
             foreignKeys.Add(fk);
             _logger.Information("Found foreign key: {ForeignKeyReference} on table {TableName}",
                 fk.ConstraintName, tableHeader.Name);
@@ -320,7 +320,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         return foreignKeys;
     }
 
-    private async Task GetForeignKeyColumns(ForeignKey foreignKey)
+    private async Task GetForeignKeyColumnsAsync(ForeignKey foreignKey)
     {
         var command =
             new SqlCommand("SELECT   \r\n" +
@@ -331,7 +331,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
                            "ORDER BY fc.constraint_column_id");
         command.Parameters.AddWithValue("@ConstraintId", foreignKey.ConstraintId);
 
-        await ExecuteReader(command, reader =>
+        await ExecuteReaderAsync(command, reader =>
         {
             foreignKey.ColumnNames.Add(reader.GetString(0));
             foreignKey.ColumnReferences.Add(reader.GetString(1));
@@ -343,7 +343,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
             foreignKey.ConstraintName);
     }
 
-    private async Task<IEnumerable<IndexColumn>> GetIndexColumnInfo(string tableName, IndexHeader indexHeader)
+    private async Task<IEnumerable<IndexColumn>> GetIndexColumnInfoAsync(string tableName, IndexHeader indexHeader)
     {
         var command =
             new SqlCommand("select COL_NAME(ic.object_id,ic.column_id) AS column_name, ic.is_descending_key\r\n" +
@@ -357,7 +357,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         command.Parameters.AddWithValue("@TableName", tableName);
 
         var columns = new List<IndexColumn>();
-        await ExecuteReader(command, reader =>
+        await ExecuteReaderAsync(command, reader =>
         {
             var column = new IndexColumn
             {

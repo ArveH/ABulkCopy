@@ -24,7 +24,7 @@ internal class Program
             if (cmdArguments.Direction == CopyDirection.In)
             {
                 var copyIn = host.Services.GetRequiredService<ICopyIn>();
-                await copyIn.Run(cmdArguments.Rdbms);
+                await copyIn.RunAsync(cmdArguments.Rdbms);
             }
             else
             {
@@ -38,7 +38,7 @@ internal class Program
                     return;
                 }
 
-                await copyOut.Run();
+                await copyOut.RunAsync();
             }
 
             Log.Information("ABulkCopy.Cmd finished.");

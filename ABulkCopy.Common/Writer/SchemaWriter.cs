@@ -13,7 +13,7 @@ public class SchemaWriter : ISchemaWriter
         _logger = logger;
     }
 
-    public async Task Write(
+    public async Task WriteAsync(
         TableDefinition tableDefinition,
         string path)
     {

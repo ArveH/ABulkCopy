@@ -2,10 +2,10 @@
 
 public interface IPgCmd
 {
-    Task CreateTable(TableDefinition tableDefinition, bool addIfNotExists = false);
-    Task ExecuteNonQuery(string sqlString);
-    Task DropTable(string tableName);
-    Task CreateIndex(string tableName, IndexDefinition indexDefinition);
-    Task ResetIdentity(string tableName, string columnName);
-    Task<object?> SelectScalar(string sqlString);
+    Task CreateTableAsync(TableDefinition tableDefinition, bool addIfNotExists = false);
+    Task ExecuteNonQueryAsync(string sqlString);
+    Task DropTableAsync(string tableName);
+    Task CreateIndexAsync(string tableName, IndexDefinition indexDefinition);
+    Task ResetIdentityAsync(string tableName, string columnName);
+    Task<object?> SelectScalarAsync(string sqlString);
 }

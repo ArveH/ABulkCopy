@@ -24,7 +24,7 @@ public class TestTableSequencer : CommonTestBase
 
         // Act
         await Parallel.ForEachAsync(
-            tableSequencer.GetTablesReadyForCreation(),
+            tableSequencer.GetTablesReadyForCreationAsync(),
             async (node, token) =>
             {
                 var tableHolder = allTables.First(t => t.Name == node.Name);
@@ -56,7 +56,7 @@ public class TestTableSequencer : CommonTestBase
 
         // Act
         await Parallel.ForEachAsync(
-            tableSequencer.GetTablesReadyForCreation(),
+            tableSequencer.GetTablesReadyForCreationAsync(),
             async (node, token) =>
             {
                 var tableHolder = allTables.First(t => t.Name == node.Name);

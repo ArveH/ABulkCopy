@@ -18,7 +18,7 @@ public class PgBulkCopy : IPgBulkCopy
         _logger = logger.ForContext<PgBulkCopy>();
     }
 
-    public async Task<string> BuildDependencyGraph(Rdbms rdbms, List<string> schemaFiles)
+    public async Task<string> BuildDependencyGraphAsync(Rdbms rdbms, List<string> schemaFiles)
     {
         var sw = new Stopwatch();
         sw.Start();
@@ -27,7 +27,7 @@ public class PgBulkCopy : IPgBulkCopy
             try
             {
                 var schemaReader = _schemaReaderFactory.Get(rdbms);
-                DependencyGraph.Add(await schemaReader.GetTableDefinition(schemaFile));
+                DependencyGraph.Add(await schemaReader.GetTableDefinitionAsync(schemaFile));
             }
             catch (Exception ex)
             {

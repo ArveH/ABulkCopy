@@ -19,13 +19,13 @@ public class PgCmd : IPgCmd
         _logger = logger.ForContext<PgCmd>();
     }
 
-    public async Task DropTable(string tableName)
+    public async Task DropTableAsync(string tableName)
     {
         var qb = _queryBuilderFactory.GetQueryBuilder();
-        await ExecuteNonQuery(qb.CreateDropTableStmt(tableName));
+        await ExecuteNonQueryAsync(qb.CreateDropTableStmt(tableName));
     }
 
-    public async Task CreateTable(TableDefinition tableDefinition, bool addIfNotExists = false)
+    public async Task CreateTableAsync(TableDefinition tableDefinition, bool addIfNotExists = false)
     {
         var qb = _queryBuilderFactory.GetQueryBuilder();
         qb.Append("create table ");
@@ -36,10 +36,10 @@ public class PgCmd : IPgCmd
         AddPrimaryKeyClause(tableDefinition, qb);
         AddForeignKeyClauses(tableDefinition, qb);
         qb.AppendLine(");");
-        await ExecuteNonQuery(qb.ToString());
+        await ExecuteNonQueryAsync(qb.ToString());
     }
 
-    public async Task CreateIndex(string tableName, IndexDefinition indexDefinition)
+    public async Task CreateIndexAsync(string tableName, IndexDefinition indexDefinition)
     {
         var qb = _queryBuilderFactory.GetQueryBuilder();
         qb.Append("create ");
@@ -56,12 +56,12 @@ public class PgCmd : IPgCmd
             AddIndexColumns(qb, indexDefinition.Columns);
         }
 
-        await ExecuteNonQuery(qb.ToString());
+        await ExecuteNonQueryAsync(qb.ToString());
     }
 
-    public async Task ResetIdentity(string tableName, string columnName)
+    public async Task ResetIdentityAsync(string tableName, string columnName)
     {
-        var oid = await _systemTables.GetIdentityOid(tableName, columnName);
+        var oid = await _systemTables.GetIdentityOidAsync(tableName, columnName);
         if (oid == null)
         {
             throw new SqlNullValueException("Sequence not found");
@@ -80,13 +80,13 @@ public class PgCmd : IPgCmd
         await cmd.ExecuteScalarAsync();
     }
 
-    public async Task ExecuteNonQuery(string sqlString)
+    public async Task ExecuteNonQueryAsync(string sqlString)
     {
         await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
         await cmd.ExecuteNonQueryAsync();
     }
 
-    public async Task<object?> SelectScalar(string sqlString)
+    public async Task<object?> SelectScalarAsync(string sqlString)
     {
         await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
         return await cmd.ExecuteScalarAsync();

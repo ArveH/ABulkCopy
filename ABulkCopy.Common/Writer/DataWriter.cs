@@ -19,7 +19,7 @@ public class DataWriter : IDataWriter
         _logger = logger;
     }
 
-    public async Task<long> Write(
+    public async Task<long> WriteAsync(
     TableDefinition tableDefinition,
         string path)
     {
@@ -28,9 +28,9 @@ public class DataWriter : IDataWriter
         var fileFullPath = Path.Combine(
             path, tableDefinition.Header.Name + Constants.DataSuffix);
         await using var streamWriter = _fileSystem.File.CreateText(fileFullPath);
-        await tableReader.PrepareReader(tableDefinition);
+        await tableReader.PrepareReaderAsync(tableDefinition);
         var rowCounter = 0;
-        while (await tableReader.Read())
+        while (await tableReader.ReadAsync())
         {
             WriteRow(tableReader, tableDefinition, streamWriter, path, rowCounter);
             streamWriter.WriteLine();

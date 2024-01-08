@@ -34,7 +34,7 @@ public class MssDataWriterTestsMisc : MssDataWriterTestBase
         // Act
         try
         {
-            await TestDataWriter.Write(
+            await TestDataWriter.WriteAsync(
                 OriginalTableDefinition,
                 TestPath);
         }
@@ -65,7 +65,7 @@ public class MssDataWriterTestsMisc : MssDataWriterTestBase
         // Act
         try
         {
-            await TestDataWriter.Write(
+            await TestDataWriter.WriteAsync(
                 OriginalTableDefinition,
                 TestPath);
         }
@@ -99,7 +99,7 @@ public class MssDataWriterTestsMisc : MssDataWriterTestBase
         // Act
         try
         {
-            await TestDataWriter.Write(
+            await TestDataWriter.WriteAsync(
                 OriginalTableDefinition,
                 TestPath);
         }

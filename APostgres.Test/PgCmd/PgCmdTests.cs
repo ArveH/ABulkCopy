@@ -72,7 +72,7 @@ public class PgCmdTests : PgTestBase
         List<decimal> statusValues;
         try
         {
-            await pgCmd.CreateTable(inputDefinition);
+            await pgCmd.CreateTableAsync(inputDefinition);
             await PgDbHelper.Instance.ExecuteNonQuery($"insert into \"{tableName}\" (id) values (3)");
             statusValues = (await PgDbHelper.Instance.SelectColumn<decimal>(tableName, "status")).ToList();
         }
@@ -104,10 +104,10 @@ public class PgCmdTests : PgTestBase
 
         try
         {
-            await pgCmd.CreateTable(inputDefinition);
+            await pgCmd.CreateTableAsync(inputDefinition);
 
             // Act
-            var pk = await systemTables.GetPrimaryKey(new TableHeader
+            var pk = await systemTables.GetPrimaryKeyAsync(new TableHeader
             {
                 Name = tableName,
                 Schema = "public"
@@ -141,7 +141,7 @@ public class PgCmdTests : PgTestBase
                 ("col2", false),
             });
         var pgCmd = GetPgCmd();
-        await pgCmd.CreateTable(parent1TableDefinition);
+        await pgCmd.CreateTableAsync(parent1TableDefinition);
         var parent2TableDefinition = GetParentTableDefinition(
             parent2TableName, new List<(string, bool)>
             {
@@ -149,7 +149,7 @@ public class PgCmdTests : PgTestBase
                 ("col1", false),
                 ("col2", false),
             });
-        await pgCmd.CreateTable(parent2TableDefinition);
+        await pgCmd.CreateTableAsync(parent2TableDefinition);
         var childTableDefinition = GetChildTableDefinition(
             childTableName,
             new List<(string, List<string>)>
@@ -161,11 +161,11 @@ public class PgCmdTests : PgTestBase
         try
         {
             // Act
-            await pgCmd.CreateTable(childTableDefinition);
+            await pgCmd.CreateTableAsync(childTableDefinition);
 
             // Assert
             var systemTables = GetPgSystemTables();
-            var fks = (await systemTables.GetForeignKeys(new TableHeader
+            var fks = (await systemTables.GetForeignKeysAsync(new TableHeader
             {
                 Name = childTableName,
                 Schema = "public"
@@ -202,7 +202,7 @@ public class PgCmdTests : PgTestBase
                 ("col2", false),
             });
         var pgCmd = GetPgCmd();
-        await pgCmd.CreateTable(parent1TableDefinition);
+        await pgCmd.CreateTableAsync(parent1TableDefinition);
         var childTableDefinition = GetChildTableDefinition(
             childTableName,
             new List<(string, List<string>)>
@@ -213,11 +213,11 @@ public class PgCmdTests : PgTestBase
         try
         {
             // Act
-            await pgCmd.CreateTable(childTableDefinition);
+            await pgCmd.CreateTableAsync(childTableDefinition);
 
             // Assert
             var systemTables = GetPgSystemTables();
-            var fks = (await systemTables.GetForeignKeys(new TableHeader
+            var fks = (await systemTables.GetForeignKeysAsync(new TableHeader
             {
                 Name = childTableName,
                 Schema = "public"
@@ -250,9 +250,9 @@ public class PgCmdTests : PgTestBase
                 ("col2", false),
             });
         var pgCmd = GetPgCmd();
-        await pgCmd.CreateTable(parent1TableDefinition);
-        await pgCmd.ExecuteNonQuery($"insert into \"{parent1TableName}\" (\"Parent1Id\", \"col1\", \"col2\") values (1, 1, 1)");
-        await pgCmd.ExecuteNonQuery($"insert into \"{parent1TableName}\" (\"Parent1Id\", \"col1\", \"col2\") values (1, 2, 1)");
+        await pgCmd.CreateTableAsync(parent1TableDefinition);
+        await pgCmd.ExecuteNonQueryAsync($"insert into \"{parent1TableName}\" (\"Parent1Id\", \"col1\", \"col2\") values (1, 1, 1)");
+        await pgCmd.ExecuteNonQueryAsync($"insert into \"{parent1TableName}\" (\"Parent1Id\", \"col1\", \"col2\") values (1, 2, 1)");
         var childTableDefinition = GetChildTableDefinition(
             childTableName,
             new List<(string, List<string>)>
@@ -260,19 +260,19 @@ public class PgCmdTests : PgTestBase
                 (parent1TableName, new() { "Parent1Id", "col1" })
             });
         childTableDefinition.ForeignKeys.First().DeleteAction = DeleteAction.Cascade;
-        await pgCmd.CreateTable(childTableDefinition);
-        await pgCmd.ExecuteNonQuery($"insert into \"{childTableName}\" (\"id\", \"Parent1Id\", \"col1\") values (10, 1, 1)");
-        await pgCmd.ExecuteNonQuery($"insert into \"{childTableName}\" (\"id\", \"Parent1Id\", \"col1\") values (11, 1, 2)");
-        var beforeCount = (long)(await pgCmd.SelectScalar($"select count(*) from \"{childTableName}\"") ?? 0);
+        await pgCmd.CreateTableAsync(childTableDefinition);
+        await pgCmd.ExecuteNonQueryAsync($"insert into \"{childTableName}\" (\"id\", \"Parent1Id\", \"col1\") values (10, 1, 1)");
+        await pgCmd.ExecuteNonQueryAsync($"insert into \"{childTableName}\" (\"id\", \"Parent1Id\", \"col1\") values (11, 1, 2)");
+        var beforeCount = (long)(await pgCmd.SelectScalarAsync($"select count(*) from \"{childTableName}\"") ?? 0);
         beforeCount.Should().Be(2, "because child table has two rows before deleting from parent table");
 
         try
         {
             // Act
-            await pgCmd.ExecuteNonQuery($"delete from \"{parent1TableName}\" where \"col1\" = 1");
+            await pgCmd.ExecuteNonQueryAsync($"delete from \"{parent1TableName}\" where \"col1\" = 1");
 
             // Assert
-            var afterCount = (long)(await pgCmd.SelectScalar($"select count(*) from \"{childTableName}\"") ?? 0);
+            var afterCount = (long)(await pgCmd.SelectScalarAsync($"select count(*) from \"{childTableName}\"") ?? 0);
             afterCount.Should().Be(1, "because 1 row from child table should be delete when deleting it's foreign key");
         }
         finally

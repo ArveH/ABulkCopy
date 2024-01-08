@@ -2,7 +2,7 @@
 
 public interface ISchemaWriter
 {
-    Task Write(
+    Task WriteAsync(
         TableDefinition tableDefinition,
         string path);
 }

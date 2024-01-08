@@ -33,7 +33,7 @@ public abstract class MssDataWriterTestBase : MssTestBase
         // Act
         try
         {
-            await TestDataWriter.Write(
+            await TestDataWriter.WriteAsync(
                 OriginalTableDefinition,
                 TestPath);
         }

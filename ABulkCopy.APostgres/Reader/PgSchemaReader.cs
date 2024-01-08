@@ -16,13 +16,13 @@ public class PgSchemaReader : ISchemaReader
         _logger = logger.ForContext<PgSchemaReader>();
     }
 
-    public Task<TableDefinition> GetTableDefinition(string folderPath, string tableName)
+    public Task<TableDefinition> GetTableDefinitionAsync(string folderPath, string tableName)
     {
         var fullPath = Path.Combine(folderPath, $"{tableName}{Constants.SchemaSuffix}");
-        return GetTableDefinition(fullPath);
+        return GetTableDefinitionAsync(fullPath);
     }
 
-    public async Task<TableDefinition> GetTableDefinition(string fullPath)
+    public async Task<TableDefinition> GetTableDefinitionAsync(string fullPath)
     {
         if (!_fileSystem.File.Exists(fullPath))
         {

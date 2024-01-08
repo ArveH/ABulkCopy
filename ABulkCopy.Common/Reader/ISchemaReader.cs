@@ -2,6 +2,6 @@
 
 public interface ISchemaReader
 {
-    Task<TableDefinition> GetTableDefinition(string folderPath, string tableName);
-    Task<TableDefinition> GetTableDefinition(string fullPath);
+    Task<TableDefinition> GetTableDefinitionAsync(string folderPath, string tableName);
+    Task<TableDefinition> GetTableDefinitionAsync(string fullPath);
 }

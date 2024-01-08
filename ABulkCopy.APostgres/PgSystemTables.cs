@@ -16,7 +16,7 @@ public class PgSystemTables : IPgSystemTables
         _logger = logger.ForContext<PgSystemTables>();
     }
 
-    public async Task<PrimaryKey?> GetPrimaryKey(TableHeader tableHeader)
+    public async Task<PrimaryKey?> GetPrimaryKeyAsync(TableHeader tableHeader)
     {
         var sqlString = "SELECT\r\n" +
                         "    tc.table_schema,\r\n" +
@@ -55,7 +55,7 @@ public class PgSystemTables : IPgSystemTables
         return pk;
     }
 
-    public async Task<IEnumerable<ForeignKey>> GetForeignKeys(TableHeader tableHeader)
+    public async Task<IEnumerable<ForeignKey>> GetForeignKeysAsync(TableHeader tableHeader)
     {
         var sqlString = "select \r\n" +
                         "    cl.relname as \"parent_table\", \r\n" +
@@ -86,7 +86,7 @@ public class PgSystemTables : IPgSystemTables
         while (await reader.ReadAsync())
         {
             var constraintName = reader.GetString(1);
-            var columns = await GetForeignKeyColumns(constraintName);
+            var columns = await GetForeignKeyColumnsAsync(constraintName);
             var fk = new ForeignKey
             {
                 ColumnNames = columns.Select(c => c.child).ToList(),
@@ -103,7 +103,7 @@ public class PgSystemTables : IPgSystemTables
         return foreignKeys;
     }
 
-    public async Task<uint?> GetIdentityOid(string tableName, string columnName)
+    public async Task<uint?> GetIdentityOidAsync(string tableName, string columnName)
     {
         var seqName = $"{tableName}_{columnName}_seq";
 
@@ -118,7 +118,7 @@ public class PgSystemTables : IPgSystemTables
         return (uint?)oid;
     }
 
-    private async Task<List<(string child, string parent)>> GetForeignKeyColumns(string constraintName)
+    private async Task<List<(string child, string parent)>> GetForeignKeyColumnsAsync(string constraintName)
     {
         var sqlString = "select \r\n" +
                         "    att2.attname as \"child_column\", \r\n" +

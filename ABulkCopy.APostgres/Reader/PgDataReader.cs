@@ -19,7 +19,7 @@ public class PgDataReader : IADataReader, IDisposable
         _logger = logger.ForContext<PgDataReader>();
     }
 
-    public async Task<long> Read(
+    public async Task<long> ReadAsync(
         string folder, 
         TableDefinition tableDefinition, 
         EmptyStringFlag emptyStringFlag = EmptyStringFlag.Leave)
@@ -44,7 +44,7 @@ public class PgDataReader : IADataReader, IDisposable
             if (_fileReader.IsEndOfFile) break;
             try
             {
-                await ReadRow(
+                await ReadRowAsync(
                     _fileReader, 
                     writer, 
                     folder,
@@ -76,7 +76,7 @@ public class PgDataReader : IADataReader, IDisposable
         return counter;
     }
 
-    private async Task ReadRow(IDataFileReader dataFileReader,
+    private async Task ReadRowAsync(IDataFileReader dataFileReader,
         NpgsqlBinaryImporter writer,
         string folder,
         TableDefinition tableDefinition, 

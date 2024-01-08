@@ -65,7 +65,7 @@ public class TableSequencer : ITableSequencer
         }
     }
 
-    public async IAsyncEnumerable<INode> GetTablesReadyForCreation()
+    public async IAsyncEnumerable<INode> GetTablesReadyForCreationAsync()
     {
         while (true)
         {

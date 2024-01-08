@@ -2,6 +2,6 @@
 
 public interface IDataWriter
 {
-    Task<long> Write(TableDefinition tableDefinition,
+    Task<long> WriteAsync(TableDefinition tableDefinition,
         string path);
 }

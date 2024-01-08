@@ -2,5 +2,5 @@
 
 public interface IMssTableSchema
 {
-    Task<TableDefinition?> GetTableInfo(string tableName);
+    Task<TableDefinition?> GetTableInfoAsync(string tableName);
 }

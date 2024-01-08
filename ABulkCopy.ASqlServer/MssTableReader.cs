@@ -25,7 +25,7 @@ public class MssTableReader : IDisposable, IMssTableReader
     public required string ConnectionString { get; init; }
     public SqlDataReader Reader => _reader ?? throw new InvalidOperationException("Reader is not initialized");
 
-    public async Task PrepareReader(TableDefinition tableDefinition)
+    public async Task PrepareReaderAsync(TableDefinition tableDefinition)
     {
         var selectStatement = _selectCreator.CreateSelect(tableDefinition);
         _connection = new SqlConnection(ConnectionString);
@@ -43,7 +43,7 @@ public class MssTableReader : IDisposable, IMssTableReader
     public long GetBytes(int ordinal, long startIndex, byte[] buf, int length) 
         => Reader.GetBytes(ordinal, startIndex, buf, 0, length);
 
-    public async Task<bool> Read()
+    public async Task<bool> ReadAsync()
     {
         if (_reader == null)
         {

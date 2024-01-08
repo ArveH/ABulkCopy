@@ -2,5 +2,5 @@
 
 public interface ICopyOut
 {
-    Task Run();
+    Task RunAsync();
 }

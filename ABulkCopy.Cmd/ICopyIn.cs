@@ -2,5 +2,5 @@
 
 internal interface ICopyIn
 {
-    Task Run(Rdbms rdbms);
+    Task RunAsync(Rdbms rdbms);
 }

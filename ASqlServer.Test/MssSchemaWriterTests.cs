@@ -135,7 +135,7 @@ public class MssSchemaWriterTests
     private async Task TestWriteColumn(IColumn col)
     {
         // Act
-        await _schemaWriter.Write(_originalTableDefinition, TestPath);
+        await _schemaWriter.WriteAsync(_originalTableDefinition, TestPath);
 
         // Assert
         var jsonTxt = await GetJsonText();

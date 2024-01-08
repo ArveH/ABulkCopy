@@ -2,8 +2,8 @@
 
 public interface ITableReader
 {
-    Task PrepareReader(TableDefinition tableDefinition);
-    Task<bool> Read();
+    Task PrepareReaderAsync(TableDefinition tableDefinition);
+    Task<bool> ReadAsync();
     bool IsNull(int ordinal);
     object? GetValue(int ordinal);
     long GetBytes(int ordinal, long startIndex, byte[] buf, int length);

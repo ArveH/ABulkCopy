@@ -9,7 +9,7 @@ public class MssCommandBase
         _dbContext = dbContext;
     }
 
-    public async Task ExecuteReader(
+    public async Task ExecuteReaderAsync(
         SqlCommand command,
         Action<SqlDataReader> readFunc)
     {
@@ -29,7 +29,7 @@ public class MssCommandBase
         }
     }
 
-    public async Task ExecuteReader(
+    public async Task ExecuteReaderAsync(
         SqlCommand command,
         Func<SqlDataReader, Task> readFunc)
     {

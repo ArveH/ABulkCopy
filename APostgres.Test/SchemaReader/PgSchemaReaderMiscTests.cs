@@ -44,7 +44,7 @@ public class PgSchemaReaderMiscTests : PgSchemaReaderBase
         inputDefinition.Columns.Add(identityCol);
         FileHelper.CreateSingleColMssSchemaFile(inputDefinition);
 
-        var tableDefinition = await SchemaReader.GetTableDefinition(FileHelper.DataFolder, TableName);
+        var tableDefinition = await SchemaReader.GetTableDefinitionAsync(FileHelper.DataFolder, TableName);
 
         tableDefinition.Should().NotBeNull("because tableDefinition should not be null");
         tableDefinition!.Header.Name.Should().Be(TableName);

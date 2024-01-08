@@ -7,5 +7,5 @@ public interface ITableSequencer
     bool IsTableFinished(string tableName);
     bool TableReadyForCreation(string tableName);
     void TableFinished(INode node);
-    IAsyncEnumerable<INode> GetTablesReadyForCreation();
+    IAsyncEnumerable<INode> GetTablesReadyForCreationAsync();
 }

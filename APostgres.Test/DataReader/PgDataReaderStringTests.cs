@@ -144,7 +144,7 @@ public class PgDataReaderStringTests : PgDataReaderTestBase
             TestLogger);
 
         // Act
-        await dataReader.Read(FileHelper.DataFolder, tableDefinition, EmptyStringFlag.Single);
+        await dataReader.ReadAsync(FileHelper.DataFolder, tableDefinition, EmptyStringFlag.Single);
 
         //Assert
         var colValue = await PgDbHelper.Instance.SelectScalar<string>(
