@@ -23,7 +23,9 @@ public class PgSchemaReaderBase : PgTestBase
     {
         FileHelper.CreateSingleColMssSchemaFile(TableName, col);
 
-        var tableDefinition = await SchemaReader.GetTableDefinitionAsync(FileHelper.DataFolder, TableName);
+        var cts = new CancellationTokenSource();
+        var tableDefinition = await SchemaReader.GetTableDefinitionAsync(
+            FileHelper.DataFolder, TableName, cts.Token).ConfigureAwait(false);
 
         tableDefinition.Should().NotBeNull();
         tableDefinition!.Header.Name.Should().Be(TableName);

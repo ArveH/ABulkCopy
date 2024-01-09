@@ -16,13 +16,14 @@ public class PgSchemaReader : ISchemaReader
         _logger = logger.ForContext<PgSchemaReader>();
     }
 
-    public Task<TableDefinition> GetTableDefinitionAsync(string folderPath, string tableName)
+    public async Task<TableDefinition> GetTableDefinitionAsync(
+        string folderPath, string tableName, CancellationToken ct)
     {
         var fullPath = Path.Combine(folderPath, $"{tableName}{Constants.SchemaSuffix}");
-        return GetTableDefinitionAsync(fullPath);
+        return await GetTableDefinitionAsync(fullPath, ct).ConfigureAwait(false);
     }
 
-    public async Task<TableDefinition> GetTableDefinitionAsync(string fullPath)
+    public async Task<TableDefinition> GetTableDefinitionAsync(string fullPath, CancellationToken ct)
     {
         if (!_fileSystem.File.Exists(fullPath))
         {
@@ -31,7 +32,7 @@ public class PgSchemaReader : ISchemaReader
         }
 
         using var reader = _fileSystem.File.OpenText(fullPath);
-        var jsonTxt = await reader.ReadToEndAsync();
+        var jsonTxt = await reader.ReadToEndAsync(ct).ConfigureAwait(false);
         var options = new JsonSerializerOptions
         {
             // Contrast is going to have a field day with me allowing stuff like ' :-)

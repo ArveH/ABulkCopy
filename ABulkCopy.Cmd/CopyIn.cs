@@ -55,7 +55,7 @@ public class CopyIn : ICopyIn
             schemaFiles.Count);
         Console.WriteLine($"Creating {schemaFiles.Count} {"table".Plural(schemaFiles.Count)}.");
 
-        var elapsedStr = await _pgBulkCopy.BuildDependencyGraphAsync(rdbms, schemaFiles);
+        var elapsedStr = await _pgBulkCopy.BuildDependencyGraphAsync(rdbms, schemaFiles, ct).ConfigureAwait(false);
         Console.WriteLine($"Creating dependency graph took {elapsedStr}");
         var allTables = _pgBulkCopy.DependencyGraph.BreathFirst().ToList();
 
@@ -65,13 +65,17 @@ public class CopyIn : ICopyIn
             allTables.Where(t => t.IsIndependent),
             _logger);
 
-        //TODO: Use CancellationToken
         await Parallel.ForEachAsync(
-            tableSequencer.GetTablesReadyForCreationAsync(),
+            tableSequencer.GetTablesReadyForCreationAsync(), 
+            ct, 
             async (node, _) =>
             {
                 if (node.TableDefinition == null) throw new ArgumentNullException(nameof(node.TableDefinition));
-                if (!await CreateTableAsync(folder, node.TableDefinition, _config.ToEnum(Constants.Config.EmptyString)))
+                if (!await CreateTableAsync(
+                        folder, 
+                        node.TableDefinition, 
+                        _config.ToEnum(Constants.Config.EmptyString), ct)
+                            .ConfigureAwait(false))
                 {
                     Interlocked.Increment(ref errors);
                 }
@@ -98,10 +102,10 @@ public class CopyIn : ICopyIn
         Console.WriteLine($"The total CopyIn operation took {sw.Elapsed:g}");
     }
 
-    private async Task<bool> CreateTableAsync(
-        string folder, 
+    private async Task<bool> CreateTableAsync(string folder,
         TableDefinition tableDefinition,
-        EmptyStringFlag emptyStringFlag)
+        EmptyStringFlag emptyStringFlag, 
+        CancellationToken ct)
     {
         IADataReader? dataReader = null;
         var errorOccurred = false;
@@ -109,8 +113,8 @@ public class CopyIn : ICopyIn
         {
             try
             {
-                await _pgCmd.DropTableAsync(tableDefinition.Header.Name);
-                await _pgCmd.CreateTableAsync(tableDefinition);
+                await _pgCmd.DropTableAsync(tableDefinition.Header.Name, ct).ConfigureAwait(false);
+                await _pgCmd.CreateTableAsync(tableDefinition, ct).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -123,7 +127,7 @@ public class CopyIn : ICopyIn
             try
             {
                 dataReader = _aDataReaderFactory.Get(tableDefinition.Rdbms);
-                var rows = await dataReader.ReadAsync(folder, tableDefinition, emptyStringFlag);
+                var rows = await dataReader.ReadAsync(folder, tableDefinition, ct, emptyStringFlag).ConfigureAwait(false);
                 Console.WriteLine($"Read {rows} {"row".Plural(rows)} for table '{tableDefinition.Header.Name}'");
                 _logger.Information($"Read {{Rows}} {"row".Plural(rows)} for table '{{TableName}}'",
                     rows, tableDefinition.Header.Name);
@@ -142,7 +146,7 @@ public class CopyIn : ICopyIn
             {
                 try
                 {
-                    await _pgCmd.ResetIdentityAsync(tableDefinition.Header.Name, columnName);
+                    await _pgCmd.ResetIdentityAsync(tableDefinition.Header.Name, columnName, ct).ConfigureAwait(false);
                     _logger.Information("Reset auto generation for {TableName}.{ColumnName}",
                         tableDefinition.Header.Name, columnName);
                 }
@@ -167,13 +171,13 @@ public class CopyIn : ICopyIn
             dataReader?.Dispose();
         }
 
-        await Parallel.ForEachAsync(tableDefinition.Indexes, async (indexDefinition, _) =>
+        await Parallel.ForEachAsync(tableDefinition.Indexes, ct, async (indexDefinition, _) =>
         {
             try
             {
                 _logger.Information("Creating index '{IndexName}' for table '{TableName}'...",
                     indexDefinition.Header.Name, tableDefinition.Header.Name);
-                await _pgCmd.CreateIndexAsync(tableDefinition.Header.Name, indexDefinition);
+                await _pgCmd.CreateIndexAsync(tableDefinition.Header.Name, indexDefinition, ct).ConfigureAwait(false);
                 Console.WriteLine(
                     $"Created index '{indexDefinition.Header.Name}' for table '{tableDefinition.Header.Name}'");
                 _logger.Information("Created index '{IndexName}' for table '{TableName}'",

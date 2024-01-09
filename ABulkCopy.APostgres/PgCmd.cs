@@ -19,13 +19,14 @@ public class PgCmd : IPgCmd
         _logger = logger.ForContext<PgCmd>();
     }
 
-    public async Task DropTableAsync(string tableName)
+    public async Task DropTableAsync(string tableName, CancellationToken ct)
     {
         var qb = _queryBuilderFactory.GetQueryBuilder();
-        await ExecuteNonQueryAsync(qb.CreateDropTableStmt(tableName));
+        await ExecuteNonQueryAsync(qb.CreateDropTableStmt(tableName), ct).ConfigureAwait(false);
     }
 
-    public async Task CreateTableAsync(TableDefinition tableDefinition, bool addIfNotExists = false)
+    public async Task CreateTableAsync(TableDefinition tableDefinition, CancellationToken ct,
+        bool addIfNotExists = false)
     {
         var qb = _queryBuilderFactory.GetQueryBuilder();
         qb.Append("create table ");
@@ -36,10 +37,11 @@ public class PgCmd : IPgCmd
         AddPrimaryKeyClause(tableDefinition, qb);
         AddForeignKeyClauses(tableDefinition, qb);
         qb.AppendLine(");");
-        await ExecuteNonQueryAsync(qb.ToString());
+        await ExecuteNonQueryAsync(qb.ToString(), ct).ConfigureAwait(false);
     }
 
-    public async Task CreateIndexAsync(string tableName, IndexDefinition indexDefinition)
+    public async Task CreateIndexAsync(
+        string tableName, IndexDefinition indexDefinition, CancellationToken ct)
     {
         var qb = _queryBuilderFactory.GetQueryBuilder();
         qb.Append("create ");
@@ -56,12 +58,13 @@ public class PgCmd : IPgCmd
             AddIndexColumns(qb, indexDefinition.Columns);
         }
 
-        await ExecuteNonQueryAsync(qb.ToString());
+        await ExecuteNonQueryAsync(qb.ToString(), ct).ConfigureAwait(false);
     }
 
-    public async Task ResetIdentityAsync(string tableName, string columnName)
+    public async Task ResetIdentityAsync(
+        string tableName, string columnName, CancellationToken ct)
     {
-        var oid = await _systemTables.GetIdentityOidAsync(tableName, columnName);
+        var oid = await _systemTables.GetIdentityOidAsync(tableName, columnName, ct).ConfigureAwait(false);
         if (oid == null)
         {
             throw new SqlNullValueException("Sequence not found");
@@ -77,19 +80,19 @@ public class PgCmd : IPgCmd
         qb.AppendLine(") )");
 
         await using var cmd = _pgContext.DataSource.CreateCommand(qb.ToString());
-        await cmd.ExecuteScalarAsync();
+        await cmd.ExecuteScalarAsync(ct).ConfigureAwait(false);
     }
 
-    public async Task ExecuteNonQueryAsync(string sqlString)
+    public async Task ExecuteNonQueryAsync(string sqlString, CancellationToken ct)
     {
         await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
-        await cmd.ExecuteNonQueryAsync();
+        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
-    public async Task<object?> SelectScalarAsync(string sqlString)
+    public async Task<object?> SelectScalarAsync(string sqlString, CancellationToken ct)
     {
         await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
-        return await cmd.ExecuteScalarAsync();
+        return await cmd.ExecuteScalarAsync(ct).ConfigureAwait(false);
     }
 
     private void AddForeignKeyClauses(TableDefinition tableDefinition, IQueryBuilder qb)

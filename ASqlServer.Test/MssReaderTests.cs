@@ -31,7 +31,7 @@ public class MssReaderTests
             selectCreatorMock.Object,
             _output)
         {
-            ConnectionString = connectionString!
+            ConnectionString = connectionString
         };
 
         var tableDefinition = MssTestData.GetTableDefinitionAllTypes();

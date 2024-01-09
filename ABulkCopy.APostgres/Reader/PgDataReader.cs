@@ -19,18 +19,18 @@ public class PgDataReader : IADataReader, IDisposable
         _logger = logger.ForContext<PgDataReader>();
     }
 
-    public async Task<long> ReadAsync(
-        string folder, 
-        TableDefinition tableDefinition, 
+    public async Task<long> ReadAsync(string folder,
+        TableDefinition tableDefinition,
+        CancellationToken ct,
         EmptyStringFlag emptyStringFlag = EmptyStringFlag.Leave)
     {
         _logger.Information("Reading data for table '{TableName}' from '{Path}'",
             tableDefinition.Header.Name, folder);
-        await using var conn = await _context.DataSource.OpenConnectionAsync().ConfigureAwait(false);
+        await using var conn = await _context.DataSource.OpenConnectionAsync(ct).ConfigureAwait(false);
 
         var copyStmt = CreateCopyStmt(tableDefinition);
         await using var writer = await conn.BeginBinaryImportAsync(
-            copyStmt).ConfigureAwait(false);
+            copyStmt, ct).ConfigureAwait(false);
 
         var path = Path.Combine(
             folder,
@@ -49,7 +49,8 @@ public class PgDataReader : IADataReader, IDisposable
                     writer, 
                     folder,
                     tableDefinition,
-                    emptyStringFlag).ConfigureAwait(false);
+                    emptyStringFlag,
+                    ct).ConfigureAwait(false);
                 counter++;
             }
             catch (Exception ex)
@@ -69,7 +70,7 @@ public class PgDataReader : IADataReader, IDisposable
         }
         else
         {
-            await writer.CompleteAsync().ConfigureAwait(false);
+            await writer.CompleteAsync(ct).ConfigureAwait(false);
             _logger.Information($"Read {{RowCount}} {"row".Plural(counter)} for table '{{TableName}}' from '{{Path}}'",
                 counter, tableDefinition.Header.Name, folder);
         }
@@ -79,17 +80,18 @@ public class PgDataReader : IADataReader, IDisposable
     private async Task ReadRowAsync(IDataFileReader dataFileReader,
         NpgsqlBinaryImporter writer,
         string folder,
-        TableDefinition tableDefinition, 
-        EmptyStringFlag emptyStringFlag)
+        TableDefinition tableDefinition,
+        EmptyStringFlag emptyStringFlag, 
+        CancellationToken ct)
     {
-        await writer.StartRowAsync().ConfigureAwait(false);
+        await writer.StartRowAsync(ct).ConfigureAwait(false);
 
         foreach (var col in tableDefinition.Columns)
         {
             var colValue = dataFileReader.ReadColumn(col.Name, emptyStringFlag);
             if (colValue == null)
             {
-                await writer.WriteNullAsync().ConfigureAwait(false);
+                await writer.WriteNullAsync(ct).ConfigureAwait(false);
                 continue;
             }
 
@@ -102,13 +104,15 @@ public class PgDataReader : IADataReader, IDisposable
                     colValue);
                 await writer.WriteAsync(
                     dataFileReader.ReadAllBytes(path),
-                    col.Type.GetNativeType()).ConfigureAwait(false);
+                    col.Type.GetNativeType(), 
+                    ct).ConfigureAwait(false);
             }
             else
             {
                 await writer.WriteAsync(
                     col.ToInternalType(colValue),
-                    col.Type.GetNativeType()).ConfigureAwait(false);
+                    col.Type.GetNativeType(), 
+                    ct).ConfigureAwait(false);
             }
         }
 

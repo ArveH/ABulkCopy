@@ -45,7 +45,8 @@ public class PgDataReaderTestBase : PgTestBase
             QBFactoryMock.Object,
             new DataFileReader(FileHelper.FileSystem, TestLogger), 
             TestLogger);
-        await dataReader.ReadAsync(FileHelper.DataFolder, tableDefinition);
+        var cts = new CancellationTokenSource();
+        await dataReader.ReadAsync(FileHelper.DataFolder, tableDefinition, cts.Token);
     }
 
     protected async Task<TableDefinition> CreateTableAndDataFile(

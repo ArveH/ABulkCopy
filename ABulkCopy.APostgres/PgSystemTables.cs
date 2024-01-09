@@ -103,7 +103,7 @@ public class PgSystemTables : IPgSystemTables
         return foreignKeys;
     }
 
-    public async Task<uint?> GetIdentityOidAsync(string tableName, string columnName)
+    public async Task<uint?> GetIdentityOidAsync(string tableName, string columnName, CancellationToken ct)
     {
         var seqName = $"{tableName}_{columnName}_seq";
 
