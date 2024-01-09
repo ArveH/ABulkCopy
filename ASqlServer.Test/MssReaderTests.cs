@@ -35,16 +35,17 @@ public class MssReaderTests
         };
 
         var tableDefinition = MssTestData.GetTableDefinitionAllTypes();
+        var cts = new CancellationTokenSource();
 
         // Act
-        await tableReader.PrepareReaderAsync(tableDefinition);
-        var rowWasRead = await tableReader.ReadAsync();
+        await tableReader.PrepareReaderAsync(tableDefinition, cts.Token);
+        var rowWasRead = await tableReader.ReadAsync(cts.Token);
         rowWasRead.Should().BeTrue("because there should be one row");
         var value = tableReader.GetValue(0);
         value.Should().NotBeNull("because value should be a bigint number");
         value.Should().BeOfType<long>("because value should be a bigint number");
         ((long)value!).Should().Be(AllTypes.SampleValues.BigInt);
-        rowWasRead = await tableReader.ReadAsync();
+        rowWasRead = await tableReader.ReadAsync(cts.Token);
         rowWasRead.Should().BeFalse("because there should be only one row");
     }
 }

@@ -25,7 +25,7 @@ public class CopyIn : ICopyIn
         _logger = logger;
     }
 
-    public async Task RunAsync(Rdbms rdbms)
+    public async Task RunAsync(Rdbms rdbms, CancellationToken ct)
     {
         var sw = new Stopwatch();
         sw.Start();
@@ -65,6 +65,7 @@ public class CopyIn : ICopyIn
             allTables.Where(t => t.IsIndependent),
             _logger);
 
+        //TODO: Use CancellationToken
         await Parallel.ForEachAsync(
             tableSequencer.GetTablesReadyForCreationAsync(),
             async (node, _) =>

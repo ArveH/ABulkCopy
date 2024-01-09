@@ -2,5 +2,5 @@
 
 public interface ICopyOut
 {
-    Task RunAsync();
+    Task RunAsync(CancellationToken ct);
 }

@@ -20,21 +20,26 @@ public class DataWriter : IDataWriter
     }
 
     public async Task<long> WriteAsync(
-    TableDefinition tableDefinition,
-        string path)
+        TableDefinition tableDefinition,
+        string path, 
+        CancellationToken ct)
     {
         var tableReader = _tableReaderFactory.GetTableReader(_dbContext);
         AddDirectoriesForBlobs(tableDefinition, path);
         var fileFullPath = Path.Combine(
             path, tableDefinition.Header.Name + Constants.DataSuffix);
         await using var streamWriter = _fileSystem.File.CreateText(fileFullPath);
-        await tableReader.PrepareReaderAsync(tableDefinition);
+        await tableReader.PrepareReaderAsync(tableDefinition, ct).ConfigureAwait(false);
         var rowCounter = 0;
-        while (await tableReader.ReadAsync())
+        while (await tableReader.ReadAsync(ct).ConfigureAwait(false))
         {
             WriteRow(tableReader, tableDefinition, streamWriter, path, rowCounter);
-            streamWriter.WriteLine();
+            await streamWriter.WriteLineAsync().ConfigureAwait(false);
             rowCounter++;
+            if (ct.IsCancellationRequested)
+            {
+                break;
+            }
         }
 
         return rowCounter;

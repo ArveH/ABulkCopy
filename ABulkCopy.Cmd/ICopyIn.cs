@@ -2,5 +2,5 @@
 
 internal interface ICopyIn
 {
-    Task RunAsync(Rdbms rdbms);
+    Task RunAsync(Rdbms rdbms, CancellationToken ctsToken);
 }

@@ -25,32 +25,32 @@ public class MssTableReader : IDisposable, IMssTableReader
     public required string ConnectionString { get; init; }
     public SqlDataReader Reader => _reader ?? throw new InvalidOperationException("Reader is not initialized");
 
-    public async Task PrepareReaderAsync(TableDefinition tableDefinition)
+    public async Task PrepareReaderAsync(TableDefinition tableDefinition, CancellationToken ct)
     {
         var selectStatement = _selectCreator.CreateSelect(tableDefinition);
         _connection = new SqlConnection(ConnectionString);
         _command = new SqlCommand(selectStatement);
         _command.Connection = _connection;
-        await _connection.OpenAsync().ConfigureAwait(false);
+        await _connection.OpenAsync(ct).ConfigureAwait(false);
         _reader = await _command.ExecuteReaderAsync(
-            CommandBehavior.SequentialAccess).ConfigureAwait(false);
+            CommandBehavior.SequentialAccess, ct).ConfigureAwait(false);
         _logger.Information("Preparing reader '{readerName}' for table '{tableName}'",
             _readerName, tableDefinition.Header.Name);
     }
 
     public bool IsNull(int ordinal) => Reader.IsDBNull(ordinal);
-    public object? GetValue(int ordinal) => Reader.GetValue(ordinal);
+    public object GetValue(int ordinal) => Reader.GetValue(ordinal);
     public long GetBytes(int ordinal, long startIndex, byte[] buf, int length) 
         => Reader.GetBytes(ordinal, startIndex, buf, 0, length);
 
-    public async Task<bool> ReadAsync()
+    public async Task<bool> ReadAsync(CancellationToken ct)
     {
         if (_reader == null)
         {
             throw new InvalidOperationException("You must call PrepareReader before Reading");
         }
 
-        if (await _reader.ReadAsync().ConfigureAwait(false))
+        if (await _reader.ReadAsync(ct).ConfigureAwait(false))
         {
             _rowCount++;
             return true;

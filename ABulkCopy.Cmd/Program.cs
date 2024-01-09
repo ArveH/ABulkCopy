@@ -14,6 +14,13 @@ internal class Program
         Log.Information("ABulkCopy.Cmd (version: {Version}) started.", version);
         Console.WriteLine($"ABulkCopy.Cmd (version: {version}) started.");
 
+        var cts = new CancellationTokenSource();
+        Console.CancelKeyPress += (_, e) =>
+        {
+            e.Cancel = true;
+            cts.Cancel();
+        };
+
         try
         {
             var builder = Host.CreateApplicationBuilder();
@@ -24,7 +31,7 @@ internal class Program
             if (cmdArguments.Direction == CopyDirection.In)
             {
                 var copyIn = host.Services.GetRequiredService<ICopyIn>();
-                await copyIn.RunAsync(cmdArguments.Rdbms);
+                await copyIn.RunAsync(cmdArguments.Rdbms, cts.Token);
             }
             else
             {
@@ -38,7 +45,7 @@ internal class Program
                     return;
                 }
 
-                await copyOut.RunAsync();
+                await copyOut.RunAsync(cts.Token);
             }
 
             Log.Information("ABulkCopy.Cmd finished.");

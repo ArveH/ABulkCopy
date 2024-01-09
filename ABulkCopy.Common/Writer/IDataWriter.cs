@@ -3,5 +3,5 @@
 public interface IDataWriter
 {
     Task<long> WriteAsync(TableDefinition tableDefinition,
-        string path);
+        string path, CancellationToken ct);
 }

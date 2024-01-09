@@ -25,7 +25,7 @@ public class CopyOut : ICopyOut
         _logger = logger.ForContext<CopyOut>();
     }
 
-    public async Task RunAsync()
+    public async Task RunAsync(CancellationToken ct)
     {
         var sw = new Stopwatch();
         sw.Start();
@@ -34,9 +34,9 @@ public class CopyOut : ICopyOut
             tableNames.Count);
         Console.WriteLine($"Copy out {tableNames.Count} {"table".Plural(tableNames.Count)}.");
         var errors = 0;
-        await Parallel.ForEachAsync(tableNames, async (tableName, _) =>
+        await Parallel.ForEachAsync(tableNames, ct, async (tableName, _) =>
         {
-            if (!await CopyTableAsync(_config.Check(Constants.Config.Folder), tableName))
+            if (!await CopyTableAsync(_config.Check(Constants.Config.Folder), tableName, ct).ConfigureAwait(false))
             {
                 Interlocked.Increment(ref errors);
             }
@@ -59,19 +59,21 @@ public class CopyOut : ICopyOut
         Console.WriteLine($"Copy took {sw.Elapsed:g}");
     }
 
-    private async Task<bool> CopyTableAsync(string folder, string tableName)
+    private async Task<bool> CopyTableAsync(string folder, string tableName, CancellationToken ct)
     {
         try
         {
-            var tabDef = await _tableSchema.GetTableInfoAsync(tableName);
+            // TODO: CancellationToken
+            var tabDef = await _tableSchema.GetTableInfoAsync(tableName).ConfigureAwait(false);
             if (tabDef == null)
             {
                 _logger.Warning("Table {SearchString} not found", tableName);
                 return false;
             }
 
-            await _schemaWriter.WriteAsync(tabDef, folder);
-            var rows = await _dataWriter.WriteAsync(tabDef, folder);
+            // TODO: CancellationToken
+            await _schemaWriter.WriteAsync(tabDef, folder).ConfigureAwait(false);
+            var rows = await _dataWriter.WriteAsync(tabDef, folder, ct).ConfigureAwait(false);
             _logger.Information("Table '{TableName}' with {Rows} rows copied to disk",
                 tableName, rows);
             Console.WriteLine($"Table '{tableName}' with {rows} rows copied to disk");
