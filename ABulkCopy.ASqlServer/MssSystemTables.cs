@@ -15,7 +15,8 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         _logger = logger.ForContext<MssSystemTables>();
     }
 
-    public async Task<IEnumerable<string>> GetTableNamesAsync(string searchString)
+    public async Task<IEnumerable<string>> GetTableNamesAsync(
+        string searchString, CancellationToken ct)
     {
         SqlCommand? command;
         if (string.IsNullOrWhiteSpace(searchString))
@@ -57,13 +58,14 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         await ExecuteReaderAsync(command, reader =>
         {
             tableNames.Add(reader.GetString(0));
-        });
+        }, ct).ConfigureAwait(false);
 
         _logger.Information("Found {numberOfTables} tables.", tableNames.Count);
         return tableNames;
     }
 
-    public async Task<TableHeader?> GetTableHeaderAsync(string tableName)
+    public async Task<TableHeader?> GetTableHeaderAsync(
+        string tableName, CancellationToken ct)
     {
         var command =
             new SqlCommand("SELECT o.object_id AS id, " +
@@ -83,26 +85,26 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
 
         var tableHeaders = new List<TableHeader>();
         await ExecuteReaderAsync(command, reader =>
+        {
+            Identity? identity = null;
+            if (!reader.IsDBNull(3))
             {
-                Identity? identity = null;
-                if (!reader.IsDBNull(3))
+                identity = new Identity
                 {
-                    identity = new Identity
-                    {
-                        Seed = Convert.ToInt32(reader.GetDecimal(3)),
-                        Increment = Convert.ToInt32(reader.GetDecimal(4))
-                    };
-                }
+                    Seed = Convert.ToInt32(reader.GetDecimal(3)),
+                    Increment = Convert.ToInt32(reader.GetDecimal(4))
+                };
+            }
 
-                tableHeaders.Add(new TableHeader
-                {
-                    Id = reader.GetInt32(0),
-                    Schema = reader.GetString(1),
-                    Name = tableName,
-                    Location = reader.GetString(2),
-                    Identity = identity
-                });
+            tableHeaders.Add(new TableHeader
+            {
+                Id = reader.GetInt32(0),
+                Schema = reader.GetString(1),
+                Name = tableName,
+                Location = reader.GetString(2),
+                Identity = identity
             });
+        }, ct).ConfigureAwait(false);
         if (tableHeaders.Count == 1)
         {
             _logger.Information(
@@ -118,7 +120,8 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         return null;
     }
 
-    public async Task<IEnumerable<IColumn>> GetTableColumnInfoAsync(TableHeader tableHeader)
+    public async Task<IEnumerable<IColumn>> GetTableColumnInfoAsync(
+        TableHeader tableHeader, CancellationToken ct)
     {
         var command =
             new SqlCommand("WITH cte AS (\r\n" +
@@ -192,7 +195,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
 
             _logger.Verbose("Added column: {@columnDefinition}",
                 columnDefinitions.Last());
-        });
+        }, ct).ConfigureAwait(false);
         _logger.Information(
             "Retrieved column info for {colCount} columns on '{tableName}'",
             columnDefinitions.Count,
@@ -200,7 +203,8 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         return columnDefinitions;
     }
 
-    public async Task<PrimaryKey?> GetPrimaryKeyAsync(TableHeader tableHeader)
+    public async Task<PrimaryKey?> GetPrimaryKeyAsync(
+        TableHeader tableHeader, CancellationToken ct)
     {
         var command =
             new SqlCommand("SELECT c.name, \r\n" +
@@ -224,21 +228,23 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
                 Name = reader.GetString(1),
                 Direction = reader.GetBoolean(2) ? Direction.Descending : Direction.Ascending
             });
-        });
+        }, ct).ConfigureAwait(false);
         _logger.Information(
             "Retrieved primary key {@PrimaryKey} for '{tableName}'",
             pk, tableHeader.Name);
         return pk;
     }
 
-    public async Task<IEnumerable<ForeignKey>> GetForeignKeysAsync(TableHeader tableHeader)
+    public async Task<IEnumerable<ForeignKey>> GetForeignKeysAsync(
+        TableHeader tableHeader, CancellationToken ct)
     {
-        var foreignKeys = await GetForeignKeyReferencesAsync(tableHeader);
+        var foreignKeys = await GetForeignKeyReferencesAsync(tableHeader, ct);
 
         return foreignKeys;
     }
 
-    public async Task<IEnumerable<IndexDefinition>> GetIndexesAsync(TableHeader tableHeader)
+    public async Task<IEnumerable<IndexDefinition>> GetIndexesAsync(
+        TableHeader tableHeader, CancellationToken ct)
     {
         var command =
             new SqlCommand("select i.index_id, i.object_id, i.name, i.type, i.is_unique, f.name\r\n" +
@@ -267,7 +273,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
                     }
                 };
 
-                var indexColumns = await GetIndexColumnInfoAsync(tableHeader.Name, index.Header);
+                var indexColumns = await GetIndexColumnInfoAsync(tableHeader.Name, index.Header, ct);
                 index.Columns.AddRange(indexColumns);
                 indexes.Add(index);
 
@@ -278,7 +284,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
                 Console.WriteLine(ex);
                 throw;
             }
-        });
+        }, ct).ConfigureAwait(false);
 
         _logger.Information(
             $"Retrieved {{IndexCount}} {"index".Plural(indexes.Count)} for table '{{tableName}}'",
@@ -287,7 +293,8 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         return indexes;
     }
 
-    private async Task<List<ForeignKey>> GetForeignKeyReferencesAsync(TableHeader tableHeader)
+    private async Task<List<ForeignKey>> GetForeignKeyReferencesAsync(
+        TableHeader tableHeader, CancellationToken ct)
     {
         var command =
             new SqlCommand("SELECT DISTINCT  \r\n" +
@@ -311,16 +318,17 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
                 DeleteAction = (DeleteAction)Enum.Parse(typeof(DeleteAction), reader.GetString(3).Replace("_", ""), true),
                 UpdateAction = (UpdateAction)Enum.Parse(typeof(UpdateAction), reader.GetString(4).Replace("_", ""), true)
             };
-            await GetForeignKeyColumnsAsync(fk);
+            await GetForeignKeyColumnsAsync(fk, ct);
             foreignKeys.Add(fk);
             _logger.Information("Found foreign key: {ForeignKeyReference} on table {TableName}",
                 fk.ConstraintName, tableHeader.Name);
-        });
+        }, ct).ConfigureAwait(false);
 
         return foreignKeys;
     }
 
-    private async Task GetForeignKeyColumnsAsync(ForeignKey foreignKey)
+    private async Task GetForeignKeyColumnsAsync(
+        ForeignKey foreignKey, CancellationToken ct)
     {
         var command =
             new SqlCommand("SELECT   \r\n" +
@@ -335,7 +343,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         {
             foreignKey.ColumnNames.Add(reader.GetString(0));
             foreignKey.ColumnReferences.Add(reader.GetString(1));
-        });
+        }, ct).ConfigureAwait(false);
 
         _logger.Debug(
             "Added {KeyColumnCount} columns to constraint '{ConstraintName}'",
@@ -343,7 +351,8 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
             foreignKey.ConstraintName);
     }
 
-    private async Task<IEnumerable<IndexColumn>> GetIndexColumnInfoAsync(string tableName, IndexHeader indexHeader)
+    private async Task<IEnumerable<IndexColumn>> GetIndexColumnInfoAsync(
+        string tableName, IndexHeader indexHeader, CancellationToken ct)
     {
         var command =
             new SqlCommand("select COL_NAME(ic.object_id,ic.column_id) AS column_name, ic.is_descending_key\r\n" +
@@ -366,7 +375,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
             };
             columns.Add(column);
             _logger.Verbose("Added column: {ColumnName}", column.Name);
-        });
+        }, ct).ConfigureAwait(false);
 
         _logger.Information(
             $"Retrieved {{ColumnCount}} index {"column".Plural(columns.Count)} for index '{{TableName}}.{{IndexName}}'",

@@ -29,7 +29,7 @@ public class CopyOut : ICopyOut
     {
         var sw = new Stopwatch();
         sw.Start();
-        var tableNames = (await _systemTables.GetTableNamesAsync(_config.SafeGet(Constants.Config.SearchFilter))).ToList();
+        var tableNames = (await _systemTables.GetTableNamesAsync(_config.SafeGet(Constants.Config.SearchFilter), ct).ConfigureAwait(false)).ToList();
         _logger.Information($"Copy out {{TableCount}} {"table".Plural(tableNames.Count)}",
             tableNames.Count);
         Console.WriteLine($"Copy out {tableNames.Count} {"table".Plural(tableNames.Count)}.");
@@ -40,7 +40,7 @@ public class CopyOut : ICopyOut
             {
                 Interlocked.Increment(ref errors);
             }
-        });
+        }).ConfigureAwait(false);
         sw.Stop();
 
         if (errors > 0)
@@ -64,7 +64,7 @@ public class CopyOut : ICopyOut
         try
         {
             // TODO: CancellationToken
-            var tabDef = await _tableSchema.GetTableInfoAsync(tableName).ConfigureAwait(false);
+            var tabDef = await _tableSchema.GetTableInfoAsync(tableName, ct).ConfigureAwait(false);
             if (tabDef == null)
             {
                 _logger.Warning("Table {SearchString} not found", tableName);

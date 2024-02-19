@@ -11,17 +11,18 @@ public class MssCommandBase
 
     public async Task ExecuteReaderAsync(
         SqlCommand command,
-        Action<SqlDataReader> readFunc)
+        Action<SqlDataReader> readFunc,
+        CancellationToken ct)
     {
         var connection = new SqlConnection(_dbContext.ConnectionString);
         await using (connection.ConfigureAwait(false))
         {
             command.Connection = connection;
-            await connection.OpenAsync().ConfigureAwait(false);
+            await connection.OpenAsync(ct).ConfigureAwait(false);
             await using (command.ConfigureAwait(false))
             {
-                await using var reader = await command.ExecuteReaderAsync().ConfigureAwait(false);
-                while (await reader.ReadAsync().ConfigureAwait(false))
+                await using var reader = await command.ExecuteReaderAsync(ct).ConfigureAwait(false);
+                while (await reader.ReadAsync(ct).ConfigureAwait(false))
                 {
                     readFunc(reader);
                 }
@@ -31,17 +32,18 @@ public class MssCommandBase
 
     public async Task ExecuteReaderAsync(
         SqlCommand command,
-        Func<SqlDataReader, Task> readFunc)
+        Func<SqlDataReader, Task> readFunc,
+        CancellationToken ct)
     {
         var connection = new SqlConnection(_dbContext.ConnectionString);
         await using (connection.ConfigureAwait(false))
         {
             command.Connection = connection;
-            await connection.OpenAsync().ConfigureAwait(false);
+            await connection.OpenAsync(ct).ConfigureAwait(false);
             await using (command.ConfigureAwait(false))
             {
-                await using var reader = await command.ExecuteReaderAsync().ConfigureAwait(false);
-                while (await reader.ReadAsync().ConfigureAwait(false))
+                await using var reader = await command.ExecuteReaderAsync(ct).ConfigureAwait(false);
+                while (await reader.ReadAsync(ct).ConfigureAwait(false))
                 {
                     await readFunc(reader);
                 }

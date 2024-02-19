@@ -113,7 +113,7 @@ public class PgCmdTests : PgTestBase
             {
                 Name = tableName,
                 Schema = "public"
-            });
+            }, cts.Token);
             pk.Should().NotBeNull();
             pk!.ColumnNames.Count.Should().Be(1);
             pk.ColumnNames[0].Name.Should().Be("id");
@@ -172,7 +172,7 @@ public class PgCmdTests : PgTestBase
             {
                 Name = childTableName,
                 Schema = "public"
-            })).ToList();
+            }, cts.Token)).ToList();
             fks.Count.Should().Be(2, "because there should be 2 foreign keys");
             fks.Select(k => k.TableReference).Should().Contain(new List<string> { parent1TableName, parent2TableName });
             fks.First(k => k.TableReference == parent1TableName).ColumnNames.Count.Should().Be(1);
@@ -225,7 +225,7 @@ public class PgCmdTests : PgTestBase
             {
                 Name = childTableName,
                 Schema = "public"
-            })).ToList();
+            }, cts.Token)).ToList();
             fks.Count.Should().Be(1, "because there should be 1 foreign key");
             fks.First().TableReference.Should().Be(parent1TableName);
             fks.First().ColumnReferences.Count.Should().Be(2);

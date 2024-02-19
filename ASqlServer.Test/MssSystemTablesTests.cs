@@ -2,6 +2,8 @@ namespace ASqlServer.Test;
 
 public class MssSystemTablesTests : MssTestBase
 {
+    private CancellationTokenSource _cts = new();
+
     public MssSystemTablesTests(ITestOutputHelper output)
         : base(output)
     {
@@ -16,7 +18,7 @@ public class MssSystemTablesTests : MssTestBase
     public async Task TestGetTableNames(string searchString, int expectedCount)
     {
         // Act
-        var tableNames = await MssSystemTables.GetTableNamesAsync(searchString);
+        var tableNames = await MssSystemTables.GetTableNamesAsync(searchString, _cts.Token);
 
         // Assert
         tableNames.Count().Should().Be(expectedCount, $"because there should be {expectedCount} tables returned");
@@ -26,7 +28,7 @@ public class MssSystemTablesTests : MssTestBase
     public async Task TestGetTableHeader_Then_NameAndSchemaOk()
     {
         // Act
-        var tableHeader = await MssSystemTables.GetTableHeaderAsync("AllTypes");
+        var tableHeader = await MssSystemTables.GetTableHeaderAsync("AllTypes", _cts.Token);
 
         // Assert
         tableHeader.Should().NotBeNull();
@@ -39,7 +41,7 @@ public class MssSystemTablesTests : MssTestBase
     public async Task TestGetTableHeader_Then_IdentityOk()
     {
         // Act
-        var tableHeader = await MssSystemTables.GetTableHeaderAsync("AllTypes");
+        var tableHeader = await MssSystemTables.GetTableHeaderAsync("AllTypes", _cts.Token);
 
         // Assert
         tableHeader.Should().NotBeNull();
@@ -52,11 +54,11 @@ public class MssSystemTablesTests : MssTestBase
     public async Task TestGetColumnInfo_When_AllTypes()
     {
         // Arrange
-        var tableHeader = await MssSystemTables.GetTableHeaderAsync("AllTypes");
+        var tableHeader = await MssSystemTables.GetTableHeaderAsync("AllTypes", _cts.Token);
         tableHeader.Should().NotBeNull();
 
         // Act
-        var columnInfo = (await MssSystemTables.GetTableColumnInfoAsync(tableHeader!)).ToList();
+        var columnInfo = (await MssSystemTables.GetTableColumnInfoAsync(tableHeader!, _cts.Token)).ToList();
 
         // Assert
         columnInfo.Should().NotBeNull();
@@ -80,11 +82,11 @@ public class MssSystemTablesTests : MssTestBase
     public async Task TestGetColumnInfo_When_DefaultValues()
     {
         // Arrange
-        var tableHeader = await MssSystemTables.GetTableHeaderAsync("TestDefaults");
+        var tableHeader = await MssSystemTables.GetTableHeaderAsync("TestDefaults", _cts.Token);
         tableHeader.Should().NotBeNull();
 
         // Act
-        var columnInfo = (await MssSystemTables.GetTableColumnInfoAsync(tableHeader!)).ToList();
+        var columnInfo = (await MssSystemTables.GetTableColumnInfoAsync(tableHeader!, _cts.Token)).ToList();
 
         // Assert
         columnInfo.Should().NotBeNull("because ColumnInfo shouldn't be null");
@@ -111,11 +113,11 @@ public class MssSystemTablesTests : MssTestBase
     public async Task TestGetPrimaryKey_When_Exists()
     {
         // Arrange
-        var tableHeader = await MssSystemTables.GetTableHeaderAsync("ClientScope");
+        var tableHeader = await MssSystemTables.GetTableHeaderAsync("ClientScope", _cts.Token);
         tableHeader.Should().NotBeNull();
 
         // Act
-        var pk = await MssSystemTables.GetPrimaryKeyAsync(tableHeader!);
+        var pk = await MssSystemTables.GetPrimaryKeyAsync(tableHeader!, _cts.Token);
 
         // Assert
         pk.Should().NotBeNull();
@@ -131,11 +133,11 @@ public class MssSystemTablesTests : MssTestBase
     public async Task TestGetPrimaryKey_When_NotExist()
     {
         // Arrange
-        var tableHeader = await MssSystemTables.GetTableHeaderAsync("TestDefaults");
+        var tableHeader = await MssSystemTables.GetTableHeaderAsync("TestDefaults", _cts.Token);
         tableHeader.Should().NotBeNull();
 
         // Act
-        var pk = await MssSystemTables.GetPrimaryKeyAsync(tableHeader!);
+        var pk = await MssSystemTables.GetPrimaryKeyAsync(tableHeader!, _cts.Token);
 
         // Assert
         pk.Should().BeNull("because TestDefaults doesn't have a primary key");
@@ -145,11 +147,11 @@ public class MssSystemTablesTests : MssTestBase
     public async Task TestGetForeignKey_WhenExists()
     {
         // Arrange
-        var tableHeader = await MssSystemTables.GetTableHeaderAsync("ClientScope");
+        var tableHeader = await MssSystemTables.GetTableHeaderAsync("ClientScope", _cts.Token);
         tableHeader.Should().NotBeNull();
 
         // Act
-        var fks = await MssSystemTables.GetForeignKeysAsync(tableHeader!);
+        var fks = await MssSystemTables.GetForeignKeysAsync(tableHeader!, _cts.Token);
 
         // Assert
         var foreignKeys = fks.ToList();

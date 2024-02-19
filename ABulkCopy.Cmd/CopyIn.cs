@@ -72,15 +72,16 @@ public class CopyIn : ICopyIn
             {
                 if (node.TableDefinition == null) throw new ArgumentNullException(nameof(node.TableDefinition));
                 if (!await CreateTableAsync(
-                        folder, 
-                        node.TableDefinition, 
-                        _config.ToEnum(Constants.Config.EmptyString), ct)
-                            .ConfigureAwait(false))
+                            folder, 
+                            node.TableDefinition, 
+                            _config.ToEnum(Constants.Config.EmptyString), 
+                            ct)
+                        .ConfigureAwait(false))
                 {
                     Interlocked.Increment(ref errors);
                 }
                 tableSequencer.TableFinished(node);
-            });
+            }).ConfigureAwait(false);
 
         if (errors > 0)
         {
@@ -191,7 +192,7 @@ public class CopyIn : ICopyIn
                     indexDefinition.Header.Name, tableDefinition.Header.Name);
                 errorOccurred = true;
             }
-        });
+        }).ConfigureAwait(false);
 
         return !errorOccurred;
     }

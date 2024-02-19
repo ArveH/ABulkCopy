@@ -16,7 +16,8 @@ public class PgSystemTables : IPgSystemTables
         _logger = logger.ForContext<PgSystemTables>();
     }
 
-    public async Task<PrimaryKey?> GetPrimaryKeyAsync(TableHeader tableHeader)
+    public async Task<PrimaryKey?> GetPrimaryKeyAsync(
+        TableHeader tableHeader, CancellationToken ct)
     {
         var sqlString = "SELECT\r\n" +
                         "    tc.table_schema,\r\n" +
@@ -30,9 +31,9 @@ public class PgSystemTables : IPgSystemTables
                         "        AND tc.table_schema = kcu.table_schema\r\n" +
                        $"WHERE tc.constraint_type = 'PRIMARY KEY' AND tc.table_name='{_identifier.AdjustForSystemTable(tableHeader.Name)}'";
         await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
-        await using var reader = await cmd.ExecuteReaderAsync();
+        await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
 
-        var isSomethingRead = await reader.ReadAsync();
+        var isSomethingRead = await reader.ReadAsync(ct).ConfigureAwait(false);
         if (!isSomethingRead) return null;
 
         var pk = new PrimaryKey
@@ -44,7 +45,7 @@ public class PgSystemTables : IPgSystemTables
             }
         };
 
-        while (await reader.ReadAsync())
+        while (await reader.ReadAsync(ct).ConfigureAwait(false))
         {
             pk.ColumnNames.Add(new OrderColumn { Name = reader.GetString(3) });
         }
@@ -55,7 +56,8 @@ public class PgSystemTables : IPgSystemTables
         return pk;
     }
 
-    public async Task<IEnumerable<ForeignKey>> GetForeignKeysAsync(TableHeader tableHeader)
+    public async Task<IEnumerable<ForeignKey>> GetForeignKeysAsync(
+        TableHeader tableHeader, CancellationToken ct)
     {
         var sqlString = "select \r\n" +
                         "    cl.relname as \"parent_table\", \r\n" +
@@ -80,13 +82,13 @@ public class PgSystemTables : IPgSystemTables
                         "       cl.oid = con.confrelid\r\n";
 
         await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
-        await using var reader = await cmd.ExecuteReaderAsync();
+        await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
 
         var foreignKeys = new List<ForeignKey>();
-        while (await reader.ReadAsync())
+        while (await reader.ReadAsync(ct).ConfigureAwait(false))
         {
             var constraintName = reader.GetString(1);
-            var columns = await GetForeignKeyColumnsAsync(constraintName);
+            var columns = await GetForeignKeyColumnsAsync(constraintName, ct);
             var fk = new ForeignKey
             {
                 ColumnNames = columns.Select(c => c.child).ToList(),
@@ -103,13 +105,14 @@ public class PgSystemTables : IPgSystemTables
         return foreignKeys;
     }
 
-    public async Task<uint?> GetIdentityOidAsync(string tableName, string columnName, CancellationToken ct)
+    public async Task<uint?> GetIdentityOidAsync(
+        string tableName, string columnName, CancellationToken ct)
     {
         var seqName = $"{tableName}_{columnName}_seq";
 
         await using var cmd = _pgContext.DataSource.CreateCommand(
             $"select oid from pg_class where relkind = 'S' and relname = '{_identifier.AdjustForSystemTable(seqName)}'");
-        var oid = await cmd.ExecuteScalarAsync();
+        var oid = await cmd.ExecuteScalarAsync(ct).ConfigureAwait(false);
         if (oid == null || oid == DBNull.Value)
         {
             return null;
@@ -118,7 +121,9 @@ public class PgSystemTables : IPgSystemTables
         return (uint?)oid;
     }
 
-    private async Task<List<(string child, string parent)>> GetForeignKeyColumnsAsync(string constraintName)
+    private async Task<List<(string child, string parent)>> GetForeignKeyColumnsAsync(
+        string constraintName,
+        CancellationToken ct)
     {
         var sqlString = "select \r\n" +
                         "    att2.attname as \"child_column\", \r\n" +
@@ -139,10 +144,10 @@ public class PgSystemTables : IPgSystemTables
                         "   join pg_attribute att2 on\r\n" +
                         "       att2.attrelid = con.conrelid and att2.attnum = con.parent";
         await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
-        await using var reader = await cmd.ExecuteReaderAsync();
+        await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
 
         var columns = new List<(string, string)>();
-        while (await reader.ReadAsync())
+        while (await reader.ReadAsync(ct).ConfigureAwait(false))
         {
             columns.Add((reader.GetString(0), reader.GetString(1)));
         }

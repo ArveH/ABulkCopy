@@ -2,5 +2,6 @@
 
 public interface IMssTableSchema
 {
-    Task<TableDefinition?> GetTableInfoAsync(string tableName);
+    Task<TableDefinition?> GetTableInfoAsync(
+        string tableName, CancellationToken ct);
 }

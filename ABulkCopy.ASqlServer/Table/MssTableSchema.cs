@@ -13,18 +13,19 @@ public class MssTableSchema : IMssTableSchema
         _logger = logger.ForContext<MssTableSchema>();
     }
 
-    public async Task<TableDefinition?> GetTableInfoAsync(string tableName)
+    public async Task<TableDefinition?> GetTableInfoAsync(
+        string tableName, CancellationToken ct)
     {
-        var tableHeader = await _systemTables.GetTableHeaderAsync(tableName);
+        var tableHeader = await _systemTables.GetTableHeaderAsync(tableName, ct);
         if (tableHeader == null)
         {
             _logger.Warning("Table {TableName} not found", tableName);
             return null;
         }
-        var columnInfo = await _systemTables.GetTableColumnInfoAsync(tableHeader);
-        var primaryKey = await _systemTables.GetPrimaryKeyAsync(tableHeader);
-        var foreignKeys = await _systemTables.GetForeignKeysAsync(tableHeader);
-        var indexes = await _systemTables.GetIndexesAsync(tableHeader);
+        var columnInfo = await _systemTables.GetTableColumnInfoAsync(tableHeader, ct);
+        var primaryKey = await _systemTables.GetPrimaryKeyAsync(tableHeader, ct);
+        var foreignKeys = await _systemTables.GetForeignKeysAsync(tableHeader, ct);
+        var indexes = await _systemTables.GetIndexesAsync(tableHeader, ct);
 
         return new TableDefinition(Rdbms.Mss)
         {

@@ -4,6 +4,7 @@ public class MssGetIndexesTest : MssTestBase
 {
     private readonly string _testTableName = Environment.MachineName + "MssGetIndexesTest";
     private readonly string _testIndexName = Environment.MachineName + "IX_MssGetIndexesTest";
+    private readonly CancellationTokenSource _cts = new();
 
     public MssGetIndexesTest(ITestOutputHelper output) 
         : base(output)
@@ -14,11 +15,11 @@ public class MssGetIndexesTest : MssTestBase
     public async Task TestGetIndexes_When_OneIndexOneColumn()
     {
         // Arrange
-        var tableHeader = await MssSystemTables.GetTableHeaderAsync("ConfiguredClients");
+        var tableHeader = await MssSystemTables.GetTableHeaderAsync("ConfiguredClients", _cts.Token);
         tableHeader.Should().NotBeNull();
 
         // Act
-        var indexes = (await MssSystemTables.GetIndexesAsync(tableHeader!)).ToList();
+        var indexes = (await MssSystemTables.GetIndexesAsync(tableHeader!, _cts.Token)).ToList();
 
         // Assert
         indexes.Should().NotBeNull();
@@ -48,7 +49,7 @@ public class MssGetIndexesTest : MssTestBase
         await CreateIndex(tableHeader!.Id, columns);
 
         // Act
-        var indexes = (await MssSystemTables.GetIndexesAsync(tableHeader)).ToList();
+        var indexes = (await MssSystemTables.GetIndexesAsync(tableHeader, _cts.Token)).ToList();
         indexes.Should().NotBeNull();
         indexes.Count.Should().Be(1);
 
@@ -72,7 +73,7 @@ public class MssGetIndexesTest : MssTestBase
         tableDef.Columns.Add(new SqlServerInt(2, "Col2", false));
         tableDef.Columns.Add(new SqlServerInt(3, "Col3", false));
         await MssDbHelper.Instance.CreateTable(tableDef);
-        return await MssSystemTables.GetTableHeaderAsync(_testTableName);
+        return await MssSystemTables.GetTableHeaderAsync(_testTableName, _cts.Token);
     }
 
     private async Task CreateIndex(int tableId, List<IndexColumn> columns)

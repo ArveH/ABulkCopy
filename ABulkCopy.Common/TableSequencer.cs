@@ -86,7 +86,7 @@ public class TableSequencer : ITableSequencer
                 yield break;
             }
 
-            await Task.Delay(100);
+            await Task.Delay(100).ConfigureAwait(false);
         }
     }
 }
