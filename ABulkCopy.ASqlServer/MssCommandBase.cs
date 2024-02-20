@@ -45,7 +45,7 @@ public class MssCommandBase
                 await using var reader = await command.ExecuteReaderAsync(ct).ConfigureAwait(false);
                 while (await reader.ReadAsync(ct).ConfigureAwait(false))
                 {
-                    await readFunc(reader);
+                    await readFunc(reader).ConfigureAwait(false);
                 }
             }
         }

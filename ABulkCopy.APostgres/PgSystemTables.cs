@@ -88,7 +88,7 @@ public class PgSystemTables : IPgSystemTables
         while (await reader.ReadAsync(ct).ConfigureAwait(false))
         {
             var constraintName = reader.GetString(1);
-            var columns = await GetForeignKeyColumnsAsync(constraintName, ct);
+            var columns = await GetForeignKeyColumnsAsync(constraintName, ct).ConfigureAwait(false);
             var fk = new ForeignKey
             {
                 ColumnNames = columns.Select(c => c.child).ToList(),

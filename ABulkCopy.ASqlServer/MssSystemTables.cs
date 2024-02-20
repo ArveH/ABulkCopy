@@ -238,7 +238,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
     public async Task<IEnumerable<ForeignKey>> GetForeignKeysAsync(
         TableHeader tableHeader, CancellationToken ct)
     {
-        var foreignKeys = await GetForeignKeyReferencesAsync(tableHeader, ct);
+        var foreignKeys = await GetForeignKeyReferencesAsync(tableHeader, ct).ConfigureAwait(false);
 
         return foreignKeys;
     }
@@ -273,7 +273,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
                     }
                 };
 
-                var indexColumns = await GetIndexColumnInfoAsync(tableHeader.Name, index.Header, ct);
+                var indexColumns = await GetIndexColumnInfoAsync(tableHeader.Name, index.Header, ct).ConfigureAwait(false);
                 index.Columns.AddRange(indexColumns);
                 indexes.Add(index);
 
@@ -318,7 +318,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
                 DeleteAction = (DeleteAction)Enum.Parse(typeof(DeleteAction), reader.GetString(3).Replace("_", ""), true),
                 UpdateAction = (UpdateAction)Enum.Parse(typeof(UpdateAction), reader.GetString(4).Replace("_", ""), true)
             };
-            await GetForeignKeyColumnsAsync(fk, ct);
+            await GetForeignKeyColumnsAsync(fk, ct).ConfigureAwait(false);
             foreignKeys.Add(fk);
             _logger.Information("Found foreign key: {ForeignKeyReference} on table {TableName}",
                 fk.ConstraintName, tableHeader.Name);

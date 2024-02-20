@@ -28,7 +28,7 @@ public class SchemaWriter : ISchemaWriter
                 Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
                 WriteIndented = true,
                 Converters = { new JsonStringEnumConverter(), new ColumnInterfaceConverter() }
-            }));
+            })).ConfigureAwait(false);
         _logger.Information("Table definition written to '{FullPath}'",
             fullPath);
     }
