@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ABulkCopy.Cmd": {
+      "commandName": "Project",
+      "commandLineArgs": "-d out -r Mss -c \"Server=.;Database=u4ids4;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true\" -l D:\\Temp\\LogFiles\\Application\\abulkcopy_out_local_u4ids.log -f d:\\temp\\abulkcopy\\u4ids -s ExternalUserClaims"
+    }
+  }
+}
