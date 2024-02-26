@@ -4,6 +4,6 @@ This is a .NET 8 Console application. The main purpose of this tool is to copy d
 
 First, you copy tables from the source database into files. Then you use the same files to create tables and copy data into the destination database.
 
-More information can be found in the Wiki
+To get started, build the ABulkCopy.Cmd Console application. Then run .\abulkcopy.cmd.exe --help to see the parameters.
 
 > NOTE: This is currently under development. File formats, command parameters, and functionality can (and most likely will) change.
