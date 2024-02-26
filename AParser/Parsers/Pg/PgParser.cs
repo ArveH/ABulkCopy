@@ -80,9 +80,8 @@ public class PgParser : IPgParser
 
     public string ParseConvertToNumber(ITokenizer tokenizer, INode node)
     {
-        return "to_number(" +
-               ParseExpression(tokenizer, node.Children[4]) +
-               ")";
+        return ParseExpression(tokenizer, node.Children[4]) +
+               "::integer";
     }
 
     public string ParseTodayFunction(ITokenizer tokenizer, INode node)
