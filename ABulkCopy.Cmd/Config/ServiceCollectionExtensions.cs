@@ -24,6 +24,12 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IPgColumnFactory, PgColumnFactory>();
         services.AddSingleton<IPgSystemTables, PgSystemTables>();
         services.AddTransient<IPgBulkCopy, PgBulkCopy>();
+        services.AddSingleton<IPgParser, PgParser>();
+        services.AddSingleton<ITokenFactory, TokenFactory>();
+        services.AddSingleton<AParser.Tree.INodeFactory, AParser.Tree.NodeFactory>();
+        services.AddSingleton<ISqlTypes, SqlTypes>();
+        services.AddTransient<ITokenizerFactory, TokenizerFactory>();
+        services.AddTransient<AParser.Tree.IParseTree, AParser.Tree.ParseTree>();
 
         return services;
     }

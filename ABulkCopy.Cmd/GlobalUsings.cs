@@ -21,6 +21,7 @@ global using ABulkCopy.Common.Types;
 global using ABulkCopy.Common.Types.Table;
 global using ABulkCopy.Common.Utils;
 global using ABulkCopy.Common.Writer;
+global using AParser;
 global using AParser.Parsers.Pg;
 global using CommandLine;
 global using Microsoft.Extensions.Configuration;
