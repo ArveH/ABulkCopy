@@ -4,8 +4,10 @@ public class PgParserTests : ParserTestBase
 {
     [Theory]
     [InlineData("123", "123")]
+    [InlineData("-123", "-123")]
     [InlineData("(123)", "(123)")]
     [InlineData("((99.9))", "((99.9))")]
+    [InlineData("((-1))", "((-1))")]
     [InlineData("123.2444", "123.2444")]
     [InlineData("1.arve", "1.")]
     [InlineData(".1", ".1")]

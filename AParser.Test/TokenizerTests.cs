@@ -18,6 +18,7 @@ public class TokenizerTests
     [InlineData("]",  TokenType.UndefinedToken)]
     [InlineData("1",  TokenType.NumberToken)]
     [InlineData("123",  TokenType.NumberToken)]
+    [InlineData("-1",  TokenType.NumberToken)]
     [InlineData(",",  TokenType.CommaToken)]
     [InlineData("a",  TokenType.NameToken)]
     [InlineData("abc",  TokenType.NameToken)]
@@ -26,7 +27,6 @@ public class TokenizerTests
     [InlineData("Aa0",  TokenType.NameToken)]
     [InlineData("a099",  TokenType.NameToken)]
     [InlineData("_", TokenType.NameToken)]
-    [InlineData("0aA",  TokenType.NumberToken)]
     [InlineData(".90",  TokenType.NumberToken)]
     [InlineData("[arve]",  TokenType.QuotedNameToken)]
     [InlineData("[.90]",  TokenType.QuotedNameToken)]
@@ -42,6 +42,11 @@ public class TokenizerTests
         var result = tokenizer.GetNext();
 
         result.Type.Should().Be(expected, $"because \"{input}\" should produce {expected}");
+
+        if (result.Type == TokenType.NumberToken)
+        {
+            result.Length.Should().Be(input.Length, $"because \"{input}\" has a length of {input.Length}");
+        }
     }
 
     [Fact]

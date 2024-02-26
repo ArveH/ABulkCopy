@@ -134,15 +134,9 @@ public class Tokenizer : ITokenizer
             return CurrentToken;
         }
 
-        if (char.IsDigit(CurrentChar))
-        {
-            CurrentToken = _tokenFactory.GetToken(TokenType.NumberToken, _position);
-            SkipToEndOfNumber();
-            CurrentToken.Length = _position - CurrentToken.StartPos;
-            return CurrentToken;
-        }
-
-        if (CurrentChar == '.' && char.IsDigit(PeekNextChar))
+        if (char.IsDigit(CurrentChar) ||
+            (CurrentChar == '.' && char.IsDigit(PeekNextChar)) ||
+            (CurrentChar == '-' && char.IsDigit(PeekNextChar)))
         {
             CurrentToken = _tokenFactory.GetToken(TokenType.NumberToken, _position);
             SkipToEndOfNumber();
@@ -205,6 +199,11 @@ public class Tokenizer : ITokenizer
 
     private void SkipToEndOfNumber()
     {
+        if (CurrentChar == '-')
+        {
+            _position++;
+        }
+
         while (char.IsDigit(CurrentChar))
         {
             _position++;
