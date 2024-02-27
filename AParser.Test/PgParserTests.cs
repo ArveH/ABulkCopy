@@ -28,6 +28,10 @@ public class PgParserTests : ParserTestBase
     [InlineData("(CONVERT([datetime],'JAN 1 1900 00:00:01:000',(9)))", "(cast('JAN 1 1900 00:00:01' as timestamp))")]
     [InlineData("(CONVERT([datetime],'20991231 23:59:59:998',(9)))", "(to_timestamp('20991231 23:59:59:998', 'YYYYMMDD HH24:MI:SS:FF3'))")]
     [InlineData("(CONVERT([datetime],'JAN 1 1900',(9)))", "(cast('JAN 1 1900' as timestamp))")]
+    [InlineData("(CONVERT([smalldatetime],'JAN 1 1900',(9)))", "(cast('JAN 1 1900' as timestamp))")]
+    [InlineData("(CONVERT([smalldatetime],'JAN 1 1900'))", "(cast('JAN 1 1900' as timestamp))")]
+    [InlineData("(CONVERT([smalldatetime],'1900-01-01',(9)))", "(cast('1900-01-01' as timestamp))")]
+    [InlineData("(CONVERT([smalldatetime],'1900-01-01'))", "(cast('1900-01-01' as timestamp))")]
     [InlineData("(getdate())", "(localtimestamp)")]
     [InlineData("(newid())", "(gen_random_uuid())")]
     public void TestParseExpression(string testSql, string expected)
