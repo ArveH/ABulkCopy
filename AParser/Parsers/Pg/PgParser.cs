@@ -52,6 +52,8 @@ public class PgParser : IPgParser
             "[bit]" => ParseConvertToNumber(tokenizer, node),
             "datetime" => ParseConvertToTimestamp(tokenizer, node),
             "[datetime]" => ParseConvertToTimestamp(tokenizer, node),
+            "smalldatetime" => ParseConvertToTimestamp(tokenizer, node),
+            "[smalldatetime]" => ParseConvertToTimestamp(tokenizer, node),
             _ => throw new UnknownSqlTypeException(ErrorMessages.UnknownSqlType(sqlType))
         };
     }
