@@ -1,9 +1,9 @@
 # A database copy tool
 
-This is a .NET 8 Console application. The main purpose of this tool is to copy database tables from a source database to a destination database. To move data, you run it twice.
+Currently only used to copy tables from an SQL Server database to a Postgres database.
 
-First, you copy tables from the source database into files. Then you use the same files to create tables and copy data into the destination database.
+Eventually, I plan to turn it into a general copy tool for copying all schema and data from one database to another. It can be SQL Server to SQL Server, Postgres to Postgres, or between SQL Server and Postgres.
 
-To get started, build the ABulkCopy.Cmd Console application. Then run .\abulkcopy.cmd.exe --help to see the parameters.
+More information can be found here: [https://arveh.github.io/ABulkCopy/](https://arveh.github.io/ABulkCopy/)
 
-> NOTE: This is currently under development. File formats, command parameters, and functionality can (and most likely will) change.
+
