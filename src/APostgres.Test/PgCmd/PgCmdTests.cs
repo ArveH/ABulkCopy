@@ -349,7 +349,7 @@ public class PgCmdTests : PgTestBase
             { Constants.Config.AddQuotes, "true" },
         };
 
-        return new PgSystemTables(PgContext, GetIdentifier(appSettings), TestLogger);
+        return new PgSystemTables(PgDbHelper.Instance.PgContext, GetIdentifier(appSettings), TestLogger);
     }
 
     private IPgCmd GetPgCmd(Dictionary<string, string?>? appSettings=null)
@@ -366,7 +366,7 @@ public class PgCmdTests : PgTestBase
             .Returns(() => new QueryBuilder(
                 GetIdentifier(appSettings)));
         return new ABulkCopy.APostgres.PgCmd(
-            PgContext,
+            PgDbHelper.Instance.PgContext,
             _qbFactoryMock.Object,
             _systemTablesMock.Object,
             TestLogger);

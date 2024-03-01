@@ -10,7 +10,7 @@ public class PgDataReaderTestBase : PgTestBase
     {
         QBFactoryMock.Setup(f => f.GetQueryBuilder())
             .Returns(() => new QueryBuilder(
-                new Identifier(TestConfiguration, PgContext)));
+                new Identifier(TestConfiguration, PgDbHelper.Instance.PgContext)));
     }
 
     protected async Task<T?> TestDataReader<T>(
@@ -41,7 +41,7 @@ public class PgDataReaderTestBase : PgTestBase
     {
         var tableDefinition = await CreateTableAndDataFile(tableName, cols, fileData);
         var dataReader = new PgDataReader(
-            PgContext,
+            PgDbHelper.Instance.PgContext,
             QBFactoryMock.Object,
             new DataFileReader(FileHelper.FileSystem, TestLogger), 
             TestLogger);

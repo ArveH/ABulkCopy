@@ -17,7 +17,6 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services)
     {
         services.AddSingleton<PgContext>();
-        services.AddSingleton<IDbContext>(s => s.GetRequiredService<PgContext>());
         services.AddSingleton<IPgContext>(s => s.GetRequiredService<PgContext>());
         services.AddSingleton<IPgCmd, PgCmd>();
         services.AddSingleton<ITypeConverter, PgTypeMapper>();

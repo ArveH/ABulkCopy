@@ -5,7 +5,6 @@ public class PgTestBase
     protected readonly ILogger TestLogger;
     protected readonly Microsoft.Extensions.Logging.ILoggerFactory TestLoggerFactory;
     protected readonly IConfiguration TestConfiguration;
-    protected readonly IPgContext PgContext;
 
     protected PgTestBase(ITestOutputHelper output)
     {
@@ -33,8 +32,6 @@ public class PgTestBase
         TestLogger = loggerConfig.CreateLogger();
 
         TestLoggerFactory = new Microsoft.Extensions.Logging.LoggerFactory().AddSerilog(TestLogger);
-
-        PgContext = new PgContext(TestLoggerFactory, TestConfiguration);
     }
 
     //[MethodImpl(MethodImplOptions.NoInlining)]
