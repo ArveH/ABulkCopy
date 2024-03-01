@@ -7,8 +7,7 @@ public class PgDbHelper
     private static readonly Lazy<PgDbHelper> LazyInstance =
         new(() => new PgDbHelper());
 
-    private readonly PgContext _pgContext;
-    private static TableDefinition _tableDefinition = new(Rdbms.Pg)
+    private static readonly TableDefinition TableDefinition = new(Rdbms.Pg)
     {
         Header = new()
         {
@@ -44,16 +43,17 @@ public class PgDbHelper
     private PgDbHelper()
     {
         IConfiguration configuration = new ConfigHelper().GetConfiguration("128e015d-d8ef-4ca8-ba79-5390b26c675f");
-        _pgContext = new PgContext(new NullLoggerFactory(), configuration);
+        PgContext = new PgContext(new NullLoggerFactory(), configuration);
     }
 
     public static PgDbHelper Instance => LazyInstance.Value;
-    public string ConnectionString => _pgContext.ConnectionString;
+    public PgContext PgContext { get; }
+    public string ConnectionString => PgContext.ConnectionString;
     public const string GlobalTestTableName = "PgIntegrationTestTable";
 
     public async Task VerifyTestTable()
     {
-        await CreateTable(_tableDefinition);
+        await CreateTable(TableDefinition);
     }
 
     public async Task CreateTable(TableDefinition tableDefinition, 
@@ -107,7 +107,7 @@ public class PgDbHelper
     {
         var identifier = GetIdentifier(addQuote);
         var sqlString = $"select count(*) from {identifier.Get(tableName)};";
-        await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
+        await using var cmd = PgContext.DataSource.CreateCommand(sqlString);
         var reader = await cmd.ExecuteReaderAsync();
         if (!await reader.ReadAsync()) throw new SqlNullValueException();
 
@@ -120,7 +120,7 @@ public class PgDbHelper
     {
         var identifier = GetIdentifier(addQuote);
         var sqlString = $"select {identifier.Get(col.Name)} from {identifier.Get(tableName)};";
-        await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
+        await using var cmd = PgContext.DataSource.CreateCommand(sqlString);
         var reader = await cmd.ExecuteReaderAsync();
         if (!await reader.ReadAsync()) throw new SqlNullValueException();
 
@@ -133,7 +133,7 @@ public class PgDbHelper
     {
         var identifier = GetIdentifier(addQuote);
         var sqlString = $"select {identifier.Get(colName)} from {identifier.Get(tableName)};";
-        await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
+        await using var cmd = PgContext.DataSource.CreateCommand(sqlString);
         var reader = await cmd.ExecuteReaderAsync();
         var result = new List<T?>();
         while (await reader.ReadAsync())
@@ -146,7 +146,7 @@ public class PgDbHelper
 
     public async Task ExecuteNonQuery(string sqlString)
     {
-        await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
+        await using var cmd = PgContext.DataSource.CreateCommand(sqlString);
         await cmd.ExecuteNonQueryAsync();
     }
 
@@ -159,7 +159,7 @@ public class PgDbHelper
         var config = new ConfigurationBuilder()
             .AddInMemoryCollection(appSettings)
             .Build();
-        var identifier = new Identifier(config, _pgContext);
+        var identifier = new Identifier(config, PgContext);
         return identifier;
     }
 }

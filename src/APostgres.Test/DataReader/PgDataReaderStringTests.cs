@@ -138,7 +138,7 @@ public class PgDataReaderStringTests : PgDataReaderTestBase
             new() { col }, 
             new() {testVal});
         var dataReader = new PgDataReader(
-            PgContext,
+            PgDbHelper.Instance.PgContext,
             QBFactoryMock.Object,
             new DataFileReader(FileHelper.FileSystem, TestLogger),
             TestLogger);

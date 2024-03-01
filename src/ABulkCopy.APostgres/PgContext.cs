@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace ABulkCopy.APostgres;
 
@@ -8,9 +9,9 @@ public class PgContext : IPgContext
     private readonly IConfiguration _config;
     private string? _connectionString;
 
-    public PgContext(ILoggerFactory loggerFactory, IConfiguration config)
+    public PgContext(ILoggerFactory? loggerFactory, IConfiguration config)
     {
-        _loggerFactory = loggerFactory;
+        _loggerFactory = loggerFactory ?? new NullLoggerFactory();
         _config = config;
         Rdbms = Rdbms.Pg;
     }
@@ -47,5 +48,11 @@ public class PgContext : IPgContext
             }
             return _dataSource;
         }
+    }
+
+    public void Dispose()
+    {
+        _dataSource?.Dispose();
+        _dataSource = null;
     }
 }
