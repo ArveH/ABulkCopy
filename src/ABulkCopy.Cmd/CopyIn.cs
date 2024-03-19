@@ -65,6 +65,8 @@ public class CopyIn : ICopyIn
             allTables.Where(t => t.IsIndependent),
             _logger);
 
+        var emptyStringFlag = _config.ToEnum(Constants.Config.EmptyString);
+
         await Parallel.ForEachAsync(
             tableSequencer.GetTablesReadyForCreationAsync(), 
             ct, 
@@ -74,7 +76,7 @@ public class CopyIn : ICopyIn
                 if (!await CreateTableAsync(
                             folder, 
                             node.TableDefinition, 
-                            _config.ToEnum(Constants.Config.EmptyString), 
+                            emptyStringFlag, 
                             ct)
                         .ConfigureAwait(false))
                 {

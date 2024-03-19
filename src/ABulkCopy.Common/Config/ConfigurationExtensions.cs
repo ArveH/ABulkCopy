@@ -27,7 +27,7 @@ public static class ConfigurationExtensions
     public static EmptyStringFlag ToEnum(this IConfiguration config, string key)
     {
         var val = config[key];
-        if (string.IsNullOrWhiteSpace(val) || Enum.TryParse<EmptyStringFlag>(val, true, out var flag))
+        if (string.IsNullOrWhiteSpace(val) || !Enum.TryParse<EmptyStringFlag>(val, true, out var flag))
         {
             return EmptyStringFlag.Leave;
         }
