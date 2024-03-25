@@ -23,7 +23,7 @@ jobs:
       run: dotnet restore
       
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build src/ABulkCopy.sln --no-restore
 
     - name: Publish
       run: dotnet publish -c Release
