@@ -22,8 +22,8 @@ jobs:
         dotnet-version: 8.x
         
     - name: Build
-      run: dotnet build ${{slnFile}}
+      run: dotnet build ${{env.slnFile}}
 
     - name: Publish
-      run: dotnet publish ${{slnFile}} -c Release
+      run: dotnet publish ${{env.slnFile}} -c Release
 
