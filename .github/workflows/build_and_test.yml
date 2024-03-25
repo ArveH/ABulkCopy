@@ -31,6 +31,9 @@ jobs:
       id: gitversion
       uses: gittools/actions/gitversion/execute@v1.1.1
       with:
+        overrideConfig: |
+          update-build-number=false
+          next-version='0.0.1'
         updateAssemblyInfo: true
         useConfigFile: true
 

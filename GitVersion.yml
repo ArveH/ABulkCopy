@@ -7,5 +7,5 @@ branches:
     regex: ^master$
 ignore:
   sha: []
-  commits-before: 2024-03-25T19:00:00Z
+  commits-before: 2024-03-24T00:00:00Z
 merge-message-formats: {}
