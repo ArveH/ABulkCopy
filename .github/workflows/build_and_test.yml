@@ -6,6 +6,7 @@ on:
     branches: [ "master" ]
 env:
   slnFile: 'src/ABulkCopy.sln'
+  consoleProjFile: 'src/ABulkCopy.Cmd/ABulkCopy.Cmd.csproj'
 
 jobs:
   build:
@@ -20,5 +21,5 @@ jobs:
       run: dotnet build ${{env.slnFile}}
 
     - name: Publish
-      run: dotnet publish ${{env.slnFile}} -c Release
+      run: dotnet publish ${{env.consoleProjFile}} -c Release
 
