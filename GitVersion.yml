@@ -1,0 +1,11 @@
+mode: ContinuousDelivery
+assembly-file-versioning-format: '{Major}.{Minor}.{Patch}'
+assembly-file-versioning-scheme: MajorMinorPatch
+branches:
+  master:
+    increment: Patch
+    regex: ^master$
+ignore:
+  sha: []
+  commits-before: 2024-03-25T19:00:00Z
+merge-message-formats: {}

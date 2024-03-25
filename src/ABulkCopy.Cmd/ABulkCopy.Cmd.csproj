@@ -10,9 +10,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UserSecretsId>128e015d-d8ef-4ca8-ba79-5390b26c675f</UserSecretsId>
-    <VersionPrefix>0.3.0</VersionPrefix>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
-    <VersionSuffix>alpha$([System.DateTime]::UtcNow.ToString(`yyMMddHHmm`))</VersionSuffix>
   </PropertyGroup>
 
   <ItemGroup>

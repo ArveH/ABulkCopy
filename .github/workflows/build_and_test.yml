@@ -16,9 +16,23 @@ jobs:
     steps:
     - name: Checkout all
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Install GitVersion
+      uses: gittools/actions/gitversion/setup@v1.1.1
+      with:
+        versionSpec: '5.x'
 
     - name: Build
       run: dotnet build ${{env.slnFile}}
+
+    - name: Determine version
+      id: gitversion
+      uses: gittools/actions/gitversion/execute@v1.1.1
+      with:
+        updateAssemblyInfo: true
+        useConfigFile: true
 
     - name: Publish
       run: dotnet publish ${{env.consoleProjFile}} -c Release
