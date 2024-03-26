@@ -5,6 +5,6 @@ public static class StringExtensions
     public static string Squeeze(
         this string source)
     {
-        return source.Replace(" ", "");
+        return source.Replace(" ", "").Replace("\r", "").Replace("\n", "");
     }
 }
