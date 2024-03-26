@@ -38,7 +38,7 @@ jobs:
         useConfigFile: true
 
     - name: Test
-      run: dotnet test ${{env.slnFile}} --no-build -v n 
+      run: dotnet test ${{env.slnFile}} --no-build -v n -e AppSettings__ConnectionString=${{secrets.MSS_ABULKCOPY_TEST_CONNECTIONSTRING}}
   
     - name: Publish
       run: dotnet publish ${{env.consoleProjFile}} -c Release
