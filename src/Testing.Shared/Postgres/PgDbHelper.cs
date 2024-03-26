@@ -42,7 +42,7 @@ public class PgDbHelper
 
     private PgDbHelper()
     {
-        IConfiguration configuration = new ConfigHelper().GetConfiguration("128e015d-d8ef-4ca8-ba79-5390b26c675f");
+        IConfiguration configuration = new ConfigHelper().GetConfiguration("518061ef-12d6-4e4f-ad66-f3a7f8a42557");
         PgContext = new PgContext(new NullLoggerFactory(), configuration);
     }
 
