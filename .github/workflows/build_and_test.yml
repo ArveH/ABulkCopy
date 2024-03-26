@@ -7,6 +7,10 @@ on:
 env:
   slnFile: 'src/ABulkCopy.sln'
   consoleProjFile: 'src/ABulkCopy.Cmd/ABulkCopy.Cmd.csproj'
+  commonTest: 'src/Common.Test/Common.Test.csproj'
+  asqlserverTest: 'src/ASqlServer.Test/ASqlServer.Test.csproj'
+  apostgresTest: 'src/APostgres.Test/APostgres.Test.csproj'
+  aparserTest: 'src/AParser.Test/AParser.Test.csproj'
 
 jobs:
   build:
@@ -37,9 +41,15 @@ jobs:
         updateAssemblyInfo: true
         useConfigFile: true
 
-    - name: Test
-      run: dotnet test ${{env.slnFile}} --no-build --filter FullyQualifiedName~Common.Test -v m -e AppSettings__ConnectionString=${{secrets.MSS_ABULKCOPY_TEST_CONNECTIONSTRING}}
-  
+    - name: Test AParser
+      run: dotnet test ${{env.aparserTest}} --no-build -v m
+    
+    - name: Test Common
+      run: dotnet test ${{env.commonTest}} --no-build -v m 
+
+    - name: Test ASqlServer
+      run: dotnet test ${{env.asqlserverTest}} --no-build --filter FullyQualifiedName~TestGetTableNames -v m -e AppSettings__ConnectionString=${{secrets.MSS_ABULKCOPY_TEST_CONNECTIONSTRING}}
+
     - name: Publish
       run: dotnet publish ${{env.consoleProjFile}} -c Release
 
