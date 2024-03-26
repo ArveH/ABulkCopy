@@ -37,6 +37,9 @@ jobs:
         updateAssemblyInfo: true
         useConfigFile: true
 
+    - name: Test
+      run: dotnet test ${{env.slnFile}} --no-build -v n 
+  
     - name: Publish
       run: dotnet publish ${{env.consoleProjFile}} -c Release
 
