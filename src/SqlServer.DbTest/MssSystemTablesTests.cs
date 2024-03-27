@@ -2,7 +2,7 @@ namespace SqlServer.DbTest;
 
 public class MssSystemTablesTests : MssTestBase
 {
-    private CancellationTokenSource _cts = new();
+    private readonly CancellationTokenSource _cts = new();
 
     public MssSystemTablesTests(ITestOutputHelper output)
         : base(output)
