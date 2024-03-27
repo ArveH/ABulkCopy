@@ -1,6 +1,6 @@
 namespace SqlServer.DbTest;
 
-public class MssSystemTablesTests : MssTestBase
+public class MssSystemTablesTests : MssSystemTablesTestBase
 {
     private readonly CancellationTokenSource _cts = new();
 

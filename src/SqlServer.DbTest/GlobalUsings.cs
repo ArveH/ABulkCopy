@@ -23,6 +23,7 @@ global using Serilog;
 global using SqlServer.DbTest.Helpers;
 global using System.Data;
 global using System.Data.SqlClient;
+global using System.Diagnostics;
 global using System.IO.Abstractions.TestingHelpers;
 global using System.Text;
 global using Testing.Shared;

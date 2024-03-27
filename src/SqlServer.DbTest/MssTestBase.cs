@@ -5,7 +5,6 @@ public abstract class MssTestBase
     protected readonly ILogger TestLogger;
     protected readonly IConfiguration TestConfiguration;
     protected readonly IDbContext MssDbContext;
-    protected readonly IMssSystemTables MssSystemTables;
 
     protected MssTestBase(ITestOutputHelper output)
     {
@@ -18,19 +17,26 @@ public abstract class MssTestBase
         TestConfiguration = new ConfigHelper().GetConfiguration("128e015d-d8ef-4ca8-ba79-5390b26c675f");
 
         MssDbContext = new MssContext(TestConfiguration);
-
-        MssSystemTables = CreateMssSystemTables();
     }
 
-    private IMssSystemTables CreateMssSystemTables()
+    protected string GetName()
     {
-        var connectionString = TestConfiguration.Check(TestConstants.Config.ConnectionString);
-        connectionString.Should()
-            .NotBeNullOrWhiteSpace("because the connection string should be set");
-        IMssColumnFactory colFactory = new MssColumnFactory();
-        IMssSystemTables systemTables = new MssSystemTables(
-            MssDbContext,
-            colFactory, TestLogger);
-        return systemTables;
+        var st = new StackTrace();
+        // Frames:
+        //   0: GetName
+        //   1: MoveNext
+        //   2: Start
+        //   3: <Should be the name of the test method>
+        var sf = st.GetFrame(3);
+        if (sf == null)
+        {
+            throw new InvalidOperationException("Stack Frame is null");
+        }
+
+        var methodName = sf.GetMethod()?.Name ?? throw new InvalidOperationException("Method is null");
+        var methodName20 = methodName.Length > 24 ? methodName[4..24] : methodName;
+        var machineName20 = Environment.MachineName.Length > 20 ? Environment.MachineName[..20] : Environment.MachineName;
+
+        return machineName20 + methodName20;
     }
 }
