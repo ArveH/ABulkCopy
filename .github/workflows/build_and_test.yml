@@ -51,6 +51,17 @@ jobs:
         name: program
         path: ./src/ABulkCopy.Cmd/bin/Release/net8.0/win-x64/publish
 
+    - name: Upload tests artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: tests
+        path: |
+          ./src/AParser.Test/bin/Debug/net8.0
+          ./src/APostgres.Test/bin/Debug/net8.0
+          ./src/ASqlServer.Test/bin/Debug/net8.0
+          ./src/Common.Test/bin/Debug/net8.0
+  
+  
     # - name: Test AParser
     #   run: dotnet test ${{env.aparserTest}} --no-build -v m
     
