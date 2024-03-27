@@ -123,7 +123,7 @@ jobs:
         tag_name: ${{ env.currentVersion }}
         release_name: Release ${{ env.currentVersion }}
         body: |
-          You can find the release notes in the documentation
+          You can find the release notes [here.](https://arveh.github.io/ABulkCopy.Docs/)
         draft: false
         prerelease: true
 
