@@ -66,22 +66,19 @@ jobs:
     needs: build
 
     steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: tests
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: tests
 
-      - name: Display file structure after downloading
-        run: ls -R
-
-    # - name: Test AParser
-    #   run: dotnet test ${{env.aparserTest}} --no-build -v m
+    - name: Test AParser
+      run: dotnet test ./AParser.Test/bin/Debug/net8.0/AParser.Test.dll -v m
     
-    # - name: Test Common
-    #   run: dotnet test ${{env.commonTest}} --no-build -v m 
+    - name: Test Common
+      run: dotnet test ./Common.Test/bin/Debug/net8.0/Common.Test.dll -v m 
 
-    # - name: Test ASqlServer
-    #   run: dotnet test ${{env.asqlserverTest}} --no-build -v m -e AppSettings__ConnectionString="${{secrets.MSS_ABULKCOPY_TEST_CONNECTIONSTRING}}"
+    - name: Test ASqlServer
+      run: dotnet test ./ASqlServer.Test/bin/Debug/net8.0/ASqlServer.Test.dll -v m -e AppSettings__ConnectionString="${{secrets.MSS_ABULKCOPY_TEST_CONNECTIONSTRING}}"
 
 
     
