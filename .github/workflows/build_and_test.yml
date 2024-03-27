@@ -40,7 +40,11 @@ jobs:
           next-version=0.1.1
         updateAssemblyInfo: true
         useConfigFile: true
-      
+
+    
+    - name: Publish
+      run: dotnet publish ${{env.consoleProjFile}} -c Release
+
     - name: Display file structure
       run: ls -R
 
@@ -59,7 +63,5 @@ jobs:
     # - name: Test ASqlServer
     #   run: dotnet test ${{env.asqlserverTest}} --no-build -v m -e AppSettings__ConnectionString="${{secrets.MSS_ABULKCOPY_TEST_CONNECTIONSTRING}}"
 
-    # - name: Publish
-    #   run: dotnet publish ${{env.consoleProjFile}} -c Release
 
     
