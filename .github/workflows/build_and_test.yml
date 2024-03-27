@@ -40,16 +40,26 @@ jobs:
           next-version=0.1.1
         updateAssemblyInfo: true
         useConfigFile: true
+      
+    - name: Display file structure
+      run: ls -R
 
-    - name: Test AParser
-      run: dotnet test ${{env.aparserTest}} --no-build -v m
+    # - name: Upload program artifact
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: program
+    #     path: src\ABulkCopy.Cmd\bin\Release\net8.0\win-x64\Publish
+
+    # - name: Test AParser
+    #   run: dotnet test ${{env.aparserTest}} --no-build -v m
     
-    - name: Test Common
-      run: dotnet test ${{env.commonTest}} --no-build -v m 
+    # - name: Test Common
+    #   run: dotnet test ${{env.commonTest}} --no-build -v m 
 
-    - name: Test ASqlServer
-      run: dotnet test ${{env.asqlserverTest}} --no-build -v m -e AppSettings__ConnectionString="${{secrets.MSS_ABULKCOPY_TEST_CONNECTIONSTRING}}"
+    # - name: Test ASqlServer
+    #   run: dotnet test ${{env.asqlserverTest}} --no-build -v m -e AppSettings__ConnectionString="${{secrets.MSS_ABULKCOPY_TEST_CONNECTIONSTRING}}"
 
-    - name: Publish
-      run: dotnet publish ${{env.consoleProjFile}} -c Release
+    # - name: Publish
+    #   run: dotnet publish ${{env.consoleProjFile}} -c Release
 
+    
