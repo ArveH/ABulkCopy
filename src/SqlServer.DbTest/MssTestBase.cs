@@ -1,4 +1,4 @@
-﻿namespace ASqlServer.Test;
+﻿namespace SqlServer.DbTest;
 
 public abstract class MssTestBase
 {
