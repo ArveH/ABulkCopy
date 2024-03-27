@@ -45,14 +45,11 @@ jobs:
     - name: Publish
       run: dotnet publish ${{env.consoleProjFile}} -c Release
 
-    - name: Display file structure
-      run: ls -R
-
-    # - name: Upload program artifact
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #     name: program
-    #     path: src\ABulkCopy.Cmd\bin\Release\net8.0\win-x64\Publish
+    - name: Upload program artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: program
+        path: ./src/ABulkCopy.Cmd/bin/Release/net8.0/win-x64/publish
 
     # - name: Test AParser
     #   run: dotnet test ${{env.aparserTest}} --no-build -v m
