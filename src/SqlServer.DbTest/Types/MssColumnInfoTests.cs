@@ -67,6 +67,15 @@ public class MssColumnInfoTests : MssSystemTablesTestBase
     [InlineData("nvarchar(4000)", MssTypes.NVarChar, 4000, null, null)]
     [InlineData("nvarchar(max)", MssTypes.NVarChar, -1, null, null)]
     [InlineData("ntext", MssTypes.NText, -1, null, null)]
+    [InlineData("binary", MssTypes.Binary, 1, null, null)]
+    [InlineData("binary(1)", MssTypes.Binary, 1, null, null)]
+    [InlineData("binary(8000)", MssTypes.Binary, 8000, null, null)]
+    [InlineData("varbinary", MssTypes.VarBinary, 1, null, null)]
+    [InlineData("varbinary(1)", MssTypes.VarBinary, 1, null, null)]
+    [InlineData("varbinary(8000)", MssTypes.VarBinary, 8000, null, null)]
+    [InlineData("varbinary(max)", MssTypes.VarBinary, -1, null, null)]
+    [InlineData("image", MssTypes.Image, -1, null, null)]
+    [InlineData("uniqueidentifier", MssTypes.UniqueIdentifier, 16, null, null)]
     public async Task TestTypeAndSize(
         string colDef,
         string type,
