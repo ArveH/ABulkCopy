@@ -46,11 +46,13 @@ public class MssColumnFactory : IMssColumnFactory
             case MssTypes.Money:
                 return new SqlServerMoney(id, name, isNullable);
             case MssTypes.NChar:
-                return new SqlServerNChar(id, name, isNullable, length, collation);
+                return new SqlServerNChar(
+                    id, name, isNullable, length == -1 ? -1 : length / 2, collation);
             case MssTypes.NText:
                 return new SqlServerNText(id, name, isNullable, collation);
             case MssTypes.NVarChar:
-                return new SqlServerNVarChar(id, name, isNullable, length, collation);
+                return new SqlServerNVarChar(
+                    id, name, isNullable, length == -1 ? -1 : length / 2, collation);
             case MssTypes.Real:
                 return new SqlServerReal(id, name, isNullable);
             case MssTypes.SmallDateTime:
