@@ -56,6 +56,17 @@ public class MssColumnInfoTests : MssSystemTablesTestBase
     [InlineData("time(5)", MssTypes.Time, 5, 14, 5)]
     [InlineData("time(6)", MssTypes.Time, 5, 15, 6)]
     [InlineData("time(7)", MssTypes.Time, 5, 16, 7)]
+    [InlineData("char(1)", MssTypes.Char, 1, null, null)]
+    [InlineData("char(8000)", MssTypes.Char, 8000, null, null)]
+    [InlineData("varchar(1)", MssTypes.VarChar, 1, null, null)]
+    [InlineData("varchar(8000)", MssTypes.VarChar, 8000, null, null)]
+    [InlineData("varchar(max)", MssTypes.VarChar, -1, null, null)]
+    [InlineData("nchar(1)", MssTypes.NChar, 1, null, null)]
+    [InlineData("nchar(4000)", MssTypes.NChar, 4000, null, null)]
+    [InlineData("nvarchar(1)", MssTypes.NVarChar, 1, null, null)]
+    [InlineData("nvarchar(4000)", MssTypes.NVarChar, 4000, null, null)]
+    [InlineData("nvarchar(max)", MssTypes.NVarChar, -1, null, null)]
+    [InlineData("ntext", MssTypes.NText, -1, null, null)]
     public async Task TestTypeAndSize(
         string colDef,
         string type,
