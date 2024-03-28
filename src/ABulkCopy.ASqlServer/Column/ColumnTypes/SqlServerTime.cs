@@ -1,4 +1,6 @@
-﻿namespace ABulkCopy.ASqlServer.Column.ColumnTypes;
+﻿using System.Diagnostics;
+
+namespace ABulkCopy.ASqlServer.Column.ColumnTypes;
 
 public class SqlServerTime : MssDefaultColumn
 {
@@ -31,7 +33,11 @@ public class SqlServerTime : MssDefaultColumn
 
     private void SetPrecisionAndLength(int? scale)
     {
-        Precision = 9 + scale;
+        Precision = scale switch
+        {
+            0 => 8,
+            _ => 9 + scale
+        };
         Length = Precision switch
         {
             < 12 => 3,

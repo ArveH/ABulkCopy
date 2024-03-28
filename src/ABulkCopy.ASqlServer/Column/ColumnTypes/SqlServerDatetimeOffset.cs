@@ -31,7 +31,11 @@ public class SqlServerDateTimeOffset : MssDefaultColumn
 
     private void SetPrecisionAndLength(int scale)
     {
-        Precision = 27 + scale;
+        Precision = scale switch
+        {
+            0 => 26,
+            _ => 27 + scale
+        };
         Length = Precision switch
         {
             < 30 => 8,
