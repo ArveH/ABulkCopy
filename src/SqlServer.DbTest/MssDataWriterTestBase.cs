@@ -1,6 +1,6 @@
-﻿namespace ASqlServer.Test;
+﻿namespace SqlServer.DbTest;
 
-public abstract class MssDataWriterTestBase : MssTestBase
+public abstract class MssDataWriterTestBase : MssSystemTablesTestBase
 {
     public const string TestPath = @"C:\testfiles";
     protected string TestTableName { get; }

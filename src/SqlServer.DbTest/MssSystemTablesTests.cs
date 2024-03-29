@@ -1,8 +1,8 @@
-namespace ASqlServer.Test;
+namespace SqlServer.DbTest;
 
-public class MssSystemTablesTests : MssTestBase
+public class MssSystemTablesTests : MssSystemTablesTestBase
 {
-    private CancellationTokenSource _cts = new();
+    private readonly CancellationTokenSource _cts = new();
 
     public MssSystemTablesTests(ITestOutputHelper output)
         : base(output)

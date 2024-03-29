@@ -1,24 +1,12 @@
-﻿namespace ASqlServer.Test;
+﻿namespace SqlServer.DbTest;
 
-public abstract class MssTestBase
+public abstract class MssSystemTablesTestBase : MssTestBase
 {
-    protected readonly ILogger TestLogger;
-    protected readonly IConfiguration TestConfiguration;
-    protected readonly IDbContext MssDbContext;
     protected readonly IMssSystemTables MssSystemTables;
 
-    protected MssTestBase(ITestOutputHelper output)
+    protected MssSystemTablesTestBase(ITestOutputHelper output) 
+        : base(output)
     {
-        TestLogger = new LoggerConfiguration()
-            .Enrich.FromLogContext()
-            .MinimumLevel.Verbose()
-            .WriteTo.TestOutput(output)
-            .CreateLogger();
-
-        TestConfiguration = new ConfigHelper().GetConfiguration("128e015d-d8ef-4ca8-ba79-5390b26c675f");
-
-        MssDbContext = new MssContext(TestConfiguration);
-
         MssSystemTables = CreateMssSystemTables();
     }
 

@@ -1,6 +1,6 @@
-﻿namespace ASqlServer.Test;
+﻿namespace SqlServer.DbTest;
 
-public class MssGetIndexesTest : MssTestBase
+public class MssGetIndexesTest : MssSystemTablesTestBase
 {
     private readonly string _testTableName = Environment.MachineName + "MssGetIndexesTest";
     private readonly string _testIndexName = Environment.MachineName + "IX_MssGetIndexesTest";

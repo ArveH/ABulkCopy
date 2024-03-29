@@ -1,4 +1,4 @@
-﻿namespace APostgres.Test.PgCmd;
+﻿namespace Postgres.DbTests.PgCmd;
 
 public class PgCmdTests : PgTestBase
 {

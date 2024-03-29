@@ -1,4 +1,4 @@
-﻿namespace Testing.Shared.SqlServer;
+﻿namespace SqlServer.DbTest.Helpers;
 
 public class MssDbHelper
 {
@@ -63,7 +63,7 @@ public class MssDbHelper
     public async Task InsertIntoSingleColumnTable(
         string tableName,
         object? value,
-        SqlDbType? dbType=null)
+        SqlDbType? dbType = null)
     {
         await using var sqlConnection = new SqlConnection(ConnectionString);
         await sqlConnection.OpenAsync();

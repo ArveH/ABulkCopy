@@ -56,6 +56,7 @@ jobs:
           ./src/APostgres.Test/bin/Debug/net8.0
           ./src/ASqlServer.Test/bin/Debug/net8.0
           ./src/Common.Test/bin/Debug/net8.0
+          ./src/SqlServer.DbTests/bin/Debug/net8.0
   
   test:
     name: Test
@@ -71,11 +72,17 @@ jobs:
     - name: Test AParser
       run: dotnet test ./AParser.Test/bin/Debug/net8.0/AParser.Test.dll -v m
     
+    - name: Test APostgres
+      run: dotnet test ./APostgres.Test/bin/Debug/net8.0/APostgres.Test.dll -v m
+
+    - name: Test ASqlServer
+      run: dotnet test ./ASqlServer.Test/bin/Debug/net8.0/ASqlServer.Test.dll -v m
+
     - name: Test Common
       run: dotnet test ./Common.Test/bin/Debug/net8.0/Common.Test.dll -v m 
 
-    - name: Test ASqlServer
-      run: dotnet test ./ASqlServer.Test/bin/Debug/net8.0/ASqlServer.Test.dll -v m -e AppSettings__ConnectionString="${{secrets.MSS_ABULKCOPY_TEST_CONNECTIONSTRING}}"
+    - name: Test SqlServer.DbTests
+      run: dotnet test ./SqlServer.DbTests/bin/Debug/net8.0/SqlServer.DbTests.dll -v m -e AppSettings__ConnectionString="${{secrets.MSS_ABULKCOPY_TEST_CONNECTIONSTRING}}"
 
   release:
     name: Release

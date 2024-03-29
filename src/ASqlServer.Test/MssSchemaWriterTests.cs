@@ -94,17 +94,6 @@ public class MssSchemaWriterTests
     }
 
     [Fact]
-    public async Task TestWriteNVarChar_When_Length4001_Then_NLongText()
-    {
-        var col = new SqlServerNVarChar(101, "MyTestCol", false, 4001);
-        _originalTableDefinition.Columns.Add(col);
-        var expectedCol = col.Clone();
-        expectedCol.Type = MssTypes.NVarChar;
-        expectedCol.Length = -1;
-        await TestWriteColumn(expectedCol);
-    }
-
-    [Fact]
     public async Task TestWriteVarBinary_When_Length8000_Then_Unchanged()
     {
         var col = new SqlServerVarBinary(101, "MyTestCol", false, 8000);

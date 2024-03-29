@@ -1,4 +1,4 @@
-﻿namespace APostgres.Test.DataReader;
+﻿namespace Postgres.DbTests.DataReader;
 
 public class PgDataReaderStringTests : PgDataReaderTestBase
 {
