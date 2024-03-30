@@ -5,7 +5,7 @@ branches:
   master:
     increment: Patch
     regex: ^master$
-    tag: 'alpha'
+    tag: ''
 ignore:
   sha: []
   commits-before: 2024-03-24T00:00:00Z
