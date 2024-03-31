@@ -62,7 +62,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     outputs:
-      currentVersion: v${{ needs.build.outputs.currentVersion }}
+      currentVersion: ${{ needs.build.outputs.currentVersion }}
 
     steps:
     - name: Download artifact
