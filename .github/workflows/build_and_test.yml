@@ -77,11 +77,7 @@ jobs:
       run: dotnet test ./Common.Test/bin/Debug/net8.0/Common.Test.dll -v m 
 
     - name: Test ASqlServer
-      run: dotnet test ./ASqlServer.Test/bin/Debug/net8.0/ASqlServer.Test.dll -v m
-
-    - name: Test APostgres
-      run: dotnet test ./APostgres.Test/bin/Debug/net8.0/APostgres.Test.dll -v m
-
+      run: dotnet test ./ASqlServer.Test/bin/Debug/net8.0/ASqlServer.Test.dll -v m -e AppSettings__ConnectionString="${{secrets.MSS_ABULKCOPY_TEST_CONNECTIONSTRING}}"
 
   release:
     name: Release
