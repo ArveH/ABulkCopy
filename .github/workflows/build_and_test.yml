@@ -92,8 +92,8 @@ jobs:
       with:
         name: program
     
-    - name: Display structure of artifact files
-      run: ls -R
+    # - name: Display structure of artifact files
+    #   run: ls -R
 
     - name: Zip release files
       uses: thedoctor0/zip-release@0.7.5
@@ -114,8 +114,8 @@ jobs:
         draft: false
         prerelease: true
 
-    - name: List files after zip and creating release
-      run: ls -R
+    # - name: List files after zip and creating release
+    #   run: ls -R
 
     - name: Upload Release Asset
       id: upload-release-asset 
