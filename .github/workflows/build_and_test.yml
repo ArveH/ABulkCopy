@@ -61,6 +61,8 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     needs: build
+    outputs:
+      currentVersion: v${{ needs.build.outputs.currentVersion }}
 
     steps:
     - name: Download artifact
@@ -75,14 +77,18 @@ jobs:
       run: dotnet test ./Common.Test/bin/Debug/net8.0/Common.Test.dll -v m 
 
     - name: Test ASqlServer
-      run: dotnet test ./ASqlServer.Test/bin/Debug/net8.0/ASqlServer.Test.dll -v m -e AppSettings__ConnectionString="${{secrets.MSS_ABULKCOPY_TEST_CONNECTIONSTRING}}"
+      run: dotnet test ./ASqlServer.Test/bin/Debug/net8.0/ASqlServer.Test.dll -v m
+
+    - name: Test APostgres
+      run: dotnet test ./APostgres.Test/bin/Debug/net8.0/APostgres.Test.dll -v m
+
 
   release:
     name: Release
     runs-on: ubuntu-latest
-    needs: build # TODO: Change this to test, when I get everything working
+    needs: test
     env:
-      currentVersion: ${{ needs.build.outputs.currentVersion }}
+      currentVersion: ${{ needs.test.outputs.currentVersion }}
 
     steps:
     - name: Download program artifact
