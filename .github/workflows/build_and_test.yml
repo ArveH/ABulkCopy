@@ -61,6 +61,8 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     needs: build
+    outputs:
+      currentVersion: ${{ needs.build.outputs.currentVersion }}
 
     steps:
     - name: Download artifact
@@ -80,9 +82,9 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-    needs: build # TODO: Change this to test, when I get everything working
+    needs: test
     env:
-      currentVersion: ${{ needs.build.outputs.currentVersion }}
+      currentVersion: ${{ needs.test.outputs.currentVersion }}
 
     steps:
     - name: Download program artifact
