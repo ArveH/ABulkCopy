@@ -9,34 +9,40 @@ public static class Startup
         Rdbms rdbms,
         IConfigurationRoot configuration)
     {
+        builder.Services.ConfigureServices(rdbms, configuration);
+        return builder;
+    }
+
+    public static void ConfigureServices(
+        this IServiceCollection services,
+        Rdbms rdbms,
+        IConfigurationRoot configuration)
+    {
         var loggerFactory = LoggerFactory.Create(loggingBuilder =>
         {
             loggingBuilder.ClearProviders();
             loggingBuilder.AddSerilog(Log.Logger);
         });
-        builder.Services.AddSingleton(loggerFactory);
-
-        builder.Services.AddSingleton(configuration);
-        builder.Services.AddSingleton(Log.Logger);
-        builder.Services.AddSingleton<ISchemaWriter, SchemaWriter>();
-        builder.Services.AddSingleton<IDataWriter, DataWriter>();
-        builder.Services.AddSingleton<ISchemaReaderFactory, SchemaReaderFactory>();
-        builder.Services.AddSingleton<IADataReaderFactory, ADataReaderFactory>();
-        builder.Services.AddSingleton<ITableReaderFactory, TableReaderFactory>();
-        builder.Services.AddSingleton<ISelectCreator, SelectCreator>();
-        builder.Services.AddSingleton<ICopyOut, CopyOut>();
-        builder.Services.AddSingleton<ICopyIn, CopyIn>();
-        builder.Services.AddSingleton<IMappingFactory, MappingFactory>();
-        builder.Services.AddSingleton<IFileSystem>(new FileSystem());
-        builder.Services.AddTransient<IDataFileReader, DataFileReader>();
-        builder.Services.AddTransient<IDependencyGraph, DependencyGraph>();
-        builder.Services.AddTransient<IVisitorFactory, VisitorFactory>();
-        builder.Services.AddSingleton<INodeFactory, NodeFactory>();
-        builder.Services.AddSingleton<IQueryBuilderFactory, QueryBuilderFactory>();
-        builder.Services.AddSingleton<IIdentifier, Identifier>();
-        if (rdbms == Rdbms.Mss) builder.Services.AddMssServices();
-        if (rdbms == Rdbms.Pg) builder.Services.AddPgServices();
-
-        return builder;
+        services.AddSingleton(loggerFactory);
+        services.AddSingleton<IConfiguration>(configuration);
+        services.AddSingleton(Log.Logger);
+        services.AddSingleton<ISchemaWriter, SchemaWriter>();
+        services.AddSingleton<IDataWriter, DataWriter>();
+        services.AddSingleton<ISchemaReaderFactory, SchemaReaderFactory>();
+        services.AddSingleton<IADataReaderFactory, ADataReaderFactory>();
+        services.AddSingleton<ITableReaderFactory, TableReaderFactory>();
+        services.AddSingleton<ISelectCreator, SelectCreator>();
+        services.AddSingleton<ICopyOut, CopyOut>();
+        services.AddSingleton<ICopyIn, CopyIn>();
+        services.AddSingleton<IMappingFactory, MappingFactory>();
+        services.AddSingleton<IFileSystem>(new FileSystem());
+        services.AddTransient<IDataFileReader, DataFileReader>();
+        services.AddTransient<IDependencyGraph, DependencyGraph>();
+        services.AddTransient<IVisitorFactory, VisitorFactory>();
+        services.AddSingleton<INodeFactory, NodeFactory>();
+        services.AddSingleton<IQueryBuilderFactory, QueryBuilderFactory>();
+        services.AddSingleton<IIdentifier, Identifier>();
+        if (rdbms == Rdbms.Mss) services.AddMssServices();
+        if (rdbms == Rdbms.Pg) services.AddPgServices();
     }
 }

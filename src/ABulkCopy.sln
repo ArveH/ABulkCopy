@@ -33,6 +33,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CreateMssTestDatabase", "Cr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CreatePgTestDatabase", "CreatePgTestDatabase\CreatePgTestDatabase.csproj", "{9EFF03C2-3D2E-4509-AA4F-53C1F9ADC21C}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "End2EndTests", "End2EndTests\End2EndTests.csproj", "{DDCD33B0-AF05-4093-904B-E8DBA7304549}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -91,6 +93,10 @@ Global
 		{9EFF03C2-3D2E-4509-AA4F-53C1F9ADC21C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9EFF03C2-3D2E-4509-AA4F-53C1F9ADC21C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9EFF03C2-3D2E-4509-AA4F-53C1F9ADC21C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDCD33B0-AF05-4093-904B-E8DBA7304549}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDCD33B0-AF05-4093-904B-E8DBA7304549}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDCD33B0-AF05-4093-904B-E8DBA7304549}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDCD33B0-AF05-4093-904B-E8DBA7304549}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -105,6 +111,7 @@ Global
 		{52F62825-B054-4AA0-A0D6-BF261E1B5546} = {68E6AC7A-B6D6-4060-AC5C-0493C1CAF093}
 		{87C49480-1070-47EE-96A0-20C5137C58D5} = {52F62825-B054-4AA0-A0D6-BF261E1B5546}
 		{9EFF03C2-3D2E-4509-AA4F-53C1F9ADC21C} = {52F62825-B054-4AA0-A0D6-BF261E1B5546}
+		{DDCD33B0-AF05-4093-904B-E8DBA7304549} = {68E6AC7A-B6D6-4060-AC5C-0493C1CAF093}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FE8442EC-5938-4FC6-87FD-AA949B4EC6B0}
