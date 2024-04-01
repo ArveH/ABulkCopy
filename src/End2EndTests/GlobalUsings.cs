@@ -8,3 +8,4 @@ global using CommandLine;
 global using FluentAssertions;
 global using Microsoft.Extensions.DependencyInjection;
 global using Testcontainers.MsSql;
+global using Xunit.Abstractions;
