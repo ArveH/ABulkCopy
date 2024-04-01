@@ -26,24 +26,22 @@ public class TestCopying : IAsyncLifetime
         ]);
         cmdArguments.Should().NotBeNull("because there are command line arguments");
 
-        var args = cmdArguments!.ToAppSettings();
-
-        await using var connection = new SqlConnection(_msSqlContainer.GetConnectionString());
-        await connection.OpenAsync();
-
-        await using var command = connection.CreateCommand();
-        command.CommandText = "SELECT 1;";
-
-        var actual = await command.ExecuteScalarAsync() as int?;
-        Assert.Equal(1, actual.GetValueOrDefault());
-
         var configuration = new ConfigHelper().GetConfiguration(
-            null, cmdArguments.ToAppSettings());
+            null, cmdArguments!.ToAppSettings());
 
         IServiceCollection services = new ServiceCollection();
         services.ConfigureServices(Rdbms.Mss, configuration);
         IServiceProvider provider = services.BuildServiceProvider();
 
+        File.Delete(tableName + ".schema");
+        File.Delete(tableName + ".data");
+
+        await using var conn = new SqlConnection(connectionString);
+        await using var cmd = conn.CreateCommand();
+        cmd.CommandText = $"CREATE TABLE {tableName} (Id INT PRIMARY KEY, Name NVARCHAR(50))";
+        await conn.OpenAsync();
+        await cmd.ExecuteNonQueryAsync();
+        
         var copyOut = provider.GetRequiredService<ICopyOut>();
         await copyOut.RunAsync(CancellationToken.None);
 
