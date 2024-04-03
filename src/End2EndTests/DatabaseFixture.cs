@@ -7,7 +7,9 @@ public class DatabaseFixture : IAsyncLifetime
     private readonly MsSqlContainer _mssContainer =
         new MsSqlBuilder().Build();
     private readonly PostgreSqlContainer _pgContainer =
-        new PostgreSqlBuilder().Build();
+        new PostgreSqlBuilder()
+            .WithPortBinding(54770, 5432)
+            .Build();
 
     public string MssConnectionString => _mssContainer.GetConnectionString();
     public string PgConnectionString => _pgContainer.GetConnectionString();
