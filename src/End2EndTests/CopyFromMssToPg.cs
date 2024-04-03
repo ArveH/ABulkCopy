@@ -19,11 +19,16 @@ public class CopyFromMssToPg : End2EndBase, IDisposable
         var tableName = GetName(nameof(CopyFromMssToPg));
         DeleteFiles(tableName);
         await CreateTableAsync(tableName);
-        var services = CopyProg.GetServices(Rdbms.Mss, _fixture.ConnectionString, tableName);
-        var copyOut = services.GetRequiredService<ICopyOut>();
+        var mssServices = CopyProg.GetServices(
+            CopyDirection.Out, Rdbms.Mss, _fixture.MssConnectionString, tableName);
+        var pgServices = CopyProg.GetServices(
+            CopyDirection.In, Rdbms.Pg, _fixture.PgConnectionString);
+        var copyOut = mssServices.GetRequiredService<ICopyOut>();
+        var copyIn = pgServices.GetRequiredService<ICopyIn>();
 
         // Act
         await copyOut.RunAsync(CancellationToken.None);
+        await copyIn.RunAsync(Rdbms.Pg, CancellationToken.None);
         
         // Assert
         var schemaFile = await File.ReadAllTextAsync(tableName + ".schema");
@@ -35,7 +40,7 @@ public class CopyFromMssToPg : End2EndBase, IDisposable
 
     private async Task CreateTableAsync(string tableName)
     {
-        await using var conn = new SqlConnection(_fixture.ConnectionString);
+        await using var conn = new SqlConnection(_fixture.MssConnectionString);
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = $"CREATE TABLE {tableName} (Id INT PRIMARY KEY, Name NVARCHAR(50))";
         await conn.OpenAsync();
@@ -48,5 +53,5 @@ public class CopyFromMssToPg : End2EndBase, IDisposable
         File.Delete(tableName + ".data");
     }
 
-    public void Dispose() => _output.WriteLine(_fixture.ContainerId);
+    public void Dispose() => _output.WriteLine(_fixture.MssContainerId);
 }

@@ -1,20 +1,28 @@
-﻿namespace End2EndTests;
+﻿using Testcontainers.PostgreSql;
+
+namespace End2EndTests;
 
 public class DatabaseFixture : IAsyncLifetime
 {
-    private readonly MsSqlContainer _msSqlContainer =
+    private readonly MsSqlContainer _mssContainer =
         new MsSqlBuilder().Build();
+    private readonly PostgreSqlContainer _pgContainer =
+        new PostgreSqlBuilder().Build();
 
-    public string ConnectionString => _msSqlContainer.GetConnectionString();
-    public string ContainerId => $"{_msSqlContainer.Id}";
+    public string MssConnectionString => _mssContainer.GetConnectionString();
+    public string PgConnectionString => _pgContainer.GetConnectionString();
+    public string MssContainerId => $"{_mssContainer.Id}";
+    public string PgContainerId => $"{_pgContainer.Id}";
 
     public async Task InitializeAsync()
     {
-        await _msSqlContainer.StartAsync();
+        await _mssContainer.StartAsync();
+        await _pgContainer.StartAsync();
     }
 
-    public Task DisposeAsync()
+    public async Task DisposeAsync()
     {
-        return _msSqlContainer.DisposeAsync().AsTask();
+        await _mssContainer.DisposeAsync();
+        await _pgContainer.DisposeAsync();
     }
 }

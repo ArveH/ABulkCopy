@@ -3,24 +3,30 @@
 public class CopyProg
 {
     public static IServiceProvider GetServices(
+        CopyDirection direction,
         Rdbms rdbms,
         string connectionString,
-        string tableName)
+        string? searchString=null)
     {
-        var cmdArguments = GetArguments([
-                "-d",
-                "out",
-                "-r",
-                rdbms.ToString(),
-                "-c",
-                connectionString,
-                "-l",
-                ".\\local_out.log",
-                "-f",
-                ".\\",
-                "-s",
-                tableName
-            ]);
+        List<string> args = [
+            "-d",
+            direction.ToString(),
+            "-r",
+            rdbms.ToString(),
+            "-c",
+            connectionString,
+            "-l",
+            ".\\local_out.log",
+            "-f",
+            ".\\"
+        ];
+        if (searchString != null)
+        {
+            args.Add("-s");
+            args.Add(searchString);
+        }
+
+        var cmdArguments = GetArguments(args.ToArray());
         if (cmdArguments == null)
         {
             throw new ApplicationException("Couldn't find command line arguments");
@@ -30,7 +36,7 @@ public class CopyProg
             null, cmdArguments.ToAppSettings());
 
         IServiceCollection services = new ServiceCollection();
-        services.ConfigureServices(Rdbms.Mss, configuration);
+        services.ConfigureServices(rdbms, configuration);
         return services.BuildServiceProvider();
     }
 
