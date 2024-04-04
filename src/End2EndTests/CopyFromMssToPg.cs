@@ -1,3 +1,5 @@
+using ABulkCopy.Common.Identifier;
+
 namespace End2EndTests;
 
 [Collection(nameof(DatabaseCollection))]
@@ -5,6 +7,7 @@ public class CopyFromMssToPg : End2EndBase, IDisposable
 {
     private readonly DatabaseFixture _fixture;
     private readonly ITestOutputHelper _output;
+    private IIdentifier _identifier;
 
     public CopyFromMssToPg(DatabaseFixture fixture, ITestOutputHelper output)
     {
@@ -25,6 +28,7 @@ public class CopyFromMssToPg : End2EndBase, IDisposable
             CopyDirection.In, Rdbms.Pg, _fixture.PgConnectionString, $"\\b{tableName}\\b");
         var copyOut = mssServices.GetRequiredService<ICopyOut>();
         var copyIn = pgServices.GetRequiredService<ICopyIn>();
+        _identifier = pgServices.GetRequiredService<IIdentifier>();
 
         // Act
         await copyOut.RunAsync(CancellationToken.None);
@@ -36,10 +40,7 @@ public class CopyFromMssToPg : End2EndBase, IDisposable
         schemaFile.Should().Contain($"\"Name\": \"{tableName}\"");
         var dataFile = await File.ReadAllTextAsync(tableName + ".data");
         dataFile.Should().NotBeNull("because the data file should exist");
-        await ValidateTypeInfoAsync(
-            tableName, "integer",
-            expectedPrecision: 32,
-            expectedLength: 0);
+        await ValidateTypeInfoAsync(tableName, "integer", null, 32, 0);
     }
 
     private async Task CreateTableAsync(string tableName, string colType)
@@ -59,16 +60,16 @@ public class CopyFromMssToPg : End2EndBase, IDisposable
         int? expectedScale = null)
     {
         var sqlString =
-            $"select data_type, \r\n " +
-            $"       character_maximum_length, numeric_precision, numeric_scale, \r\n " +
-            $"       character_octet_length\r\n " +
-            $" from information_schema.columns\r\n " +
-            $"where table_name = '{tableName.ToLowerInvariant()}'\r\n " +
-            $"  and column_name = 'col1'";
+            "select data_type, \r\n " +
+            "       character_maximum_length, numeric_precision, numeric_scale, \r\n " +
+            "       character_octet_length\r\n " +
+            " from information_schema.columns\r\n " +
+            $"where table_name = '{_identifier.AdjustForSystemTable(tableName)}'\r\n " +
+            "  and column_name = 'col1'";
 
         try
         {
-            await using var cmd = PgDbHelper.Instance.PgContext.DataSource.CreateCommand(sqlString);
+            await using var cmd = _fixture.PgDataSource.CreateCommand(sqlString);
             var reader = await cmd.ExecuteReaderAsync();
             var foundColumn = await reader.ReadAsync();
             foundColumn.Should().BeTrue($"because column '{tableName}.col1' should exist");
