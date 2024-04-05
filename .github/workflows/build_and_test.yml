@@ -74,6 +74,9 @@ jobs:
       with:
         name: tests
 
+    - name: Display structure of artifact files
+      run: ls -R
+  
     - name: Test AParser
       run: dotnet test ./AParser.Test/bin/Debug/net8.0/AParser.Test.dll -v m
     
