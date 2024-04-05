@@ -1,6 +1,4 @@
-﻿using Serilog.Settings.Configuration;
-
-namespace ABulkCopy.Cmd.Config;
+﻿namespace ABulkCopy.Cmd.Internal.Config;
 
 public class LogConfigHelper
 {

@@ -1,4 +1,6 @@
-﻿namespace End2EndTests;
+﻿using ABulkCopy.Cmd.Internal;
+
+namespace End2EndTests;
 
 public class CopyProg
 {

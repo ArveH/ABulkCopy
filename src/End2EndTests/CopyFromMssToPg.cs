@@ -1,3 +1,4 @@
+using ABulkCopy.Cmd.Internal;
 using ABulkCopy.Common.Identifier;
 
 namespace End2EndTests;
@@ -7,7 +8,7 @@ public class CopyFromMssToPg : End2EndBase, IDisposable
 {
     private readonly DatabaseFixture _fixture;
     private readonly ITestOutputHelper _output;
-    private IIdentifier _identifier;
+    private IIdentifier? _identifier;
 
     public CopyFromMssToPg(DatabaseFixture fixture, ITestOutputHelper output)
     {
@@ -64,7 +65,7 @@ public class CopyFromMssToPg : End2EndBase, IDisposable
             "       character_maximum_length, numeric_precision, numeric_scale, \r\n " +
             "       character_octet_length\r\n " +
             " from information_schema.columns\r\n " +
-            $"where table_name = '{_identifier.AdjustForSystemTable(tableName)}'\r\n " +
+            $"where table_name = '{_identifier?.AdjustForSystemTable(tableName)}'\r\n " +
             "  and column_name = 'col1'";
 
         try

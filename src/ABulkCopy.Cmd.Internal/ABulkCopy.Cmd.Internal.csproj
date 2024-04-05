@@ -1,16 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
-    <PublishSingleFile>true</PublishSingleFile>
-    <SelfContained>true</SelfContained>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <DebugType>embedded</DebugType>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <UserSecretsId>128e015d-d8ef-4ca8-ba79-5390b26c675f</UserSecretsId>
-    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,20 +19,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="GitVersion.MsBuild" Version="5.12.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\ABulkCopy.Cmd.Internal\ABulkCopy.Cmd.Internal.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="appsettings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <ProjectReference Include="..\ABulkCopy.APostgres\ABulkCopy.APostgres.csproj" />
+    <ProjectReference Include="..\ABulkCopy.ASqlServer\ABulkCopy.ASqlServer.csproj" />
+    <ProjectReference Include="..\ABulkCopy.Common\ABulkCopy.Common.csproj" />
+    <ProjectReference Include="..\AParser\AParser.csproj" />
   </ItemGroup>
 
 </Project>

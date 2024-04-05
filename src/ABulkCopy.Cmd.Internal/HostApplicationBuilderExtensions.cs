@@ -1,8 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using ABulkCopy.Cmd.Internal.Config;
+using ABulkCopy.Cmd.Internal.Factories;
+using Microsoft.Extensions.Logging;
 
-namespace ABulkCopy.Cmd;
+namespace ABulkCopy.Cmd.Internal;
 
-public static class Startup
+public static class HostApplicationBuilderExtensions
 {
     public static HostApplicationBuilder ConfigureServices(
         this HostApplicationBuilder builder, 

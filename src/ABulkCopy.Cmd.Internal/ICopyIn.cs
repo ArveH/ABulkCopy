@@ -1,4 +1,4 @@
-﻿namespace ABulkCopy.Cmd;
+﻿namespace ABulkCopy.Cmd.Internal;
 
 public interface ICopyIn
 {

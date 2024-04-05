@@ -35,6 +35,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CreatePgTestDatabase", "Cre
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "End2EndTests", "End2EndTests\End2EndTests.csproj", "{DDCD33B0-AF05-4093-904B-E8DBA7304549}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ABulkCopy.Cmd.Internal", "ABulkCopy.Cmd.Internal\ABulkCopy.Cmd.Internal.csproj", "{389257CC-ECDD-4C58-84EB-EB3E9807C22F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -97,6 +99,10 @@ Global
 		{DDCD33B0-AF05-4093-904B-E8DBA7304549}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DDCD33B0-AF05-4093-904B-E8DBA7304549}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DDCD33B0-AF05-4093-904B-E8DBA7304549}.Release|Any CPU.Build.0 = Release|Any CPU
+		{389257CC-ECDD-4C58-84EB-EB3E9807C22F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{389257CC-ECDD-4C58-84EB-EB3E9807C22F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{389257CC-ECDD-4C58-84EB-EB3E9807C22F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{389257CC-ECDD-4C58-84EB-EB3E9807C22F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
