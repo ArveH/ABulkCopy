@@ -59,7 +59,7 @@ jobs:
           ./src/APostgres.Test/bin/Debug/net8.0
           ./src/ASqlServer.Test/bin/Debug/net8.0
           ./src/Common.Test/bin/Debug/net8.0
-          ./src/End2EndTests/bin/Debug/net8.0/win-64
+          ./src/End2EndTests/bin/Debug/net8.0/win-x64
   
   test:
     name: Test
@@ -87,7 +87,7 @@ jobs:
       run: dotnet test ./ASqlServer.Test/bin/Debug/net8.0/ASqlServer.Test.dll -v m -e AppSettings__ConnectionString="${{secrets.MSS_ABULKCOPY_TEST_CONNECTIONSTRING}}"
 
     - name: SqlServer to Postgres end-to-end tests
-      run: dotnet test ./End2EndTests/bin/Debug/net8.0/win-64/End2EndTests.dll -v m
+      run: dotnet test ./End2EndTests/bin/Debug/net8.0/win-x64/End2EndTests.dll -v m
 
   release:
     name: Release
