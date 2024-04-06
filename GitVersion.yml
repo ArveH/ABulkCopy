@@ -4,9 +4,11 @@ assembly-file-versioning-scheme: MajorMinorPatch
 branches:
   pull-request:
     increment: Patch
+    prevent-increment-of-merged-branch-version: false
     tag: ''
   master:
     increment: Patch
+    prevent-increment-of-merged-branch-version: false
     regex: ^master$
     tag: ''
 ignore:
