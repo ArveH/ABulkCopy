@@ -1,4 +1,4 @@
-﻿namespace ABulkCopy.Cmd.Factories;
+﻿namespace ABulkCopy.Cmd.Internal.Factories;
 
 public class ADataReaderFactory : IADataReaderFactory
 {

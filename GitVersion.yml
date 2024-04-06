@@ -3,6 +3,8 @@ assembly-file-versioning-format: '{Major}.{Minor}.{Patch}'
 assembly-file-versioning-scheme: MajorMinorPatch
 branches:
   pull-request:
+    increment: Patch
+    regex: ^master$
     tag: ''
   master:
     increment: Patch
