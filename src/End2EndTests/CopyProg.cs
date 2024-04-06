@@ -18,9 +18,9 @@ public class CopyProg
             "-c",
             connectionString,
             "-l",
-            ".\\local_out.log",
+            Path.Combine(".", "local_out.log"),
             "-f",
-            ".\\"
+            "."
         ];
         if (searchString != null)
         {

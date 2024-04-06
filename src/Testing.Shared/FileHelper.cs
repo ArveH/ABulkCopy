@@ -5,7 +5,7 @@ namespace Testing.Shared;
 public class FileHelper
 {
     public MockFileSystem FileSystem { get; } = new();
-    public string DataFolder { get; set; } = ".\\testdata";
+    public string DataFolder { get; set; } = Path.Combine(".", "testdata");
 
     public void CreateSingleColMssSchemaFile(string tableName, IColumn col)
     {
