@@ -1,4 +1,4 @@
-﻿namespace ABulkCopy.Cmd.Config;
+﻿namespace ABulkCopy.Cmd.Internal.Config;
 
 public static class ServiceCollectionExtensions
 {

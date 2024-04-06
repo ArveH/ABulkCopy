@@ -1,6 +1,6 @@
-﻿namespace ABulkCopy.Cmd;
+﻿namespace ABulkCopy.Cmd.Internal;
 
-internal interface ICopyIn
+public interface ICopyIn
 {
     Task RunAsync(Rdbms rdbms, CancellationToken ctsToken);
 }

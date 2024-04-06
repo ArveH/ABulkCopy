@@ -1,8 +1,8 @@
 ﻿namespace ABulkCopy.Cmd;
 
-internal class Program
+public class Program
 {
-    static async Task Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var cmdArguments = GetArguments(args);
         if (cmdArguments == null) return;
