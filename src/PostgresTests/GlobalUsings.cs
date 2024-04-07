@@ -1,3 +1,4 @@
+global using System.Data.SqlTypes;
 global using ABulkCopy.APostgres;
 global using ABulkCopy.APostgres.Column;
 global using ABulkCopy.APostgres.Column.ColumnTypes;
@@ -24,6 +25,9 @@ global using Moq;
 global using Serilog;
 global using System.Diagnostics;
 global using System.IO.Abstractions.TestingHelpers;
+global using System.Text;
+global using Npgsql;
+global using Testcontainers.PostgreSql;
 global using Testing.Shared;
 global using Testing.Shared.SqlServer;
 global using Xunit;

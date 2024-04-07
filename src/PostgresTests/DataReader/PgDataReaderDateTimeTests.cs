@@ -1,11 +1,12 @@
-﻿namespace APostgres.Test.DataReader;
+﻿namespace PostgresTests.DataReader;
 
+[Collection(nameof(DatabaseCollection))]
 public class PgDataReaderDateTimeTests : PgDataReaderTestBase
 {
     private const string ColName = "Col1";
 
-    public PgDataReaderDateTimeTests(ITestOutputHelper output)
-        : base(output)
+    public PgDataReaderDateTimeTests(DatabaseFixture dbFixture, ITestOutputHelper output)
+        : base(dbFixture, output)
     {
     }
 

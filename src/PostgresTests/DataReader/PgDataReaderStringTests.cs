@@ -1,11 +1,12 @@
-﻿namespace APostgres.Test.DataReader;
+﻿namespace PostgresTests.DataReader;
 
+[Collection(nameof(DatabaseCollection))]
 public class PgDataReaderStringTests : PgDataReaderTestBase
 {
     private const string ColName = "Col1";
 
-    public PgDataReaderStringTests(ITestOutputHelper output)
-        : base(output)
+    public PgDataReaderStringTests(DatabaseFixture dbFixture, ITestOutputHelper output)
+        : base(dbFixture, output)
     {
     }
 
@@ -138,7 +139,7 @@ public class PgDataReaderStringTests : PgDataReaderTestBase
             new() { col }, 
             new() {testVal});
         var dataReader = new PgDataReader(
-            PgDbHelper.Instance.PgContext,
+            DbFixture.PgContext,
             QBFactoryMock.Object,
             new DataFileReader(FileHelper.FileSystem, TestLogger),
             TestLogger);
@@ -148,7 +149,7 @@ public class PgDataReaderStringTests : PgDataReaderTestBase
         await dataReader.ReadAsync(FileHelper.DataFolder, tableDefinition, cts.Token, EmptyStringFlag.Single);
 
         //Assert
-        var colValue = await PgDbHelper.Instance.SelectScalar<string>(
+        var colValue = await DbFixture.SelectScalar<string>(
             tableName, col);
         colValue.Should().Be(expectedVal);
     }

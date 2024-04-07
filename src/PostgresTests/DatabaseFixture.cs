@@ -1,64 +1,42 @@
 ﻿using Microsoft.Extensions.Logging.Abstractions;
 
-namespace Testing.Shared.Postgres;
+namespace PostgresTests;
 
-public class PgDbHelper
+public class DatabaseFixture : IAsyncLifetime
 {
-    private static readonly Lazy<PgDbHelper> LazyInstance =
-        new(() => new PgDbHelper());
-
-    private static readonly TableDefinition TableDefinition = new(Rdbms.Pg)
-    {
-        Header = new()
-        {
-            Name = GlobalTestTableName,
-            Schema = "public"
-        },
-        Columns = new List<IColumn>
-        {
-            new PostgresUuid(1, "TestId", false),
-            new PostgresBigInt(2, "BigIntCol", true),
-            new PostgresInt(3, "IntCol", true),
-            new PostgresSmallInt(4, "SmallIntCol", true),
-            new PostgresBoolean(5, "BooleanCol", true),
-            new PostgresDate(6, "DateCol", true),
-            new PostgresTimestamp(7, "TimestampCol", true),
-            new PostgresTimestampTz(8, "TimestampTzCol", true),
-            new PostgresTime(9, "TimeCol", true),
-            new PostgresDoublePrecision(11, "DoublePrecisionCol", true),
-            new PostgresReal(12, "RealCol", true),
-            new PostgresMoney(13, "MoneyCol", true),
-            new PostgresDecimal(14, "DecimalCol", true, 32, 6),
-            new PostgresVarChar(15, "VarCharCol", true, 100),
-            new PostgresChar(16, "CharCol", true, 10),
-            new PostgresText(17, "TextCol", true),
-            new PostgresUuid(18, "UuidCol", true)
-        }
-    };
-
+    private readonly PostgreSqlContainer _pgContainer =
+        new PostgreSqlBuilder()
+            .WithPortBinding(54771, 5432)
+            .Build();
+    private IPgContext? _pgContext;
     private readonly IParseTree _parseTree = new ParseTree(new NodeFactory(), new SqlTypes());
     private readonly IPgParser _parser = new PgParser();
     private readonly ITokenizerFactory _tokenizerFactory = new TokenizerFactory(new TokenFactory());
 
-    private PgDbHelper()
+    public string PgConnectionString => _pgContainer.GetConnectionString();
+    public string PgContainerId => _pgContainer.Id;
+
+    public IPgContext PgContext
     {
-        IConfiguration configuration = new ConfigHelper().GetConfiguration("518061ef-12d6-4e4f-ad66-f3a7f8a42557");
+        get => _pgContext ?? throw new ArgumentNullException(nameof(PgContext));
+        private set => _pgContext = value;
+    }
+
+    public async Task InitializeAsync()
+    {
+        await _pgContainer.StartAsync();
+        IConfiguration configuration = new ConfigHelper().GetConfiguration(
+            "ed7ee99b-0e84-4e9a-9eb5-985d610aeb8b",
+            new()
+            {
+                { Constants.Config.ConnectionString, PgConnectionString }
+            });
         PgContext = new PgContext(new NullLoggerFactory(), configuration);
     }
 
-    public static PgDbHelper Instance => LazyInstance.Value;
-    public PgContext PgContext { get; }
-    public string ConnectionString => PgContext.ConnectionString;
-    public const string GlobalTestTableName = "PgIntegrationTestTable";
-
-    public async Task VerifyTestTable()
-    {
-        await CreateTable(TableDefinition);
-    }
-
-    public async Task CreateTable(TableDefinition tableDefinition, 
-        bool addQuote = true, 
-        bool addIfNotExists = false)
+    public async Task CreateTable(TableDefinition tableDefinition,
+    bool addQuote = true,
+    bool addIfNotExists = false)
     {
         var sb = new StringBuilder();
         var identifier = GetIdentifier(addQuote);
@@ -90,8 +68,10 @@ public class PgDbHelper
                 sb.Append(" default ");
                 sb.Append(_parser.Parse(tokenizer, root));
             }
+
             sb.Append(column.GetNullableClause());
         }
+
         sb.AppendLine(");");
         await ExecuteNonQuery(sb.ToString());
     }
@@ -154,12 +134,18 @@ public class PgDbHelper
     {
         var appSettings = new Dictionary<string, string?>
         {
-            {Constants.Config.AddQuotes, addQuote.ToString()}
+            { Constants.Config.AddQuotes, addQuote.ToString() }
         };
         var config = new ConfigurationBuilder()
             .AddInMemoryCollection(appSettings)
             .Build();
         var identifier = new Identifier(config, PgContext);
         return identifier;
+    }
+
+    public async Task DisposeAsync()
+    {
+        await _pgContainer.DisposeAsync();
+        _pgContext?.Dispose();
     }
 }

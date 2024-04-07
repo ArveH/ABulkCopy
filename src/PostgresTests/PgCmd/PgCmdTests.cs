@@ -1,11 +1,13 @@
-﻿namespace APostgres.Test.PgCmd;
+﻿namespace PostgresTests.PgCmd;
 
+[Collection(nameof(DatabaseCollection))]
 public class PgCmdTests : PgTestBase
 {
     private readonly Mock<IQueryBuilderFactory> _qbFactoryMock = new();
     private readonly Mock<IPgSystemTables> _systemTablesMock = new();
 
-    public PgCmdTests(ITestOutputHelper output) : base(output)
+    public PgCmdTests(DatabaseFixture dbFixture, ITestOutputHelper output) 
+        : base(dbFixture, output)
     {
     }
 
@@ -26,20 +28,20 @@ public class PgCmdTests : PgTestBase
         };
         inputDefinition.Columns.Add(identityCol);
         inputDefinition.Columns.Add(new PostgresVarChar(2, "Name", true, 100));
-        await PgDbHelper.Instance.DropTable(tableName);
+        await DbFixture.DropTable(tableName);
 
         // Act
         List<long> identityValues;
         try
         {
-            await PgDbHelper.Instance.CreateTable(inputDefinition);
-            await PgDbHelper.Instance.ExecuteNonQuery($"insert into \"{tableName}\" (\"Name\") values ('Arve1')");
-            await PgDbHelper.Instance.ExecuteNonQuery($"insert into \"{tableName}\" (\"Name\") values ('Arve2')");
-            identityValues = (await PgDbHelper.Instance.SelectColumn<long>(tableName, "agrtid")).ToList();
+            await DbFixture.CreateTable(inputDefinition);
+            await DbFixture.ExecuteNonQuery($"insert into \"{tableName}\" (\"Name\") values ('Arve1')");
+            await DbFixture.ExecuteNonQuery($"insert into \"{tableName}\" (\"Name\") values ('Arve2')");
+            identityValues = (await DbFixture.SelectColumn<long>(tableName, "agrtid")).ToList();
         }
         finally
         {
-            await PgDbHelper.Instance.DropTable(tableName);
+            await DbFixture.DropTable(tableName);
         }
 
         // Assert
@@ -65,7 +67,7 @@ public class PgCmdTests : PgTestBase
         };
         inputDefinition.Columns.Add(new PostgresBigInt(1, "id", false));
         inputDefinition.Columns.Add(defCol);
-        await PgDbHelper.Instance.DropTable(tableName);
+        await DbFixture.DropTable(tableName);
         var pgCmd = GetPgCmd();
         var cts = new CancellationTokenSource();
 
@@ -74,12 +76,12 @@ public class PgCmdTests : PgTestBase
         try
         {
             await pgCmd.CreateTableAsync(inputDefinition, cts.Token);
-            await PgDbHelper.Instance.ExecuteNonQuery($"insert into \"{tableName}\" (id) values (3)");
-            statusValues = (await PgDbHelper.Instance.SelectColumn<decimal>(tableName, "status")).ToList();
+            await DbFixture.ExecuteNonQuery($"insert into \"{tableName}\" (id) values (3)");
+            statusValues = (await DbFixture.SelectColumn<decimal>(tableName, "status")).ToList();
         }
         finally
         {
-            await PgDbHelper.Instance.DropTable(tableName);
+            await DbFixture.DropTable(tableName);
         }
 
         // Assert
@@ -99,7 +101,7 @@ public class PgCmdTests : PgTestBase
                 ("col1", false),
                 ("col2", false)
             });
-        await PgDbHelper.Instance.DropTable(tableName);
+        await DbFixture.DropTable(tableName);
         var pgCmd = GetPgCmd();
         var systemTables = GetPgSystemTables();
         var cts = new CancellationTokenSource();
@@ -120,7 +122,7 @@ public class PgCmdTests : PgTestBase
         }
         finally
         {
-            await PgDbHelper.Instance.DropTable(tableName);
+            await DbFixture.DropTable(tableName);
         }
 
     }
@@ -132,9 +134,9 @@ public class PgCmdTests : PgTestBase
         var parent1TableName = GetName() + "_parent1";
         var parent2TableName = GetName() + "_parent2";
         var childTableName = GetName() + "_child";
-        await PgDbHelper.Instance.DropTable(childTableName);
-        await PgDbHelper.Instance.DropTable(parent1TableName);
-        await PgDbHelper.Instance.DropTable(parent2TableName);
+        await DbFixture.DropTable(childTableName);
+        await DbFixture.DropTable(parent1TableName);
+        await DbFixture.DropTable(parent2TableName);
         var parent1TableDefinition = GetParentTableDefinition(
             parent1TableName, new List<(string, bool)>
             {
@@ -182,9 +184,9 @@ public class PgCmdTests : PgTestBase
         }
         finally
         {
-            await PgDbHelper.Instance.DropTable(childTableName);
-            await PgDbHelper.Instance.DropTable(parent2TableName);
-            await PgDbHelper.Instance.DropTable(parent1TableName);
+            await DbFixture.DropTable(childTableName);
+            await DbFixture.DropTable(parent2TableName);
+            await DbFixture.DropTable(parent1TableName);
         }
 
     }
@@ -195,8 +197,8 @@ public class PgCmdTests : PgTestBase
         // Arrange
         var parent1TableName = GetName() + "_parent1";
         var childTableName = GetName() + "_child";
-        await PgDbHelper.Instance.DropTable(childTableName);
-        await PgDbHelper.Instance.DropTable(parent1TableName);
+        await DbFixture.DropTable(childTableName);
+        await DbFixture.DropTable(parent1TableName);
         var parent1TableDefinition = GetParentTableDefinition(
             parent1TableName, new List<(string, bool)>
             {
@@ -233,8 +235,8 @@ public class PgCmdTests : PgTestBase
         }
         finally
         {
-            await PgDbHelper.Instance.DropTable(childTableName);
-            await PgDbHelper.Instance.DropTable(parent1TableName);
+            await DbFixture.DropTable(childTableName);
+            await DbFixture.DropTable(parent1TableName);
         }
     }
 
@@ -244,8 +246,8 @@ public class PgCmdTests : PgTestBase
         // Arrange
         var parent1TableName = GetName() + "_parent1";
         var childTableName = GetName() + "_child";
-        await PgDbHelper.Instance.DropTable(childTableName);
-        await PgDbHelper.Instance.DropTable(parent1TableName);
+        await DbFixture.DropTable(childTableName);
+        await DbFixture.DropTable(parent1TableName);
         var parent1TableDefinition = GetParentTableDefinition(
             parent1TableName, new List<(string, bool)>
             {
@@ -282,8 +284,8 @@ public class PgCmdTests : PgTestBase
         }
         finally
         {
-            await PgDbHelper.Instance.DropTable(childTableName);
-            await PgDbHelper.Instance.DropTable(parent1TableName);
+            await DbFixture.DropTable(childTableName);
+            await DbFixture.DropTable(parent1TableName);
         }
     }
 
@@ -349,7 +351,7 @@ public class PgCmdTests : PgTestBase
             { Constants.Config.AddQuotes, "true" },
         };
 
-        return new PgSystemTables(PgDbHelper.Instance.PgContext, GetIdentifier(appSettings), TestLogger);
+        return new PgSystemTables(DbFixture.PgContext, GetIdentifier(appSettings), TestLogger);
     }
 
     private IPgCmd GetPgCmd(Dictionary<string, string?>? appSettings=null)
@@ -366,7 +368,7 @@ public class PgCmdTests : PgTestBase
             .Returns(() => new QueryBuilder(
                 GetIdentifier(appSettings)));
         return new ABulkCopy.APostgres.PgCmd(
-            PgDbHelper.Instance.PgContext,
+            DbFixture.PgContext,
             _qbFactoryMock.Object,
             _systemTablesMock.Object,
             TestLogger);
