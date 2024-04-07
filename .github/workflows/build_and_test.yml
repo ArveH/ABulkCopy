@@ -26,14 +26,9 @@ jobs:
 
     steps:
     - name: Checkout all
-      if: github.event_name == 'workflow_dispatch'
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-
-    - name: Checkout
-      if: github.event_name != 'workflow_dispatch'
-      uses: actions/checkout@v4
 
     - name: Install GitVersion
       if: github.event_name == 'workflow_dispatch'
