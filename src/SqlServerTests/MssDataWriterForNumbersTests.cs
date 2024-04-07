@@ -1,4 +1,4 @@
-﻿namespace ASqlServer.Test;
+﻿namespace SqlServerTests;
 
 public class MssDataWriterForNumbersTests : MssDataWriterTestBase
 {
