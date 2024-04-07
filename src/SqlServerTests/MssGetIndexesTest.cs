@@ -1,13 +1,14 @@
 ﻿namespace SqlServerTests;
 
+[Collection(nameof(DatabaseCollection))]
 public class MssGetIndexesTest : MssTestBase
 {
     private readonly string _testTableName = Environment.MachineName + "MssGetIndexesTest";
     private readonly string _testIndexName = Environment.MachineName + "IX_MssGetIndexesTest";
     private readonly CancellationTokenSource _cts = new();
 
-    public MssGetIndexesTest(ITestOutputHelper output) 
-        : base(output)
+    public MssGetIndexesTest(DatabaseFixture dbFixture, ITestOutputHelper output) 
+        : base(dbFixture, output)
     {
     }
 
@@ -37,7 +38,7 @@ public class MssGetIndexesTest : MssTestBase
     public async Task TestGetIndexes_When_OneDescendingColumn()
     {
         // Arrange
-        await MssDbHelper.Instance.DropTable(_testTableName);
+        await DbFixture.DropTable(_testTableName);
         var tableHeader = await CreateTestTable();
         tableHeader.Should().NotBeNull("because table should exist");
         var columns = new List<IndexColumn>
@@ -72,7 +73,7 @@ public class MssGetIndexesTest : MssTestBase
         tableDef.Columns.Add(new SqlServerInt(1, "Col1", false));
         tableDef.Columns.Add(new SqlServerInt(2, "Col2", false));
         tableDef.Columns.Add(new SqlServerInt(3, "Col3", false));
-        await MssDbHelper.Instance.CreateTable(tableDef);
+        await DbFixture.CreateTable(tableDef);
         return await MssSystemTables.GetTableHeaderAsync(_testTableName, _cts.Token);
     }
 
@@ -91,6 +92,6 @@ public class MssGetIndexesTest : MssTestBase
             Columns = columns
         };
 
-        await MssDbHelper.Instance.CreateIndex(_testTableName, indexDef);
+        await DbFixture.CreateIndex(_testTableName, indexDef);
     }
 }

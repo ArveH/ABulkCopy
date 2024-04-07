@@ -1,11 +1,12 @@
 ﻿namespace SqlServerTests;
 
+[Collection(nameof(DatabaseCollection))]
 public class MssReaderTests
 {
     private readonly ILogger _output;
     private readonly IConfiguration _configuration;
 
-    public MssReaderTests(ITestOutputHelper output)
+    public MssReaderTests(DatabaseFixture dbFixture, ITestOutputHelper output)
     {
         _output = new LoggerConfiguration()
             .Enrich.FromLogContext()

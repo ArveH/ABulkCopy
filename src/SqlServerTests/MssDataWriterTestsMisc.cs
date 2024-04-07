@@ -1,9 +1,10 @@
 ﻿namespace SqlServerTests;
 
+[Collection(nameof(DatabaseCollection))]
 public class MssDataWriterTestsMisc : MssDataWriterTestBase
 {
-    public MssDataWriterTestsMisc(ITestOutputHelper output)
-        : base(output, Environment.MachineName + "MssDataWriterTestsMisc")
+    public MssDataWriterTestsMisc(DatabaseFixture dbFixture, ITestOutputHelper output)
+        : base(dbFixture, output, Environment.MachineName + "MssDataWriterTestsMisc")
     {
     }
 
@@ -26,9 +27,9 @@ public class MssDataWriterTestsMisc : MssDataWriterTestBase
         var value = AllTypes.SampleValues.Varbinary10K;
         var col = new SqlServerVarBinary(101, "MyTestCol", false, 10000);
         OriginalTableDefinition.Columns.Add(col);
-        await MssDbHelper.Instance.DropTable(TestTableName);
-        await MssDbHelper.Instance.CreateTable(OriginalTableDefinition);
-        await MssDbHelper.Instance.InsertIntoSingleColumnTable(
+        await DbFixture.DropTable(TestTableName);
+        await DbFixture.CreateTable(OriginalTableDefinition);
+        await DbFixture.InsertIntoSingleColumnTable(
             TestTableName, value, SqlDbType.VarBinary);
         var cts = new CancellationTokenSource();
 
@@ -42,7 +43,7 @@ public class MssDataWriterTestsMisc : MssDataWriterTestBase
         }
         finally
         {
-            await MssDbHelper.Instance.DropTable(TestTableName);
+            await DbFixture.DropTable(TestTableName);
         }
 
         // Assert
@@ -59,9 +60,9 @@ public class MssDataWriterTestsMisc : MssDataWriterTestBase
         var value = AllTypes.SampleValues.Varbinary10K;
         var col = new SqlServerImage(101, "MyTestCol", false);
         OriginalTableDefinition.Columns.Add(col);
-        await MssDbHelper.Instance.DropTable(TestTableName);
-        await MssDbHelper.Instance.CreateTable(OriginalTableDefinition);
-        await MssDbHelper.Instance.InsertIntoSingleColumnTable(
+        await DbFixture.DropTable(TestTableName);
+        await DbFixture.CreateTable(OriginalTableDefinition);
+        await DbFixture.InsertIntoSingleColumnTable(
             TestTableName, value, SqlDbType.Image);
         var cts = new CancellationTokenSource();
 
@@ -75,7 +76,7 @@ public class MssDataWriterTestsMisc : MssDataWriterTestBase
         }
         finally
         {
-            await MssDbHelper.Instance.DropTable(TestTableName);
+            await DbFixture.DropTable(TestTableName);
         }
 
         // Assert
@@ -91,13 +92,13 @@ public class MssDataWriterTestsMisc : MssDataWriterTestBase
     {
         var col = new SqlServerVarBinary(101, "MyTestCol", true, -1);
         OriginalTableDefinition.Columns.Add(col);
-        await MssDbHelper.Instance.DropTable(TestTableName);
-        await MssDbHelper.Instance.CreateTable(OriginalTableDefinition);
-        await MssDbHelper.Instance.InsertIntoSingleColumnTable(
+        await DbFixture.DropTable(TestTableName);
+        await DbFixture.CreateTable(OriginalTableDefinition);
+        await DbFixture.InsertIntoSingleColumnTable(
             TestTableName, AllTypes.SampleValues.Varbinary10K, SqlDbType.VarBinary);
-        await MssDbHelper.Instance.InsertIntoSingleColumnTable(
+        await DbFixture.InsertIntoSingleColumnTable(
             TestTableName, null, SqlDbType.VarBinary);
-        await MssDbHelper.Instance.InsertIntoSingleColumnTable(
+        await DbFixture.InsertIntoSingleColumnTable(
             TestTableName, AllTypes.SampleValues.Binary5K, SqlDbType.VarBinary);
         var cts = new CancellationTokenSource();
 
@@ -111,7 +112,7 @@ public class MssDataWriterTestsMisc : MssDataWriterTestBase
         }
         finally
         {
-            await MssDbHelper.Instance.DropTable(TestTableName);
+            await DbFixture.DropTable(TestTableName);
         }
 
         // Assert

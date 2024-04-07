@@ -1,11 +1,12 @@
 namespace SqlServerTests;
 
+[Collection(nameof(DatabaseCollection))]
 public class MssSystemTablesTests : MssTestBase
 {
     private CancellationTokenSource _cts = new();
 
-    public MssSystemTablesTests(ITestOutputHelper output)
-        : base(output)
+    public MssSystemTablesTests(DatabaseFixture dbFixture, ITestOutputHelper output)
+        : base(dbFixture, output)
     {
     }
 

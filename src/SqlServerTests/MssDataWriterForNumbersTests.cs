@@ -1,9 +1,10 @@
 ﻿namespace SqlServerTests;
 
+[Collection(nameof(DatabaseCollection))]
 public class MssDataWriterForNumbersTests : MssDataWriterTestBase
 {
-    public MssDataWriterForNumbersTests(ITestOutputHelper output)
-        : base(output, Environment.MachineName + "MssDataWriterForNumbersTests")
+    public MssDataWriterForNumbersTests(DatabaseFixture dbFixture, ITestOutputHelper output)
+        : base(dbFixture, output, Environment.MachineName + "MssDataWriterForNumbersTests")
     {
     }
 

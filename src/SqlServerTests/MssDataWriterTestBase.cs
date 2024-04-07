@@ -8,15 +8,15 @@ public abstract class MssDataWriterTestBase : MssTestBase
     protected readonly MockFileSystem MockFileSystem;
     protected readonly IDataWriter TestDataWriter;
 
-    protected MssDataWriterTestBase(ITestOutputHelper output, string tableName)
-        : base(output)
+    protected MssDataWriterTestBase(DatabaseFixture dbFixture, ITestOutputHelper output, string tableName)
+        : base(dbFixture, output)
     {
         TestTableName = tableName;
         OriginalTableDefinition = MssTestData.GetEmpty(tableName);
         MockFileSystem = new MockFileSystem();
         MockFileSystem.AddDirectory(TestPath);
         TestDataWriter = new DataWriter(
-            MssDbContext,
+            DbFixture.MssDbContext,
             new TableReaderFactoryForTest(new SelectCreator(TestLogger), TestLogger),
             MockFileSystem, TestLogger);
     }
@@ -25,9 +25,9 @@ public abstract class MssDataWriterTestBase : MssTestBase
     {
         // Arrange
         OriginalTableDefinition.Columns.Add(col);
-        await MssDbHelper.Instance.DropTable(TestTableName);
-        await MssDbHelper.Instance.CreateTable(OriginalTableDefinition);
-        await MssDbHelper.Instance.InsertIntoSingleColumnTable(
+        await DbFixture.DropTable(TestTableName);
+        await DbFixture.CreateTable(OriginalTableDefinition);
+        await DbFixture.InsertIntoSingleColumnTable(
             TestTableName, value, dbType);
         var cts = new CancellationTokenSource();
 
@@ -41,7 +41,7 @@ public abstract class MssDataWriterTestBase : MssTestBase
         }
         finally
         {
-            await MssDbHelper.Instance.DropTable(TestTableName);
+            await DbFixture.DropTable(TestTableName);
         }
 
         return await GetJsonText();

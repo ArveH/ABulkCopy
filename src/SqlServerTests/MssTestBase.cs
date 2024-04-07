@@ -2,34 +2,30 @@
 
 public abstract class MssTestBase
 {
+    protected readonly DatabaseFixture DbFixture;
     protected readonly ILogger TestLogger;
-    protected readonly IConfiguration TestConfiguration;
-    protected readonly IDbContext MssDbContext;
     protected readonly IMssSystemTables MssSystemTables;
 
-    protected MssTestBase(ITestOutputHelper output)
+    protected MssTestBase(DatabaseFixture dbFixture, ITestOutputHelper output)
     {
+        DbFixture = dbFixture;
         TestLogger = new LoggerConfiguration()
             .Enrich.FromLogContext()
             .MinimumLevel.Verbose()
             .WriteTo.TestOutput(output)
             .CreateLogger();
 
-        TestConfiguration = new ConfigHelper().GetConfiguration("128e015d-d8ef-4ca8-ba79-5390b26c675f");
-
-        MssDbContext = new MssContext(TestConfiguration);
-
         MssSystemTables = CreateMssSystemTables();
     }
 
     private IMssSystemTables CreateMssSystemTables()
     {
-        var connectionString = TestConfiguration.Check(TestConstants.Config.ConnectionString);
+        var connectionString = DbFixture.TestConfiguration.Check(TestConstants.Config.ConnectionString);
         connectionString.Should()
             .NotBeNullOrWhiteSpace("because the connection string should be set");
         IMssColumnFactory colFactory = new MssColumnFactory();
         IMssSystemTables systemTables = new MssSystemTables(
-            MssDbContext,
+            DbFixture.MssDbContext,
             colFactory, TestLogger);
         return systemTables;
     }
