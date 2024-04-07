@@ -2,6 +2,13 @@ name: Build Console application
 on:
   pull_request:
     branches: [ "master" ]
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build (major.minor.patch)'
+        required: true
+        default: '0.0.0'
 env:
   slnFile: 'src/ABulkCopy.sln'
   consoleProjFile: 'src/ABulkCopy.Cmd/ABulkCopy.Cmd.csproj'
@@ -24,6 +31,7 @@ jobs:
         fetch-depth: 0
 
     - name: Install GitVersion
+      if: github.event_name == 'workflow_dispatch'
       uses: gittools/actions/gitversion/setup@v1.1.1
       with:
         versionSpec: '5.x'
@@ -33,15 +41,20 @@ jobs:
 
     - name: Determine version
       id: gitversion
+      if: github.event_name == 'workflow_dispatch'
       uses: gittools/actions/gitversion/execute@v1.1.1
       with:
         updateAssemblyInfo: true
         useConfigFile: true
+        overrideConfig: |
+          next-version=${{ github.event.inputs.version }}
 
     - name: Publish
+      if: github.event_name == 'workflow_dispatch'
       run: dotnet publish ${{env.consoleProjFile}} -c Release
 
     - name: Upload program artifact
+      if: github.event_name == 'workflow_dispatch'
       uses: actions/upload-artifact@v4
       with:
         name: program
@@ -89,6 +102,7 @@ jobs:
       run: dotnet test ./End2EndTests/bin/Debug/net8.0/End2EndTests.dll -v m
 
   release:
+    if: github.event_name == 'workflow_dispatch'
     name: Release
     runs-on: ubuntu-latest
     needs: test
