@@ -1,13 +1,14 @@
 mode: ContinuousDelivery
+assembly-versioning-scheme: MajorMinorPatchTag
 assembly-file-versioning-format: '{Major}.{Minor}.{Patch}'
-assembly-file-versioning-scheme: MajorMinorPatch
+assembly-file-versioning-scheme: MajorMinorPatchTag
 branches:
-  pull-request:
-    tag: ''
   master:
     increment: Patch
     regex: ^master$
-    tag: ''
+  pull-request:
+    increment: Patch
+    tag: 'pr'
 ignore:
   sha: []
   commits-before: 2024-03-24T00:00:00Z
