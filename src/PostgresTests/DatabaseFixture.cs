@@ -12,9 +12,13 @@ public class DatabaseFixture : IAsyncLifetime
     private readonly IParseTree _parseTree = new ParseTree(new NodeFactory(), new SqlTypes());
     private readonly IPgParser _parser = new PgParser();
     private readonly ITokenizerFactory _tokenizerFactory = new TokenizerFactory(new TokenFactory());
+    private IConfiguration? _configuration;
 
     public string PgConnectionString => _pgContainer.GetConnectionString();
     public string PgContainerId => _pgContainer.Id;
+
+    public IConfiguration Configuration 
+        => _configuration ?? throw new ArgumentNullException(nameof(Configuration));
 
     public IPgContext PgContext
     {
@@ -25,13 +29,14 @@ public class DatabaseFixture : IAsyncLifetime
     public async Task InitializeAsync()
     {
         await _pgContainer.StartAsync();
-        IConfiguration configuration = new ConfigHelper().GetConfiguration(
+        _configuration = new ConfigHelper().GetConfiguration(
             "ed7ee99b-0e84-4e9a-9eb5-985d610aeb8b",
             new()
             {
-                { Constants.Config.ConnectionString, PgConnectionString }
-            });
-        PgContext = new PgContext(new NullLoggerFactory(), configuration);
+                { Constants.Config.ConnectionString, PgConnectionString },
+                { Constants.Config.AddQuotes, "true" }
+        });
+        PgContext = new PgContext(new NullLoggerFactory(), Configuration);
     }
 
     public async Task CreateTable(TableDefinition tableDefinition,

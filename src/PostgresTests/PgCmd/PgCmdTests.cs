@@ -361,8 +361,8 @@ public class PgCmdTests : PgTestBase
             { Constants.Config.AddQuotes, "true" },
         };
         appSettings.Add(
-            Constants.Config.ConnectionString, 
-            TestConfiguration.SafeGet(Constants.Config.ConnectionString));
+            Constants.Config.ConnectionString,
+            DbFixture.Configuration.SafeGet(Constants.Config.ConnectionString));
         _qbFactoryMock
             .Setup(f => f.GetQueryBuilder())
             .Returns(() => new QueryBuilder(

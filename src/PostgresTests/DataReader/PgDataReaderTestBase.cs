@@ -11,7 +11,7 @@ public class PgDataReaderTestBase : PgTestBase
     {
         QBFactoryMock.Setup(f => f.GetQueryBuilder())
             .Returns(() => new QueryBuilder(
-                new Identifier(TestConfiguration, DbFixture.PgContext)));
+                new Identifier(dbFixture.Configuration, DbFixture.PgContext)));
     }
 
     protected async Task<T?> TestDataReader<T>(

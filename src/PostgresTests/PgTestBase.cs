@@ -4,7 +4,6 @@ public class PgTestBase
 {
     protected readonly ILogger TestLogger;
     protected readonly Microsoft.Extensions.Logging.ILoggerFactory TestLoggerFactory;
-    protected readonly IConfiguration TestConfiguration;
     protected readonly DatabaseFixture DbFixture;
 
     protected PgTestBase(DatabaseFixture dbFixture, ITestOutputHelper output)
@@ -12,14 +11,13 @@ public class PgTestBase
         DbFixture = dbFixture;
         const string outputTemplate =
             "{Timestamp:HH:mm:ss.fff} [{Level:u3}] {Message}    {Timestamp:yyyy-MM-dd }{Properties}{NewLine}{Exception}{NewLine}";
-        TestConfiguration = new ConfigHelper().GetConfiguration("518061ef-12d6-4e4f-ad66-f3a7f8a42557");
         var loggerConfig = new LoggerConfiguration()
             .Enrich.FromLogContext()
             .MinimumLevel.Verbose()
             .WriteTo.Console(outputTemplate: outputTemplate)
             .WriteTo.TestOutput(output);
 
-        var fileFullPath = TestConfiguration[Constants.Config.LogFile];
+        var fileFullPath = DbFixture.Configuration[Constants.Config.LogFile];
         if (!string.IsNullOrWhiteSpace(fileFullPath))
         {
             loggerConfig
