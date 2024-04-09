@@ -16,18 +16,24 @@ public class MssGetIndexesTest : MssTestBase
     public async Task TestGetIndexes_When_OneIndexOneColumn()
     {
         // Arrange
-        var tableHeader = await MssSystemTables.GetTableHeaderAsync("ConfiguredClients", _cts.Token);
-        tableHeader.Should().NotBeNull();
+        await DbFixture.DropTable(_testTableName);
+        var tableHeader = await CreateTestTable();
+        tableHeader.Should().NotBeNull("because table should exist");
+        var columns = new List<IndexColumn>
+        {
+            new() { Name = "Col1" },
+        };
+        await CreateIndex(tableHeader!.Id, columns);
 
         // Act
-        var indexes = (await MssSystemTables.GetIndexesAsync(tableHeader!, _cts.Token)).ToList();
+        var indexes = (await MssSystemTables.GetIndexesAsync(tableHeader, _cts.Token)).ToList();
 
         // Assert
         indexes.Should().NotBeNull();
         indexes.Count.Should().Be(1);
         indexes[0].Header.Id.Should().Be(2);
-        indexes[0].Header.TableId.Should().BeGreaterThan(0);
-        indexes[0].Header.Name.Should().Be("IX_ConfiguredClients_OwnerTenant");
+        indexes[0].Header.TableId.Should().Be(tableHeader.Id);
+        indexes[0].Header.Name.Should().Be(_testIndexName);
         indexes[0].Header.IsUnique.Should().BeFalse();
         indexes[0].Header.Type.Should().Be(IndexType.NonClustered);
         indexes[0].Header.Location.Should().Be("PRIMARY");
