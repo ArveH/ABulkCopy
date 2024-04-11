@@ -1,27 +1,25 @@
 ﻿namespace SqlServerTests;
 
 [Collection(nameof(DatabaseCollection))]
-public class MssReaderTests
+public class MssReaderTests : MssTestBase
 {
     private readonly ILogger _output;
-    private readonly IConfiguration _configuration;
 
-    public MssReaderTests(DatabaseFixture dbFixture, ITestOutputHelper output)
+    public MssReaderTests(DatabaseFixture dbFixture, ITestOutputHelper output) 
+        : base(dbFixture, output)
     {
         _output = new LoggerConfiguration()
             .Enrich.FromLogContext()
             .MinimumLevel.Verbose()
             .WriteTo.TestOutput(output)
             .CreateLogger();
-
-        _configuration = new ConfigHelper().GetConfiguration("128e015d-d8ef-4ca8-ba79-5390b26c675f");
     }
 
     [Fact]
     public async Task TestDataReader_ReadBigint()
     {
         // Arrange
-        var connectionString = _configuration.Check(TestConstants.Config.ConnectionString);
+        var connectionString = DbFixture.TestConfiguration.Check(TestConstants.Config.ConnectionString);
         connectionString.Should()
             .NotBeNullOrWhiteSpace("because the connection string should be set in the user secrets file");
         var selectCreatorMock = new Mock<ISelectCreator>();
