@@ -1,4 +1,6 @@
-﻿namespace SqlServerTests;
+﻿using System.Data;
+
+namespace SqlServerTests;
 
 [Collection(nameof(DatabaseCollection))]
 public class MssReaderTests : MssTestBase
@@ -19,18 +21,21 @@ public class MssReaderTests : MssTestBase
     public async Task TestDataReader_ReadBigint()
     {
         // Arrange
-        var connectionString = DbFixture.TestConfiguration.Check(TestConstants.Config.ConnectionString);
-        connectionString.Should()
-            .NotBeNullOrWhiteSpace("because the connection string should be set in the user secrets file");
+        var tableName = GetName();
+        await DbFixture.DropTable(tableName);
+        await DbFixture.ExecuteNonQuery($"create table {tableName} (col1 bigint)");
+        await DbFixture.InsertIntoSingleColumnTable(
+            tableName, AllTypes.SampleValues.BigInt);
+
         var selectCreatorMock = new Mock<ISelectCreator>();
         selectCreatorMock
             .Setup(m => m.CreateSelect(It.IsAny<TableDefinition>()))
-            .Returns("select ExactNumBigInt from dbo.AllTypes");
+            .Returns($"select col1 from [{tableName}]");
         IMssTableReader tableReader = new MssTableReader(
             selectCreatorMock.Object,
             _output)
         {
-            ConnectionString = connectionString
+            ConnectionString = DbFixture.MssConnectionString
         };
 
         var tableDefinition = MssTestData.GetTableDefinitionAllTypes();

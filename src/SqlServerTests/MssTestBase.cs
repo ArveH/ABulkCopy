@@ -1,4 +1,6 @@
-﻿namespace SqlServerTests;
+﻿using System.Diagnostics;
+
+namespace SqlServerTests;
 
 public abstract class MssTestBase
 {
@@ -28,5 +30,23 @@ public abstract class MssTestBase
             DbFixture.MssDbContext,
             colFactory, TestLogger);
         return systemTables;
+    }
+
+    protected string GetName()
+    {
+        var st = new StackTrace();
+        // Frames:
+        //   0: GetName
+        //   1: MoveNext
+        //   2: Start
+        //   3: <Should be the name of the test method>
+        var sf = st.GetFrame(3);
+        if (sf == null)
+        {
+            throw new InvalidOperationException("Stack Frame is null");
+        }
+
+        var methodName = sf.GetMethod()?.Name ?? throw new InvalidOperationException("Method is null");
+        return methodName.Length > 24 ? methodName[4..24] : methodName;
     }
 }
