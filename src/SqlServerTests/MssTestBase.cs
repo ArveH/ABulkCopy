@@ -47,6 +47,6 @@ public abstract class MssTestBase
         }
 
         var methodName = sf.GetMethod()?.Name ?? throw new InvalidOperationException("Method is null");
-        return methodName.Length > 24 ? methodName[4..24] : methodName;
+        return methodName.Length > 54 ? methodName[4..54] : methodName;
     }
 }
