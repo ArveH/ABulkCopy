@@ -31,7 +31,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ABulkCopy.Cmd.Internal", "A
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DbTests", "DbTests", "{7E42F203-AEFE-41B1-AB2B-53AAE6E9BBEE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PostgresTests", "PostgresTests\PostgresTests.csproj", "{643272F9-9523-45B9-808F-9B25D2682438}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Postgres.Tests", "PostgresTests\Postgres.Tests.csproj", "{643272F9-9523-45B9-808F-9B25D2682438}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SqlServer.Tests", "SqlServerTests\SqlServer.Tests.csproj", "{1C64630C-E6D2-4A96-B89A-FB72803841DA}"
 EndProject

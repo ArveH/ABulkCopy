@@ -1,4 +1,4 @@
-﻿namespace PostgresTests.PgCmd;
+﻿namespace Postgres.Tests.PgCmd;
 
 [Collection(nameof(DatabaseCollection))]
 public class PgCmdTests : PgTestBase

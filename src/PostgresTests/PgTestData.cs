@@ -1,4 +1,4 @@
-﻿namespace PostgresTests;
+﻿namespace Postgres.Tests;
 
 public static class PgTestData
 {

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging.Abstractions;
 
-namespace PostgresTests;
+namespace Postgres.Tests;
 
 public class DatabaseFixture : IAsyncLifetime
 {
