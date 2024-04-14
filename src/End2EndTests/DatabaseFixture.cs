@@ -1,6 +1,4 @@
-﻿using Testcontainers.PostgreSql;
-
-namespace End2EndTests;
+﻿namespace CrossRDBMS.Tests;
 
 public class DatabaseFixture : IAsyncLifetime
 {

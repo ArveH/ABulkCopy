@@ -1,4 +1,4 @@
-﻿namespace End2EndTests;
+﻿namespace CrossRDBMS.Tests;
 
 [CollectionDefinition(nameof(DatabaseCollection))]
 public class DatabaseCollection : ICollectionFixture<DatabaseFixture>;

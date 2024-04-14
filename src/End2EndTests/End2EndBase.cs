@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace End2EndTests;
+﻿namespace CrossRDBMS.Tests;
 
 public class End2EndBase
 {

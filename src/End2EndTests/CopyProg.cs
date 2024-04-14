@@ -1,6 +1,4 @@
-﻿using ABulkCopy.Cmd.Internal;
-
-namespace End2EndTests;
+﻿namespace CrossRDBMS.Tests;
 
 public class CopyProg
 {

@@ -1,7 +1,4 @@
-using ABulkCopy.Cmd.Internal;
-using ABulkCopy.Common.Identifier;
-
-namespace End2EndTests;
+namespace CrossRDBMS.Tests;
 
 [Collection(nameof(DatabaseCollection))]
 public class CopyFromMssToPg : End2EndBase, IDisposable
