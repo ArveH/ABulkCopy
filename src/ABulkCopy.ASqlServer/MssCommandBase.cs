@@ -50,4 +50,14 @@ public class MssCommandBase
             }
         }
     }
+
+    public async Task ExecuteNonQueryAsync(
+        string sqlString,
+        CancellationToken ct)
+    {
+        await using var sqlConnection = new SqlConnection(_dbContext.ConnectionString);
+        await sqlConnection.OpenAsync(ct);
+        await using var sqlCommand = new SqlCommand(sqlString, sqlConnection);
+        await sqlCommand.ExecuteNonQueryAsync(ct);
+    }
 }
