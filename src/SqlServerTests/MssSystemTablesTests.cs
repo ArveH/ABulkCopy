@@ -151,10 +151,7 @@ public class MssSystemTablesTests : MssTestBase
     {
         // Arrange
         var tableName = GetName();
-        await DbFixture.DropTable(tableName);
-        await DbFixture.ExecuteNonQuery(
-            $"CREATE TABLE [dbo].[{tableName}](\r\n\t[Id] [bigint] IDENTITY(1,1) NOT NULL,\r\n\t[ExactNumBigInt] [bigint] NOT NULL,\r\n\t[ExactNumInt] [int] NOT NULL,\r\n\t[ExactNumSmallInt] [smallint] NOT NULL,\r\n\t[ExactNumTinyInt] [tinyint] NOT NULL,\r\n\t[ExactNumBit] [bit] NOT NULL,\r\n\t[ExactNumMoney] [money] NOT NULL,\r\n\t[ExactNumSmallMoney] [smallmoney] NOT NULL,\r\n\t[ExactNumDecimal] [decimal](28, 3) NOT NULL,\r\n\t[ExactNumNumeric] [numeric](28, 3) NOT NULL,\r\n\t[ApproxNumFloat] [float] NOT NULL,\r\n\t[ApproxNumReal] [real] NOT NULL,\r\n\t[DTDate] [date] NOT NULL,\r\n\t[DTDateTime] [datetime] NOT NULL,\r\n\t[DTDateTime2] [datetime2](7) NOT NULL,\r\n\t[DTSmallDateTime] [smalldatetime] NOT NULL,\r\n\t[DTDateTimeOffset] [datetimeoffset](7) NOT NULL,\r\n\t[DTTime] [time](7) NOT NULL,\r\n\t[CharStrChar20] [char](20) NULL,\r\n\t[CharStrVarchar20] [varchar](20) NULL,\r\n\t[CharStrVarchar10K] [varchar](max) NULL,\r\n\t[CharStrNChar20] [nchar](20) NULL,\r\n\t[CharStrNVarchar20] [nvarchar](20) NULL,\r\n\t[CharStrNVarchar10K] [nvarchar](max) NULL,\r\n\t[BinBinary5K] [binary](5000) NULL,\r\n\t[BinVarbinary10K] [varbinary](max) NULL,\r\n\t[OtherGuid] [uniqueidentifier] NOT NULL,\r\n\t[OtherXml] [xml] NULL,\r\n CONSTRAINT [PK_AllTypes] PRIMARY KEY CLUSTERED \r\n(\r\n\t[Id] ASC\r\n))");
-
+        await CreateTableWithDefaultValuesAsync(tableName);
         var tableHeader = await MssSystemTables.GetTableHeaderAsync(tableName, _cts.Token);
         tableHeader.Should().NotBeNull();
 
@@ -275,6 +272,22 @@ public class MssSystemTablesTests : MssTestBase
             await DbFixture.DropTable(parent2Table);
         }
     }
+
+    private async Task CreateTableWithDefaultValuesAsync(string tableName)
+    {
+        await DbFixture.DropTable(tableName);
+        await DbFixture.ExecuteNonQuery("DROP DEFAULT IF EXISTS df_num_default;");
+        await DbFixture.ExecuteNonQuery("CREATE DEFAULT df_num_default AS 0;");
+        await DbFixture.ExecuteNonQuery(
+            $"CREATE TABLE {tableName}(\r\n" +
+            $"  id INTEGER,\r\n" +
+            $"  int1 INT NOT NULL DEFAULT 0,\r\n" +
+            $"  int2 INT NOT NULL CONSTRAINT df_bulkcopy_int DEFAULT 0,\r\n" +
+            $"  int3 INT NOT NULL,\r\n" +
+            $"  date1 DATETIME2 NOT NULL DEFAULT GETDATE());");
+        await DbFixture.ExecuteNonQuery($"exec sp_bindefault 'df_num_default', '{tableName}.int3'");
+
+    }   
 
     private static void VerifyForeignKey(
         ForeignKey foreignKey, 

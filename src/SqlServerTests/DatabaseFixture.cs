@@ -79,8 +79,7 @@ public class DatabaseFixture : IAsyncLifetime
 
     public async Task DropTable(string tableName)
     {
-        var sqlString = $"if exists (select name from sys.objects where type='U' and name='{tableName}') drop table [{tableName}];";
-        await ExecuteNonQuery(sqlString);
+        await ExecuteNonQuery($"DROP TABLE IF EXISTS [{tableName}];");
     }
 
     public async Task InsertIntoSingleColumnTable(
