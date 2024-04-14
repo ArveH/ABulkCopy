@@ -1,7 +1,7 @@
 namespace CrossRDBMS.Tests;
 
 [Collection(nameof(DatabaseCollection))]
-public class CopyFromMssToPg : End2EndBase
+public class CopyFromMssToPg : TestBase
 {
     private readonly DatabaseFixture _fixture;
     private readonly ITestOutputHelper _output;
