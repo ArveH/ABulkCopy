@@ -12,10 +12,6 @@ on:
 env:
   slnFile: 'src/ABulkCopy.sln'
   consoleProjFile: 'src/ABulkCopy.Cmd/ABulkCopy.Cmd.csproj'
-  commonTest: 'src/Common.Test/Common.Test.csproj'
-  asqlserverTest: 'src/ASqlServer.Test/ASqlServer.Test.csproj'
-  apostgresTest: 'src/APostgres.Test/APostgres.Test.csproj'
-  aparserTest: 'src/AParser.Test/AParser.Test.csproj'
 
 jobs:
   build:
@@ -67,12 +63,8 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: tests
-        path: |
-          ./src/AParser.Test/bin/Debug/net8.0
-          ./src/APostgres.Test/bin/Debug/net8.0
-          ./src/ASqlServer.Test/bin/Debug/net8.0
-          ./src/Common.Test/bin/Debug/net8.0
-          ./src/End2EndTests/bin/Debug/net8.0 
+        path: ./src/**/*.Tests
+          
   test:
     name: Test
     runs-on: ubuntu-latest
@@ -89,17 +81,26 @@ jobs:
     - name: Display structure of artifact files
       run: ls -R
   
-    - name: Test AParser
-      run: dotnet test ./AParser.Test/bin/Debug/net8.0/AParser.Test.dll -v m
+    - name: UnitTest AParser
+      run: dotnet test ./AParser.Tests/bin/Debug/net8.0/AParser.Tests.dll -v m
     
-    - name: Test Common
-      run: dotnet test ./Common.Test/bin/Debug/net8.0/Common.Test.dll -v m 
+    - name: UnitTest Common
+      run: dotnet test ./Common.Tests/bin/Debug/net8.0/Common.Tests.dll -v m 
 
-    - name: Test ASqlServer
-      run: dotnet test ./ASqlServer.Test/bin/Debug/net8.0/ASqlServer.Test.dll -v m -e AppSettings__ConnectionString="${{secrets.MSS_ABULKCOPY_TEST_CONNECTIONSTRING}}"
+    - name: UnitTest ASqlServer
+      run: dotnet test ./ASqlServer.Tests/bin/Debug/net8.0/ASqlServer.Tests.dll -v m
 
-    - name: SqlServer to Postgres end-to-end tests
-      run: dotnet test ./End2EndTests/bin/Debug/net8.0/End2EndTests.dll -v m
+    - name: UnitTest APostgres
+      run: dotnet test ./APostgres.Tests/bin/Debug/net8.0/APostgres.Tests.dll -v m
+
+    - name: DbTest SqlServer
+      run: dotnet test ./SqlServer.Tests/bin/Debug/net8.0/SqlServer.Tests.dll -v m
+
+    - name: DbTest Postgres
+      run: dotnet test ./Postgres.Tests/bin/Debug/net8.0/Postgres.Tests.dll -v m
+
+    - name: DbTests CrossRDBMS
+      run: dotnet test ./CrossRDBMS/bin/Debug/net8.0/CrossRDBMS.dll -v m
 
   release:
     if: github.event_name == 'workflow_dispatch'
