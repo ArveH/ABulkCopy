@@ -100,7 +100,7 @@ jobs:
       run: dotnet test ./Postgres.Tests/bin/Debug/net8.0/Postgres.Tests.dll -v m
 
     - name: DbTests CrossRDBMS
-      run: dotnet test ./CrossRDBMS.Tests/bin/Debug/net8.0/CrossRDBMS.dll -v m
+      run: dotnet test ./CrossRDBMS.Tests/bin/Debug/net8.0/CrossRDBMS.Tests.dll -v m
 
   release:
     if: github.event_name == 'workflow_dispatch'
