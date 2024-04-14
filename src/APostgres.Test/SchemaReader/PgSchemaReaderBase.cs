@@ -1,4 +1,4 @@
-﻿namespace APostgres.Test.SchemaReader;
+﻿namespace APostgres.Tests.SchemaReader;
 
 public class PgSchemaReaderBase : PgTestBase
 {

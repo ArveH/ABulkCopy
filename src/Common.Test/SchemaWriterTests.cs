@@ -1,4 +1,4 @@
-namespace Common.Test;
+namespace Common.Tests;
 
 public class SchemaWriterTests
 {

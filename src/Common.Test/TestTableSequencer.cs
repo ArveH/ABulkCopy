@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using ABulkCopy.Common.Graph.Visitors;
 
-namespace Common.Test;
+namespace Common.Tests;
 
 public class TestTableSequencer : CommonTestBase
 {

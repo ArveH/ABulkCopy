@@ -1,4 +1,4 @@
-﻿namespace AParser.Test;
+﻿namespace AParser.Tests;
 
 public class PgParserTests : ParserTestBase
 {

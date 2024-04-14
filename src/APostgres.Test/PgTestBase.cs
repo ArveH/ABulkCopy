@@ -1,4 +1,4 @@
-﻿namespace APostgres.Test;
+﻿namespace APostgres.Tests;
 
 public class PgTestBase
 {

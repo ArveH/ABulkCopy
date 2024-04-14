@@ -1,4 +1,4 @@
-namespace ASqlServer.Test;
+namespace ASqlServer.Tests;
 
 public class MssSchemaWriterTests
 {
