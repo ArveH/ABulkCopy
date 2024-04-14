@@ -2,16 +2,15 @@
 
 public class DatabaseFixture : IAsyncLifetime
 {
-    private readonly MsSqlContainer _mssContainer =
-        new MsSqlBuilder().Build();
+    private MsSqlContainer? _mssContainer;
     private readonly IParseTree _parseTree = new ParseTree(new NodeFactory(), new SqlTypes());
     private readonly IPgParser _parser = new PgParser();
     private readonly ITokenizerFactory _tokenizerFactory = new TokenizerFactory(new TokenFactory());
     private IDbContext? _mssDbContext;
     private IConfiguration? _testConfiguration;
+    private string? _connectionString;
 
-    public string MssConnectionString => _mssContainer.GetConnectionString();
-    public string MssContainerId => $"{_mssContainer.Id}";
+    public string MssConnectionString => _connectionString ?? throw new ArgumentNullException(nameof(MssConnectionString));
 
     public IDbContext MssDbContext
     {
@@ -27,13 +26,22 @@ public class DatabaseFixture : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        await _mssContainer.StartAsync();
         TestConfiguration = new ConfigHelper().GetConfiguration(
-            "5a78c96d-6df9-4362-ba25-4afceae69c52",
-            new()
-            {
-                { Constants.Config.ConnectionString, MssConnectionString }
-            });
+            "5a78c96d-6df9-4362-ba25-4afceae69c52");
+        if (TestConfiguration.UseContainer())
+        {
+            _mssContainer = new MsSqlBuilder().Build();
+            await _mssContainer.StartAsync();
+            TestConfiguration = new ConfigHelper().GetConfiguration(
+                    "5a78c96d-6df9-4362-ba25-4afceae69c52", 
+                    new()
+                    {
+                        {"ConnectionStrings:" + Constants.Config.MssConnectionString, 
+                            _mssContainer.GetConnectionString()}
+                    });
+        }
+        _connectionString = TestConfiguration.GetConnectionString(Constants.Config.MssConnectionString);
+
         MssDbContext = new MssContext(TestConfiguration);
     }
 
@@ -157,6 +165,9 @@ public class DatabaseFixture : IAsyncLifetime
 
     public async Task DisposeAsync()
     {
-        await _mssContainer.DisposeAsync();
+        if (_mssContainer != null)
+        {
+            await _mssContainer.DisposeAsync();
+        }
     }
 }

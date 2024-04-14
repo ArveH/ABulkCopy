@@ -1,6 +1,6 @@
 ﻿namespace CrossRDBMS.Tests;
 
-public class End2EndBase
+public class TestBase
 {
     protected string GetName(string prefix = "")
     {

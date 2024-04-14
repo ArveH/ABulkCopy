@@ -4,21 +4,21 @@ namespace Postgres.Tests;
 
 public class DatabaseFixture : IAsyncLifetime
 {
-    private readonly PostgreSqlContainer _pgContainer =
-        new PostgreSqlBuilder()
-            .WithPortBinding(54771, 5432)
-            .Build();
+    private PostgreSqlContainer? _pgContainer;
     private IPgContext? _pgContext;
     private readonly IParseTree _parseTree = new ParseTree(new NodeFactory(), new SqlTypes());
     private readonly IPgParser _parser = new PgParser();
     private readonly ITokenizerFactory _tokenizerFactory = new TokenizerFactory(new TokenFactory());
     private IConfiguration? _configuration;
+    private string? _connectionString;
 
-    public string PgConnectionString => _pgContainer.GetConnectionString();
-    public string PgContainerId => _pgContainer.Id;
+    public string PgConnectionString => _connectionString ?? throw new ArgumentNullException(nameof(PgConnectionString));
 
-    public IConfiguration Configuration 
-        => _configuration ?? throw new ArgumentNullException(nameof(Configuration));
+    public IConfiguration Configuration
+    {
+        get => _configuration ?? throw new ArgumentNullException(nameof(Configuration));
+        set => _configuration = value;
+    }
 
     public IPgContext PgContext
     {
@@ -28,14 +28,32 @@ public class DatabaseFixture : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        await _pgContainer.StartAsync();
-        _configuration = new ConfigHelper().GetConfiguration(
+        Configuration = new ConfigHelper().GetConfiguration(
             "ed7ee99b-0e84-4e9a-9eb5-985d610aeb8b",
             new()
             {
-                { Constants.Config.ConnectionString, PgConnectionString },
-                { Constants.Config.AddQuotes, "true" }
-        });
+                { Constants.Config.AddQuotes, "true" },
+                { Constants.Config.UseContainer, "true" }
+            });
+        if (Configuration.UseContainer())
+        {
+            _pgContainer = new PostgreSqlBuilder()
+                .WithPortBinding(54771, 5432)
+                .Build();
+            await _pgContainer.StartAsync();
+            // We need to create the configuration again, after we get the connection string from the container
+            Configuration = new ConfigHelper().GetConfiguration(
+                "ed7ee99b-0e84-4e9a-9eb5-985d610aeb8b",
+                new()
+                {
+                    {
+                        "ConnectionStrings:" + Constants.Config.PgConnectionString,
+                        _pgContainer.GetConnectionString()
+                    },
+                    { Constants.Config.AddQuotes, "true" }
+                });
+        }
+        _connectionString = Configuration.GetConnectionString(Constants.Config.PgConnectionString);
         PgContext = new PgContext(new NullLoggerFactory(), Configuration);
     }
 
@@ -148,9 +166,13 @@ public class DatabaseFixture : IAsyncLifetime
         return identifier;
     }
 
+
     public async Task DisposeAsync()
     {
-        await _pgContainer.DisposeAsync();
+        if (_pgContainer != null)
+        {
+            await _pgContainer.DisposeAsync();
+        }
         _pgContext?.Dispose();
     }
 }

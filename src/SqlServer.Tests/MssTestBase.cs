@@ -20,7 +20,7 @@ public abstract class MssTestBase
 
     private IMssSystemTables CreateMssSystemTables()
     {
-        var connectionString = DbFixture.TestConfiguration.Check(TestConstants.Config.ConnectionString);
+        var connectionString = DbFixture.TestConfiguration.GetConnectionString(Constants.Config.MssConnectionString);
         connectionString.Should()
             .NotBeNullOrWhiteSpace("because the connection string should be set");
         IMssColumnFactory colFactory = new MssColumnFactory();

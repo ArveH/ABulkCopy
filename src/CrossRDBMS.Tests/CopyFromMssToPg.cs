@@ -1,13 +1,13 @@
 namespace CrossRDBMS.Tests;
 
 [Collection(nameof(DatabaseCollection))]
-public class CopyFromMssToPg : End2EndBase, IDisposable
+public class CopyFromMssToPg : TestBase
 {
     private readonly DatabaseFixture _fixture;
     private readonly ITestOutputHelper _output;
     private IIdentifier? _identifier;
 
-    public CopyFromMssToPg(DatabaseFixture fixture, ITestOutputHelper output)
+    public CopyFromMssToPg(DatabaseFixture fixture, ITestOutputHelper output) 
     {
         _fixture = fixture;
         _output = output;
@@ -67,7 +67,7 @@ public class CopyFromMssToPg : End2EndBase, IDisposable
 
         try
         {
-            await using var cmd = _fixture.PgDataSource.CreateCommand(sqlString);
+            await using var cmd = _fixture.PgContext.DataSource.CreateCommand(sqlString);
             var reader = await cmd.ExecuteReaderAsync();
             var foundColumn = await reader.ReadAsync();
             foundColumn.Should().BeTrue($"because column '{tableName}.col1' should exist");
@@ -123,6 +123,4 @@ public class CopyFromMssToPg : End2EndBase, IDisposable
         File.Delete(tableName + ".schema");
         File.Delete(tableName + ".data");
     }
-
-    public void Dispose() => _output.WriteLine(_fixture.MssContainerId);
 }

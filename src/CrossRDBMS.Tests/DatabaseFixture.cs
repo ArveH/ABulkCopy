@@ -1,36 +1,84 @@
-﻿namespace CrossRDBMS.Tests;
+﻿using Microsoft.Extensions.Logging.Abstractions;
+
+namespace CrossRDBMS.Tests;
 
 public class DatabaseFixture : IAsyncLifetime
 {
-    private readonly MsSqlContainer _mssContainer =
-        new MsSqlBuilder().Build();
-    private readonly PostgreSqlContainer _pgContainer =
-        new PostgreSqlBuilder()
-            .WithPortBinding(54770, 5432)
-            .Build();
-    private NpgsqlDataSource? _pgDataSource;
+    private MsSqlContainer? _mssContainer;
+    private PostgreSqlContainer? _pgContainer;
+    private IDbContext? _mssContext;
+    private IPgContext? _pgContext;
+    private IConfiguration? _testConfiguration;
+    private string? _pgConnectionString;
+    private string? _mssConnectionString;
 
-    public string MssConnectionString => _mssContainer.GetConnectionString();
-    public string PgConnectionString => _pgContainer.GetConnectionString();
-    public string MssContainerId => $"{_mssContainer.Id}";
-    public string PgContainerId => $"{_pgContainer.Id}";
-    public NpgsqlDataSource PgDataSource => _pgDataSource ?? throw new ArgumentNullException(nameof(PgDataSource));
+    public string MssConnectionString =>
+        _mssConnectionString ?? throw new ArgumentNullException(nameof(MssConnectionString));
+
+    public string PgConnectionString =>
+        _pgConnectionString ?? throw new ArgumentNullException(nameof(PgConnectionString));
+
+    public IConfiguration TestConfiguration
+    {
+        get => _testConfiguration ?? throw new ArgumentNullException(nameof(TestConfiguration));
+        set => _testConfiguration = value;
+    }
+
+    public IDbContext MssContext
+    {
+        get => _mssContext ?? throw new ArgumentNullException(nameof(MssContext));
+        set => _mssContext = value;
+    }
+
+    public IPgContext PgContext
+    {
+        get => _pgContext ?? throw new ArgumentNullException(nameof(PgContext));
+        private set => _pgContext = value;
+    }
 
     public async Task InitializeAsync()
     {
-        await _mssContainer.StartAsync();
-        await _pgContainer.StartAsync();
-
-        _pgDataSource = new NpgsqlDataSourceBuilder(PgConnectionString).Build();
+        TestConfiguration = new ConfigHelper().GetConfiguration(
+            "4c4ed632-229d-49da-88b9-454aa5a4a83c");
+        if (TestConfiguration.UseContainer())
+        {
+            _mssContainer =
+                new MsSqlBuilder().Build();
+            _pgContainer =
+                new PostgreSqlBuilder()
+                    .WithPortBinding(54770, 5432)
+                    .Build();
+            await _mssContainer.StartAsync();
+            await _pgContainer.StartAsync();
+            TestConfiguration = new ConfigHelper().GetConfiguration(
+                "4c4ed632-229d-49da-88b9-454aa5a4a83c",
+                new()
+                {
+                    {
+                        "ConnectionStrings:" + Constants.Config.MssConnectionString, _mssContainer.GetConnectionString()
+                    },
+                    {
+                        "ConnectionStrings:" + Constants.Config.PgConnectionString, _pgContainer.GetConnectionString()
+                    }
+                });
+        }
+        _mssConnectionString = TestConfiguration.GetConnectionString(Constants.Config.MssConnectionString);
+        _pgConnectionString = TestConfiguration.GetConnectionString(Constants.Config.PgConnectionString);
+        PgContext = new PgContext(new NullLoggerFactory(), TestConfiguration);
+        MssContext = new MssContext(TestConfiguration);
     }
 
     public async Task DisposeAsync()
     {
-        await _mssContainer.DisposeAsync();
-        await _pgContainer.DisposeAsync();
-        if (_pgDataSource != null)
+        if (_mssContainer != null)
         {
-            await _pgDataSource.DisposeAsync();
+            await _mssContainer.DisposeAsync();
         }
+
+        if (_pgContainer != null)
+        {
+            await _pgContainer.DisposeAsync();
+        }
+        _pgContext?.Dispose();
     }
 }
