@@ -29,18 +29,33 @@ public class CmdArguments
     public Dictionary<string, string?> ToAppSettings()
     {
         var appSettings = new Dictionary<string, string?>();
-        if (!string.IsNullOrWhiteSpace(ConnectionString)) 
-            appSettings.Add(Constants.Config.ConnectionString, ConnectionString);
-        if (!string.IsNullOrWhiteSpace(ConnectionString)) 
+        if (!string.IsNullOrWhiteSpace(ConnectionString))
+        {
+            if (Rdbms == Rdbms.Mss)
+            {
+                appSettings.Add("ConnectionStrings:" + Constants.Config.MssConnectionString, ConnectionString);
+            }
+            else if (Rdbms == Rdbms.Pg)
+            {
+                appSettings.Add("ConnectionStrings:" + Constants.Config.PgConnectionString, ConnectionString);
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(Folder))
+        {
             appSettings.Add(Constants.Config.Folder, Folder);
-        if (!string.IsNullOrWhiteSpace(ConnectionString)) 
+        }
+
+        if (!string.IsNullOrWhiteSpace(LogFile))
+        {
             appSettings.Add(Constants.Config.LogFile, LogFile);
-        if (!string.IsNullOrWhiteSpace(ConnectionString)) 
-            appSettings.Add(Constants.Config.AddQuotes, AddQuotes.ToString());
-        if (!string.IsNullOrWhiteSpace(ConnectionString)) 
+        }
+        appSettings.Add(Constants.Config.AddQuotes, AddQuotes.ToString());
+        if (!string.IsNullOrWhiteSpace(SearchFilter))
+        {
             appSettings.Add(Constants.Config.SearchFilter, SearchFilter);
-        if (!string.IsNullOrWhiteSpace(ConnectionString)) 
-            appSettings.Add(Constants.Config.EmptyString, EmptyString.ToString());
+        }
+        appSettings.Add(Constants.Config.EmptyString, EmptyString.ToString());
 
         return appSettings;
     }

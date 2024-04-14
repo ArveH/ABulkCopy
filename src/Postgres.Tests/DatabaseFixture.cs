@@ -33,7 +33,7 @@ public class DatabaseFixture : IAsyncLifetime
             "ed7ee99b-0e84-4e9a-9eb5-985d610aeb8b",
             new()
             {
-                { Constants.Config.ConnectionString, PgConnectionString },
+                { Constants.Config.PgConnectionString, PgConnectionString },
                 { Constants.Config.AddQuotes, "true" }
         });
         PgContext = new PgContext(new NullLoggerFactory(), Configuration);

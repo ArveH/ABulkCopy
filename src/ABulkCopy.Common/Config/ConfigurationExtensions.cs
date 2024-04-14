@@ -24,6 +24,17 @@ public static class ConfigurationExtensions
         return val;
     }
 
+    public static bool IsTrue(this IConfiguration config, string key)
+    {
+        var val = config[key];
+        if (string.IsNullOrWhiteSpace(val))
+        {
+            return false;
+        }
+
+        return bool.TryParse(val, out var flag) && flag;
+    }
+
     public static EmptyStringFlag ToEnum(this IConfiguration config, string key)
     {
         var val = config[key];
