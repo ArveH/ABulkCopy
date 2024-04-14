@@ -1,6 +1,6 @@
 using ForeignKey = ABulkCopy.Common.Types.Table.ForeignKey;
 
-namespace SqlServerTests;
+namespace SqlServer.Tests;
 
 [Collection(nameof(DatabaseCollection))]
 public class MssSystemTablesTests : MssTestBase

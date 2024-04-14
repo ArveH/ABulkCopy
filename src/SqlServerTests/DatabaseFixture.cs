@@ -1,10 +1,4 @@
-﻿using AParser.Parsers.Pg;
-using AParser.Tree;
-using AParser;
-using System.Data.SqlClient;
-using System.Text;
-
-namespace SqlServerTests;
+﻿namespace SqlServer.Tests;
 
 public class DatabaseFixture : IAsyncLifetime
 {

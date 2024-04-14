@@ -1,4 +1,4 @@
-﻿namespace SqlServerTests;
+﻿namespace SqlServer.Tests;
 
 [Collection(nameof(DatabaseCollection))]
 public class MssDataWriterTestsForStrings : MssDataWriterTestBase

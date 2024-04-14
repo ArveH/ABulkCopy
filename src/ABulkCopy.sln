@@ -33,7 +33,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DbTests", "DbTests", "{7E42
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PostgresTests", "PostgresTests\PostgresTests.csproj", "{643272F9-9523-45B9-808F-9B25D2682438}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SqlServerTests", "SqlServerTests\SqlServerTests.csproj", "{1C64630C-E6D2-4A96-B89A-FB72803841DA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SqlServer.Tests", "SqlServerTests\SqlServer.Tests.csproj", "{1C64630C-E6D2-4A96-B89A-FB72803841DA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{007FA46D-3BE5-4B08-AEE2-55B975C9C076}"
 EndProject

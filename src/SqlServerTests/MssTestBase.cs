@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace SqlServerTests;
+﻿namespace SqlServer.Tests;
 
 public abstract class MssTestBase
 {

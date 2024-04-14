@@ -1,4 +1,4 @@
-﻿namespace SqlServerTests;
+﻿namespace SqlServer.Tests;
 
 public class TableReaderFactoryForTest : ITableReaderFactory
 {
