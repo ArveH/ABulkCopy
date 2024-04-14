@@ -28,22 +28,19 @@ public class DatabaseFixture : IAsyncLifetime
     {
         TestConfiguration = new ConfigHelper().GetConfiguration(
             "5a78c96d-6df9-4362-ba25-4afceae69c52");
-        if (TestConfiguration.IsTrue(Constants.Config.UseContainer))
+        if (TestConfiguration.UseContainer())
         {
             _mssContainer = new MsSqlBuilder().Build();
             await _mssContainer.StartAsync();
-            _connectionString = _mssContainer.GetConnectionString();
             TestConfiguration = new ConfigHelper().GetConfiguration(
                     "5a78c96d-6df9-4362-ba25-4afceae69c52", 
                     new()
                     {
-                        {"ConnectionStrings:" + Constants.Config.MssConnectionString, _connectionString}
+                        {"ConnectionStrings:" + Constants.Config.MssConnectionString, 
+                            _mssContainer.GetConnectionString()}
                     });
         }
-        else
-        {
-            _connectionString = TestConfiguration.GetConnectionString(Constants.Config.MssConnectionString);
-        }
+        _connectionString = TestConfiguration.GetConnectionString(Constants.Config.MssConnectionString);
 
         MssDbContext = new MssContext(TestConfiguration);
     }

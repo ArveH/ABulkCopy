@@ -24,15 +24,15 @@ public static class ConfigurationExtensions
         return val;
     }
 
-    public static bool IsTrue(this IConfiguration config, string key)
+    public static bool UseContainer(this IConfiguration config)
     {
-        var val = config[key];
+        var val = config[Constants.Config.UseContainer];
         if (string.IsNullOrWhiteSpace(val))
         {
-            return false;
+            return true;
         }
 
-        return bool.TryParse(val, out var flag) && flag;
+        return !bool.TryParse(val, out var flag) || flag;
     }
 
     public static EmptyStringFlag ToEnum(this IConfiguration config, string key)
