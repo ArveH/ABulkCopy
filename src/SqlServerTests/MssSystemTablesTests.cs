@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using ForeignKey = ABulkCopy.Common.Types.Table.ForeignKey;
 
 namespace SqlServerTests;
@@ -287,11 +286,11 @@ public class MssSystemTablesTests : MssTestBase
             $"  date1 DATETIME2 NOT NULL DEFAULT GETDATE());");
         await DbFixture.ExecuteNonQuery($"exec sp_bindefault 'df_num_default', '{tableName}.int3'");
 
-    }   
+    }
 
     private static void VerifyForeignKey(
-        ForeignKey foreignKey, 
-        string childTable, 
+        ForeignKey foreignKey,
+        string childTable,
         string parentTable,
         string fkColName)
     {

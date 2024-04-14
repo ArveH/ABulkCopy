@@ -61,7 +61,6 @@ public class PgDataReaderDateTimeTests : PgDataReaderTestBase
     public async Task? TestTime_When_FractionsRounded()
     {
         // Arrange
-        var testVal = new TimeOnly(11, 12, 13, 456, 789);
         var col = new PostgresTime(1, ColName, false, 2);
         var colValue = await TestDataReader<TimeOnly>(
             GetName(), col, "11:12:13.456789,");

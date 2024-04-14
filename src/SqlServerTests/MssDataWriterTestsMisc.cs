@@ -1,4 +1,5 @@
-﻿namespace SqlServerTests;
+﻿// ReSharper disable PossiblyMistakenUseOfInterpolatedStringInsert
+namespace SqlServerTests;
 
 [Collection(nameof(DatabaseCollection))]
 public class MssDataWriterTestsMisc : MssDataWriterTestBase

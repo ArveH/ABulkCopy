@@ -28,10 +28,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Using Include="Xunit" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\ABulkCopy.APostgres\ABulkCopy.APostgres.csproj" />
     <ProjectReference Include="..\ABulkCopy.Common\ABulkCopy.Common.csproj" />
     <ProjectReference Include="..\Testing.Shared\Testing.Shared.csproj" />

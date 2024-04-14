@@ -28,7 +28,7 @@ public class PgSchemaReaderBase : PgTestBase
             FileHelper.DataFolder, TableName, cts.Token).ConfigureAwait(false);
 
         tableDefinition.Should().NotBeNull();
-        tableDefinition!.Header.Name.Should().Be(TableName);
+        tableDefinition.Header.Name.Should().Be(TableName);
         tableDefinition.Columns.Should().HaveCount(1);
         tableDefinition.Columns[0].Should().NotBeNull("because we should be able to cast to the correct type");
         return tableDefinition.Columns[0];

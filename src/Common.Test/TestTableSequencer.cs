@@ -134,7 +134,7 @@ public class TableHolder : INode
     public int SimulatedCopyTime { get; set; }
 
     public string Name { get; }
-    public TableDefinition? TableDefinition => throw new NotImplementedException();
+    public TableDefinition TableDefinition => throw new NotImplementedException();
     public bool IsRoot => Name == "root";
     public bool IsIndependent => Parents.Count == 0;
     public Dictionary<string, INode> Parents { get; } = new();

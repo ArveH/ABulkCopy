@@ -49,7 +49,7 @@ public class PgSchemaReaderMiscTests : PgSchemaReaderBase
             FileHelper.DataFolder, TableName, cts.Token);
 
         tableDefinition.Should().NotBeNull("because tableDefinition should not be null");
-        tableDefinition!.Header.Name.Should().Be(TableName);
+        tableDefinition.Header.Name.Should().Be(TableName);
         tableDefinition.Columns.Should().HaveCount(1);
         tableDefinition.Columns[0].Should().NotBeNull("because we should have a column");
         tableDefinition.Columns[0].Identity.Should().BeEquivalentTo(identityCol.Identity);

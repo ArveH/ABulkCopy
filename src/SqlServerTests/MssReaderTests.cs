@@ -1,13 +1,11 @@
-﻿using System.Data;
-
-namespace SqlServerTests;
+﻿namespace SqlServerTests;
 
 [Collection(nameof(DatabaseCollection))]
 public class MssReaderTests : MssTestBase
 {
     private readonly ILogger _output;
 
-    public MssReaderTests(DatabaseFixture dbFixture, ITestOutputHelper output) 
+    public MssReaderTests(DatabaseFixture dbFixture, ITestOutputHelper output)
         : base(dbFixture, output)
     {
         _output = new LoggerConfiguration()

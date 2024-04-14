@@ -38,6 +38,7 @@ public class PgDataReaderOtherTypesTests : PgDataReaderTestBase
         // Arrange
         var tableName = GetName();
         var col = new PostgresByteA(1, ColName, true);
+        // ReSharper disable once PossiblyMistakenUseOfInterpolatedStringInsert
         var blobFileName = $"i{0:D15}.raw";
         var blobFilePath = Path.Combine(
             FileHelper.DataFolder, tableName, ColName, blobFileName);
