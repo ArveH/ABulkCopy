@@ -6,37 +6,33 @@ public class MssTestGetTableNamesMultipleSchemas(
     : MssTestGetTableNamesBase(dbFixture, output)
 {
     [Fact]
-    public async Task TestGetTableNames_When_NotExists()
+    public async Task TestGetTableNames_When_SameTableInDifferentSchemas()
     {
         var guid = Guid.NewGuid().ToString("N");
-        await TestGetTableNamesAsync(guid, "does_not_exist", 0);
-    }
+        try
+        {
+            // Arrange
+            var testTableName = "T_" + guid + "1";
+            await CreateTable(DatabaseFixture.TestSchemaName, testTableName);
+            await CreateTable("dbo", testTableName);
+            await CreateTable("dbo", "T_ExtraTable");
 
-    [Fact]
-    public async Task TestGetTableNames_When_ExactName()
-    {
-        var guid = Guid.NewGuid().ToString("N");
-        await TestGetTableNamesAsync(guid, "T_" + guid + "1", 1);
-    }
+            // Act
+            var tableNames = await MssSystemTables.GetTableNamesAsync(testTableName, CancellationToken.None);
 
-    [Fact]
-    public async Task TestGetTableNames_When_AllUpperCase()
-    {
-        var guid = Guid.NewGuid().ToString("N");
-        await TestGetTableNamesAsync(guid, "T_" + guid.ToUpper() + "1", 1);
-    }
-
-    [Fact]
-    public async Task TestGetTableNames_When_EndIsWild()
-    {
-        var guid = Guid.NewGuid().ToString("N");
-        await TestGetTableNamesAsync(guid, "T_" + guid.ToUpper() + "%", 3);
-    }
-
-    [Fact]
-    public async Task TestGetTableNames_When_StartAndEndIsWild()
-    {
-        var guid = Guid.NewGuid().ToString("N");
-        await TestGetTableNamesAsync(guid, "%" + guid + "%", 3);
+            // Assert
+            var tableList = tableNames.ToList();
+            tableList.Count().Should().Be(2);
+            tableList[0].Should().Be("dbo." + testTableName);
+            tableList[1].Should().Be($"{DatabaseFixture.TestSchemaName}." + testTableName);
+        }
+        finally
+        {
+            await DbFixture.DropTable(DatabaseFixture.TestSchemaName, "T_" + guid + "1");
+            await DbFixture.DropTable("dbo", "T_" + guid + "1");
+            await DbFixture.DropTable("dbo", "T_" + guid + "2");
+            await DbFixture.DropTable("dbo", "T_" + guid + "3");
+            await DbFixture.DropTable("dbo", "T_MyNewData");
+        }
     }
 }

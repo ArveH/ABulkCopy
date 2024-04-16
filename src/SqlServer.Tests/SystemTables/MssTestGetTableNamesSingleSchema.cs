@@ -39,4 +39,30 @@ public class MssTestGetTableNamesSingleSchema(
         var guid = Guid.NewGuid().ToString("N");
         await TestGetTableNamesAsync(guid, "%" + guid + "%", 3);
     }
+
+    protected async Task TestGetTableNamesAsync(
+        string guid, string searchString, int expectedCount)
+    {
+        try
+        {
+            // Arrange
+            await CreateTable("T_" + guid + "1");
+            await CreateTable("T_" + guid + "2");
+            await CreateTable("T_" + guid + "3");
+            await CreateTable("T_MyNewData");
+
+            // Act
+            var tableNames = await MssSystemTables.GetTableNamesAsync(searchString, CancellationToken.None);
+
+            // Assert
+            tableNames.Count().Should().Be(expectedCount);
+        }
+        finally
+        {
+            await DbFixture.DropTable("T_" + guid + "1");
+            await DbFixture.DropTable("T_" + guid + "2");
+            await DbFixture.DropTable("T_" + guid + "3");
+            await DbFixture.DropTable("T_MyNewData");
+        }
+    }
 }

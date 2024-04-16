@@ -10,6 +10,8 @@ public class DatabaseFixture : IAsyncLifetime
     private IConfiguration? _testConfiguration;
     private string? _connectionString;
 
+    public const string TestSchemaName = "test_schema";
+
     public string MssConnectionString => _connectionString ?? throw new ArgumentNullException(nameof(MssConnectionString));
 
     public IDbContext MssDbContext
@@ -43,12 +45,22 @@ public class DatabaseFixture : IAsyncLifetime
         _connectionString = TestConfiguration.GetConnectionString(Constants.Config.MssConnectionString);
 
         MssDbContext = new MssContext(TestConfiguration);
+        await OneTimeSetupAsync();
+    }
+
+    private async Task OneTimeSetupAsync()
+    {
+        var schemaExists = await ExecuteScalarAsync<int>($"select count(*) from sys.schemas where name = '{TestSchemaName}'");
+        if (schemaExists == 0)
+        {
+            await ExecuteNonQuery($"CREATE SCHEMA {TestSchemaName}");
+        }
     }
 
     public async Task CreateTable(TableDefinition tableDefinition)
     {
         var sb = new StringBuilder();
-        sb.AppendLine($"create table [{tableDefinition.Header.Name}] (");
+        sb.AppendLine($"create table [{tableDefinition.Header.Schema}].[{tableDefinition.Header.Name}] (");
         var first = true;
         foreach (var column in tableDefinition.Columns)
         {
@@ -81,7 +93,12 @@ public class DatabaseFixture : IAsyncLifetime
 
     public async Task DropTable(string tableName)
     {
-        await ExecuteNonQuery($"DROP TABLE IF EXISTS [{tableName}];");
+        await DropTable("dbo", tableName);
+    }
+
+    public async Task DropTable(string schema, string tableName)
+    {
+        await ExecuteNonQuery($"DROP TABLE IF EXISTS [{schema}].[{tableName}];");
     }
 
     public async Task InsertIntoSingleColumnTable(
@@ -161,6 +178,14 @@ public class DatabaseFixture : IAsyncLifetime
         await sqlConnection.OpenAsync();
         await using var sqlCommand = new SqlCommand(sqlString, sqlConnection);
         await sqlCommand.ExecuteNonQueryAsync();
+    }
+
+    public async Task<T?> ExecuteScalarAsync<T>(string sqlString)
+    {
+        await using var sqlConnection = new SqlConnection(MssConnectionString);
+        await sqlConnection.OpenAsync();
+        await using var sqlCommand = new SqlCommand(sqlString, sqlConnection);
+        return (T?)await sqlCommand.ExecuteScalarAsync();
     }
 
     public async Task DisposeAsync()
