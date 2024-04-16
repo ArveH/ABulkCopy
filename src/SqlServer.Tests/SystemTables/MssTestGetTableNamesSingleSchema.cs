@@ -46,10 +46,10 @@ public class MssTestGetTableNamesSingleSchema(
         try
         {
             // Arrange
-            await CreateTable("T_" + guid + "1");
-            await CreateTable("T_" + guid + "2");
-            await CreateTable("T_" + guid + "3");
-            await CreateTable("T_MyNewData");
+            await CreateTableAsync("T_" + guid + "1");
+            await CreateTableAsync("T_" + guid + "2");
+            await CreateTableAsync("T_" + guid + "3");
+            await CreateTableAsync("T_MyNewData");
 
             // Act
             var tableNames = await MssSystemTables.GetTableNamesAsync(searchString, CancellationToken.None);

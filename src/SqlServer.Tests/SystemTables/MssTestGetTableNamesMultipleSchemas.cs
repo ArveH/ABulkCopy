@@ -13,9 +13,9 @@ public class MssTestGetTableNamesMultipleSchemas(
         {
             // Arrange
             var testTableName = "T_" + guid + "1";
-            await CreateTable(DatabaseFixture.TestSchemaName, testTableName);
-            await CreateTable("dbo", testTableName);
-            await CreateTable("dbo", "T_ExtraTable");
+            await CreateTableAsync(DatabaseFixture.TestSchemaName, testTableName);
+            await CreateTableAsync("dbo", testTableName);
+            await CreateTableAsync("dbo", "T_ExtraTable");
 
             // Act
             var tableNames = await MssSystemTables.GetTableNamesAsync(testTableName, CancellationToken.None);

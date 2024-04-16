@@ -4,12 +4,12 @@ public class MssTestGetTableNamesBase(
     DatabaseFixture dbFixture, ITestOutputHelper output)
     : MssTestBase(dbFixture, output)
 {
-    protected async Task CreateTable(string tableName)
+    protected async Task CreateTableAsync(string tableName)
     {
-        await CreateTable("dbo", tableName);
+        await CreateTableAsync("dbo", tableName);
     }
 
-    protected async Task CreateTable(string schema, string tableName)
+    protected async Task CreateTableAsync(string schema, string tableName)
     {
         await DbFixture.DropTable(schema, tableName);
         await DbFixture.ExecuteNonQuery(

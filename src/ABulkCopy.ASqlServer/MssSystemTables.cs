@@ -24,7 +24,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
             _logger.Information("Reading all tables");
 
             command =
-                new SqlCommand("SELECT name FROM sys.tables WITH(NOLOCK)\r\n" +
+                new SqlCommand("SELECT SCHEMA_NAME(schema_id) + '.' + name FROM sys.tables WITH(NOLOCK)\r\n" +
                                " WHERE object_id not in (\r\n" +
                                "   SELECT major_id\r\n" +
                                "     FROM sys.extended_properties WITH(NOLOCK)\r\n" +
@@ -40,7 +40,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
             _logger.Information("Reading tables where search string is '{searchString}'", searchString);
 
             command =
-                new SqlCommand("SELECT name FROM sys.tables WITH(NOLOCK)\r\n" +
+                new SqlCommand("SELECT SCHEMA_NAME(schema_id) + '.' + name FROM sys.tables WITH(NOLOCK)\r\n" +
                                " WHERE object_id not in (\r\n" +
                                "   SELECT major_id\r\n" +
                                "     FROM sys.extended_properties WITH(NOLOCK)\r\n" +
@@ -65,7 +65,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
     }
 
     public async Task<TableHeader?> GetTableHeaderAsync(
-        string tableName, CancellationToken ct)
+        string schemaName, string tableName, CancellationToken ct)
     {
         var command =
             new SqlCommand("SELECT o.object_id AS id, " +

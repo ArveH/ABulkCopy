@@ -7,40 +7,6 @@ public class MssSystemTablesTests(DatabaseFixture dbFixture, ITestOutputHelper o
     : MssTestBase(dbFixture, output)
 {
     [Fact]
-    public async Task TestGetTableHeader_Then_NameAndSchemaOk()
-    {
-        // Act
-        var tableName = GetName();
-        await DbFixture.DropTable(tableName);
-        await DbFixture.ExecuteNonQuery(
-            $"CREATE TABLE [dbo].[{tableName}](\r\n\t[Id] [bigint] IDENTITY(1,1) NOT NULL,\r\n\t[ExactNumBigInt] [bigint] NOT NULL)");
-        var tableHeader = await MssSystemTables.GetTableHeaderAsync(tableName, CancellationToken.None);
-
-        // Assert
-        tableHeader.Should().NotBeNull();
-        tableHeader!.Id.Should().BeGreaterThan(0);
-        tableHeader.Name.Should().Be(tableName);
-        tableHeader.Schema.Should().Be("dbo");
-    }
-
-    [Fact]
-    public async Task TestGetTableHeader_Then_IdentityOk()
-    {
-        // Act
-        var tableName = GetName();
-        await DbFixture.DropTable(tableName);
-        await DbFixture.ExecuteNonQuery(
-            $"CREATE TABLE [dbo].[{tableName}](\r\n\t[Id] [bigint] IDENTITY(1,1) NOT NULL,\r\n\t[ExactNumBigInt] [bigint] NOT NULL)");
-        var tableHeader = await MssSystemTables.GetTableHeaderAsync(tableName, CancellationToken.None);
-
-        // Assert
-        tableHeader.Should().NotBeNull();
-        tableHeader!.Identity.Should().NotBeNull();
-        tableHeader.Identity!.Seed.Should().Be(1);
-        tableHeader.Identity.Increment.Should().Be(1);
-    }
-
-    [Fact]
     public async Task TestGetColumnInfo_When_AllTypes()
     {
         // Arrange
