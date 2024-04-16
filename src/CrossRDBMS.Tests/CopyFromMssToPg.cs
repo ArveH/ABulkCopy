@@ -19,6 +19,7 @@ public class CopyFromMssToPg : TestBase
         // Arrange
         var tableName = GetName(nameof(CopyFromMssToPg));
         DeleteFiles(tableName);
+        await DropTableAsync(tableName);
         await CreateTableAsync(tableName, "int");
         var mssServices = CopyProg.GetServices(
             CopyDirection.Out, Rdbms.Mss, _fixture.MssConnectionString, tableName);
@@ -39,6 +40,15 @@ public class CopyFromMssToPg : TestBase
         var dataFile = await File.ReadAllTextAsync(tableName + ".data");
         dataFile.Should().NotBeNull("because the data file should exist");
         await ValidateTypeInfoAsync(tableName, "integer", null, 32, 0);
+    }
+
+    private async Task DropTableAsync(string tableName)
+    {
+        await using var conn = new SqlConnection(_fixture.MssConnectionString);
+        await using var cmd = conn.CreateCommand();
+        cmd.CommandText = $"DROP TABLE IF EXISTS {tableName}";
+        await conn.OpenAsync();
+        await cmd.ExecuteNonQueryAsync();
     }
 
     private async Task CreateTableAsync(string tableName, string colType)
