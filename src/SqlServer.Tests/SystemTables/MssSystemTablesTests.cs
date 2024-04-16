@@ -1,84 +1,11 @@
 using ForeignKey = ABulkCopy.Common.Types.Table.ForeignKey;
 
-namespace SqlServer.Tests;
+namespace SqlServer.Tests.SystemTables;
 
 [Collection(nameof(DatabaseCollection))]
-public class MssSystemTablesTests : MssTestBase
+public class MssSystemTablesTests(DatabaseFixture dbFixture, ITestOutputHelper output) 
+    : MssTestBase(dbFixture, output)
 {
-    private CancellationTokenSource _cts = new();
-
-    public MssSystemTablesTests(DatabaseFixture dbFixture, ITestOutputHelper output)
-        : base(dbFixture, output)
-    {
-    }
-
-    [Fact]
-    public async Task TestGetTableNames_When_NotExists()
-    {
-        var guid = Guid.NewGuid().ToString("N");
-        await TestGetTableNamesAsync(guid, "does_not_exist", 0);
-    }
-
-    [Fact]
-    public async Task TestGetTableNames_When_ExactName()
-    {
-        var guid = Guid.NewGuid().ToString("N");
-        await TestGetTableNamesAsync(guid, "T_" + guid + "1", 1);
-    }
-
-    [Fact]
-    public async Task TestGetTableNames_When_AllUpperCase()
-    {
-        var guid = Guid.NewGuid().ToString("N");
-        await TestGetTableNamesAsync(guid, "T_" + guid.ToUpper() + "1", 1);
-    }
-
-    [Fact]
-    public async Task TestGetTableNames_When_EndIsWild()
-    {
-        var guid = Guid.NewGuid().ToString("N");
-        await TestGetTableNamesAsync(guid, "T_" + guid.ToUpper() + "%", 3);
-    }
-
-    [Fact]
-    public async Task TestGetTableNames_When_StartAndEndIsWild()
-    {
-        var guid = Guid.NewGuid().ToString("N");
-        await TestGetTableNamesAsync(guid, "%" + guid + "%", 3);
-    }
-
-    private async Task TestGetTableNamesAsync(string guid, string searchString, int expectedCount)
-    {
-        try
-        {
-            // Arrange
-            await CreateTable_For_TestGetTableNames("T_" + guid + "1");
-            await CreateTable_For_TestGetTableNames("T_" + guid + "2");
-            await CreateTable_For_TestGetTableNames("T_" + guid + "3");
-            await CreateTable_For_TestGetTableNames("T_MyNewData");
-
-            // Act
-            var tableNames = await MssSystemTables.GetTableNamesAsync(searchString, _cts.Token);
-
-            // Assert
-            tableNames.Count().Should().Be(expectedCount);
-        }
-        finally
-        {
-            await DbFixture.DropTable("T_" + guid + "1");
-            await DbFixture.DropTable("T_" + guid + "2");
-            await DbFixture.DropTable("T_" + guid + "3");
-            await DbFixture.DropTable("T_MyNewData");
-        }
-    }
-
-    private async Task CreateTable_For_TestGetTableNames(string tableName)
-    {
-        await DbFixture.DropTable(tableName);
-        await DbFixture.ExecuteNonQuery(
-            $"CREATE TABLE [dbo].[{tableName}](\r\n\t[ExactNumBigInt] [bigint] NOT NULL)");
-    }
-
     [Fact]
     public async Task TestGetTableHeader_Then_NameAndSchemaOk()
     {
@@ -87,7 +14,7 @@ public class MssSystemTablesTests : MssTestBase
         await DbFixture.DropTable(tableName);
         await DbFixture.ExecuteNonQuery(
             $"CREATE TABLE [dbo].[{tableName}](\r\n\t[Id] [bigint] IDENTITY(1,1) NOT NULL,\r\n\t[ExactNumBigInt] [bigint] NOT NULL)");
-        var tableHeader = await MssSystemTables.GetTableHeaderAsync(tableName, _cts.Token);
+        var tableHeader = await MssSystemTables.GetTableHeaderAsync(tableName, CancellationToken.None);
 
         // Assert
         tableHeader.Should().NotBeNull();
@@ -104,7 +31,7 @@ public class MssSystemTablesTests : MssTestBase
         await DbFixture.DropTable(tableName);
         await DbFixture.ExecuteNonQuery(
             $"CREATE TABLE [dbo].[{tableName}](\r\n\t[Id] [bigint] IDENTITY(1,1) NOT NULL,\r\n\t[ExactNumBigInt] [bigint] NOT NULL)");
-        var tableHeader = await MssSystemTables.GetTableHeaderAsync(tableName, _cts.Token);
+        var tableHeader = await MssSystemTables.GetTableHeaderAsync(tableName, CancellationToken.None);
 
         // Assert
         tableHeader.Should().NotBeNull();
@@ -121,11 +48,11 @@ public class MssSystemTablesTests : MssTestBase
         await DbFixture.DropTable(tableName);
         await DbFixture.ExecuteNonQuery(
             $"CREATE TABLE [dbo].[{tableName}](\r\n\t[Id] [bigint] IDENTITY(1,1) NOT NULL,\r\n\t[ExactNumBigInt] [bigint] NOT NULL,\r\n\t[ExactNumInt] [int] NOT NULL,\r\n\t[ExactNumSmallInt] [smallint] NOT NULL,\r\n\t[ExactNumTinyInt] [tinyint] NOT NULL,\r\n\t[ExactNumBit] [bit] NOT NULL,\r\n\t[ExactNumMoney] [money] NOT NULL,\r\n\t[ExactNumSmallMoney] [smallmoney] NOT NULL,\r\n\t[ExactNumDecimal] [decimal](28, 3) NOT NULL,\r\n\t[ExactNumNumeric] [numeric](28, 3) NOT NULL,\r\n\t[ApproxNumFloat] [float] NOT NULL,\r\n\t[ApproxNumReal] [real] NOT NULL,\r\n\t[DTDate] [date] NOT NULL,\r\n\t[DTDateTime] [datetime] NOT NULL,\r\n\t[DTDateTime2] [datetime2](7) NOT NULL,\r\n\t[DTSmallDateTime] [smalldatetime] NOT NULL,\r\n\t[DTDateTimeOffset] [datetimeoffset](7) NOT NULL,\r\n\t[DTTime] [time](7) NOT NULL,\r\n\t[CharStrChar20] [char](20) NULL,\r\n\t[CharStrVarchar20] [varchar](20) NULL,\r\n\t[CharStrVarchar10K] [varchar](max) NULL,\r\n\t[CharStrNChar20] [nchar](20) NULL,\r\n\t[CharStrNVarchar20] [nvarchar](20) NULL,\r\n\t[CharStrNVarchar10K] [nvarchar](max) NULL,\r\n\t[BinBinary5K] [binary](5000) NULL,\r\n\t[BinVarbinary10K] [varbinary](max) NULL,\r\n\t[OtherGuid] [uniqueidentifier] NOT NULL,\r\n\t[OtherXml] [xml] NULL,\r\n CONSTRAINT [PK_{tableName}] PRIMARY KEY CLUSTERED \r\n(\r\n\t[Id] ASC\r\n))");
-        var tableHeader = await MssSystemTables.GetTableHeaderAsync(tableName, _cts.Token);
+        var tableHeader = await MssSystemTables.GetTableHeaderAsync(tableName, CancellationToken.None);
         tableHeader.Should().NotBeNull();
 
         // Act
-        var columnInfo = (await MssSystemTables.GetTableColumnInfoAsync(tableHeader!, _cts.Token)).ToList();
+        var columnInfo = (await MssSystemTables.GetTableColumnInfoAsync(tableHeader!, CancellationToken.None)).ToList();
 
         // Assert
         columnInfo.Should().NotBeNull();
@@ -151,11 +78,11 @@ public class MssSystemTablesTests : MssTestBase
         // Arrange
         var tableName = GetName();
         await CreateTableWithDefaultValuesAsync(tableName);
-        var tableHeader = await MssSystemTables.GetTableHeaderAsync(tableName, _cts.Token);
+        var tableHeader = await MssSystemTables.GetTableHeaderAsync(tableName, CancellationToken.None);
         tableHeader.Should().NotBeNull();
 
         // Act
-        var columnInfo = (await MssSystemTables.GetTableColumnInfoAsync(tableHeader!, _cts.Token)).ToList();
+        var columnInfo = (await MssSystemTables.GetTableColumnInfoAsync(tableHeader!, CancellationToken.None)).ToList();
 
         // Assert
         columnInfo.Should().NotBeNull("because ColumnInfo shouldn't be null");
@@ -186,11 +113,11 @@ public class MssSystemTablesTests : MssTestBase
         await DbFixture.DropTable(tableName);
         await DbFixture.ExecuteNonQuery($"CREATE TABLE [{tableName}]([Key1] int NOT NULL, [Key2] int NOT NULL, [AnotherCol] nvarchar(20), \r\nCONSTRAINT [PK_{tableName}] PRIMARY KEY CLUSTERED \r\n(\r\n\t[Key1] ASC,\r\n\t[Key2] ASC\r\n))");
 
-        var tableHeader = await MssSystemTables.GetTableHeaderAsync(tableName, _cts.Token);
+        var tableHeader = await MssSystemTables.GetTableHeaderAsync(tableName, CancellationToken.None);
         tableHeader.Should().NotBeNull();
 
         // Act
-        var pk = await MssSystemTables.GetPrimaryKeyAsync(tableHeader!, _cts.Token);
+        var pk = await MssSystemTables.GetPrimaryKeyAsync(tableHeader!, CancellationToken.None);
 
         // Assert
         pk.Should().NotBeNull();
@@ -209,11 +136,11 @@ public class MssSystemTablesTests : MssTestBase
         var tableName = GetName();
         await DbFixture.DropTable(tableName);
         await DbFixture.ExecuteNonQuery($"CREATE TABLE [{tableName}]([Key1] int NOT NULL, [Key2] int NOT NULL, [AnotherCol] nvarchar(20))");
-        var tableHeader = await MssSystemTables.GetTableHeaderAsync(tableName, _cts.Token);
+        var tableHeader = await MssSystemTables.GetTableHeaderAsync(tableName, CancellationToken.None);
         tableHeader.Should().NotBeNull();
 
         // Act
-        var pk = await MssSystemTables.GetPrimaryKeyAsync(tableHeader!, _cts.Token);
+        var pk = await MssSystemTables.GetPrimaryKeyAsync(tableHeader!, CancellationToken.None);
 
         // Assert
         pk.Should().BeNull($"because {tableName} doesn't have a primary key");
@@ -251,11 +178,11 @@ public class MssSystemTablesTests : MssTestBase
                 $"    FOREIGN KEY ([Parent2Id]) \r\n\t" +
                 $"    REFERENCES [{parent2Table}] ([Id]) " +
                 $"    ON DELETE CASCADE )");
-            var tableHeader = await MssSystemTables.GetTableHeaderAsync(childTable, _cts.Token);
+            var tableHeader = await MssSystemTables.GetTableHeaderAsync(childTable, CancellationToken.None);
             tableHeader.Should().NotBeNull();
 
             // Act
-            var fks = await MssSystemTables.GetForeignKeysAsync(tableHeader!, _cts.Token);
+            var fks = await MssSystemTables.GetForeignKeysAsync(tableHeader!, CancellationToken.None);
 
             // Assert
             var foreignKeys = fks.ToList();
