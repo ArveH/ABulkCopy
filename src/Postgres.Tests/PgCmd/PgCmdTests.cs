@@ -7,24 +7,29 @@ public class PgCmdTests(
 {
     private readonly Mock<IQueryBuilderFactory> _qbFactoryMock = new();
 
-    [Fact]
-    public async Task TestResetIdentityColumn()
+    [Theory]
+    [InlineData(20, 20)]
+    [InlineData(64, 20)]
+    [InlineData(20, 64)]
+    [InlineData(64, 64)]
+    public async Task TestResetIdentityColumn(int tableNameLength, int colNameLength)
     {
-        var tableName = "hlp".PadRight(63 - 3, 'z');
+        var tableName = "tbl".PadRight(tableNameLength - 3, 'z');
+        var colName = "col".PadRight(colNameLength - 3, 'z');
         try
         {
             // Arrange
             var pgCmd = GetPgCmd();
-            await CreateTableWithIdentityColumn(tableName, 100, 10);
+            await CreateTableWithIdentityColumn(tableName, colName, 100);
+            await DbFixture.ExecuteNonQuery($"insert into \"{tableName}\" (\"Name\") values ('Arve3')");
 
             // Act
-            await pgCmd.ResetIdentityAsync(tableName, "agrtid", CancellationToken.None);
+            await pgCmd.ResetIdentityAsync(tableName, colName, CancellationToken.None);
 
             // Assert
-            var identityValues = (await DbFixture.SelectColumn<long>(tableName, "agrtid")).ToList();
-            identityValues.Count.Should().Be(2);
-            identityValues[0].Should().Be(100);
-            identityValues[1].Should().Be(110);
+            var identityValues = (await DbFixture.SelectColumn<long>(tableName, colName)).ToList();
+            identityValues.Count.Should().Be(3);
+            identityValues.Should().Contain(120);
         }
         finally
         {
@@ -32,15 +37,16 @@ public class PgCmdTests(
         }
     }
 
-    private async Task CreateTableWithIdentityColumn(string tableName, int seed, int increment)
+    private async Task CreateTableWithIdentityColumn(
+        string tableName, string colName, int seed)
     {
         var inputDefinition = PgTestData.GetEmpty(tableName);
         inputDefinition.Header.Identity = new Identity
         {
-            Increment = increment,
+            Increment = 10,
             Seed = seed
         };
-        var identityCol = new PostgresBigInt(1, "agrtid", false)
+        var identityCol = new PostgresBigInt(1, colName, false)
         {
             Identity = inputDefinition.Header.Identity
         };
