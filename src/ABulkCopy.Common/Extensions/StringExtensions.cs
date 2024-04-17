@@ -21,6 +21,12 @@ public static class StringExtensions
         return Constants.Quote + str + Constants.Quote;
     }
 
+    public static string TrimSchema(this string str)
+    {
+        var parts = str.Split('.');
+        return parts.Length == 2 ? parts[1] : str;
+    }
+
     public static string TrimParentheses(this string str)
     {
         var offset = str.TakeWhile(c => c == '(').Count();

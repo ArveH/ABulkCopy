@@ -108,17 +108,39 @@ public class PgSystemTables : IPgSystemTables
     public async Task<uint?> GetIdentityOidAsync(
         string tableName, string columnName, CancellationToken ct)
     {
-        var seqName = $"{tableName}_{columnName}_seq";
-
+        var seqName = await GetOwnedSequenceNameAsync(tableName, columnName, ct).ConfigureAwait(false);
+        if (seqName == null)
+        {
+            return null;
+        }
         await using var cmd = _pgContext.DataSource.CreateCommand(
-            $"select oid from pg_class where relkind = 'S' and relname = '{_identifier.AdjustForSystemTable(seqName)}'");
+            $"select oid from pg_class where relkind = 'S' and " +
+            $"relname = '{_identifier.AdjustForSystemTable(seqName.TrimSchema())}'");
         var oid = await cmd.ExecuteScalarAsync(ct).ConfigureAwait(false);
         if (oid == null || oid == DBNull.Value)
         {
+            _logger.Error("Can't get oid for sequence '{SequenceName}'", seqName);
             return null;
         }
 
         return (uint?)oid;
+    }
+
+    public async Task<string?> GetOwnedSequenceNameAsync(
+        string tableName, string columnName, CancellationToken ct)
+    {
+        await using var cmd = _pgContext.DataSource.CreateCommand(
+            $"select pg_get_serial_sequence('{_identifier.AdjustForSystemTable(tableName)}', '{_identifier.AdjustForSystemTable(columnName)}')");
+
+        var seqName = await cmd.ExecuteScalarAsync(ct).ConfigureAwait(false);
+        if (seqName == null || seqName == DBNull.Value)
+        {
+            _logger.Error("Can't get sequence name for '{TableName}'.'{ColumnName}'",
+                tableName, columnName);
+            return null;
+        }
+
+        return (string?)seqName;
     }
 
     private async Task<List<(string child, string parent)>> GetForeignKeyColumnsAsync(

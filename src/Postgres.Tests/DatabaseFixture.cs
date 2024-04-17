@@ -32,8 +32,7 @@ public class DatabaseFixture : IAsyncLifetime
             "ed7ee99b-0e84-4e9a-9eb5-985d610aeb8b",
             new()
             {
-                { Constants.Config.AddQuotes, "true" },
-                { Constants.Config.UseContainer, "true" }
+                { Constants.Config.AddQuotes, "true" }
             });
         if (Configuration.UseContainer())
         {
