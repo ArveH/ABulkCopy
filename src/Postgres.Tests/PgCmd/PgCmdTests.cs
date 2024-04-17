@@ -1,14 +1,55 @@
 ﻿namespace Postgres.Tests.PgCmd;
 
 [Collection(nameof(DatabaseCollection))]
-public class PgCmdTests : PgTestBase
+public class PgCmdTests(
+    DatabaseFixture dbFixture, ITestOutputHelper output) 
+    : PgTestBase(dbFixture, output)
 {
     private readonly Mock<IQueryBuilderFactory> _qbFactoryMock = new();
-    private readonly Mock<IPgSystemTables> _systemTablesMock = new();
 
-    public PgCmdTests(DatabaseFixture dbFixture, ITestOutputHelper output) 
-        : base(dbFixture, output)
+    [Fact]
+    public async Task TestResetIdentityColumn()
     {
+        var tableName = "hlp".PadRight(63 - 3, 'z');
+        try
+        {
+            // Arrange
+            var pgCmd = GetPgCmd();
+            await CreateTableWithIdentityColumn(tableName, 100, 10);
+
+            // Act
+            await pgCmd.ResetIdentityAsync(tableName, "agrtid", CancellationToken.None);
+
+            // Assert
+            var identityValues = (await DbFixture.SelectColumn<long>(tableName, "agrtid")).ToList();
+            identityValues.Count.Should().Be(2);
+            identityValues[0].Should().Be(100);
+            identityValues[1].Should().Be(110);
+        }
+        finally
+        {
+            await DbFixture.DropTable(tableName);
+        }
+    }
+
+    private async Task CreateTableWithIdentityColumn(string tableName, int seed, int increment)
+    {
+        var inputDefinition = PgTestData.GetEmpty(tableName);
+        inputDefinition.Header.Identity = new Identity
+        {
+            Increment = increment,
+            Seed = seed
+        };
+        var identityCol = new PostgresBigInt(1, "agrtid", false)
+        {
+            Identity = inputDefinition.Header.Identity
+        };
+        inputDefinition.Columns.Add(identityCol);
+        inputDefinition.Columns.Add(new PostgresVarChar(2, "Name", true, 100));
+        await DbFixture.DropTable(tableName);
+        await DbFixture.CreateTable(inputDefinition);
+        await DbFixture.ExecuteNonQuery($"insert into \"{tableName}\" (\"Name\") values ('Arve1')");
+        await DbFixture.ExecuteNonQuery($"insert into \"{tableName}\" (\"Name\") values ('Arve2')");
     }
 
     [Fact]
@@ -370,7 +411,7 @@ public class PgCmdTests : PgTestBase
         return new ABulkCopy.APostgres.PgCmd(
             DbFixture.PgContext,
             _qbFactoryMock.Object,
-            _systemTablesMock.Object,
+            GetPgSystemTables(appSettings),
             TestLogger);
     }
 }
