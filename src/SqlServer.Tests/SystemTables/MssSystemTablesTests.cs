@@ -44,7 +44,8 @@ public class MssSystemTablesTests(DatabaseFixture dbFixture, ITestOutputHelper o
     {
         // Arrange
         var tableName = GetName();
-        await CreateTableWithDefaultValuesAsync(tableName);
+        var constraintName = "Def_" + tableName;
+        await CreateTableWithDefaultValuesAsync(tableName, constraintName);
         var tableHeader = await MssSystemTables.GetTableHeaderAsync(
             "dbo", tableName, CancellationToken.None);
         tableHeader.Should().NotBeNull();
@@ -64,7 +65,7 @@ public class MssSystemTablesTests(DatabaseFixture dbFixture, ITestOutputHelper o
         columnInfo[2].DefaultConstraint!.IsSystemNamed.Should().BeFalse();
         columnInfo[2].DefaultConstraint!.Definition.Should().Be("((0))");
         columnInfo[3].DefaultConstraint.Should().NotBeNull("because DefaultConstraint for third column shouldn't be null");
-        columnInfo[3].DefaultConstraint!.Name.Should().Be("df_num_default");
+        columnInfo[3].DefaultConstraint!.Name.Should().Be(constraintName);
         columnInfo[3].DefaultConstraint!.IsSystemNamed.Should().BeFalse();
         columnInfo[3].DefaultConstraint!.Definition.Should().StartWith("CREATE DEFAULT");
         columnInfo[4].DefaultConstraint.Should().NotBeNull("because DefaultConstraint for fourth column shouldn't be null");
@@ -170,11 +171,12 @@ public class MssSystemTablesTests(DatabaseFixture dbFixture, ITestOutputHelper o
         }
     }
 
-    private async Task CreateTableWithDefaultValuesAsync(string tableName)
+    private async Task CreateTableWithDefaultValuesAsync(
+        string tableName, string constraintName)
     {
         await DbFixture.DropTable(tableName);
-        await DbFixture.ExecuteNonQuery("DROP DEFAULT IF EXISTS df_num_default;");
-        await DbFixture.ExecuteNonQuery("CREATE DEFAULT df_num_default AS 0;");
+        await DbFixture.ExecuteNonQuery($"DROP DEFAULT IF EXISTS {constraintName};");
+        await DbFixture.ExecuteNonQuery($"CREATE DEFAULT {constraintName} AS 0;");
         await DbFixture.ExecuteNonQuery(
             $"CREATE TABLE {tableName}(\r\n" +
             $"  id INTEGER,\r\n" +
@@ -182,7 +184,7 @@ public class MssSystemTablesTests(DatabaseFixture dbFixture, ITestOutputHelper o
             $"  int2 INT NOT NULL CONSTRAINT df_bulkcopy_int DEFAULT 0,\r\n" +
             $"  int3 INT NOT NULL,\r\n" +
             $"  date1 DATETIME2 NOT NULL DEFAULT GETDATE());");
-        await DbFixture.ExecuteNonQuery($"exec sp_bindefault 'df_num_default', '{tableName}.int3'");
+        await DbFixture.ExecuteNonQuery($"exec sp_bindefault '{constraintName}', '{tableName}.int3'");
 
     }
 
