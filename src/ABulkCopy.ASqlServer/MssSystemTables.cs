@@ -124,7 +124,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
             return tableHeaders[0];
         }
 
-        _logger.Warning($"Table information for table '{tableName}' was not found");
+        _logger.Warning($"Table information for table '{tableName}' returned {tableHeaders.Count} rows");
         return null;
     }
 
