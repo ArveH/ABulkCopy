@@ -15,8 +15,8 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         _logger = logger.ForContext<MssSystemTables>();
     }
 
-    public async Task<IEnumerable<string>> GetTableNamesAsync(
-        string searchString, CancellationToken ct)
+    public async Task<IEnumerable<(string schemaName, string tableName)>> 
+        GetFullTableNamesAsync(string schemaNames, string searchString, CancellationToken ct)
     {
         SqlCommand? command;
         if (string.IsNullOrWhiteSpace(searchString))
@@ -24,44 +24,50 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
             _logger.Information("Reading all tables");
 
             command =
-                new SqlCommand("SELECT SCHEMA_NAME(schema_id) + '.' + name FROM sys.tables WITH(NOLOCK)\r\n" +
-                               " WHERE object_id not in (\r\n" +
+                new SqlCommand("SELECT s.name AS SchemaName, t.name AS TableName\r\n" +
+                               "FROM sys.tables t WITH(NOLOCK)\r\n" +
+                               "INNER JOIN sys.schemas s WITH(NOLOCK)\r\n" +
+                               "    ON t.schema_id = s.schema_id\r\n" +
+                               " WHERE t.object_id not in (\r\n" +
                                "   SELECT major_id\r\n" +
                                "     FROM sys.extended_properties WITH(NOLOCK)\r\n" +
                                "    WHERE minor_id = 0\r\n" +
                                "      AND class = 1\r\n" +
                                "      AND name = N'microsoft_database_tools_support')\r\n" +
-                               "   AND is_ms_shipped = 0\r\n" +
-                               "   AND schema_id not in (2, 3, 4, 5)\r\n" + // guest, information_schema, sys, logs
-                               "ORDER BY name");
+                               "   AND t.is_ms_shipped = 0 \r\n" +
+                               schemaNames.AddSchemaFilter() +
+                               "ORDER BY s.name, t.name");
         }
         else
         {
             _logger.Information("Reading tables where search string is '{searchString}'", searchString);
 
             command =
-                new SqlCommand("SELECT SCHEMA_NAME(schema_id) + '.' + name FROM sys.tables WITH(NOLOCK)\r\n" +
+                new SqlCommand("SELECT s.name AS SchemaName, t.name AS TableName\r\n" +
+                               "FROM sys.tables t WITH(NOLOCK)\r\n" +
+                               "INNER JOIN sys.schemas s WITH(NOLOCK)\r\n" +
+                               "    ON t.schema_id = s.schema_id\r\n" +
                                " WHERE object_id not in (\r\n" +
                                "   SELECT major_id\r\n" +
                                "     FROM sys.extended_properties WITH(NOLOCK)\r\n" +
                                "    WHERE minor_id = 0\r\n" +
                                "      AND class = 1\r\n" +
                                "      AND name = N'microsoft_database_tools_support')\r\n" +
-                               "   AND name LIKE @SearchString\r\n" +
-                               "   AND is_ms_shipped = 0\r\n" +
-                               "   AND schema_id not in (2, 3, 4, 5)\r\n" + // guest, information_schema, sys, logs
-                               "ORDER BY name");
+                               "   AND t.name LIKE @SearchString\r\n" +
+                               "   AND t.is_ms_shipped = 0\r\n" +
+                               schemaNames.AddSchemaFilter() +
+                               "ORDER BY s.name, t.name");
             command.Parameters.AddWithValue("@SearchString", searchString);
         }
 
-        var tableNames = new List<string>();
+        var fullNames = new List<(string, string)>();
         await ExecuteReaderAsync(command, reader =>
         {
-            tableNames.Add(reader.GetString(0));
+            fullNames.Add((reader.GetString(0), reader.GetString(1)));
         }, ct).ConfigureAwait(false);
 
-        _logger.Information("Found {numberOfTables} tables.", tableNames.Count);
-        return tableNames;
+        _logger.Information("Found {numberOfTables} tables.", fullNames.Count);
+        return fullNames;
     }
 
     public async Task<TableHeader?> GetTableHeaderAsync(

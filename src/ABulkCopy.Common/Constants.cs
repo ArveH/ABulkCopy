@@ -17,6 +17,7 @@ public static class Constants
         public const string Folder = "AppSettings:Folder";
         public const string LogFile = "AppSettings:LogFile";
         public const string AddQuotes = "AppSettings:AddQuotes";
+        public const string SchemaFilter = "AppSettings:SchemaFilter";
         public const string SearchFilter = "AppSettings:SearchFilter";
         public const string EmptyString = "AppSettings:EmptyString";
 

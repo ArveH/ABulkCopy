@@ -29,14 +29,21 @@ public class CopyOut : ICopyOut
     {
         var sw = new Stopwatch();
         sw.Start();
-        var tableNames = (await _systemTables.GetTableNamesAsync(_config.SafeGet(Constants.Config.SearchFilter), ct).ConfigureAwait(false)).ToList();
-        _logger.Information($"Copy out {{TableCount}} {"table".Plural(tableNames.Count)}",
-            tableNames.Count);
-        Console.WriteLine($"Copy out {tableNames.Count} {"table".Plural(tableNames.Count)}.");
+        var fullNames = (await _systemTables.GetFullTableNamesAsync(
+            _config.SafeGet(Constants.Config.SchemaFilter), 
+            _config.SafeGet(Constants.Config.SearchFilter), 
+            ct).ConfigureAwait(false)).ToList();
+        _logger.Information($"Copy out {{TableCount}} {"table".Plural(fullNames.Count)}",
+            fullNames.Count);
+        Console.WriteLine($"Copy out {fullNames.Count} {"table".Plural(fullNames.Count)}.");
         var errors = 0;
-        await Parallel.ForEachAsync(tableNames, ct, async (tableName, _) =>
+        await Parallel.ForEachAsync(fullNames, ct, async (fullName, _) =>
         {
-            if (!await CopyTableAsync(_config.Check(Constants.Config.Folder), tableName, ct).ConfigureAwait(false))
+            if (!await CopyTableAsync(
+                    _config.Check(Constants.Config.Folder), 
+                    fullName.schemaName,
+                    fullName.tableName, 
+                    ct).ConfigureAwait(false))
             {
                 Interlocked.Increment(ref errors);
             }
@@ -45,15 +52,15 @@ public class CopyOut : ICopyOut
 
         if (errors > 0)
         {
-            _logger.Warning($"Copy out {{TableCount}} {"table".Plural(tableNames.Count)} finished with {{Errors}} {"error".Plural(errors)}", 
-                tableNames.Count, errors);
-            Console.WriteLine($"Copy out {tableNames.Count} {"table".Plural(tableNames.Count)} finished with {errors} {"error".Plural(errors)}");
+            _logger.Warning($"Copy out {{TableCount}} {"table".Plural(fullNames.Count)} finished with {{Errors}} {"error".Plural(errors)}", 
+                fullNames.Count, errors);
+            Console.WriteLine($"Copy out {fullNames.Count} {"table".Plural(fullNames.Count)} finished with {errors} {"error".Plural(errors)}");
         }
         else
         {
-            _logger.Information($"Copy out {{TableCount}} {"table".Plural(tableNames.Count)} finished.", 
-                tableNames.Count);
-            Console.WriteLine($"Copy out {tableNames.Count} {"table".Plural(tableNames.Count)} finished.");
+            _logger.Information($"Copy out {{TableCount}} {"table".Plural(fullNames.Count)} finished.", 
+                fullNames.Count);
+            Console.WriteLine($"Copy out {fullNames.Count} {"table".Plural(fullNames.Count)} finished.");
         }
         _logger.Information("Copy took {Elapsed}", sw.Elapsed.ToString("g"));
         Console.WriteLine($"Copy took {sw.Elapsed:g}");

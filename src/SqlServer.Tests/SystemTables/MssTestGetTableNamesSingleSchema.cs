@@ -52,7 +52,10 @@ public class MssTestGetTableNamesSingleSchema(
             await CreateTableAsync("T_MyNewData");
 
             // Act
-            var tableNames = await MssSystemTables.GetTableNamesAsync(searchString, CancellationToken.None);
+            var tableNames = await MssSystemTables.GetFullTableNamesAsync(
+                "dbo",
+                searchString, 
+                CancellationToken.None);
 
             // Assert
             tableNames.Count().Should().Be(expectedCount);

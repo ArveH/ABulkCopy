@@ -1,4 +1,6 @@
-﻿namespace ABulkCopy.Common.Extensions;
+﻿using System.Collections.Generic;
+
+namespace ABulkCopy.Common.Extensions;
 
 public static class StringExtensions
 {
@@ -19,6 +21,13 @@ public static class StringExtensions
     public static string Quote(this string str)
     {
         return Constants.Quote + str + Constants.Quote;
+    }
+
+    public static string AddSchemaFilter(this string? str)
+    {
+        return string.IsNullOrWhiteSpace(str) 
+            ? "AND s.schema_id not in (2, 3, 4, 5)" // guest, information_schema, sys, logs
+            : "AND s.name in (" + string.Join(",", str.Split(',').Select(s => $"'{s}'")) + ")";
     }
 
     public static string TrimSchema(this string str)

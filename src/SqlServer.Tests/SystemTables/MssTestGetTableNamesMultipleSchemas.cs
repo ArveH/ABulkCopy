@@ -18,13 +18,16 @@ public class MssTestGetTableNamesMultipleSchemas(
             await CreateTableAsync("dbo", "T_ExtraTable");
 
             // Act
-            var tableNames = await MssSystemTables.GetTableNamesAsync(testTableName, CancellationToken.None);
+            var tableNames = await MssSystemTables.GetFullTableNamesAsync(
+                "", testTableName, CancellationToken.None);
 
             // Assert
             var tableList = tableNames.ToList();
             tableList.Count().Should().Be(2);
-            tableList[0].Should().Be("dbo." + testTableName);
-            tableList[1].Should().Be($"{DatabaseFixture.TestSchemaName}." + testTableName);
+            tableList[0].schemaName.Should().Be("dbo");
+            tableList[0].tableName.Should().Be(testTableName);
+            tableList[1].schemaName.Should().Be(DatabaseFixture.TestSchemaName);
+            tableList[1].tableName.Should().Be(testTableName);
         }
         finally
         {
