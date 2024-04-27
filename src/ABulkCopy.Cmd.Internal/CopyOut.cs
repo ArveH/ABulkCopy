@@ -59,12 +59,16 @@ public class CopyOut : ICopyOut
         Console.WriteLine($"Copy took {sw.Elapsed:g}");
     }
 
-    private async Task<bool> CopyTableAsync(string folder, string tableName, CancellationToken ct)
+    private async Task<bool> CopyTableAsync(
+        string folder, 
+        string schemaName,
+        string tableName, CancellationToken ct)
     {
         try
         {
             // TODO: CancellationToken
-            var tabDef = await _tableSchema.GetTableInfoAsync(tableName, ct).ConfigureAwait(false);
+            var tabDef = await _tableSchema.GetTableInfoAsync(schemaName, tableName, ct)
+                .ConfigureAwait(false);
             if (tabDef == null)
             {
                 _logger.Warning("Table {SearchString} not found", tableName);

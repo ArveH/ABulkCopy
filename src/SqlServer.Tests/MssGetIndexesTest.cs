@@ -80,7 +80,7 @@ public class MssGetIndexesTest : MssTestBase
         tableDef.Columns.Add(new SqlServerInt(2, "Col2", false));
         tableDef.Columns.Add(new SqlServerInt(3, "Col3", false));
         await DbFixture.CreateTable(tableDef);
-        return await MssSystemTables.GetTableHeaderAsync(_testTableName, _cts.Token);
+        return await MssSystemTables.GetTableHeaderAsync("dbo", _testTableName, _cts.Token);
     }
 
     private async Task CreateIndex(int tableId, List<IndexColumn> columns)

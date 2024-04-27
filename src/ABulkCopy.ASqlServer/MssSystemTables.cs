@@ -69,11 +69,13 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
     {
         var command =
             new SqlCommand("SELECT o.object_id AS id, " +
-                           "       OBJECT_SCHEMA_NAME(o.object_id) AS [schema], " +
+                           "       s.name AS [schema], " +
                            "       f.name AS segname,\r\n" +
                            "       IDENT_SEED(@TableName) AS seed,\r\n" +
                            "       IDENT_INCR(@TableName) AS increment " +
                            "FROM   sys.objects o WITH(NOLOCK)\r\n" +
+                           "INNER JOIN sys.schemas s WITH(NOLOCK)\r\n" +
+                           "    ON s.schema_id = o.schema_id\r\n" +
                            "INNER JOIN sys.indexes i WITH(NOLOCK)\r\n" +
                            "    ON i.object_id = o.object_id\r\n" +
                            "INNER JOIN sys.filegroups f WITH(NOLOCK)\r\n" +

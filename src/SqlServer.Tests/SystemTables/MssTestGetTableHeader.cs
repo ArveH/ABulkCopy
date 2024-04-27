@@ -6,13 +6,14 @@ public class MssTestGetTableHeader(
     : MssTestBase(dbFixture, output)
 {
     [Fact]
-    public async Task TestGetTableHeader_Then_NameAndSchemaDbo()
+    public async Task TestGetTableHeader_When_NameAndSchemaDbo()
     {
         // Act
         var tableName = GetName();
         var schemaName = "dbo";
         await CreateTableAsync(schemaName, tableName);
-        var tableHeader = await MssSystemTables.GetTableHeaderAsync(schemaName, tableName, CancellationToken.None);
+        var tableHeader = await MssSystemTables.GetTableHeaderAsync(
+            schemaName, tableName, CancellationToken.None);
 
         // Assert
         tableHeader.Should().NotBeNull();
@@ -22,13 +23,14 @@ public class MssTestGetTableHeader(
     }
 
     [Fact]
-    public async Task TestGetTableHeader_Then_NameAndTestSchema()
+    public async Task TestGetTableHeader_When_NameAndTestSchema()
     {
         // Act
         var schemaName = DatabaseFixture.TestSchemaName;
         var tableName = GetName();
         await CreateTableAsync(schemaName, tableName);
-        var tableHeader = await MssSystemTables.GetTableHeaderAsync(schemaName, tableName, CancellationToken.None);
+        var tableHeader = await MssSystemTables.GetTableHeaderAsync(
+            schemaName, tableName, CancellationToken.None);
 
         // Assert
         tableHeader.Should().NotBeNull();
@@ -38,7 +40,7 @@ public class MssTestGetTableHeader(
     }
 
     [Fact]
-    public async Task TestGetTableHeader_Then_IdentityOk()
+    public async Task TestGetTableHeader_When_IdentityOk()
     {
         // Act
         var schemaName = "dbo";

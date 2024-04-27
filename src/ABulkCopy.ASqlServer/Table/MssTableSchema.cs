@@ -14,12 +14,19 @@ public class MssTableSchema : IMssTableSchema
     }
 
     public async Task<TableDefinition?> GetTableInfoAsync(
-        string tableName, CancellationToken ct)
+        string schemaName, string tableName, CancellationToken ct)
     {
-        var tableHeader = await _systemTables.GetTableHeaderAsync(tableName, ct).ConfigureAwait(false);
+        if (schemaName == string.Empty)
+        {
+            schemaName = "dbo";
+        }
+
+        var tableHeader = await _systemTables.GetTableHeaderAsync(
+            schemaName, tableName, ct).ConfigureAwait(false);
         if (tableHeader == null)
         {
-            _logger.Warning("Table {TableName} not found", tableName);
+            _logger.Warning("Table {SchemaName}.{TableName} not found", 
+                schemaName, tableName);
             return null;
         }
         var columnInfo = await _systemTables.GetTableColumnInfoAsync(tableHeader, ct).ConfigureAwait(false);
