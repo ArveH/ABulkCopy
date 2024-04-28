@@ -2,7 +2,8 @@
 
 [Collection(nameof(DatabaseCollection))]
 public class MssTestGetTableNamesSingleSchema(
-    DatabaseFixture dbFixture, ITestOutputHelper output)
+    DatabaseFixture dbFixture,
+    ITestOutputHelper output)
     : MssTestGetTableNamesBase(dbFixture, output)
 {
     [Fact]
@@ -43,29 +44,21 @@ public class MssTestGetTableNamesSingleSchema(
     protected async Task TestGetTableNamesAsync(
         string guid, string searchString, int expectedCount)
     {
-        try
+        var testTables = new List<SchemaTableTuple>
         {
-            // Arrange
-            await CreateTableAsync("T_" + guid + "1");
-            await CreateTableAsync("T_" + guid + "2");
-            await CreateTableAsync("T_" + guid + "3");
-            await CreateTableAsync("T_MyNewData");
+            new("dbo", "T_" + guid + "1"),
+            new("dbo", "T_" + guid + "2"),
+            new("dbo", "T_" + guid + "3"),
+            new("dbo", "T_MyNewData")
+        };
 
-            // Act
-            var tableNames = await MssSystemTables.GetFullTableNamesAsync(
+        var tableNames = await CreateAndCleanupTablesAsync(testTables, async () =>
+            (await MssSystemTables.GetFullTableNamesAsync(
                 "dbo",
-                searchString, 
-                CancellationToken.None);
-
-            // Assert
-            tableNames.Count().Should().Be(expectedCount);
-        }
-        finally
-        {
-            await DbFixture.DropTable("T_" + guid + "1");
-            await DbFixture.DropTable("T_" + guid + "2");
-            await DbFixture.DropTable("T_" + guid + "3");
-            await DbFixture.DropTable("T_MyNewData");
-        }
+                searchString,
+                CancellationToken.None)).ToList());
+        
+        // Assert
+        tableNames.Count().Should().Be(expectedCount);
     }
 }

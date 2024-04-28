@@ -15,7 +15,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         _logger = logger.ForContext<MssSystemTables>();
     }
 
-    public async Task<IEnumerable<(string schemaName, string tableName)>> 
+    public async Task<IEnumerable<SchemaTableTuple>> 
         GetFullTableNamesAsync(string schemaNames, string searchString, CancellationToken ct)
     {
         SqlCommand? command;

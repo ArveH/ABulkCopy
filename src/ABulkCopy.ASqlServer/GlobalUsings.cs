@@ -15,3 +15,4 @@ global using Serilog;
 global using System.Data;
 global using System.Data.SqlClient;
 global using System.Globalization;
+global using SchemaTableTuple = (string schemaName, string tableName);

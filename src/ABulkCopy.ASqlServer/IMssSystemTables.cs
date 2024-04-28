@@ -2,7 +2,7 @@
 
 public interface IMssSystemTables
 {
-    Task<IEnumerable<(string schemaName, string tableName)>> GetFullTableNamesAsync(
+    Task<IEnumerable<SchemaTableTuple>> GetFullTableNamesAsync(
         string schemaNames, string searchString, CancellationToken ct);
     Task<TableHeader?> GetTableHeaderAsync(string schemaName, string tableName, CancellationToken ct);
     Task<IEnumerable<IColumn>> GetTableColumnInfoAsync(TableHeader tableHeader, CancellationToken ct);
