@@ -53,7 +53,7 @@ public class MssDataWriterTestsMisc : MssDataWriterTestBase
         // Assert
         var dataFile = await MockFileSystem.GetJsonDataText(TestPath, ("dbo", TestTableName));
         dataFile.TrimEnd().Should().Be("i000000000000000.raw,");
-        var fullPath = Path.Combine(TestPath, TestTableName, "MyTestCol", $"i{0:D15}.raw");
+        var fullPath = Path.Combine(TestPath, OriginalTableDefinition.GetFullName(), "MyTestCol", $"i{0:D15}.raw");
         MockFileSystem.FileExists(fullPath).Should().BeTrue($"because '{fullPath}' should exist");
         MockFileSystem.FileInfo.New(fullPath).Length.Should().Be(10000);
     }
@@ -86,7 +86,7 @@ public class MssDataWriterTestsMisc : MssDataWriterTestBase
         // Assert
         var dataFile = await MockFileSystem.GetJsonDataText(TestPath, ("dbo", TestTableName));
         dataFile.TrimEnd().Should().Be("i000000000000000.raw,");
-        var fullPath = Path.Combine(TestPath, TestTableName, "MyTestCol", $"i{0:D15}.raw");
+        var fullPath = Path.Combine(TestPath, OriginalTableDefinition.GetFullName(), "MyTestCol", $"i{0:D15}.raw");
         MockFileSystem.FileExists(fullPath).Should().BeTrue($"because '{fullPath}' should exist");
         MockFileSystem.FileInfo.New(fullPath).Length.Should().Be(10000);
     }
@@ -128,7 +128,7 @@ public class MssDataWriterTestsMisc : MssDataWriterTestBase
         dataFileLines[1].TrimEnd().Should().Be(",");
         dataFileLines[2].TrimEnd().Should().Be("i000000000000002.raw,");
 
-        var fullPath = Path.Combine(TestPath, TestTableName, "MyTestCol", $"i{0:D15}.raw");
+        var fullPath = Path.Combine(TestPath, OriginalTableDefinition.GetFullName(), "MyTestCol", $"i{0:D15}.raw");
         MockFileSystem.FileExists(fullPath).Should().BeTrue($"because '{fullPath}' should exist");
         MockFileSystem.FileInfo.New(fullPath).Length.Should().Be(10000);
     }
