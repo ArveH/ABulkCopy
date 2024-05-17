@@ -31,7 +31,7 @@ public class PgSchemaReaderMiscTests : PgSchemaReaderBase
     [Fact]
     public async Task ReadIdentityColumn()
     {
-        var inputDefinition = MssTestData.GetEmpty(TableName);
+        var inputDefinition = MssTestData.GetEmpty(("dbo", TableName));
         inputDefinition.Header.Identity = new Identity
         {
             Increment = 10,

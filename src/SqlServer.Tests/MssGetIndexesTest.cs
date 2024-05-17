@@ -75,7 +75,7 @@ public class MssGetIndexesTest : MssTestBase
 
     private async Task<TableHeader?> CreateTestTable()
     {
-        var tableDef = MssTestData.GetEmpty(_testTableName);
+        var tableDef = MssTestData.GetEmpty(("dbo", _testTableName));
         tableDef.Columns.Add(new SqlServerInt(1, "Col1", false));
         tableDef.Columns.Add(new SqlServerInt(2, "Col2", false));
         tableDef.Columns.Add(new SqlServerInt(3, "Col3", false));

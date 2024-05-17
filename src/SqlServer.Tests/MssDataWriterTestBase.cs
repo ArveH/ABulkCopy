@@ -12,7 +12,7 @@ public abstract class MssDataWriterTestBase : MssTestBase
         : base(dbFixture, output)
     {
         TestTableName = tableName;
-        OriginalTableDefinition = MssTestData.GetEmpty(tableName);
+        OriginalTableDefinition = MssTestData.GetEmpty(("dbo", tableName));
         MockFileSystem = new MockFileSystem();
         MockFileSystem.AddDirectory(TestPath);
         TestDataWriter = new DataWriter(

@@ -21,7 +21,7 @@ public class PgSchemaReaderBase : PgTestBase
 
     protected async Task<IColumn> GetColFromTableDefinition(IColumn col)
     {
-        FileHelper.CreateSingleColMssSchemaFile(TableName, col);
+        FileHelper.CreateSingleColMssSchemaFile(("dbo", TableName), col);
 
         var cts = new CancellationTokenSource();
         var tableDefinition = await SchemaReader.GetTableDefinitionAsync(

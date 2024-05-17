@@ -2,7 +2,7 @@
 
 public static class MssTestData
 {
-    public static TableDefinition GetEmpty(string name)
+    public static TableDefinition GetEmpty(SchemaTableTuple st)
     {
         return new TableDefinition(Rdbms.Mss)
         {
@@ -10,8 +10,8 @@ public static class MssTestData
             {
                 Id = 1,
                 Location = "default",
-                Name = name,
-                Schema = "dbo"
+                Name = st.tableName,
+                Schema = st.schemaName
             }
         };
     }

@@ -10,7 +10,7 @@ public class MssSchemaWriterTests
 
     public MssSchemaWriterTests()
     {
-        _originalTableDefinition = MssTestData.GetEmpty(TestTableName);
+        _originalTableDefinition = MssTestData.GetEmpty(("dbo", TestTableName));
         _mockFileSystem = new MockFileSystem();
         _mockFileSystem.AddDirectory(TestPath);
         _schemaWriter = new SchemaWriter(

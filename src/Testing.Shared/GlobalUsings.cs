@@ -24,3 +24,4 @@ global using System.Text.Encodings.Web;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using ABulkCopy.Common.Extensions;
+global using SchemaTableTuple = (string schemaName, string tableName);

@@ -314,7 +314,7 @@ public class DependencyGraphTests
         var tableDefinitions = new List<TableDefinition>();
         foreach (var name in names)
         {
-            var tabDef = MssTestData.GetEmpty(name);
+            var tabDef = MssTestData.GetEmpty(("dbo", name));
             tabDef.Columns.Add(new SqlServerBigInt(1, "Id", false));
             tableDefinitions.Add(tabDef);
         }

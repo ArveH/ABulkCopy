@@ -55,11 +55,11 @@ public class PgDataReaderTestBase : PgTestBase
         List<IColumn> cols, 
         List<string> fileData)
     {
-        var tableDefinition = MssTestData.GetEmpty(tableName);
+        var tableDefinition = MssTestData.GetEmpty(("dbo", tableName));
         cols.ForEach(tableDefinition.Columns.Add);
         await DbFixture.DropTable(tableName);
         await DbFixture.CreateTable(tableDefinition);
-        FileHelper.CreateDataFile(tableName, fileData);
+        FileHelper.CreateDataFile(("dbo", tableName), fileData);
         return tableDefinition;
     }
 }

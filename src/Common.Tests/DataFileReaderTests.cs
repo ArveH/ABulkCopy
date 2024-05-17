@@ -12,7 +12,7 @@ public class DataFileReaderTests : CommonTestBase
     public DataFileReaderTests(ITestOutputHelper output)
         : base(output)
     {
-        _tableDefinition = MssTestData.GetEmpty(TestTableName);
+        _tableDefinition = MssTestData.GetEmpty(("dbo", TestTableName));
         _fileHelper = new FileHelper();
     }
 
@@ -165,7 +165,7 @@ public class DataFileReaderTests : CommonTestBase
         {
             rows.Add(row2);
         }
-        _fileHelper.CreateDataFile(TestTableName, rows);
+        _fileHelper.CreateDataFile(("dbo", TestTableName), rows);
         var dataFileReader = new DataFileReader(_fileHelper.FileSystem, TestLogger);
         var path = Path.Combine(
             _fileHelper.DataFolder,
