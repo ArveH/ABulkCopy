@@ -64,6 +64,8 @@ public class DatabaseFixture : IAsyncLifetime
         var identifier = GetIdentifier(addQuote);
         sb.Append("create table ");
         if (addIfNotExists) sb.Append("if not exists ");
+        sb.Append(identifier.Get(tableDefinition.Header.Schema));
+        sb.Append(".");
         sb.Append(identifier.Get(tableDefinition.Header.Name));
         sb.AppendLine("(");
         var first = true;

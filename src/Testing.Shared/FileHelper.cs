@@ -27,7 +27,7 @@ public class FileHelper
 
         var fileData = new MockFileData(jsonText);
         FileSystem.AddFile(
-            Path.Combine(DataFolder, $"{tableDefinition.Header.Name}{Constants.SchemaSuffix}"),
+            Path.Combine(DataFolder, tableDefinition.GetSchemaFileName()),
             fileData);
     }
 

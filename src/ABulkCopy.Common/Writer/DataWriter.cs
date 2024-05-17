@@ -27,7 +27,7 @@ public class DataWriter : IDataWriter
         var tableReader = _tableReaderFactory.GetTableReader(_dbContext);
         AddDirectoriesForBlobs(tableDefinition, path);
         var fileFullPath = Path.Combine(
-            path, tableDefinition.Header.Name + Constants.DataSuffix);
+            path, tableDefinition.GetDataFileName());
         await using var streamWriter = _fileSystem.File.CreateText(fileFullPath);
         await tableReader.PrepareReaderAsync(tableDefinition, ct).ConfigureAwait(false);
         var rowCounter = 0;
@@ -56,7 +56,7 @@ public class DataWriter : IDataWriter
         {
             if (column.Type.IsRaw())
             {
-                var blobPath = Path.Combine(path, tableDefinition.Header.Name, column.Name);
+                var blobPath = Path.Combine(path, tableDefinition.GetFullName(), column.Name);
                 if (!_fileSystem.Directory.Exists(blobPath))
                 {
                     _logger.Information("Creating directory '{blobPath}' for blob column '{columnName}'",
@@ -89,7 +89,7 @@ public class DataWriter : IDataWriter
                     i,
                     Path.Combine(
                         path,
-                        tableDefinition.Header.Name,
+                        tableDefinition.GetFullName(),
                         tableDefinition.Columns[i].Name,
                         rawFileName)
                     ,

@@ -19,11 +19,13 @@ public class QueryBuilder : IQueryBuilder
     public void AppendLine(string str) => _sb.AppendLine(str);
     public override string ToString() => _sb.ToString();
 
-    public string CreateDropTableStmt(string tableName)
+    public string CreateDropTableStmt(SchemaTableTuple st)
     {
         _sb.Clear();
         _sb.Append("drop table if exists ");
-        AppendIdentifier(tableName);
+        AppendIdentifier(st.schemaName);
+        _sb.Append(".");
+        AppendIdentifier(st.tableName);
         _sb.Append(';');
         return _sb.ToString();
     }

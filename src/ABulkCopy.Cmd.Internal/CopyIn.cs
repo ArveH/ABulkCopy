@@ -116,14 +116,14 @@ public class CopyIn : ICopyIn
         {
             try
             {
-                await _pgCmd.DropTableAsync(tableDefinition.Header.Name, ct).ConfigureAwait(false);
+                await _pgCmd.DropTableAsync(tableDefinition.GetNameTuple(), ct).ConfigureAwait(false);
                 await _pgCmd.CreateTableAsync(tableDefinition, ct).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 _logger.Error(ex, "Couldn't create table '{TableName}'",
-                    tableDefinition.Header.Name);
-                Console.WriteLine($"Couldn't create table '{tableDefinition.Header.Name}'");
+                    tableDefinition.GetFullName());
+                Console.WriteLine($"Couldn't create table '{tableDefinition.GetFullName()}'");
                 return false;
             }
 
@@ -131,15 +131,15 @@ public class CopyIn : ICopyIn
             {
                 dataReader = _aDataReaderFactory.Get(tableDefinition.Rdbms);
                 var rows = await dataReader.ReadAsync(folder, tableDefinition, ct, emptyStringFlag).ConfigureAwait(false);
-                Console.WriteLine($"Read {rows} {"row".Plural(rows)} for table '{tableDefinition.Header.Name}'");
+                Console.WriteLine($"Read {rows} {"row".Plural(rows)} for table '{tableDefinition.GetFullName()}'");
                 _logger.Information($"Read {{Rows}} {"row".Plural(rows)} for table '{{TableName}}'",
-                    rows, tableDefinition.Header.Name);
+                    rows, tableDefinition.GetFullName());
             }
             catch (Exception ex)
             {
                 _logger.Error(ex, "Read data for table '{TableName}' failed",
-                    tableDefinition.Header.Name);
-                Console.WriteLine($"Read data for table '{tableDefinition.Header.Name}' failed");
+                    tableDefinition.GetFullName());
+                Console.WriteLine($"Read data for table '{tableDefinition.GetFullName()}' failed");
                 return false;
             }
 
@@ -149,15 +149,15 @@ public class CopyIn : ICopyIn
             {
                 try
                 {
-                    await _pgCmd.ResetIdentityAsync(tableDefinition.Header.Name, columnName, ct).ConfigureAwait(false);
+                    await _pgCmd.ResetIdentityAsync(tableDefinition.GetFullName(), columnName, ct).ConfigureAwait(false);
                     _logger.Information("Reset auto generation for {TableName}.{ColumnName}",
-                        tableDefinition.Header.Name, columnName);
+                        tableDefinition.GetFullName(), columnName);
                 }
                 catch (Exception ex)
                 {
                     _logger.Error(ex, "Reset auto generation for {TableName}.{ColumnName} failed",
-                        tableDefinition.Header.Name, columnName);
-                    Console.WriteLine($"**ERROR**: Reset auto generation for {tableDefinition.Header.Name}.{columnName} failed after all rows where inserted. This is a serious error! The auto generation will most likely produce duplicates.");
+                        tableDefinition.GetFullName(), columnName);
+                    Console.WriteLine($"**ERROR**: Reset auto generation for {tableDefinition.GetFullName()}.{columnName} failed after all rows where inserted. This is a serious error! The auto generation will most likely produce duplicates.");
                     errorOccurred = true;
                 }
             }
@@ -165,8 +165,8 @@ public class CopyIn : ICopyIn
         catch (Exception ex)
         {
             _logger.Error(ex, "Unexpected error for table '{TableName}'",
-                tableDefinition.Header.Name);
-            Console.WriteLine($"Unexpected error for table '{tableDefinition.Header.Name}'");
+                tableDefinition.GetFullName());
+            Console.WriteLine($"Unexpected error for table '{tableDefinition.GetFullName()}'");
             return false;
         }
         finally
@@ -179,19 +179,19 @@ public class CopyIn : ICopyIn
             try
             {
                 _logger.Information("Creating index '{IndexName}' for table '{TableName}'...",
-                    indexDefinition.Header.Name, tableDefinition.Header.Name);
-                await _pgCmd.CreateIndexAsync(tableDefinition.Header.Name, indexDefinition, ct).ConfigureAwait(false);
+                    indexDefinition.Header.Name, tableDefinition.GetFullName());
+                await _pgCmd.CreateIndexAsync(tableDefinition.GetFullName(), indexDefinition, ct).ConfigureAwait(false);
                 Console.WriteLine(
-                    $"Created index '{indexDefinition.Header.Name}' for table '{tableDefinition.Header.Name}'");
+                    $"Created index '{indexDefinition.Header.Name}' for table '{tableDefinition.GetFullName()}'");
                 _logger.Information("Created index '{IndexName}' for table '{TableName}'",
-                    indexDefinition.Header.Name, tableDefinition.Header.Name);
+                    indexDefinition.Header.Name, tableDefinition.GetFullName());
             }
             catch (Exception ex)
             {
                 Console.WriteLine(
-                    $"Created index '{indexDefinition.Header.Name}' for table '{tableDefinition.Header.Name}' failed");
+                    $"Created index '{indexDefinition.Header.Name}' for table '{tableDefinition.GetFullName()}' failed");
                 _logger.Error(ex, "Created index '{IndexName}' for table '{TableName}' failed",
-                    indexDefinition.Header.Name, tableDefinition.Header.Name);
+                    indexDefinition.Header.Name, tableDefinition.GetFullName());
                 errorOccurred = true;
             }
         }).ConfigureAwait(false);

@@ -19,10 +19,10 @@ public class PgCmd : IPgCmd
         _logger = logger.ForContext<PgCmd>();
     }
 
-    public async Task DropTableAsync(string tableName, CancellationToken ct)
+    public async Task DropTableAsync(SchemaTableTuple st, CancellationToken ct)
     {
         var qb = _queryBuilderFactory.GetQueryBuilder();
-        await ExecuteNonQueryAsync(qb.CreateDropTableStmt(tableName), ct).ConfigureAwait(false);
+        await ExecuteNonQueryAsync(qb.CreateDropTableStmt(st), ct).ConfigureAwait(false);
     }
 
     public async Task CreateTableAsync(TableDefinition tableDefinition, CancellationToken ct,
@@ -31,7 +31,7 @@ public class PgCmd : IPgCmd
         var qb = _queryBuilderFactory.GetQueryBuilder();
         qb.Append("create table ");
         if (addIfNotExists) qb.Append("if not exists ");
-        qb.AppendIdentifier(tableDefinition.Header.Name);
+        qb.AppendIdentifier(tableDefinition.GetFullName());
         qb.AppendLine(" (");
         qb.AppendColumns(tableDefinition);
         AddPrimaryKeyClause(tableDefinition, qb);

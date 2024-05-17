@@ -6,7 +6,7 @@ public interface IQueryBuilder
     void Append(string str);
     void AppendLine(string str);
     string ToString();
-    string CreateDropTableStmt(string tableName);
+    string CreateDropTableStmt(SchemaTableTuple st);
     void AppendIdentifierList(IEnumerable<string> names);
     void AppendColumns(TableDefinition tableDefinition);
 }

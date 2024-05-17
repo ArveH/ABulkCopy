@@ -18,8 +18,8 @@ public class SchemaWriter : ISchemaWriter
         string path)
     {
         _logger.Debug("Writing table definition for '{TableName}' to file...",
-            tableDefinition.Header.Name);
-        var fullPath = Path.Combine(path, tableDefinition.Header.Name + Constants.SchemaSuffix);
+            tableDefinition.GetFullName());
+        var fullPath = Path.Combine(path, tableDefinition.GetSchemaFileName());
         await _fileSystem.File.WriteAllTextAsync(
             fullPath,
             JsonSerializer.Serialize(tableDefinition, new JsonSerializerOptions

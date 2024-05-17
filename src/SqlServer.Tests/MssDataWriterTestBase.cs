@@ -44,7 +44,7 @@ public abstract class MssDataWriterTestBase : MssTestBase
             await DbFixture.DropTable(TestTableName);
         }
 
-        return await GetJsonText();
+        return await GetJsonTextForDataFile(("dbo", TestTableName));
     }
 
     protected async Task TestWriteUsingType(IColumn col, object? value)
@@ -67,9 +67,9 @@ public abstract class MssDataWriterTestBase : MssTestBase
     protected static readonly string String10K = new('a', 10000);
     protected static readonly string NString10K = new('ﯵ', 10000);
 
-    protected async Task<string> GetJsonText()
+    protected async Task<string> GetJsonTextForDataFile(SchemaTableTuple st)
     {
-        var fullPath = Path.Combine(TestPath, TestTableName + Constants.DataSuffix);
+        var fullPath = Path.Combine(TestPath, $"{st.schemaName}.{st.tableName}");
         MockFileSystem.FileExists(fullPath).Should().BeTrue("because data file should exist");
         var jsonTxt = await MockFileSystem.File.ReadAllTextAsync(fullPath);
         return jsonTxt;

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace ABulkCopy.Common.Extensions;
+﻿namespace ABulkCopy.Common.Extensions;
 
 public static class StringExtensions
 {

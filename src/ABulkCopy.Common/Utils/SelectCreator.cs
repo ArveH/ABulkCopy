@@ -15,7 +15,7 @@ public class SelectCreator : ISelectCreator
         {
             throw new ArgumentException(
                 $"No columns in table definition for table " + 
-                $"'{tableDefinition.Header.Name}'", nameof(tableDefinition.Columns));
+                $"'{tableDefinition.GetFullName()}'", nameof(tableDefinition.Columns));
         }
         
         var columns = tableDefinition.Columns
@@ -23,7 +23,7 @@ public class SelectCreator : ISelectCreator
 
         _logger.Debug(
             "Created select statement for table '{TableName}' with '{ColumnCount}' columns",
-            tableDefinition.Header.Name, columns.Count);
+            tableDefinition.GetFullName(), columns.Count);
         return "SELECT " 
                + string.Join(", ", columns) 
                + $" FROM [{tableDefinition.Header.Schema}].[{tableDefinition.Header.Name}]";
