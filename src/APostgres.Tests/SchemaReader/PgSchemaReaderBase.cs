@@ -2,7 +2,7 @@
 
 public class PgSchemaReaderBase : PgTestBase
 {
-    protected const string TableName = "MyTable";
+    protected static SchemaTableTuple TestNames = ("dbo", "MyTable");
     protected FileHelper FileHelper;
     protected ISchemaReader SchemaReader;
 
@@ -21,15 +21,15 @@ public class PgSchemaReaderBase : PgTestBase
 
     protected async Task<IColumn> GetColFromTableDefinition(IColumn col)
     {
-        FileHelper.CreateSingleColMssSchemaFile(("dbo", TableName), col);
+        FileHelper.CreateSingleColMssSchemaFile(TestNames, col);
 
         var cts = new CancellationTokenSource();
         var tableDefinition = await SchemaReader.GetTableDefinitionAsync(
-            FileHelper.DataFolder, TableName, cts.Token).ConfigureAwait(false);
+            FileHelper.DataFolder, TestNames, cts.Token).ConfigureAwait(false);
 
         tableDefinition.Should().NotBeNull();
         tableDefinition.Header.Schema.Should().Be("public");
-        tableDefinition.Header.Name.Should().Be(TableName);
+        tableDefinition.Header.Name.Should().Be(TestNames.tableName);
         tableDefinition.Columns.Should().HaveCount(1);
         tableDefinition.Columns[0].Should().NotBeNull("because we should be able to cast to the correct type");
         return tableDefinition.Columns[0];

@@ -1,16 +1,18 @@
+using ABulkCopy.Common.Extensions;
+
 namespace ASqlServer.Tests;
 
 public class MssSchemaWriterTests
 {
     private const string TestPath = @"C:\testfiles";
-    private const string TestTableName = "TestTableForTestWrite";
+    private static SchemaTableTuple TestNames = ("dbo", "TestTableForTestWrite");
     private readonly TableDefinition _originalTableDefinition;
     private readonly MockFileSystem _mockFileSystem;
     private readonly ISchemaWriter _schemaWriter;
 
     public MssSchemaWriterTests()
     {
-        _originalTableDefinition = MssTestData.GetEmpty(("dbo", TestTableName));
+        _originalTableDefinition = MssTestData.GetEmpty(TestNames);
         _mockFileSystem = new MockFileSystem();
         _mockFileSystem.AddDirectory(TestPath);
         _schemaWriter = new SchemaWriter(
@@ -157,7 +159,7 @@ public class MssSchemaWriterTests
 
     private async Task<string> GetJsonText()
     {
-        var fullPath = Path.Combine(TestPath, TestTableName + Constants.SchemaSuffix);
+        var fullPath = Path.Combine(TestPath, TestNames.GetSchemaFileName());
         _mockFileSystem.FileExists(fullPath).Should().BeTrue("because schema file should exist");
         var jsonTxt = await _mockFileSystem.File.ReadAllTextAsync(fullPath);
         return jsonTxt;

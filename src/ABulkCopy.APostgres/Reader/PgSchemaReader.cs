@@ -17,9 +17,9 @@ public class PgSchemaReader : ISchemaReader
     }
 
     public async Task<TableDefinition> GetTableDefinitionAsync(
-        string folderPath, string tableName, CancellationToken ct)
+        string folderPath, SchemaTableTuple st, CancellationToken ct)
     {
-        var fullPath = Path.Combine(folderPath, $"{tableName}{Constants.SchemaSuffix}");
+        var fullPath = Path.Combine(folderPath, st.GetSchemaFileName());
         return await GetTableDefinitionAsync(fullPath, ct).ConfigureAwait(false);
     }
 

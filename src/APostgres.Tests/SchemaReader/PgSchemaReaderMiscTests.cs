@@ -31,7 +31,7 @@ public class PgSchemaReaderMiscTests : PgSchemaReaderBase
     [Fact]
     public async Task ReadIdentityColumn()
     {
-        var inputDefinition = MssTestData.GetEmpty(("dbo", TableName));
+        var inputDefinition = MssTestData.GetEmpty(TestNames);
         inputDefinition.Header.Identity = new Identity
         {
             Increment = 10,
@@ -46,11 +46,11 @@ public class PgSchemaReaderMiscTests : PgSchemaReaderBase
 
         var cts = new CancellationTokenSource();
         var tableDefinition = await SchemaReader.GetTableDefinitionAsync(
-            FileHelper.DataFolder, TableName, cts.Token);
+            FileHelper.DataFolder, TestNames, cts.Token);
 
         tableDefinition.Should().NotBeNull("because tableDefinition should not be null");
         tableDefinition.Header.Schema.Should().Be("public");
-        tableDefinition.Header.Name.Should().Be(TableName);
+        tableDefinition.Header.Name.Should().Be(TestNames.tableName);
         tableDefinition.Columns.Should().HaveCount(1);
         tableDefinition.Columns[0].Should().NotBeNull("because we should have a column");
         tableDefinition.Columns[0].Identity.Should().BeEquivalentTo(identityCol.Identity);
