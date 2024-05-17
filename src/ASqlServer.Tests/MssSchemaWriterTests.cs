@@ -140,7 +140,7 @@ public class MssSchemaWriterTests
         await _schemaWriter.WriteAsync(_originalTableDefinition, TestPath);
 
         // Assert
-        var jsonTxt = await GetJsonText();
+        var jsonTxt = await _mockFileSystem.GetJsonSchemaText(TestPath, TestNames);
         var collation = col.Collation == null ? "null" : $"\"{col.Collation}\"";
         jsonTxt.Squeeze().Should().ContainEquivalentOf((
             "{\r\n" +
@@ -155,13 +155,5 @@ public class MssSchemaWriterTests
             "      \"DefaultConstraint\": null,\r\n" +
             $"      \"Collation\": {collation}\r\n" +
             "    }").Squeeze());
-    }
-
-    private async Task<string> GetJsonText()
-    {
-        var fullPath = Path.Combine(TestPath, TestNames.GetSchemaFileName());
-        _mockFileSystem.FileExists(fullPath).Should().BeTrue("because schema file should exist");
-        var jsonTxt = await _mockFileSystem.File.ReadAllTextAsync(fullPath);
-        return jsonTxt;
     }
 }

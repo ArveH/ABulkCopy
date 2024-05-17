@@ -169,7 +169,7 @@ public class DataFileReaderTests : CommonTestBase
         var dataFileReader = new DataFileReader(_fileHelper.FileSystem, TestLogger);
         var path = Path.Combine(
             _fileHelper.DataFolder,
-            $"{TestTableName}{Constants.DataSuffix}");
+            $"dbo.{TestTableName}{Constants.DataSuffix}");
         dataFileReader.Open(path);
         return dataFileReader;
     }

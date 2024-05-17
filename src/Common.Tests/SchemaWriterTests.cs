@@ -28,7 +28,7 @@ public class SchemaWriterTests
         await _schemaWriter.WriteAsync(_originalTableDefinition, TestPath);
 
         // Assert
-        var jsonTxt = await GetJsonText();
+        var jsonTxt = await _mockFileSystem.GetJsonSchemaText(TestPath, ("dbo", TestTableName));
         jsonTxt.Squeeze().Should().ContainEquivalentOf((
             "\"Header\": {\r\n" +
             "    \"Id\": 1,\r\n" +
@@ -53,7 +53,7 @@ public class SchemaWriterTests
         await _schemaWriter.WriteAsync(_originalTableDefinition, TestPath);
 
         // Assert
-        var jsonTxt = await GetJsonText();
+        var jsonTxt = await _mockFileSystem.GetJsonSchemaText(TestPath, ("dbo", TestTableName));
         jsonTxt.Squeeze().Should().ContainEquivalentOf((
             "\"Header\": {\r\n" +
             "    \"Id\": 1,\r\n" +
@@ -82,7 +82,7 @@ public class SchemaWriterTests
         await _schemaWriter.WriteAsync(_originalTableDefinition, TestPath);
 
         // Assert
-        return await GetJsonText();
+        return await _mockFileSystem.GetJsonSchemaText(TestPath, ("dbo", TestTableName));
     }
 
     [Fact]

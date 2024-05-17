@@ -1,4 +1,7 @@
 ﻿// ReSharper disable PossiblyMistakenUseOfInterpolatedStringInsert
+
+using Testing.Shared;
+
 namespace SqlServer.Tests;
 
 [Collection(nameof(DatabaseCollection))]
@@ -48,7 +51,7 @@ public class MssDataWriterTestsMisc : MssDataWriterTestBase
         }
 
         // Assert
-        var dataFile = await GetJsonTextForDataFile(("dbo", TestTableName));
+        var dataFile = await MockFileSystem.GetJsonDataText(TestPath, ("dbo", TestTableName));
         dataFile.TrimEnd().Should().Be("i000000000000000.raw,");
         var fullPath = Path.Combine(TestPath, TestTableName, "MyTestCol", $"i{0:D15}.raw");
         MockFileSystem.FileExists(fullPath).Should().BeTrue($"because '{fullPath}' should exist");
@@ -81,7 +84,7 @@ public class MssDataWriterTestsMisc : MssDataWriterTestBase
         }
 
         // Assert
-        var dataFile = await GetJsonTextForDataFile(("dbo", TestTableName));
+        var dataFile = await MockFileSystem.GetJsonDataText(TestPath, ("dbo", TestTableName));
         dataFile.TrimEnd().Should().Be("i000000000000000.raw,");
         var fullPath = Path.Combine(TestPath, TestTableName, "MyTestCol", $"i{0:D15}.raw");
         MockFileSystem.FileExists(fullPath).Should().BeTrue($"because '{fullPath}' should exist");
@@ -117,7 +120,7 @@ public class MssDataWriterTestsMisc : MssDataWriterTestBase
         }
 
         // Assert
-        var dataFile = await GetJsonTextForDataFile(("dbo", TestTableName));
+        var dataFile = await MockFileSystem.GetJsonDataText(TestPath, ("dbo", TestTableName));
         var dataFileLines = dataFile.Split(
             Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
         dataFileLines.Length.Should().Be(3);
