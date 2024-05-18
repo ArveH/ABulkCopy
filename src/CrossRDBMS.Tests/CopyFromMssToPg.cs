@@ -24,7 +24,7 @@ public class CopyFromMssToPg : TestBase
         var mssServices = CopyProg.GetServices(
             CopyDirection.Out, Rdbms.Mss, _fixture.MssConnectionString, tableName);
         var pgServices = CopyProg.GetServices(
-            CopyDirection.In, Rdbms.Pg, _fixture.PgConnectionString, $"\\b{tableName}\\b");
+            CopyDirection.In, Rdbms.Pg, _fixture.PgConnectionString, $@"\b{tableName}\b");
         var copyOut = mssServices.GetRequiredService<ICopyOut>();
         var copyIn = pgServices.GetRequiredService<ICopyIn>();
         _identifier = pgServices.GetRequiredService<IIdentifier>();
@@ -34,10 +34,10 @@ public class CopyFromMssToPg : TestBase
         await copyIn.RunAsync(Rdbms.Pg, CancellationToken.None);
 
         // Assert
-        var schemaFile = await File.ReadAllTextAsync(tableName + ".schema");
+        var schemaFile = await File.ReadAllTextAsync("dbo." + tableName + ".schema");
         schemaFile.Should().NotBeNullOrEmpty("because the schema file should exist");
         schemaFile.Should().Contain($"\"Name\": \"{tableName}\"");
-        var dataFile = await File.ReadAllTextAsync(tableName + ".data");
+        var dataFile = await File.ReadAllTextAsync("dbo." + tableName + ".data");
         dataFile.Should().NotBeNull("because the data file should exist");
         await ValidateTypeInfoAsync(tableName, "integer", null, 32, 0);
     }
