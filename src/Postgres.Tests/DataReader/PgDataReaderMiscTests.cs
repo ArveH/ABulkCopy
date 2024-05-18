@@ -26,12 +26,12 @@ public class PgDataReaderMiscTests : PgDataReaderTestBase
                 tableName, cols, fileData);
 
             // Assert
-            var rowcount = await DbFixture.GetRowCount(tableName);
+            var rowcount = await DbFixture.GetRowCount(("public", tableName));
             rowcount.Should().Be(0);
         }
         finally
         {
-            await DbFixture.DropTable(tableName);
+            await DbFixture.DropTable(("public", tableName));
         }
     }
 
@@ -57,21 +57,21 @@ public class PgDataReaderMiscTests : PgDataReaderTestBase
 
             // Assert
             var guidValues = await DbFixture.SelectColumn<Guid>(
-                tableName, "Id");
+                ("public", tableName), "Id");
             guidValues.Count.Should().Be(1, "because there is 1 guid value");
             guidValues[0].Should().Be("8e98618c-6a78-4fa2-9c0e-b6bb2571af72");
             var nameValues = await DbFixture.SelectColumn<string>(
-                tableName, "Name");
+                ("public", tableName), "Name");
             nameValues.Count.Should().Be(1, "because there is 1 name value");
             nameValues[0].Should().Be("Arve");
             var lastUpdateValues = await DbFixture.SelectColumn<DateTime>(
-                tableName, "LastUpdate");
+                ("public", tableName), "LastUpdate");
             lastUpdateValues.Count.Should().Be(1, "because there is 1 last update value");
             lastUpdateValues[0].Should().Be(new DateTime(2023, 6, 14, 11, 12, 13, 123, 456, DateTimeKind.Utc));
         }
         finally
         {
-            await DbFixture.DropTable(tableName);
+            await DbFixture.DropTable(("public", tableName));
         }
     }
 
@@ -98,7 +98,7 @@ public class PgDataReaderMiscTests : PgDataReaderTestBase
             // Assert
             // Assert
             var guidValues = await DbFixture.SelectColumn<Guid>(
-                tableName, "Id");
+                ("public", tableName), "Id");
             guidValues.Count.Should().Be(3, "because there are 3 guid values");
             guidValues[0].Should().Be("8e98618c-6a78-4fa2-9c0e-b6bb2571af72");
             guidValues[1].Should().Be("8e98618c-6a78-4fa2-9c0e-b6bb2571af73");
@@ -106,7 +106,7 @@ public class PgDataReaderMiscTests : PgDataReaderTestBase
         }
         finally
         {
-            await DbFixture.DropTable(tableName);
+            await DbFixture.DropTable(("public", tableName));
         }
     }
 
@@ -134,24 +134,24 @@ public class PgDataReaderMiscTests : PgDataReaderTestBase
 
             // Assert
             var guidValues = await DbFixture.SelectColumn<Guid>(
-                tableName, "Id");
+                ("public", tableName), "Id");
             guidValues.Count.Should().Be(2, "because there are 2 guid values");
             guidValues[0].Should().Be("8e98618c-6a78-4fa2-9c0e-b6bb2571af72");
             guidValues[1].Should().Be("8e98618c-6a78-4fa2-9c0e-b6bb2571af74");
             var nameValues = await DbFixture.SelectColumn<string>(
-                tableName, "Name");
+                ("public", tableName), "Name");
             nameValues.Count.Should().Be(2, "because there are 2 name values");
             nameValues[0].Should().Be("Arve");
             nameValues[1].Should().Be("Per");
             var lastUpdateValues = await DbFixture.SelectColumn<DateTime>(
-                tableName, "LastUpdate");
+                ("public", tableName), "LastUpdate");
             lastUpdateValues.Count.Should().Be(2, "because there are 2 last update values");
             lastUpdateValues[0].Should().Be(new DateTime(2023, 6, 14, 11, 12, 13, 123, 456, DateTimeKind.Utc));
             lastUpdateValues[1].Should().Be(new DateTime(2023, 6, 15, 11, 12, 13, DateTimeKind.Utc));
         }
         finally
         {
-            await DbFixture.DropTable(tableName);
+            await DbFixture.DropTable(("public", tableName));
         }
     }
 }

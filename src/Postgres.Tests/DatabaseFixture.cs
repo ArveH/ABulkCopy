@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging.Abstractions;
+﻿using ABulkCopy.Common.Extensions;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Postgres.Tests;
 
@@ -100,17 +101,15 @@ public class DatabaseFixture : IAsyncLifetime
         await ExecuteNonQuery(sb.ToString());
     }
 
-    public async Task DropTable(string tableName, bool addQuote = true)
+    public async Task DropTable(SchemaTableTuple st, bool addQuote = true)
     {
-        var identifier = GetIdentifier(addQuote);
-        var sqlString = $"drop table if exists {identifier.Get(tableName)};";
+        var sqlString = $"drop table if exists {st.GetFullName(GetIdentifier(addQuote))};";
         await ExecuteNonQuery(sqlString);
     }
 
-    public async Task<long> GetRowCount(string tableName, bool addQuote = true)
+    public async Task<long> GetRowCount(SchemaTableTuple st, bool addQuote = true)
     {
-        var identifier = GetIdentifier(addQuote);
-        var sqlString = $"select count(*) from {identifier.Get(tableName)};";
+        var sqlString = $"select count(*) from {st.GetFullName(GetIdentifier(addQuote))};";
         await using var cmd = PgContext.DataSource.CreateCommand(sqlString);
         var reader = await cmd.ExecuteReaderAsync();
         if (!await reader.ReadAsync()) throw new SqlNullValueException();
@@ -120,10 +119,10 @@ public class DatabaseFixture : IAsyncLifetime
         return reader.GetFieldValue<long>(0);
     }
 
-    public async Task<T?> SelectScalar<T>(string tableName, IColumn col, bool addQuote = true)
+    public async Task<T?> SelectScalar<T>(SchemaTableTuple st, IColumn col, bool addQuote = true)
     {
         var identifier = GetIdentifier(addQuote);
-        var sqlString = $"select {identifier.Get(col.Name)} from {identifier.Get(tableName)};";
+        var sqlString = $"select {identifier.Get(col.Name)} from {st.GetFullName(identifier)};";
         await using var cmd = PgContext.DataSource.CreateCommand(sqlString);
         var reader = await cmd.ExecuteReaderAsync();
         if (!await reader.ReadAsync()) throw new SqlNullValueException();
@@ -133,10 +132,10 @@ public class DatabaseFixture : IAsyncLifetime
         return reader.GetFieldValue<T>(0);
     }
 
-    public async Task<List<T?>> SelectColumn<T>(string tableName, string colName, bool addQuote = true)
+    public async Task<List<T?>> SelectColumn<T>(SchemaTableTuple st, string colName, bool addQuote = true)
     {
         var identifier = GetIdentifier(addQuote);
-        var sqlString = $"select {identifier.Get(colName)} from {identifier.Get(tableName)};";
+        var sqlString = $"select {identifier.Get(colName)} from {st.GetFullName(identifier)};";
         await using var cmd = PgContext.DataSource.CreateCommand(sqlString);
         var reader = await cmd.ExecuteReaderAsync();
         var result = new List<T?>();

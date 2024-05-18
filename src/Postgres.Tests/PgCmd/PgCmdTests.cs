@@ -27,20 +27,20 @@ public class PgCmdTests(
             await pgCmd.ResetIdentityAsync(tableName, colName, CancellationToken.None);
 
             // Assert
-            var identityValues = (await DbFixture.SelectColumn<long>(tableName, colName)).ToList();
+            var identityValues = (await DbFixture.SelectColumn<long>(("public", tableName), colName)).ToList();
             identityValues.Count.Should().Be(3);
             identityValues.Should().Contain(120);
         }
         finally
         {
-            await DbFixture.DropTable(tableName);
+            await DbFixture.DropTable(("public", tableName));
         }
     }
 
     private async Task CreateTableWithIdentityColumn(
         string tableName, string colName, int seed)
     {
-        var inputDefinition = PgTestData.GetEmpty(tableName);
+        var inputDefinition = PgTestData.GetEmpty(("public", tableName));
         inputDefinition.Header.Identity = new Identity
         {
             Increment = 10,
@@ -52,7 +52,7 @@ public class PgCmdTests(
         };
         inputDefinition.Columns.Add(identityCol);
         inputDefinition.Columns.Add(new PostgresVarChar(2, "Name", true, 100));
-        await DbFixture.DropTable(tableName);
+        await DbFixture.DropTable(("public", tableName));
         await DbFixture.CreateTable(inputDefinition);
         await DbFixture.ExecuteNonQuery($"insert into \"{tableName}\" (\"Name\") values ('Arve1')");
         await DbFixture.ExecuteNonQuery($"insert into \"{tableName}\" (\"Name\") values ('Arve2')");
@@ -63,7 +63,7 @@ public class PgCmdTests(
     {
         // Arrange
         var tableName = GetName();
-        var inputDefinition = PgTestData.GetEmpty(tableName);
+        var inputDefinition = PgTestData.GetEmpty(("public", tableName));
         inputDefinition.Header.Identity = new Identity
         {
             Increment = 10,
@@ -75,7 +75,7 @@ public class PgCmdTests(
         };
         inputDefinition.Columns.Add(identityCol);
         inputDefinition.Columns.Add(new PostgresVarChar(2, "Name", true, 100));
-        await DbFixture.DropTable(tableName);
+        await DbFixture.DropTable(("public", tableName));
 
         // Act
         List<long> identityValues;
@@ -84,11 +84,11 @@ public class PgCmdTests(
             await DbFixture.CreateTable(inputDefinition);
             await DbFixture.ExecuteNonQuery($"insert into \"{tableName}\" (\"Name\") values ('Arve1')");
             await DbFixture.ExecuteNonQuery($"insert into \"{tableName}\" (\"Name\") values ('Arve2')");
-            identityValues = (await DbFixture.SelectColumn<long>(tableName, "agrtid")).ToList();
+            identityValues = (await DbFixture.SelectColumn<long>(("public", tableName), "agrtid")).ToList();
         }
         finally
         {
-            await DbFixture.DropTable(tableName);
+            await DbFixture.DropTable(("public", tableName));
         }
 
         // Assert
@@ -102,7 +102,7 @@ public class PgCmdTests(
     {
         // Arrange
         var tableName = GetName();
-        var inputDefinition = PgTestData.GetEmpty(tableName);
+        var inputDefinition = PgTestData.GetEmpty(("public", tableName));
         var defCol = new PostgresDecimal(2, "status", false, 32, 6)
         {
             DefaultConstraint = new DefaultDefinition
@@ -114,7 +114,7 @@ public class PgCmdTests(
         };
         inputDefinition.Columns.Add(new PostgresBigInt(1, "id", false));
         inputDefinition.Columns.Add(defCol);
-        await DbFixture.DropTable(tableName);
+        await DbFixture.DropTable(("public", tableName));
         var pgCmd = GetPgCmd();
         var cts = new CancellationTokenSource();
 
@@ -124,11 +124,11 @@ public class PgCmdTests(
         {
             await pgCmd.CreateTableAsync(inputDefinition, cts.Token);
             await DbFixture.ExecuteNonQuery($"insert into \"{tableName}\" (id) values (3)");
-            statusValues = (await DbFixture.SelectColumn<decimal>(tableName, "status")).ToList();
+            statusValues = (await DbFixture.SelectColumn<decimal>(("public", tableName), "status")).ToList();
         }
         finally
         {
-            await DbFixture.DropTable(tableName);
+            await DbFixture.DropTable(("public", tableName));
         }
 
         // Assert
@@ -148,7 +148,7 @@ public class PgCmdTests(
                 ("col1", false),
                 ("col2", false)
             });
-        await DbFixture.DropTable(tableName);
+        await DbFixture.DropTable(("public", tableName));
         var pgCmd = GetPgCmd();
         var systemTables = GetPgSystemTables();
         var cts = new CancellationTokenSource();
@@ -169,7 +169,7 @@ public class PgCmdTests(
         }
         finally
         {
-            await DbFixture.DropTable(tableName);
+            await DbFixture.DropTable(("public", tableName));
         }
 
     }
@@ -181,9 +181,9 @@ public class PgCmdTests(
         var parent1TableName = GetName() + "_parent1";
         var parent2TableName = GetName() + "_parent2";
         var childTableName = GetName() + "_child";
-        await DbFixture.DropTable(childTableName);
-        await DbFixture.DropTable(parent1TableName);
-        await DbFixture.DropTable(parent2TableName);
+        await DbFixture.DropTable(("public", childTableName));
+        await DbFixture.DropTable(("public", parent1TableName));
+        await DbFixture.DropTable(("public", parent2TableName));
         var parent1TableDefinition = GetParentTableDefinition(
             parent1TableName, new List<(string, bool)>
             {
@@ -231,9 +231,9 @@ public class PgCmdTests(
         }
         finally
         {
-            await DbFixture.DropTable(childTableName);
-            await DbFixture.DropTable(parent2TableName);
-            await DbFixture.DropTable(parent1TableName);
+            await DbFixture.DropTable(("public", childTableName));
+            await DbFixture.DropTable(("public", parent2TableName));
+            await DbFixture.DropTable(("public", parent1TableName));
         }
 
     }
@@ -244,8 +244,8 @@ public class PgCmdTests(
         // Arrange
         var parent1TableName = GetName() + "_parent1";
         var childTableName = GetName() + "_child";
-        await DbFixture.DropTable(childTableName);
-        await DbFixture.DropTable(parent1TableName);
+        await DbFixture.DropTable(("public", childTableName));
+        await DbFixture.DropTable(("public", parent1TableName));
         var parent1TableDefinition = GetParentTableDefinition(
             parent1TableName, new List<(string, bool)>
             {
@@ -282,8 +282,8 @@ public class PgCmdTests(
         }
         finally
         {
-            await DbFixture.DropTable(childTableName);
-            await DbFixture.DropTable(parent1TableName);
+            await DbFixture.DropTable(("public", childTableName));
+            await DbFixture.DropTable(("public", parent1TableName));
         }
     }
 
@@ -293,8 +293,8 @@ public class PgCmdTests(
         // Arrange
         var parent1TableName = GetName() + "_parent1";
         var childTableName = GetName() + "_child";
-        await DbFixture.DropTable(childTableName);
-        await DbFixture.DropTable(parent1TableName);
+        await DbFixture.DropTable(("public", childTableName));
+        await DbFixture.DropTable(("public", parent1TableName));
         var parent1TableDefinition = GetParentTableDefinition(
             parent1TableName, new List<(string, bool)>
             {
@@ -331,15 +331,15 @@ public class PgCmdTests(
         }
         finally
         {
-            await DbFixture.DropTable(childTableName);
-            await DbFixture.DropTable(parent1TableName);
+            await DbFixture.DropTable(("public", childTableName));
+            await DbFixture.DropTable(("public", parent1TableName));
         }
     }
 
     private static TableDefinition GetParentTableDefinition(
         string tableName, List<(string colName, bool isKey)> cols)
     {
-        var inputDefinition = PgTestData.GetEmpty(tableName);
+        var inputDefinition = PgTestData.GetEmpty(("public", tableName));
         var pkCols = new List<string>();
         for (var i = 0; i < cols.Count; i++)
         {
@@ -362,7 +362,7 @@ public class PgCmdTests(
         List<(string tabName, List<string> colNames)> refs)
     {
         // Create TableDefinition and add primary key
-        var inputDefinition = PgTestData.GetEmpty(tableName);
+        var inputDefinition = PgTestData.GetEmpty(("public", tableName));
         inputDefinition.Columns.Add(new PostgresBigInt(0, "id", false));
         inputDefinition.PrimaryKey = new PrimaryKey
         {

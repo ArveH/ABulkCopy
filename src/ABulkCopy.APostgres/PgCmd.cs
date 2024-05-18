@@ -31,7 +31,9 @@ public class PgCmd : IPgCmd
         var qb = _queryBuilderFactory.GetQueryBuilder();
         qb.Append("create table ");
         if (addIfNotExists) qb.Append("if not exists ");
-        qb.AppendIdentifier(tableDefinition.GetFullName());
+        qb.AppendIdentifier(tableDefinition.Header.Schema);
+        qb.Append(".");
+        qb.AppendIdentifier(tableDefinition.Header.Name);
         qb.AppendLine(" (");
         qb.AppendColumns(tableDefinition);
         AddPrimaryKeyClause(tableDefinition, qb);
