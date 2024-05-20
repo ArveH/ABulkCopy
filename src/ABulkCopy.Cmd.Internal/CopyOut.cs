@@ -69,7 +69,8 @@ public class CopyOut : ICopyOut
     private async Task<bool> CopyTableAsync(
         string folder, 
         string schemaName,
-        string tableName, CancellationToken ct)
+        string tableName, 
+        CancellationToken ct)
     {
         try
         {
@@ -85,16 +86,16 @@ public class CopyOut : ICopyOut
             // TODO: CancellationToken
             await _schemaWriter.WriteAsync(tabDef, folder).ConfigureAwait(false);
             var rows = await _dataWriter.WriteAsync(tabDef, folder, ct).ConfigureAwait(false);
-            _logger.Information("Table '{TableName}' with {Rows} rows copied to disk",
-                tableName, rows);
-            Console.WriteLine($"Table '{tableName}' with {rows} rows copied to disk");
+            _logger.Information("Table '{SchemaName}.{TableName}' with {Rows} rows copied to disk",
+                schemaName, tableName, rows);
+            Console.WriteLine($"Table '{schemaName}.{tableName}' with {rows} rows copied to disk");
             return true;
         }
         catch (Exception ex)
         {
-            _logger.Error(ex, "Copy out from table '{TableName}' failed",
-                tableName);
-            Console.WriteLine($"Copy out from table '{tableName}' failed");
+            _logger.Error(ex, "Copy out from table '{SchemaName}.{TableName}' failed",
+                schemaName, tableName);
+            Console.WriteLine($"Copy out from table '{schemaName}.{tableName}' failed");
             return false;
         }
     }
