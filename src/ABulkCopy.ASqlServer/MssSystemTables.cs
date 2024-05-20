@@ -162,7 +162,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
                            "FROM cte c \r\n" +
                            "LEFT JOIN sys.objects o WITH(NOLOCK) ON (c.default_object_id = o.object_id)\r\n" +
                            "LEFT JOIN sys.default_constraints d WITH(NOLOCK) ON (d.object_id = c.default_object_id)");
-        command.Parameters.AddWithValue("@TableName", tableHeader.Name);
+        command.Parameters.AddWithValue("@TableName", $"{tableHeader.Schema}.{tableHeader.Name}");
 
         var columnDefinitions = new List<IColumn>();
         await ExecuteReaderAsync(command, reader =>
@@ -281,7 +281,8 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
                     }
                 };
 
-                var indexColumns = await GetIndexColumnInfoAsync(tableHeader.Name, index.Header, ct).ConfigureAwait(false);
+                var indexColumns = await GetIndexColumnInfoAsync(
+                    (tableHeader.Schema, tableHeader.Name), index.Header, ct).ConfigureAwait(false);
                 index.Columns.AddRange(indexColumns);
                 indexes.Add(index);
 
@@ -360,7 +361,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
     }
 
     private async Task<IEnumerable<IndexColumn>> GetIndexColumnInfoAsync(
-        string tableName, IndexHeader indexHeader, CancellationToken ct)
+        SchemaTableTuple st, IndexHeader indexHeader, CancellationToken ct)
     {
         var command =
             new SqlCommand("select COL_NAME(ic.object_id,ic.column_id) AS column_name, ic.is_descending_key\r\n" +
@@ -371,7 +372,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
                            "and i.object_id = object_id(@TableName)");
 
         command.Parameters.AddWithValue("@IndexId", indexHeader.Id);
-        command.Parameters.AddWithValue("@TableName", tableName);
+        command.Parameters.AddWithValue("@TableName", $"{st.schemaName}.{st.tableName}");
 
         var columns = new List<IndexColumn>();
         await ExecuteReaderAsync(command, reader =>
@@ -386,8 +387,8 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         }, ct).ConfigureAwait(false);
 
         _logger.Information(
-            $"Retrieved {{ColumnCount}} index {"column".Plural(columns.Count)} for index '{{TableName}}.{{IndexName}}'",
-            columns.Capacity, tableName, indexHeader.Name);
+            $"Retrieved {{ColumnCount}} index {"column".Plural(columns.Count)} for index '{{SchemaName}}{{TableName}}.{{IndexName}}'",
+            columns.Capacity, st.schemaName, st.tableName, indexHeader.Name);
 
         return columns;
     }
