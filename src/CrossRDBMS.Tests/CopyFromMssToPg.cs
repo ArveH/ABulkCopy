@@ -1,3 +1,5 @@
+using System.IO.Abstractions.TestingHelpers;
+
 namespace CrossRDBMS.Tests;
 
 [Collection(nameof(DatabaseCollection))]
@@ -5,6 +7,7 @@ public class CopyFromMssToPg : TestBase
 {
     private readonly DatabaseFixture _fixture;
     private readonly ITestOutputHelper _output;
+
     private IIdentifier? _identifier;
 
     public CopyFromMssToPg(DatabaseFixture fixture, ITestOutputHelper output) 
@@ -18,26 +21,40 @@ public class CopyFromMssToPg : TestBase
     {
         // Arrange
         var tableName = GetName(nameof(CopyFromMssToPg));
-        DeleteFiles(tableName);
+        List<string> logMessages = new();
+        IFileSystem fileSystem = new MockFileSystem();
         await DropTableAsync(tableName);
         await CreateTableAsync(tableName, "int");
-        var mssServices = CopyProg.GetServices(
-            CopyDirection.Out, Rdbms.Mss, _fixture.MssConnectionString, tableName);
-        var pgServices = CopyProg.GetServices(
-            CopyDirection.In, Rdbms.Pg, _fixture.PgConnectionString, $@"\b{tableName}\b");
-        var copyOut = mssServices.GetRequiredService<ICopyOut>();
-        var copyIn = pgServices.GetRequiredService<ICopyIn>();
-        _identifier = pgServices.GetRequiredService<IIdentifier>();
+
+        var mssContext = new CopyContext(
+            Rdbms.Mss,
+            CmdArguments.Create(ParamHelper.GetOutMss(
+                _fixture.MssConnectionString, 
+                searchFilter: tableName)),
+            logMessages,
+            _output,
+            fileSystem);
+        var pgContext = new CopyContext(
+            Rdbms.Pg,
+            CmdArguments.Create(ParamHelper.GetInPg(
+                _fixture.PgConnectionString, 
+                searchFilter: $@"\b{tableName}\b")),
+            logMessages,
+            _output,
+            fileSystem); 
+        var copyOut = mssContext.GetServices<ICopyOut>();
+        var copyIn = pgContext.GetServices<ICopyIn>();
+        _identifier = pgContext.GetServices<IIdentifier>();
 
         // Act
         await copyOut.RunAsync(CancellationToken.None);
         await copyIn.RunAsync(Rdbms.Pg, CancellationToken.None);
 
         // Assert
-        var schemaFile = await File.ReadAllTextAsync("dbo." + tableName + ".schema");
+        var schemaFile = await fileSystem.File.ReadAllTextAsync("dbo." + tableName + ".schema");
         schemaFile.Should().NotBeNullOrEmpty("because the schema file should exist");
         schemaFile.Should().Contain($"\"Name\": \"{tableName}\"");
-        var dataFile = await File.ReadAllTextAsync("dbo." + tableName + ".data");
+        var dataFile = await fileSystem.File.ReadAllTextAsync("dbo." + tableName + ".data");
         dataFile.Should().NotBeNull("because the data file should exist");
         await ValidateTypeInfoAsync(tableName, "integer", null, 32, 0);
     }

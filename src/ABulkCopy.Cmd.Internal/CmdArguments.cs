@@ -5,7 +5,7 @@ public class CmdArguments
     [Option('d', "direction", Required = true, HelpText = "Copy direction. \"In\" to a database or \"Out\" from a database.")]
     public required CopyDirection Direction { get; set; }
 
-    [Option('c', "connection-string", HelpText = "The connection string")]
+    [Option('c', "connection-string", Required = true, HelpText = "The connection string")]
     public string? ConnectionString { get; set; }
 
     [Option('r', "rdbms", Required = true, HelpText = "Database Management System. \"Pg\" or \"Mss\".")]
@@ -65,5 +65,22 @@ public class CmdArguments
         appSettings.Add(Constants.Config.EmptyString, EmptyString.ToString());
 
         return appSettings;
+    }
+
+    public static CmdArguments? Create(string[] args)
+    {
+        var parser = new Parser(cfg =>
+        {
+            cfg.CaseInsensitiveEnumValues = true;
+            cfg.HelpWriter = Console.Error;
+        });
+        var result = parser.ParseArguments<CmdArguments>(args);
+        if (result.Tag == ParserResultType.NotParsed)
+        {
+            // A usage message is written to Console.Error by the CommandLineParser
+            return null;
+        }
+
+        return result.Value;
     }
 }
