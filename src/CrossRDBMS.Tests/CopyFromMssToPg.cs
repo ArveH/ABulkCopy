@@ -23,13 +23,10 @@ public class CopyFromMssToPg : TestBase
         var tableName = GetName(nameof(CopyFromMssToPg));
         List<string> logMessages = new();
         IFileSystem fileSystem = new MockFileSystem();
-        await DropTableAsync(tableName);
-        await CreateTableAsync(tableName, "int");
-
         var mssContext = new CopyContext(
             Rdbms.Mss,
             CmdArguments.Create(ParamHelper.GetOutMss(
-                _fixture.MssConnectionString, 
+                _fixture.MssConnectionString,
                 searchFilter: tableName)),
             logMessages,
             _output,
@@ -37,11 +34,18 @@ public class CopyFromMssToPg : TestBase
         var pgContext = new CopyContext(
             Rdbms.Pg,
             CmdArguments.Create(ParamHelper.GetInPg(
-                _fixture.PgConnectionString, 
+                _fixture.PgConnectionString,
                 searchFilter: $@"\b{tableName}\b")),
             logMessages,
             _output,
-            fileSystem); 
+            fileSystem);
+
+        // TODO: 
+        await DropTableAsync(tableName);
+        await CreateTableAsync(tableName, "int");
+        // TODO: Insert values
+
+
         var copyOut = mssContext.GetServices<ICopyOut>();
         var copyIn = pgContext.GetServices<ICopyIn>();
         _identifier = pgContext.GetServices<IIdentifier>();
@@ -57,6 +61,7 @@ public class CopyFromMssToPg : TestBase
         var dataFile = await fileSystem.File.ReadAllTextAsync("dbo." + tableName + ".data");
         dataFile.Should().NotBeNull("because the data file should exist");
         await ValidateTypeInfoAsync(tableName, "integer", null, 32, 0);
+        // TODO: Validate Postgres column and data
     }
 
     private async Task DropTableAsync(string tableName)

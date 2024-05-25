@@ -11,8 +11,8 @@ public class MssSystemTablesTests(DatabaseFixture dbFixture, ITestOutputHelper o
     {
         // Arrange
         var tableName = GetName();
-        await DbFixture.DropTable(tableName);
-        await DbFixture.ExecuteNonQuery(
+        await DropTable(tableName);
+        await ExecuteNonQuery(
             $"CREATE TABLE [dbo].[{tableName}](\r\n\t[Id] [bigint] IDENTITY(1,1) NOT NULL,\r\n\t[ExactNumBigInt] [bigint] NOT NULL,\r\n\t[ExactNumInt] [int] NOT NULL,\r\n\t[ExactNumSmallInt] [smallint] NOT NULL,\r\n\t[ExactNumTinyInt] [tinyint] NOT NULL,\r\n\t[ExactNumBit] [bit] NOT NULL,\r\n\t[ExactNumMoney] [money] NOT NULL,\r\n\t[ExactNumSmallMoney] [smallmoney] NOT NULL,\r\n\t[ExactNumDecimal] [decimal](28, 3) NOT NULL,\r\n\t[ExactNumNumeric] [numeric](28, 3) NOT NULL,\r\n\t[ApproxNumFloat] [float] NOT NULL,\r\n\t[ApproxNumReal] [real] NOT NULL,\r\n\t[DTDate] [date] NOT NULL,\r\n\t[DTDateTime] [datetime] NOT NULL,\r\n\t[DTDateTime2] [datetime2](7) NOT NULL,\r\n\t[DTSmallDateTime] [smalldatetime] NOT NULL,\r\n\t[DTDateTimeOffset] [datetimeoffset](7) NOT NULL,\r\n\t[DTTime] [time](7) NOT NULL,\r\n\t[CharStrChar20] [char](20) NULL,\r\n\t[CharStrVarchar20] [varchar](20) NULL,\r\n\t[CharStrVarchar10K] [varchar](max) NULL,\r\n\t[CharStrNChar20] [nchar](20) NULL,\r\n\t[CharStrNVarchar20] [nvarchar](20) NULL,\r\n\t[CharStrNVarchar10K] [nvarchar](max) NULL,\r\n\t[BinBinary5K] [binary](5000) NULL,\r\n\t[BinVarbinary10K] [varbinary](max) NULL,\r\n\t[OtherGuid] [uniqueidentifier] NOT NULL,\r\n\t[OtherXml] [xml] NULL,\r\n CONSTRAINT [PK_{tableName}] PRIMARY KEY CLUSTERED \r\n(\r\n\t[Id] ASC\r\n))");
         var tableHeader = await MssSystemTables.GetTableHeaderAsync(
             "dbo", tableName, CancellationToken.None);
@@ -79,8 +79,8 @@ public class MssSystemTablesTests(DatabaseFixture dbFixture, ITestOutputHelper o
     {
         // Arrange
         var tableName = GetName();
-        await DbFixture.DropTable(tableName);
-        await DbFixture.ExecuteNonQuery($"CREATE TABLE [{tableName}]([Key1] int NOT NULL, [Key2] int NOT NULL, [AnotherCol] nvarchar(20), \r\nCONSTRAINT [PK_{tableName}] PRIMARY KEY CLUSTERED \r\n(\r\n\t[Key1] ASC,\r\n\t[Key2] ASC\r\n))");
+        await DropTable(tableName);
+        await ExecuteNonQuery($"CREATE TABLE [{tableName}]([Key1] int NOT NULL, [Key2] int NOT NULL, [AnotherCol] nvarchar(20), \r\nCONSTRAINT [PK_{tableName}] PRIMARY KEY CLUSTERED \r\n(\r\n\t[Key1] ASC,\r\n\t[Key2] ASC\r\n))");
 
         var tableHeader = await MssSystemTables.GetTableHeaderAsync(
             "dbo", tableName, CancellationToken.None);
@@ -104,8 +104,8 @@ public class MssSystemTablesTests(DatabaseFixture dbFixture, ITestOutputHelper o
     {
         // Arrange
         var tableName = GetName();
-        await DbFixture.DropTable(tableName);
-        await DbFixture.ExecuteNonQuery($"CREATE TABLE [{tableName}]([Key1] int NOT NULL, [Key2] int NOT NULL, [AnotherCol] nvarchar(20))");
+        await DropTable(tableName);
+        await ExecuteNonQuery($"CREATE TABLE [{tableName}]([Key1] int NOT NULL, [Key2] int NOT NULL, [AnotherCol] nvarchar(20))");
         var tableHeader = await MssSystemTables.GetTableHeaderAsync(
             "dbo", tableName, CancellationToken.None);
         tableHeader.Should().NotBeNull();
@@ -126,18 +126,18 @@ public class MssSystemTablesTests(DatabaseFixture dbFixture, ITestOutputHelper o
         try
         {
             // Arrange
-            await DbFixture.DropTable(childTable);
-            await DbFixture.DropTable(parent1Table);
-            await DbFixture.DropTable(parent2Table);
-            await DbFixture.ExecuteNonQuery(
+            await DropTable(childTable);
+            await DropTable(parent1Table);
+            await DropTable(parent2Table);
+            await ExecuteNonQuery(
                 $"CREATE TABLE [{parent1Table}]" +
                 $"  ([Id] int NOT NULL, [AnotherCol] nvarchar(20), \r\n" +
                 $"  CONSTRAINT [PK_{parent1Table}] PRIMARY KEY CLUSTERED ([Id] ASC))");
-            await DbFixture.ExecuteNonQuery(
+            await ExecuteNonQuery(
                 $"CREATE TABLE [{parent2Table}]" +
                 $"  ([Id] int NOT NULL, [AnotherCol] nvarchar(20), \r\n" +
                 $"  CONSTRAINT [PK_{parent2Table}] PRIMARY KEY CLUSTERED ([Id] ASC))");
-            await DbFixture.ExecuteNonQuery(
+            await ExecuteNonQuery(
                 $"CREATE TABLE [{childTable}]" +
                 $"  ([Id] int NOT NULL, Parent1Id int, Parent2Id int, [AnotherCol] nvarchar(20), \r\n" +
                 $"  CONSTRAINT [PK_{childTable}] PRIMARY KEY CLUSTERED ([Id] ASC), \r\n" +
@@ -165,26 +165,26 @@ public class MssSystemTablesTests(DatabaseFixture dbFixture, ITestOutputHelper o
         }
         finally
         {
-            await DbFixture.DropTable(childTable);
-            await DbFixture.DropTable(parent1Table);
-            await DbFixture.DropTable(parent2Table);
+            await DropTable(childTable);
+            await DropTable(parent1Table);
+            await DropTable(parent2Table);
         }
     }
 
     private async Task CreateTableWithDefaultValuesAsync(
         string tableName, string constraintName)
     {
-        await DbFixture.DropTable(tableName);
-        await DbFixture.ExecuteNonQuery($"DROP DEFAULT IF EXISTS {constraintName};");
-        await DbFixture.ExecuteNonQuery($"CREATE DEFAULT {constraintName} AS 0;");
-        await DbFixture.ExecuteNonQuery(
+        await DropTable(tableName);
+        await ExecuteNonQuery($"DROP DEFAULT IF EXISTS {constraintName};");
+        await ExecuteNonQuery($"CREATE DEFAULT {constraintName} AS 0;");
+        await ExecuteNonQuery(
             $"CREATE TABLE {tableName}(\r\n" +
             $"  id INTEGER,\r\n" +
             $"  int1 INT NOT NULL DEFAULT 0,\r\n" +
             $"  int2 INT NOT NULL CONSTRAINT df_bulkcopy_int DEFAULT 0,\r\n" +
             $"  int3 INT NOT NULL,\r\n" +
             $"  date1 DATETIME2 NOT NULL DEFAULT GETDATE());");
-        await DbFixture.ExecuteNonQuery($"exec sp_bindefault '{constraintName}', '{tableName}.int3'");
+        await ExecuteNonQuery($"exec sp_bindefault '{constraintName}', '{tableName}.int3'");
 
     }
 

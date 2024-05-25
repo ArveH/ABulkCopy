@@ -20,9 +20,9 @@ public class MssReaderTests : MssTestBase
     {
         // Arrange
         var tableName = GetName();
-        await DbFixture.DropTable(tableName);
-        await DbFixture.ExecuteNonQuery($"create table {tableName} (col1 bigint)");
-        await DbFixture.InsertIntoSingleColumnTable(
+        await DropTable(tableName);
+        await ExecuteNonQuery($"create table {tableName} (col1 bigint)");
+        await InsertIntoSingleColumnTable(
             tableName, AllTypes.SampleValues.BigInt);
 
         var selectCreatorMock = new Mock<ISelectCreator>();

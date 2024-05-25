@@ -11,8 +11,8 @@ public class MssTestGetTableNamesBase(
 
     protected async Task CreateTableAsync(string schema, string tableName)
     {
-        await DbFixture.DropTable(schema, tableName);
-        await DbFixture.ExecuteNonQuery(
+        await DropTable(schema, tableName);
+        await ExecuteNonQuery(
             $"CREATE TABLE [{schema}].[{tableName}](\r\n\t[ExactNumBigInt] [bigint] NOT NULL)");
     }
 
@@ -33,7 +33,7 @@ public class MssTestGetTableNamesBase(
         {
             foreach (var table in tabTuples)
             {
-                await DbFixture.DropTable(table.schemaName, table.tableName);
+                await DropTable(table.schemaName, table.tableName);
             }
         }
     }

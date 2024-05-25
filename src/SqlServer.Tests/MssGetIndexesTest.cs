@@ -16,7 +16,7 @@ public class MssGetIndexesTest : MssTestBase
     public async Task TestGetIndexes_When_OneIndexOneColumn()
     {
         // Arrange
-        await DbFixture.DropTable(_testTableName);
+        await DropTable(_testTableName);
         var tableHeader = await CreateTestTable();
         tableHeader.Should().NotBeNull("because table should exist");
         var columns = new List<IndexColumn>
@@ -44,7 +44,7 @@ public class MssGetIndexesTest : MssTestBase
     public async Task TestGetIndexes_When_OneDescendingColumn()
     {
         // Arrange
-        await DbFixture.DropTable(_testTableName);
+        await DropTable(_testTableName);
         var tableHeader = await CreateTestTable();
         tableHeader.Should().NotBeNull("because table should exist");
         var columns = new List<IndexColumn>
@@ -79,7 +79,7 @@ public class MssGetIndexesTest : MssTestBase
         tableDef.Columns.Add(new SqlServerInt(1, "Col1", false));
         tableDef.Columns.Add(new SqlServerInt(2, "Col2", false));
         tableDef.Columns.Add(new SqlServerInt(3, "Col3", false));
-        await DbFixture.CreateTable(tableDef);
+        await CreateTable(tableDef);
         return await MssSystemTables.GetTableHeaderAsync("dbo", _testTableName, _cts.Token);
     }
 
@@ -98,6 +98,6 @@ public class MssGetIndexesTest : MssTestBase
             Columns = columns
         };
 
-        await DbFixture.CreateIndex(_testTableName, indexDef);
+        await CreateIndex(_testTableName, indexDef);
     }
 }

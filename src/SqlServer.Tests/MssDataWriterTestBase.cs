@@ -27,9 +27,9 @@ public abstract class MssDataWriterTestBase : MssTestBase
     {
         // Arrange
         OriginalTableDefinition.Columns.Add(col);
-        await DbFixture.DropTable(TestTableName);
-        await DbFixture.CreateTable(OriginalTableDefinition);
-        await DbFixture.InsertIntoSingleColumnTable(
+        await DropTable(TestTableName);
+        await CreateTable(OriginalTableDefinition);
+        await InsertIntoSingleColumnTable(
             TestTableName, value, dbType);
         var cts = new CancellationTokenSource();
 
@@ -43,7 +43,7 @@ public abstract class MssDataWriterTestBase : MssTestBase
         }
         finally
         {
-            await DbFixture.DropTable(TestTableName);
+            await DropTable(TestTableName);
         }
 
         return await MockFileSystem.GetJsonDataText(TestPath, ("dbo", TestTableName));
