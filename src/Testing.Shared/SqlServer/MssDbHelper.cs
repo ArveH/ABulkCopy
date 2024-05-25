@@ -1,12 +1,13 @@
-﻿using ABulkCopy.Common.Database;
+﻿using ABulkCopy.ASqlServer;
+using ABulkCopy.Common.Database;
 
 namespace Testing.Shared.SqlServer;
 
-public class MssDbHelper
+public class MssDbHelper : MssCommandBase
 {
     private readonly IDbContext _dbContext;
 
-    public MssDbHelper(IDbContext dbContext)
+    public MssDbHelper(IDbContext dbContext) : base(dbContext)
     {
         _dbContext = dbContext;
     }
@@ -37,12 +38,12 @@ public class MssDbHelper
             sb.Append(column.GetNullableClause());
         }
         sb.AppendLine(");");
-        await ExecuteNonQuery(sb.ToString());
+        await ExecuteNonQueryAsync(sb.ToString(), CancellationToken.None);
     }
 
     public async Task DropTable(SchemaTableTuple st)
     {
-        await ExecuteNonQuery($"DROP TABLE IF EXISTS [{st.schemaName}].[{st.tableName}];");
+        await ExecuteNonQueryAsync($"DROP TABLE IF EXISTS [{st.schemaName}].[{st.tableName}];", CancellationToken.None);
     }
 
     public async Task InsertIntoSingleColumnTable(
@@ -107,21 +108,13 @@ public class MssDbHelper
         }
         sb.Append(")");
 
-        await ExecuteNonQuery(sb.ToString());
+        await ExecuteNonQueryAsync(sb.ToString(), CancellationToken.None);
     }
 
     public async Task DropIndex(string tableName, string indexName)
     {
         var sqlString = $"if exists (select name from sys.indexes where object_id=object_id('{tableName}') and name = '{indexName}' drop index [{tableName}].[{indexName}];";
-        await ExecuteNonQuery(sqlString);
-    }
-
-    public async Task ExecuteNonQuery(string sqlString)
-    {
-        await using var sqlConnection = new SqlConnection(_dbContext.ConnectionString);
-        await sqlConnection.OpenAsync();
-        await using var sqlCommand = new SqlCommand(sqlString, sqlConnection);
-        await sqlCommand.ExecuteNonQueryAsync();
+        await ExecuteNonQueryAsync(sqlString, CancellationToken.None);
     }
 
     public async Task<T?> ExecuteScalarAsync<T>(string sqlString)

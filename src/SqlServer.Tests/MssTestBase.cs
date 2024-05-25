@@ -83,7 +83,7 @@ public abstract class MssTestBase
 
     public async Task ExecuteNonQuery(string sqlString)
     {
-        await DbFixture.DbHelper.ExecuteNonQuery(sqlString);
+        await DbFixture.DbHelper.ExecuteNonQueryAsync(sqlString, CancellationToken.None);
     }
 
     public async Task<T?> ExecuteScalarAsync<T>(string sqlString)

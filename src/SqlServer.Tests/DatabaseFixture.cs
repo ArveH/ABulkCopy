@@ -58,7 +58,7 @@ public class DatabaseFixture : IAsyncLifetime
         var schemaExists = await DbHelper.ExecuteScalarAsync<int>($"select count(*) from sys.schemas where name = '{TestSchemaName}'");
         if (schemaExists == 0)
         {
-            await DbHelper.ExecuteNonQuery($"CREATE SCHEMA {TestSchemaName}");
+            await DbHelper.ExecuteNonQueryAsync($"CREATE SCHEMA {TestSchemaName}", CancellationToken.None);
         }
     }
 
