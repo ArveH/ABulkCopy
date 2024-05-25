@@ -67,7 +67,7 @@ public class CopyFromMssToPg : TestBase
     {
         await _fixture.DbHelper.DropTableAsync(("dbo", tableName));
         var tableDef = MssTestData.GetEmpty(("dbo", tableName));
-        var col = new SqlServerBigInt(101, "MyTestCol", false);
+        var col = new SqlServerInt(101, "col1", false);
         tableDef.Columns.Add(col);
         await _fixture.DbHelper.CreateTableAsync(tableDef);
     }
