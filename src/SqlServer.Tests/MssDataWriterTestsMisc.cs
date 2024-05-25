@@ -31,9 +31,9 @@ public class MssDataWriterTestsMisc : MssDataWriterTestBase
         var value = AllTypes.SampleValues.Varbinary10K;
         var col = new SqlServerVarBinary(101, "MyTestCol", false, 10000);
         OriginalTableDefinition.Columns.Add(col);
-        await DropTable(TestTableName);
-        await CreateTable(OriginalTableDefinition);
-        await InsertIntoSingleColumnTable(
+        await DropTableAsync(TestTableName);
+        await CreateTableAsync(OriginalTableDefinition);
+        await InsertIntoSingleColumnTableAsync(
             TestTableName, value, SqlDbType.VarBinary);
         var cts = new CancellationTokenSource();
 
@@ -47,7 +47,7 @@ public class MssDataWriterTestsMisc : MssDataWriterTestBase
         }
         finally
         {
-            await DropTable(TestTableName);
+            await DropTableAsync(TestTableName);
         }
 
         // Assert
@@ -64,9 +64,9 @@ public class MssDataWriterTestsMisc : MssDataWriterTestBase
         var value = AllTypes.SampleValues.Varbinary10K;
         var col = new SqlServerImage(101, "MyTestCol", false);
         OriginalTableDefinition.Columns.Add(col);
-        await DropTable(TestTableName);
-        await CreateTable(OriginalTableDefinition);
-        await InsertIntoSingleColumnTable(
+        await DropTableAsync(TestTableName);
+        await CreateTableAsync(OriginalTableDefinition);
+        await InsertIntoSingleColumnTableAsync(
             TestTableName, value, SqlDbType.Image);
         var cts = new CancellationTokenSource();
 
@@ -80,7 +80,7 @@ public class MssDataWriterTestsMisc : MssDataWriterTestBase
         }
         finally
         {
-            await DropTable(TestTableName);
+            await DropTableAsync(TestTableName);
         }
 
         // Assert
@@ -96,13 +96,13 @@ public class MssDataWriterTestsMisc : MssDataWriterTestBase
     {
         var col = new SqlServerVarBinary(101, "MyTestCol", true, -1);
         OriginalTableDefinition.Columns.Add(col);
-        await DropTable(TestTableName);
-        await CreateTable(OriginalTableDefinition);
-        await InsertIntoSingleColumnTable(
+        await DropTableAsync(TestTableName);
+        await CreateTableAsync(OriginalTableDefinition);
+        await InsertIntoSingleColumnTableAsync(
             TestTableName, AllTypes.SampleValues.Varbinary10K, SqlDbType.VarBinary);
-        await InsertIntoSingleColumnTable(
+        await InsertIntoSingleColumnTableAsync(
             TestTableName, null, SqlDbType.VarBinary);
-        await InsertIntoSingleColumnTable(
+        await InsertIntoSingleColumnTableAsync(
             TestTableName, AllTypes.SampleValues.Binary5K, SqlDbType.VarBinary);
         var cts = new CancellationTokenSource();
 
@@ -116,7 +116,7 @@ public class MssDataWriterTestsMisc : MssDataWriterTestBase
         }
         finally
         {
-            await DropTable(TestTableName);
+            await DropTableAsync(TestTableName);
         }
 
         // Assert

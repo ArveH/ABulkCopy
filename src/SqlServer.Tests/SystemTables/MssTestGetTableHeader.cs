@@ -57,8 +57,8 @@ public class MssTestGetTableHeader(
 
     private async Task CreateTableAsync(string schema, string tableName)
     {
-        await DropTable(schema, tableName);
-        await ExecuteNonQuery(
+        await DropTableAsync(schema, tableName);
+        await ExecuteNonQueryAsync(
             $"CREATE TABLE [{schema}].[{tableName}](\r\n\t[Id] [bigint] IDENTITY(1,1) NOT NULL,\r\n\t[ExactNumBigInt] [bigint] NOT NULL)");
     }
 }

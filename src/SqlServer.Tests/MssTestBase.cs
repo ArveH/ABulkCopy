@@ -48,22 +48,22 @@ public abstract class MssTestBase
         return methodName.Length > 34 ? methodName[4..34] : methodName;
     }
 
-    public async Task CreateTable(TableDefinition tableDefinition)
+    public async Task CreateTableAsync(TableDefinition tableDefinition)
     {
         await DbFixture.DbHelper.CreateTable(tableDefinition);
     }
 
-    public async Task DropTable(string tableName)
+    public async Task DropTableAsync(string tableName)
     {
-        await DropTable("dbo", tableName);
+        await DropTableAsync("dbo", tableName);
     }
 
-    public async Task DropTable(string schema, string tableName)
+    public async Task DropTableAsync(string schema, string tableName)
     {
         await DbFixture.DbHelper.DropTable((schema, tableName));
     }
 
-    public async Task InsertIntoSingleColumnTable(
+    public async Task InsertIntoSingleColumnTableAsync(
         string tableName,
         object? value,
         SqlDbType? dbType = null)
@@ -71,17 +71,17 @@ public abstract class MssTestBase
         await DbFixture.DbHelper.InsertIntoSingleColumnTable(tableName, value, dbType);
     }
 
-    public async Task CreateIndex(string tableName, IndexDefinition indexDefinition)
+    public async Task CreateIndexAsync(string tableName, IndexDefinition indexDefinition)
     {
         await DbFixture.DbHelper.CreateIndex(tableName, indexDefinition);
     }
 
-    public async Task DropIndex(string tableName, string indexName)
+    public async Task DropIndexAsync(string tableName, string indexName)
     {
         await DbFixture.DbHelper.DropIndex(tableName, indexName);
     }
 
-    public async Task ExecuteNonQuery(string sqlString)
+    public async Task ExecuteNonQueryAsync(string sqlString)
     {
         await DbFixture.DbHelper.ExecuteNonQueryAsync(sqlString, CancellationToken.None);
     }

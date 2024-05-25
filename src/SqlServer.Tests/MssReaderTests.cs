@@ -20,9 +20,9 @@ public class MssReaderTests : MssTestBase
     {
         // Arrange
         var tableName = GetName();
-        await DropTable(tableName);
-        await ExecuteNonQuery($"create table {tableName} (col1 bigint)");
-        await InsertIntoSingleColumnTable(
+        await DropTableAsync(tableName);
+        await ExecuteNonQueryAsync($"create table {tableName} (col1 bigint)");
+        await InsertIntoSingleColumnTableAsync(
             tableName, AllTypes.SampleValues.BigInt);
 
         var selectCreatorMock = new Mock<ISelectCreator>();

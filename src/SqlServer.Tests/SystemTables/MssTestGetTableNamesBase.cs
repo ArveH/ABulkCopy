@@ -11,8 +11,8 @@ public class MssTestGetTableNamesBase(
 
     protected async Task CreateTableAsync(string schema, string tableName)
     {
-        await DropTable(schema, tableName);
-        await ExecuteNonQuery(
+        await DropTableAsync(schema, tableName);
+        await ExecuteNonQueryAsync(
             $"CREATE TABLE [{schema}].[{tableName}](\r\n\t[ExactNumBigInt] [bigint] NOT NULL)");
     }
 
@@ -33,7 +33,7 @@ public class MssTestGetTableNamesBase(
         {
             foreach (var table in tabTuples)
             {
-                await DropTable(table.schemaName, table.tableName);
+                await DropTableAsync(table.schemaName, table.tableName);
             }
         }
     }
