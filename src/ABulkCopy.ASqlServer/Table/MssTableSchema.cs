@@ -37,6 +37,7 @@ public class MssTableSchema : IMssTableSchema
         return new TableDefinition(Rdbms.Mss)
         {
             Header = tableHeader,
+            Data = new TableData { FileName = $"{schemaName}.{tableName}{Constants.DataSuffix}"},
             Columns = columnInfo.ToList(),
             PrimaryKey = primaryKey,
             ForeignKeys = foreignKeys.ToList(),

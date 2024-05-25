@@ -39,6 +39,7 @@ public class PgTypeMapper : ITypeConverter
                 Location = mappings.Locations.NullableGet(sourceDefinition.Header.Location),
                 Schema = mappings.Schemas[sourceDefinition.Header.Schema],
             },
+            Data = new TableData { FileName = sourceDefinition.Data.FileName },
             Columns = ConvertColumns(sourceDefinition, mappings).ToList()
         };
         tableDefinition.ForeignKeys.AddRange(sourceDefinition.ForeignKeys.Select(k => k.Clone()));

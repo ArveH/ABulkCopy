@@ -12,7 +12,8 @@ public static class MssTestData
                 Location = "default",
                 Name = st.tableName,
                 Schema = st.schemaName
-            }
+            },
+            Data = new TableData { FileName = $"{st.schemaName}.{st.tableName}{Constants.DataSuffix}" },
         };
     }
 
@@ -28,6 +29,7 @@ public static class MssTestData
                 Name = "MssAllTypes",
                 Schema = "dbo"
             },
+            Data = new TableData {FileName = "dbo.MssAllTypes.data" },
             Columns = new List<IColumn>
             {
                 GetIdColDefinition(101, "Id"),
@@ -72,6 +74,7 @@ public static class MssTestData
                 Name = "MssDefaults",
                 Schema = "dbo"
             },
+            Data = new TableData { FileName = "dbo.MssDefaults.data" },
             Columns = new List<IColumn>
             {
                 GetIdColDefinition(101, "Id"),

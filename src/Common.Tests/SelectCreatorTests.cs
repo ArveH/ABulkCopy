@@ -52,6 +52,7 @@ public class SelectCreatorTests
                 Name = "mytable",
                 Schema = "dbo"
             },
+            Data = new TableData { FileName = "dbo.mytable.data" },
             Columns = new List<IColumn>()
         };
         for (var i = 0; i < colCount; i++)

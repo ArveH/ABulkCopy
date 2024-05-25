@@ -8,6 +8,7 @@ public class TableDefinition
     }
     public Rdbms Rdbms { get; }
     public required TableHeader Header { get; set; }
+    public required TableData Data { get; set; }
 
     public List<IColumn> Columns { get; set; } = new();
     public PrimaryKey? PrimaryKey { get; set; }

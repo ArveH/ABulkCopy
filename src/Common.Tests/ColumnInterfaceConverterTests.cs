@@ -40,7 +40,7 @@ public class ColumnInterfaceConverterTests
         var jsonText = JsonSerializer.Serialize(tableDefinition, options);
 
         // Assert
-        jsonText.Squeeze().Should().StartWith("{\r\n  \"Rdbms\": \"Mss\",\r\n  \"Header\": {\r\n    \"Id\": 1,\r\n    \"Name\": \"MssAllTypes\",\r\n    \"Schema\": \"dbo\",\r\n    \"Location\": \"default\",\r\n    \"Identity\": {\r\n      \"Seed\": 1,\r\n      \"Increment\": 1\r\n    }\r\n  },\r\n  \"Columns\": [\r\n    {\r\n      \"Name\": \"Id\",\r\n      \"Type\": \"bigint\",\r\n      \"IsNullable\": false,\r\n      \"Identity\": {\r\n        \"Seed\": 1,\r\n        \"Increment\": 1\r\n      },\r\n      \"ComputedDefinition\": null,\r\n      \"Length\": 8,\r\n      \"Precision\": 19,\r\n      \"Scale\": 0,\r\n      \"DefaultConstraint\": null,\r\n      \"Collation\": null\r\n    },".Squeeze());
+        jsonText.Squeeze().Should().StartWith("{\r\n  \"Rdbms\": \"Mss\",\r\n  \"Header\": {\r\n    \"Id\": 1,\r\n    \"Name\": \"MssAllTypes\",\r\n    \"Schema\": \"dbo\",\r\n    \"Location\": \"default\",\r\n    \"Identity\": {\r\n      \"Seed\": 1,\r\n      \"Increment\": 1\r\n    }\r\n  },\r\n  \"Data\": {\r\n    \"FileName\": \"dbo.MssAllTypes.data\"\r\n  },\r\n  \"Columns\": [\r\n    {\r\n      \"Name\": \"Id\",\r\n      \"Type\": \"bigint\",\r\n      \"IsNullable\": false,\r\n      \"Identity\": {\r\n        \"Seed\": 1,\r\n        \"Increment\": 1\r\n      },\r\n      \"ComputedDefinition\": null,\r\n      \"Length\": 8,\r\n      \"Precision\": 19,\r\n      \"Scale\": 0,\r\n      \"DefaultConstraint\": null,\r\n      \"Collation\": null\r\n    },".Squeeze());
     }
 
     [Fact]

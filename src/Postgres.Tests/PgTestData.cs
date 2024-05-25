@@ -12,7 +12,8 @@ public static class PgTestData
                 Location = "default",
                 Name = st.tableName,
                 Schema = st.schemaName
-            }
+            },
+            Data = new TableData { FileName = $"{st.schemaName}.{st.tableName}{Constants.DataSuffix}"}
         };
     }
 }
