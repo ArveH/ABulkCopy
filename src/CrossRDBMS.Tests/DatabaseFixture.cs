@@ -31,9 +31,9 @@ public class DatabaseFixture : IAsyncLifetime
         set => _mssContext = value;
     }
 
-    public MssDbHelper DbHelper
+    public MssDbHelper MssDbHelper
     {
-        get => _mssDbHelper ?? throw new ArgumentNullException(nameof(MssDbHelper));
+        get => _mssDbHelper ?? throw new ArgumentNullException(nameof(Testing.Shared.SqlServer.MssDbHelper));
         set => _mssDbHelper = value;
     }
 

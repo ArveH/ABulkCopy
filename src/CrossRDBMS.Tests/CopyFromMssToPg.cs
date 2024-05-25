@@ -1,3 +1,6 @@
+using ABulkCopy.Common.Extensions;
+using ABulkCopy.Common.Types.Column;
+
 namespace CrossRDBMS.Tests;
 
 [Collection(nameof(DatabaseCollection))]
@@ -8,7 +11,7 @@ public class CopyFromMssToPg : TestBase
 
     private IIdentifier? _identifier;
 
-    public CopyFromMssToPg(DatabaseFixture fixture, ITestOutputHelper output) 
+    public CopyFromMssToPg(DatabaseFixture fixture, ITestOutputHelper output)
     {
         _fixture = fixture;
         _output = output;
@@ -37,8 +40,11 @@ public class CopyFromMssToPg : TestBase
             logMessages,
             _output,
             fileSystem);
-
-        await CreateTableAsync(tableName);
+        var colValue = "12345";
+        await CreateTableAsync(
+            ("dbo", tableName),
+            new SqlServerInt(101, "col1", false),
+            colValue);
 
         var copyOut = mssContext.GetServices<ICopyOut>();
         var copyIn = pgContext.GetServices<ICopyIn>();
@@ -51,7 +57,15 @@ public class CopyFromMssToPg : TestBase
         // Assert
         await AssertFilesExists(fileSystem, tableName);
         await ValidateTypeInfoAsync(tableName, "integer", null, 32, 0);
-        // TODO: Validate Postgres column and data
+        await ValidateValueAsync(("public", tableName), colValue);
+    }
+
+    private async Task ValidateValueAsync(SchemaTableTuple st, string expected)
+    {
+        await using var cmd = _fixture.PgContext.DataSource.CreateCommand(
+            $"select col1 from {st.GetFullName()}");
+        var actual = (int?)await cmd.ExecuteScalarAsync();
+        actual.Should().Be(int.Parse(expected));
     }
 
     private static async Task AssertFilesExists(IFileSystem fileSystem, string tableName)
@@ -63,13 +77,18 @@ public class CopyFromMssToPg : TestBase
         dataFile.Should().NotBeNull("because the data file should exist");
     }
 
-    private async Task CreateTableAsync(string tableName)
+    private async Task CreateTableAsync(
+        SchemaTableTuple st,
+        IColumn mssCol,
+        string value)
     {
-        await _fixture.DbHelper.DropTableAsync(("dbo", tableName));
-        var tableDef = MssTestData.GetEmpty(("dbo", tableName));
-        var col = new SqlServerInt(101, "col1", false);
-        tableDef.Columns.Add(col);
-        await _fixture.DbHelper.CreateTableAsync(tableDef);
+        await _fixture.MssDbHelper.DropTableAsync(st);
+        var tableDef = MssTestData.GetEmpty(st);
+        tableDef.Columns.Add(mssCol);
+        await _fixture.MssDbHelper.CreateTableAsync(tableDef);
+        await _fixture.MssDbHelper.ExecuteNonQueryAsync(
+            $"insert into {st.GetFullName()}(col1) values ({value})",
+            CancellationToken.None);
     }
 
     private async Task ValidateTypeInfoAsync(

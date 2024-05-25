@@ -23,3 +23,4 @@ global using Testcontainers.MsSql;
 global using Testcontainers.PostgreSql;
 global using Testing.Shared.SqlServer;
 global using Xunit.Abstractions;
+global using SchemaTableTuple = (string schemaName, string tableName);
