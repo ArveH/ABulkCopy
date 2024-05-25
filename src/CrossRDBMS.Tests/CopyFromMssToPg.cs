@@ -1,5 +1,3 @@
-using System.IO.Abstractions.TestingHelpers;
-
 namespace CrossRDBMS.Tests;
 
 [Collection(nameof(DatabaseCollection))]
@@ -40,11 +38,7 @@ public class CopyFromMssToPg : TestBase
             _output,
             fileSystem);
 
-        // TODO: 
-        await DropTableAsync(tableName);
-        await CreateTableAsync(tableName, "int");
-        // TODO: Insert values
-
+        await CreateTableAsync(tableName);
 
         var copyOut = mssContext.GetServices<ICopyOut>();
         var copyIn = pgContext.GetServices<ICopyIn>();
@@ -55,31 +49,27 @@ public class CopyFromMssToPg : TestBase
         await copyIn.RunAsync(Rdbms.Pg, CancellationToken.None);
 
         // Assert
+        await AssertFilesExists(fileSystem, tableName);
+        await ValidateTypeInfoAsync(tableName, "integer", null, 32, 0);
+        // TODO: Validate Postgres column and data
+    }
+
+    private static async Task AssertFilesExists(IFileSystem fileSystem, string tableName)
+    {
         var schemaFile = await fileSystem.File.ReadAllTextAsync("dbo." + tableName + ".schema");
         schemaFile.Should().NotBeNullOrEmpty("because the schema file should exist");
         schemaFile.Should().Contain($"\"Name\": \"{tableName}\"");
         var dataFile = await fileSystem.File.ReadAllTextAsync("dbo." + tableName + ".data");
         dataFile.Should().NotBeNull("because the data file should exist");
-        await ValidateTypeInfoAsync(tableName, "integer", null, 32, 0);
-        // TODO: Validate Postgres column and data
     }
 
-    private async Task DropTableAsync(string tableName)
+    private async Task CreateTableAsync(string tableName)
     {
-        await using var conn = new SqlConnection(_fixture.MssConnectionString);
-        await using var cmd = conn.CreateCommand();
-        cmd.CommandText = $"DROP TABLE IF EXISTS {tableName}";
-        await conn.OpenAsync();
-        await cmd.ExecuteNonQueryAsync();
-    }
-
-    private async Task CreateTableAsync(string tableName, string colType)
-    {
-        await using var conn = new SqlConnection(_fixture.MssConnectionString);
-        await using var cmd = conn.CreateCommand();
-        cmd.CommandText = $"CREATE TABLE {tableName} (col1 {colType})";
-        await conn.OpenAsync();
-        await cmd.ExecuteNonQueryAsync();
+        await _fixture.DbHelper.DropTableAsync(("dbo", tableName));
+        var tableDef = MssTestData.GetEmpty(("dbo", tableName));
+        var col = new SqlServerBigInt(101, "MyTestCol", false);
+        tableDef.Columns.Add(col);
+        await _fixture.DbHelper.CreateTableAsync(tableDef);
     }
 
     private async Task ValidateTypeInfoAsync(
@@ -148,11 +138,5 @@ public class CopyFromMssToPg : TestBase
             reader.GetInt32(1).Should().Be(expectedLength.Value,
                 $"because the length should be {expectedLength.Value}");
         }
-    }
-
-    private static void DeleteFiles(string tableName)
-    {
-        File.Delete(tableName + ".schema");
-        File.Delete(tableName + ".data");
     }
 }

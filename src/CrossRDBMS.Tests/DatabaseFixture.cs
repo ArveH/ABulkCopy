@@ -7,6 +7,7 @@ public class DatabaseFixture : IAsyncLifetime
     private MsSqlContainer? _mssContainer;
     private PostgreSqlContainer? _pgContainer;
     private IDbContext? _mssContext;
+    private MssDbHelper? _mssDbHelper;
     private IPgContext? _pgContext;
     private IConfiguration? _testConfiguration;
     private string? _pgConnectionString;
@@ -28,6 +29,12 @@ public class DatabaseFixture : IAsyncLifetime
     {
         get => _mssContext ?? throw new ArgumentNullException(nameof(MssContext));
         set => _mssContext = value;
+    }
+
+    public MssDbHelper DbHelper
+    {
+        get => _mssDbHelper ?? throw new ArgumentNullException(nameof(MssDbHelper));
+        set => _mssDbHelper = value;
     }
 
     public IPgContext PgContext
@@ -66,6 +73,7 @@ public class DatabaseFixture : IAsyncLifetime
         _pgConnectionString = TestConfiguration.GetConnectionString(Constants.Config.PgConnectionString);
         PgContext = new PgContext(new NullLoggerFactory(), TestConfiguration);
         MssContext = new MssContext(TestConfiguration);
+        _mssDbHelper = new MssDbHelper(MssContext);
     }
 
     public async Task DisposeAsync()

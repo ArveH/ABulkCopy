@@ -5,7 +5,6 @@ public class TestSchemas : TestBase
 {
     private readonly DatabaseFixture _fixture;
     private readonly ITestOutputHelper _output;
-    private IIdentifier? _identifier;
 
     public TestSchemas(DatabaseFixture fixture, ITestOutputHelper output)
     {
@@ -16,5 +15,6 @@ public class TestSchemas : TestBase
     [Fact]
     public async Task TestFkInAnotherSchema()
     {
+        await Task.CompletedTask;
     }
 }
