@@ -12,7 +12,7 @@ public class MssDbHelper : MssCommandBase
         _dbContext = dbContext;
     }
 
-    public async Task CreateTable(TableDefinition tableDefinition)
+    public async Task CreateTableAsync(TableDefinition tableDefinition)
     {
         var sb = new StringBuilder();
         sb.AppendLine($"create table [{tableDefinition.Header.Schema}].[{tableDefinition.Header.Name}] (");
@@ -41,12 +41,12 @@ public class MssDbHelper : MssCommandBase
         await ExecuteNonQueryAsync(sb.ToString(), CancellationToken.None);
     }
 
-    public async Task DropTable(SchemaTableTuple st)
+    public async Task DropTableAsync(SchemaTableTuple st)
     {
         await ExecuteNonQueryAsync($"DROP TABLE IF EXISTS [{st.schemaName}].[{st.tableName}];", CancellationToken.None);
     }
 
-    public async Task InsertIntoSingleColumnTable(
+    public async Task InsertIntoSingleColumnTableAsync(
         string tableName,
         object? value,
         SqlDbType? dbType = null)
@@ -71,7 +71,7 @@ public class MssDbHelper : MssCommandBase
         await sqlCommand.ExecuteNonQueryAsync();
     }
 
-    public async Task CreateIndex(string tableName, IndexDefinition indexDefinition)
+    public async Task CreateIndexAsync(string tableName, IndexDefinition indexDefinition)
     {
         var sb = new StringBuilder();
         sb.Append("create ");
@@ -111,7 +111,7 @@ public class MssDbHelper : MssCommandBase
         await ExecuteNonQueryAsync(sb.ToString(), CancellationToken.None);
     }
 
-    public async Task DropIndex(string tableName, string indexName)
+    public async Task DropIndexAsync(string tableName, string indexName)
     {
         var sqlString = $"if exists (select name from sys.indexes where object_id=object_id('{tableName}') and name = '{indexName}' drop index [{tableName}].[{indexName}];";
         await ExecuteNonQueryAsync(sqlString, CancellationToken.None);
