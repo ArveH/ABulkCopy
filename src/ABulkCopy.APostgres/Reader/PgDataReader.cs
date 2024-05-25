@@ -33,7 +33,7 @@ public class PgDataReader : IADataReader, IDisposable
             copyStmt, ct).ConfigureAwait(false);
 
         var path = Path.Combine(
-            folder, tableDefinition.GetDataFileName());
+            folder, tableDefinition.Data.FileName);
         _fileReader.Open(path);
         var counter = 0L;
         // TODO: Currently, it will not continue on error.

@@ -27,7 +27,7 @@ public class DataWriter : IDataWriter
         var tableReader = _tableReaderFactory.GetTableReader(_dbContext);
         AddDirectoriesForBlobs(tableDefinition, path);
         var fileFullPath = Path.Combine(
-            path, tableDefinition.GetDataFileName());
+            path, tableDefinition.Data.FileName);
         await using var streamWriter = _fileSystem.File.CreateText(fileFullPath);
         await tableReader.PrepareReaderAsync(tableDefinition, ct).ConfigureAwait(false);
         var rowCounter = 0;

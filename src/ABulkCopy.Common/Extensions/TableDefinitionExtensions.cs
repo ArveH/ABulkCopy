@@ -12,11 +12,6 @@ public static class TableDefinitionExtensions
         return (tableDefinition.Header.Schema, tableDefinition.Header.Name);
     }
 
-    public static string GetDataFileName(this TableDefinition tableDefinition)
-    {
-        return tableDefinition.GetFullName() + Constants.DataSuffix;
-    }
-
     public static string GetSchemaFileName(this TableDefinition tableDefinition)
     {
         return tableDefinition.GetFullName() + Constants.SchemaSuffix;
