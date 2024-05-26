@@ -19,6 +19,8 @@ global using System.Diagnostics;
 global using System.IO.Abstractions;
 global using System.IO.Abstractions.TestingHelpers;
 global using ABulkCopy.ASqlServer.Column.ColumnTypes;
+global using ABulkCopy.Common.Extensions;
+global using ABulkCopy.Common.Types.Column;
 global using Testcontainers.MsSql;
 global using Testcontainers.PostgreSql;
 global using Testing.Shared.SqlServer;

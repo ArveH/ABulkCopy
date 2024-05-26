@@ -1,6 +1,3 @@
-using ABulkCopy.Common.Extensions;
-using ABulkCopy.Common.Types.Column;
-
 namespace CrossRDBMS.Tests;
 
 [Collection(nameof(DatabaseCollection))]
