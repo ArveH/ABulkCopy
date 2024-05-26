@@ -45,7 +45,7 @@ public class TestSchemas : TestBase
             ("dbo", parentName),
             new SqlServerInt(101, "id", false),
             parentId);
-        await CreateChildTableAsync(
+        var childDef = await CreateChildTableAsync(
             ("dbo", childName),
             new SqlServerInt(101, "id", false),
             parentDef,
@@ -59,16 +59,31 @@ public class TestSchemas : TestBase
         await copyIn.RunAsync(Rdbms.Pg, CancellationToken.None);
 
         // Assert
-        await AssertFilesExists(fileSystem, (parentDef.Header.Schema, parentDef.Header.Name));
+        await AssertFilesExists(
+            fileSystem, parentDef.GetSchemaFileName(), parentDef.Data.FileName);
+        await ValidateValueAsync(
+            ("public", childDef.Header.Name),
+            childDef.ForeignKeys.First().ColumnNames.First(),
+            1);
     }
 
-    private static async Task AssertFilesExists(IFileSystem fileSystem, SchemaTableTuple st)
+    private static async Task AssertFilesExists(
+        IFileSystem fileSystem, string schemaFile, string dataFile)
     {
-        var schemaFile = await fileSystem.File.ReadAllTextAsync(st.GetSchemaFileName());
-        schemaFile.Should().NotBeNullOrEmpty("because the schema file should exist");
-        schemaFile.Should().Contain($"\"Name\": \"{st.tableName}\"");
-        var dataFile = await fileSystem.File.ReadAllTextAsync(st.GetDataFileName());
-        dataFile.Should().NotBeNull("because the data file should exist");
+        var schemaFileContent = await fileSystem.File.ReadAllTextAsync(schemaFile);
+        schemaFileContent.Should().NotBeNullOrEmpty("because the schema file should exist");
+        schemaFileContent.Should().Contain("\"Name\": \"");
+        var dataFileContent = await fileSystem.File.ReadAllTextAsync(dataFile);
+        dataFileContent.Should().NotBeNull("because the data file should exist");
+    }
+
+    private async Task ValidateValueAsync(
+        SchemaTableTuple st, string colName, int expected)
+    {
+        await using var cmd = _fixture.PgContext.DataSource.CreateCommand(
+            $"select {colName} from {st.GetFullName()}");
+        var actual = (int?)await cmd.ExecuteScalarAsync();
+        actual.Should().Be(expected);
     }
 
     private async Task<TableDefinition> CreateTableAsync(
@@ -86,7 +101,7 @@ public class TestSchemas : TestBase
         return tableDef;
     }
 
-    private async Task CreateChildTableAsync(
+    private async Task<TableDefinition> CreateChildTableAsync(
         SchemaTableTuple st,
         IColumn mssCol,
         TableDefinition parent,
@@ -107,5 +122,7 @@ public class TestSchemas : TestBase
         await _fixture.MssDbHelper.ExecuteNonQueryAsync(
             $"insert into {st.GetFullName()}({mssCol.Name}, parentid) values ({values.childId}, {values.parentId})",
             CancellationToken.None);
+
+        return tableDef;
     }
 }
