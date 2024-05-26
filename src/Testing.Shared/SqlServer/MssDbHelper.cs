@@ -6,10 +6,20 @@ namespace Testing.Shared.SqlServer;
 public class MssDbHelper : MssCommandBase
 {
     private readonly IDbContext _dbContext;
+    public const string TestSchemaName = "test_schema";
 
     public MssDbHelper(IDbContext dbContext) : base(dbContext)
     {
         _dbContext = dbContext;
+    }
+
+    public async Task EnsureTestSchemaAsync()
+    {
+        var schemaExists = await ExecuteScalarAsync<int>($"select count(*) from sys.schemas where name = '{TestSchemaName}'");
+        if (schemaExists == 0)
+        {
+            await ExecuteNonQueryAsync($"CREATE SCHEMA {TestSchemaName}", CancellationToken.None);
+        }
     }
 
     public async Task CreateTableAsync(TableDefinition tableDefinition)

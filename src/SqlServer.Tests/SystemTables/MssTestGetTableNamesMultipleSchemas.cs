@@ -14,7 +14,7 @@ public class MssTestGetTableNamesMultipleSchemas(
         tableList.Count().Should().Be(2);
         tableList[0].schemaName.Should().Be("dbo");
         tableList[0].tableName.Should().Be(testTableName);
-        tableList[1].schemaName.Should().Be(DatabaseFixture.TestSchemaName);
+        tableList[1].schemaName.Should().Be(MssDbHelper.TestSchemaName);
         tableList[1].tableName.Should().Be(testTableName);
     }
 
@@ -51,7 +51,7 @@ public class MssTestGetTableNamesMultipleSchemas(
         var testTableName = "T_" + guid;
         var testTables = new List<SchemaTableTuple>
         {
-            new(DatabaseFixture.TestSchemaName, testTableName),
+            new(MssDbHelper.TestSchemaName, testTableName),
             new("dbo", testTableName),
             new("dbo", "T_ExtraTable"),
         };

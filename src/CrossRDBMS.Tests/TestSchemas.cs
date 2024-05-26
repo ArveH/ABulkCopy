@@ -13,7 +13,7 @@ public class TestSchemas : TestBase
     }
 
     [Fact]
-    public async Task TestFkInAnotherSchema()
+    public async Task TestFKInAnotherSchema()
     {
         await Task.CompletedTask;
     }

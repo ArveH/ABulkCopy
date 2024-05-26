@@ -8,8 +8,6 @@ public class DatabaseFixture : IAsyncLifetime
     private IConfiguration? _testConfiguration;
     private string? _connectionString;
 
-    public const string TestSchemaName = "test_schema";
-
     public string MssConnectionString => _connectionString ?? throw new ArgumentNullException(nameof(MssConnectionString));
 
     public IDbContext MssDbContext
@@ -50,16 +48,7 @@ public class DatabaseFixture : IAsyncLifetime
 
         MssDbContext = new MssContext(TestConfiguration);
         _mssDbHelper = new MssDbHelper(MssDbContext);
-        await OneTimeSetupAsync();
-    }
-
-    private async Task OneTimeSetupAsync()
-    {
-        var schemaExists = await DbHelper.ExecuteScalarAsync<int>($"select count(*) from sys.schemas where name = '{TestSchemaName}'");
-        if (schemaExists == 0)
-        {
-            await DbHelper.ExecuteNonQueryAsync($"CREATE SCHEMA {TestSchemaName}", CancellationToken.None);
-        }
+        await DbHelper.EnsureTestSchemaAsync();
     }
 
     public async Task DisposeAsync()

@@ -26,7 +26,7 @@ public class MssTestGetTableHeader(
     public async Task TestGetTableHeader_When_NameAndTestSchema()
     {
         // Act
-        var schemaName = DatabaseFixture.TestSchemaName;
+        var schemaName = MssDbHelper.TestSchemaName;
         var tableName = GetName();
         await CreateTableAsync(schemaName, tableName);
         var tableHeader = await MssSystemTables.GetTableHeaderAsync(
