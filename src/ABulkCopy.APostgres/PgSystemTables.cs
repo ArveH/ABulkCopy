@@ -92,6 +92,7 @@ public class PgSystemTables : IPgSystemTables
             var fk = new ForeignKey
             {
                 ColumnNames = columns.Select(c => c.child).ToList(),
+                SchemaReference = "public", // TODO: GetForeignKeysAsync: get schema
                 TableReference = reader.GetString(0),
                 ColumnReferences = columns.Select(c => c.parent).ToList(),
                 ConstraintName = constraintName,

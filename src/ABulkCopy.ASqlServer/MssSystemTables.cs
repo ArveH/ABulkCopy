@@ -309,6 +309,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
             new SqlCommand("SELECT DISTINCT  \r\n" +
                            "    f.name AS foreign_key_name  \r\n" +
                            "   ,object_id \r\n" +
+                           "   ,OBJECT_SCHEMA_NAME (f.referenced_object_id) AS referenced_object_schema  \r\n" +
                            "   ,OBJECT_NAME (f.referenced_object_id) AS referenced_object  \r\n" +
                            "   ,f.delete_referential_action_desc  \r\n" +
                            "   ,f.update_referential_action_desc  \r\n" +
@@ -323,9 +324,10 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
             {
                 ConstraintName = reader.GetString(0),
                 ConstraintId = reader.GetInt32(1),
-                TableReference = reader.GetString(2),
-                DeleteAction = (DeleteAction)Enum.Parse(typeof(DeleteAction), reader.GetString(3).Replace("_", ""), true),
-                UpdateAction = (UpdateAction)Enum.Parse(typeof(UpdateAction), reader.GetString(4).Replace("_", ""), true)
+                SchemaReference = reader.GetString(2),
+                TableReference = reader.GetString(3),
+                DeleteAction = (DeleteAction)Enum.Parse(typeof(DeleteAction), reader.GetString(4).Replace("_", ""), true),
+                UpdateAction = (UpdateAction)Enum.Parse(typeof(UpdateAction), reader.GetString(5).Replace("_", ""), true)
             };
             await GetForeignKeyColumnsAsync(fk, ct).ConfigureAwait(false);
             foreignKeys.Add(fk);

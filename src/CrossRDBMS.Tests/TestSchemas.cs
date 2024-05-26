@@ -114,6 +114,7 @@ public class TestSchemas : TestBase
         tableDef.ForeignKeys.Add(new ForeignKey
         {
             ColumnNames = ["parentid"],
+            SchemaReference = parent.Header.Schema,
             TableReference = parent.Header.Name,
             ColumnReferences = [parent.Columns.First().Name],
             DeleteAction = DeleteAction.Cascade

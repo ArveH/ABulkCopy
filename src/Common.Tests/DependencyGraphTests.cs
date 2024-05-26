@@ -287,6 +287,7 @@ public class DependencyGraphTests
         {
             ConstraintName = $"FK_{parentName}_Id",
             ColumnNames = new List<string> { $"{parentName}_Id" },
+            SchemaReference = "dbo",
             TableReference = parentName,
             ColumnReferences = new List<string> { "Id" },
         });

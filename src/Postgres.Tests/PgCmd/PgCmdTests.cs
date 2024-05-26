@@ -204,10 +204,10 @@ public class PgCmdTests(
         await pgCmd.CreateTableAsync(parent2TableDefinition, cts.Token);
         var childTableDefinition = GetChildTableDefinition(
             childTableName,
-            new List<(string, List<string>)>
+            new List<(SchemaTableTuple, List<string>)>
             {
-                (parent1TableName, new() { "Parent1Id" }),
-                (parent2TableName, new() { "Parent2Id" })
+                (("public", parent1TableName), ["Parent1Id"]),
+                (("public", parent2TableName), ["Parent2Id"])
             });
 
         try
@@ -258,9 +258,9 @@ public class PgCmdTests(
         await pgCmd.CreateTableAsync(parent1TableDefinition, cts.Token);
         var childTableDefinition = GetChildTableDefinition(
             childTableName,
-            new List<(string, List<string>)>
+            new List<(SchemaTableTuple, List<string>)>
             {
-                (parent1TableName, new() { "Parent1Id", "col1" })
+                (("public", parent1TableName), ["Parent1Id", "col1"])
             });
 
         try
@@ -309,9 +309,9 @@ public class PgCmdTests(
         await pgCmd.ExecuteNonQueryAsync($"insert into \"{parent1TableName}\" (\"Parent1Id\", \"col1\", \"col2\") values (1, 2, 1)", cts.Token);
         var childTableDefinition = GetChildTableDefinition(
             childTableName,
-            new List<(string, List<string>)>
+            new List<(SchemaTableTuple, List<string>)>
             {
-                (parent1TableName, new() { "Parent1Id", "col1" })
+                (("public", parent1TableName), new() { "Parent1Id", "col1" })
             });
         childTableDefinition.ForeignKeys.First().DeleteAction = DeleteAction.Cascade;
         await pgCmd.CreateTableAsync(childTableDefinition, cts.Token);
@@ -337,14 +337,14 @@ public class PgCmdTests(
     }
 
     private static TableDefinition GetParentTableDefinition(
-        string tableName, List<(string colName, bool isKey)> cols)
+        string tableName, List<(string colName, bool isPrimaryKey)> cols)
     {
         var inputDefinition = PgTestData.GetEmpty(("public", tableName));
         var pkCols = new List<string>();
         for (var i = 0; i < cols.Count; i++)
         {
             inputDefinition.Columns.Add(new PostgresInt(i, cols[i].colName, false));
-            if (cols[i].isKey)
+            if (cols[i].isPrimaryKey)
             {
                 pkCols.Add(cols[i].colName);
             }
@@ -352,14 +352,14 @@ public class PgCmdTests(
         inputDefinition.PrimaryKey = new PrimaryKey
         {
             Name = $"PK_{tableName}_{string.Join('_', pkCols)}",
-            ColumnNames = cols.Where(c => c.isKey).Select(c => new OrderColumn { Name = c.colName }).ToList()
+            ColumnNames = cols.Where(c => c.isPrimaryKey).Select(c => new OrderColumn { Name = c.colName }).ToList()
         };
         return inputDefinition;
     }
 
     private static TableDefinition GetChildTableDefinition(
         string tableName,
-        List<(string tabName, List<string> colNames)> refs)
+        List<(SchemaTableTuple st, List<string> colNames)> refs)
     {
         // Create TableDefinition and add primary key
         var inputDefinition = PgTestData.GetEmpty(("public", tableName));
@@ -381,9 +381,10 @@ public class PgCmdTests(
         {
             inputDefinition.ForeignKeys.Add(new ForeignKey
             {
-                ConstraintName = $"FK_{tableName}_{fkInfo.tabName}_{string.Join('_', fkInfo.colNames)}",
+                ConstraintName = $"FK_{tableName}_{fkInfo.st.tableName}_{string.Join('_', fkInfo.colNames)}",
                 ColumnNames = fkInfo.colNames,
-                TableReference = fkInfo.tabName,
+                SchemaReference = fkInfo.st.schemaName,
+                TableReference = fkInfo.st.tableName,
                 ColumnReferences = fkInfo.colNames
             });
         });
