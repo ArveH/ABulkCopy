@@ -1,5 +1,4 @@
-﻿using ABulkCopy.Common.Extensions;
-using Microsoft.Extensions.Logging.Abstractions;
+﻿using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Postgres.Tests;
 
@@ -7,6 +6,7 @@ public class DatabaseFixture : IAsyncLifetime
 {
     private PostgreSqlContainer? _pgContainer;
     private IPgContext? _pgContext;
+    private PgDbHelper? _pgDbHelper;
     private readonly IParseTree _parseTree = new ParseTree(new NodeFactory(), new SqlTypes());
     private readonly IPgParser _parser = new PgParser();
     private readonly ITokenizerFactory _tokenizerFactory = new TokenizerFactory(new TokenFactory());
@@ -25,6 +25,12 @@ public class DatabaseFixture : IAsyncLifetime
     {
         get => _pgContext ?? throw new ArgumentNullException(nameof(PgContext));
         private set => _pgContext = value;
+    }
+
+    public PgDbHelper DbHelper
+    {
+        get => _pgDbHelper ?? throw new ArgumentNullException(nameof(PgDbHelper));
+        private set => _pgDbHelper = value;
     }
 
     public async Task InitializeAsync()
@@ -55,6 +61,8 @@ public class DatabaseFixture : IAsyncLifetime
         }
         _connectionString = Configuration.GetConnectionString(Constants.Config.PgConnectionString);
         PgContext = new PgContext(new NullLoggerFactory(), Configuration);
+
+        DbHelper = new PgDbHelper(PgContext);
     }
 
     public async Task CreateTable(TableDefinition tableDefinition,

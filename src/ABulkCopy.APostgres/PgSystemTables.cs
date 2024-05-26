@@ -1,17 +1,18 @@
 ﻿namespace ABulkCopy.APostgres;
 
-public class PgSystemTables : IPgSystemTables
+public class PgSystemTables : PgCommandBase, IPgSystemTables
 {
-    private readonly IPgContext _pgContext;
+    private readonly IQueryBuilderFactory _queryBuilderFactory;
     private readonly IIdentifier _identifier;
     private readonly ILogger _logger;
 
     public PgSystemTables(
         IPgContext pgContext,
+        IQueryBuilderFactory queryBuilderFactory,
         IIdentifier identifier,
-        ILogger logger)
+        ILogger logger) : base(pgContext)
     {
-        _pgContext = pgContext;
+        _queryBuilderFactory = queryBuilderFactory;
         _identifier = identifier;
         _logger = logger.ForContext<PgSystemTables>();
     }
@@ -29,31 +30,31 @@ public class PgSystemTables : IPgSystemTables
                         "    JOIN information_schema.key_column_usage AS kcu\r\n" +
                         "    ON tc.constraint_name = kcu.constraint_name\r\n" +
                         "        AND tc.table_schema = kcu.table_schema\r\n" +
-                       $"WHERE tc.constraint_type = 'PRIMARY KEY' AND tc.table_name='{_identifier.AdjustForSystemTable(tableHeader.Name)}'";
-        await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
-        await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
-
-        var isSomethingRead = await reader.ReadAsync(ct).ConfigureAwait(false);
-        if (!isSomethingRead) return null;
-
-        var pk = new PrimaryKey
-        {
-            Name = reader.GetString(1),
-            ColumnNames = new List<OrderColumn>
+                        $"WHERE tc.constraint_type = 'PRIMARY KEY' AND tc.table_name='{_identifier.AdjustForSystemTable(tableHeader.Name)}'";
+        return await ExecuteQueryAsync(
+            sqlString,
+            async reader =>
             {
-                new() { Name = reader.GetString(3) }
-            }
-        };
+                var isSomethingRead = await reader.ReadAsync(ct).ConfigureAwait(false);
+                if (!isSomethingRead) return null;
 
-        while (await reader.ReadAsync(ct).ConfigureAwait(false))
-        {
-            pk.ColumnNames.Add(new OrderColumn { Name = reader.GetString(3) });
-        }
+                var pk = new PrimaryKey
+                {
+                    Name = reader.GetString(1),
+                    ColumnNames = [new() { Name = reader.GetString(3) }]
+                };
 
-        _logger.Information(
-            "Retrieved primary key {@PrimaryKey} for '{tableName}'",
-            pk, tableHeader.Name);
-        return pk;
+                while (await reader.ReadAsync(ct).ConfigureAwait(false))
+                {
+                    pk.ColumnNames.Add(new OrderColumn { Name = reader.GetString(3) });
+                }
+
+                _logger.Information(
+                    "Retrieved primary key {@PrimaryKey} for '{tableName}'",
+                    pk, tableHeader.Name);
+                return pk;
+            },
+            ct);
     }
 
     public async Task<IEnumerable<ForeignKey>> GetForeignKeysAsync(
@@ -80,30 +81,32 @@ public class PgSystemTables : IPgSystemTables
                         "   ) con\r\n" +
                         "   join pg_class cl on\r\n" +
                         "       cl.oid = con.confrelid\r\n";
-
-        await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
-        await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
-
-        var foreignKeys = new List<ForeignKey>();
-        while (await reader.ReadAsync(ct).ConfigureAwait(false))
-        {
-            var constraintName = reader.GetString(1);
-            var columns = await GetForeignKeyColumnsAsync(constraintName, ct).ConfigureAwait(false);
-            var fk = new ForeignKey
+        return await ExecuteQueryAsync<ForeignKey>(
+            sqlString,
+            async reader =>
             {
-                ColumnNames = columns.Select(c => c.child).ToList(),
-                SchemaReference = "public", // TODO: GetForeignKeysAsync: get schema
-                TableReference = reader.GetString(0),
-                ColumnReferences = columns.Select(c => c.parent).ToList(),
-                ConstraintName = constraintName,
-                UpdateAction = (UpdateAction)Enum.Parse(typeof(UpdateAction), reader.GetString(2), true),
-                DeleteAction = (DeleteAction)Enum.Parse(typeof(DeleteAction), reader.GetString(3), true)
-            };
-            foreignKeys.Add(fk);
-            _logger.Verbose("Added foreign key: {ForeignKey}", fk.ConstraintName);
-        }
+                var foreignKeys = new List<ForeignKey>();
+                while (await reader.ReadAsync(ct).ConfigureAwait(false))
+                {
+                    var constraintName = reader.GetString(1);
+                    var columns = await GetForeignKeyColumnsAsync(constraintName, ct).ConfigureAwait(false);
+                    var fk = new ForeignKey
+                    {
+                        ColumnNames = columns.Select(c => c.child).ToList(),
+                        SchemaReference = "public", // TODO: GetForeignKeysAsync: get schema
+                        TableReference = reader.GetString(0),
+                        ColumnReferences = columns.Select(c => c.parent).ToList(),
+                        ConstraintName = constraintName,
+                        UpdateAction = (UpdateAction)Enum.Parse(typeof(UpdateAction), reader.GetString(2), true),
+                        DeleteAction = (DeleteAction)Enum.Parse(typeof(DeleteAction), reader.GetString(3), true)
+                    };
+                    foreignKeys.Add(fk);
+                    _logger.Verbose("Added foreign key: {ForeignKey}", fk.ConstraintName);
+                }
 
-        return foreignKeys;
+                return foreignKeys;
+            },
+            ct);
     }
 
     public async Task<uint?> GetIdentityOidAsync(
@@ -114,10 +117,11 @@ public class PgSystemTables : IPgSystemTables
         {
             return null;
         }
-        await using var cmd = _pgContext.DataSource.CreateCommand(
+
+        var sqlString =
             $"select oid from pg_class where relkind = 'S' and " +
-            $"relname = '{_identifier.AdjustForSystemTable(seqName.TrimSchema())}'");
-        var oid = await cmd.ExecuteScalarAsync(ct).ConfigureAwait(false);
+            $"relname = '{_identifier.AdjustForSystemTable(seqName.TrimSchema())}'";
+        var oid = await SelectScalarAsync(sqlString, ct).ConfigureAwait(false);
         if (oid == null || oid == DBNull.Value)
         {
             _logger.Error("Can't get oid for sequence '{SequenceName}'", seqName);
@@ -127,13 +131,34 @@ public class PgSystemTables : IPgSystemTables
         return (uint?)oid;
     }
 
+    public async Task ResetIdentityAsync(
+        string tableName, string columnName, CancellationToken ct)
+    {
+        var oid = await GetIdentityOidAsync(tableName, columnName, ct).ConfigureAwait(false);
+        if (oid == null)
+        {
+            throw new SqlNullValueException("Sequence not found");
+        }
+
+        var qb = _queryBuilderFactory.GetQueryBuilder();
+        qb.AppendLine("select setval(");
+        qb.AppendLine($"{oid}, ");
+        qb.Append("(select max(");
+        qb.AppendIdentifier(columnName);
+        qb.Append(") from ");
+        qb.AppendIdentifier(tableName);
+        qb.AppendLine(") )");
+
+        await SelectScalarAsync(qb.ToString(), ct);
+    }
+
     public async Task<string?> GetOwnedSequenceNameAsync(
         string tableName, string columnName, CancellationToken ct)
     {
-        await using var cmd = _pgContext.DataSource.CreateCommand(
-            $"select pg_get_serial_sequence('{_identifier.AdjustForSystemTable(tableName)}', '{_identifier.AdjustForSystemTable(columnName)}')");
+        var sqlString = 
+            $"select pg_get_serial_sequence('{_identifier.AdjustForSystemTable(tableName)}', '{_identifier.AdjustForSystemTable(columnName)}')";
 
-        var seqName = await cmd.ExecuteScalarAsync(ct).ConfigureAwait(false);
+        var seqName = await SelectScalarAsync(sqlString, ct).ConfigureAwait(false);
         if (seqName == null || seqName == DBNull.Value)
         {
             _logger.Error("Can't get sequence name for '{TableName}'.'{ColumnName}'",
@@ -144,7 +169,7 @@ public class PgSystemTables : IPgSystemTables
         return (string?)seqName;
     }
 
-    private async Task<List<(string child, string parent)>> GetForeignKeyColumnsAsync(
+    private async Task<IEnumerable<(string child, string parent)>> GetForeignKeyColumnsAsync(
         string constraintName,
         CancellationToken ct)
     {
@@ -166,15 +191,18 @@ public class PgSystemTables : IPgSystemTables
                         "       att.attrelid = con.confrelid and att.attnum = con.child\r\n" +
                         "   join pg_attribute att2 on\r\n" +
                         "       att2.attrelid = con.conrelid and att2.attnum = con.parent";
-        await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
-        await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
+        return await ExecuteQueryAsync<(string child, string parent)>(
+            sqlString,
+            async reader =>
+            {
+                var columns = new List<(string, string)>();
+                while (await reader.ReadAsync(ct).ConfigureAwait(false))
+                {
+                    columns.Add((reader.GetString(0), reader.GetString(1)));
+                }
 
-        var columns = new List<(string, string)>();
-        while (await reader.ReadAsync(ct).ConfigureAwait(false))
-        {
-            columns.Add((reader.GetString(0), reader.GetString(1)));
-        }
-
-        return columns;
+                return columns;
+            },
+            ct);
     }
 }

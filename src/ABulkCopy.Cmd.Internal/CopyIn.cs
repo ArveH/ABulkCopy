@@ -3,6 +3,7 @@
 public class CopyIn : ICopyIn
 {
     private readonly IConfiguration _config;
+    private readonly IPgSystemTables _systemTables;
     private readonly IPgCmd _pgCmd;
     private readonly IPgBulkCopy _pgBulkCopy;
     private readonly IADataReaderFactory _aDataReaderFactory;
@@ -11,6 +12,7 @@ public class CopyIn : ICopyIn
 
     public CopyIn(
         IConfiguration config,
+        IPgSystemTables systemTables,
         IPgCmd pgCmd,
         IPgBulkCopy pgBulkCopy,
         IADataReaderFactory aDataReaderFactory,
@@ -18,6 +20,7 @@ public class CopyIn : ICopyIn
         ILogger logger)
     {
         _config = config;
+        _systemTables = systemTables;
         _pgCmd = pgCmd;
         _pgBulkCopy = pgBulkCopy;
         _aDataReaderFactory = aDataReaderFactory;
@@ -149,7 +152,7 @@ public class CopyIn : ICopyIn
             {
                 try
                 {
-                    await _pgCmd.ResetIdentityAsync(tableDefinition.GetFullName(), columnName, ct).ConfigureAwait(false);
+                    await _systemTables.ResetIdentityAsync(tableDefinition.GetFullName(), columnName, ct).ConfigureAwait(false);
                     _logger.Information("Reset auto generation for {TableName}.{ColumnName}",
                         tableDefinition.GetFullName(), columnName);
                 }

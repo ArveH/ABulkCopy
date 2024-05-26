@@ -1,21 +1,16 @@
 ﻿namespace ABulkCopy.APostgres;
 
-public class PgCmd : IPgCmd
+public class PgCmd : PgCommandBase, IPgCmd
 {
-    private readonly IPgContext _pgContext;
     private readonly IQueryBuilderFactory _queryBuilderFactory;
-    private readonly IPgSystemTables _systemTables;
     private readonly ILogger _logger;
 
     public PgCmd(
         IPgContext pgContext,
         IQueryBuilderFactory queryBuilderFactory,
-        IPgSystemTables systemTables,
-        ILogger logger)
+        ILogger logger) : base(pgContext)
     {
-        _pgContext = pgContext;
         _queryBuilderFactory = queryBuilderFactory;
-        _systemTables = systemTables;
         _logger = logger.ForContext<PgCmd>();
     }
 
@@ -63,40 +58,6 @@ public class PgCmd : IPgCmd
         await ExecuteNonQueryAsync(qb.ToString(), ct).ConfigureAwait(false);
     }
 
-    public async Task ResetIdentityAsync(
-        string tableName, string columnName, CancellationToken ct)
-    {
-        var oid = await _systemTables.GetIdentityOidAsync(tableName, columnName, ct).ConfigureAwait(false);
-        if (oid == null)
-        {
-            throw new SqlNullValueException("Sequence not found");
-        }
-
-        var qb = _queryBuilderFactory.GetQueryBuilder();
-        qb.AppendLine("select setval(");
-        qb.AppendLine($"{oid}, ");
-        qb.Append("(select max(");
-        qb.AppendIdentifier(columnName);
-        qb.Append(") from ");
-        qb.AppendIdentifier(tableName);
-        qb.AppendLine(") )");
-
-        await using var cmd = _pgContext.DataSource.CreateCommand(qb.ToString());
-        await cmd.ExecuteScalarAsync(ct).ConfigureAwait(false);
-    }
-
-    public async Task ExecuteNonQueryAsync(string sqlString, CancellationToken ct)
-    {
-        await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
-        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
-    }
-
-    public async Task<object?> SelectScalarAsync(string sqlString, CancellationToken ct)
-    {
-        await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
-        return await cmd.ExecuteScalarAsync(ct).ConfigureAwait(false);
-    }
-
     private void AddForeignKeyClauses(TableDefinition tableDefinition, IQueryBuilder qb)
     {
         if (!tableDefinition.ForeignKeys.Any())
@@ -130,10 +91,10 @@ public class PgCmd : IPgCmd
             return;
         }
 
-        if (name.Length > _pgContext.MaxIdentifierLength)
+        if (name.Length > MaxIdentifierLength)
         {
             _logger.Warning("Constraint name '{Name}' is too long. Max length is {MaxIdentifierLength} characters. Constraint name is not used.",
-                name, _pgContext.MaxIdentifierLength);
+                name, MaxIdentifierLength);
             return;
         }
 

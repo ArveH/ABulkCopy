@@ -14,10 +14,6 @@ public interface IPgCmd
         string tableName, 
         IndexDefinition indexDefinition, 
         CancellationToken ct);
-    Task ResetIdentityAsync(
-        string tableName, 
-        string columnName, 
-        CancellationToken ct);
     Task<object?> SelectScalarAsync(
         string sqlString,
         CancellationToken ct);

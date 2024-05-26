@@ -22,6 +22,7 @@ global using System.Data.SqlTypes;
 global using System.Diagnostics;
 global using System.IO.Abstractions.TestingHelpers;
 global using System.Text;
+global using ABulkCopy.Common.Extensions;
 global using Testcontainers.PostgreSql;
 global using Testing.Shared;
 global using Testing.Shared.Postgres;
