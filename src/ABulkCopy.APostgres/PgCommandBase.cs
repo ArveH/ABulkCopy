@@ -33,9 +33,6 @@ public class PgCommandBase
         await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
         await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
 
-        var isSomethingRead = await reader.ReadAsync(ct).ConfigureAwait(false);
-        if (!isSomethingRead) return default;
-
         return await func(reader);
     }
 
@@ -46,9 +43,6 @@ public class PgCommandBase
     {
         await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
         await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
-
-        var isSomethingRead = await reader.ReadAsync(ct).ConfigureAwait(false);
-        if (!isSomethingRead) return [];
 
         return await func(reader);
     }

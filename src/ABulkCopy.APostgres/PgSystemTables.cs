@@ -36,7 +36,7 @@ public class PgSystemTables : PgCommandBase, IPgSystemTables
             async reader =>
             {
                 var isSomethingRead = await reader.ReadAsync(ct).ConfigureAwait(false);
-                if (!isSomethingRead) return null;
+                if (!isSomethingRead) return default;
 
                 var pk = new PrimaryKey
                 {
@@ -89,7 +89,7 @@ public class PgSystemTables : PgCommandBase, IPgSystemTables
                 while (await reader.ReadAsync(ct).ConfigureAwait(false))
                 {
                     var constraintName = reader.GetString(1);
-                    var columns = await GetForeignKeyColumnsAsync(constraintName, ct).ConfigureAwait(false);
+                    var columns = (await GetForeignKeyColumnsAsync(constraintName, ct).ConfigureAwait(false)).ToList();
                     var fk = new ForeignKey
                     {
                         ColumnNames = columns.Select(c => c.child).ToList(),
