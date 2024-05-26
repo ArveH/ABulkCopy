@@ -1,6 +1,4 @@
-﻿using ABulkCopy.Common.Types.Table;
-
-namespace CrossRDBMS.Tests;
+﻿namespace CrossRDBMS.Tests;
 
 [Collection(nameof(DatabaseCollection))]
 public class TestSchemas : TestBase
@@ -18,7 +16,7 @@ public class TestSchemas : TestBase
     public async Task TestFKInAnotherSchema()
     {
         // Arrange
-        var baseName = GetName(nameof(TestFKInAnotherSchema));
+        var baseName = GetName();
         var parentName = baseName + "_parent";
         var childName = baseName + "_child";
         var parentId = 1;
@@ -55,6 +53,22 @@ public class TestSchemas : TestBase
 
         var copyOut = mssContext.GetServices<ICopyOut>();
         var copyIn = pgContext.GetServices<ICopyIn>();
+
+        // Act
+        await copyOut.RunAsync(CancellationToken.None);
+        await copyIn.RunAsync(Rdbms.Pg, CancellationToken.None);
+
+        // Assert
+        await AssertFilesExists(fileSystem, (parentDef.Header.Schema, parentDef.Header.Name));
+    }
+
+    private static async Task AssertFilesExists(IFileSystem fileSystem, SchemaTableTuple st)
+    {
+        var schemaFile = await fileSystem.File.ReadAllTextAsync(st.GetSchemaFileName());
+        schemaFile.Should().NotBeNullOrEmpty("because the schema file should exist");
+        schemaFile.Should().Contain($"\"Name\": \"{st.tableName}\"");
+        var dataFile = await fileSystem.File.ReadAllTextAsync(st.GetDataFileName());
+        dataFile.Should().NotBeNull("because the data file should exist");
     }
 
     private async Task<TableDefinition> CreateTableAsync(
