@@ -197,7 +197,7 @@ public class PgCmdTests(
         var parentDef = GetParentTableDefinition(
             parent, new List<(string, bool)>
             {
-                ("Id", true),
+                ("ParentId", true),
                 ("col1", false)
             });
         var pgCmd = GetPgCmd();
@@ -221,11 +221,11 @@ public class PgCmdTests(
                 Name = child.tableName,
                 Schema = child.schemaName
             }, CancellationToken.None)).ToList();
-            fks.Count.Should().Be(2, "because there should be 2 foreign keys");
-            fks.Select(k => k.TableReference).Should().Contain(
-                [parent.tableName]);
-            fks.First(k => k.TableReference == parent.tableName).ColumnNames.Count.Should().Be(1);
-            fks.First(k => k.TableReference == parent.tableName).ColumnNames.First().Should().Be("Parent1Id");
+            fks.Count.Should().Be(1, "because there be a foreign keys");
+            fks.First().SchemaReference.Should().Be(parent.schemaName);
+            fks.First().TableReference.Should().Be(parent.tableName);
+            fks.First().ColumnNames.Count.Should().Be(1);
+            fks.First().ColumnNames.First().Should().Be("ParentId");
         }
         finally
         {

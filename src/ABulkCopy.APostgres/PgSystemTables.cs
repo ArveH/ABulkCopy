@@ -61,6 +61,7 @@ public class PgSystemTables : PgCommandBase, IPgSystemTables
         TableHeader tableHeader, CancellationToken ct)
     {
         var sqlString = "select \r\n" +
+                        "    n.nspname as \"parent_schema\", \r\n" +
                         "    cl.relname as \"parent_table\", \r\n" +
                         "    con.conname,\r\n" +
                         "    case update_action when 'c' then 'Cascade' when 'n' then 'SetNull' when 'd' then 'SetDefault' else 'NoAction' end case,\r\n" +
@@ -80,7 +81,9 @@ public class PgSystemTables : PgCommandBase, IPgSystemTables
                         "        and con1.contype = 'f'\r\n" +
                         "   ) con\r\n" +
                         "   join pg_class cl on\r\n" +
-                        "       cl.oid = con.confrelid\r\n";
+                        "       cl.oid = con.confrelid\r\n" +
+                        "   join pg_namespace n on\r\n" +
+                        "       n.oid = cl.relnamespace\r\n";
         return await ExecuteQueryAsync<ForeignKey>(
             sqlString,
             async reader =>
@@ -88,17 +91,17 @@ public class PgSystemTables : PgCommandBase, IPgSystemTables
                 var foreignKeys = new List<ForeignKey>();
                 while (await reader.ReadAsync(ct).ConfigureAwait(false))
                 {
-                    var constraintName = reader.GetString(1);
+                    var constraintName = reader.GetString(2);
                     var columns = (await GetForeignKeyColumnsAsync(constraintName, ct).ConfigureAwait(false)).ToList();
                     var fk = new ForeignKey
                     {
                         ColumnNames = columns.Select(c => c.child).ToList(),
-                        SchemaReference = "public", // TODO: GetForeignKeysAsync: get schema
-                        TableReference = reader.GetString(0),
+                        SchemaReference = reader.GetString(0),
+                        TableReference = reader.GetString(1),
                         ColumnReferences = columns.Select(c => c.parent).ToList(),
                         ConstraintName = constraintName,
-                        UpdateAction = (UpdateAction)Enum.Parse(typeof(UpdateAction), reader.GetString(2), true),
-                        DeleteAction = (DeleteAction)Enum.Parse(typeof(DeleteAction), reader.GetString(3), true)
+                        UpdateAction = (UpdateAction)Enum.Parse(typeof(UpdateAction), reader.GetString(3), true),
+                        DeleteAction = (DeleteAction)Enum.Parse(typeof(DeleteAction), reader.GetString(4), true)
                     };
                     foreignKeys.Add(fk);
                     _logger.Verbose("Added foreign key: {ForeignKey}", fk.ConstraintName);

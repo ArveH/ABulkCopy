@@ -74,6 +74,8 @@ public class PgCmd : PgCommandBase, IPgCmd
             qb.AppendIdentifierList(fk.ColumnNames);
 
             qb.Append(") references ");
+            qb.AppendIdentifier(fk.SchemaReference);
+            qb.Append(".");
             qb.AppendIdentifier(fk.TableReference);
             qb.Append(" (");
             qb.AppendIdentifierList(fk.ColumnReferences);
