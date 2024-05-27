@@ -26,7 +26,7 @@ public class DependencyGraphTests
         VerifyCount(graph, tableDefinitions.Count);
         VerifyDepths(
             graph.GetTableDepths(),
-            tableDefinitions.Select(d => d.Header.Name).ToList(),
+            tableDefinitions.Select(d => d.GetFullName()).ToList(),
             new List<int> { 1 });
     }
 
@@ -45,7 +45,7 @@ public class DependencyGraphTests
         VerifyCount(graph, tableDefinitions.Count);
         VerifyDepths(
             graph.GetTableDepths(),
-            tableDefinitions.Select(d => d.Header.Name).ToList(),
+            tableDefinitions.Select(d => d.GetFullName()).ToList(),
             new List<int> { 1, 1 });
     }
 
@@ -65,7 +65,7 @@ public class DependencyGraphTests
         VerifyCount(graph, tableDefinitions.Count);
         VerifyDepths(
             graph.GetTableDepths(),
-            tableDefinitions.Select(d => d.Header.Name).ToList(),
+            tableDefinitions.Select(d => d.GetFullName()).ToList(),
             new List<int> { 1, 2 });
     }
 
@@ -85,7 +85,7 @@ public class DependencyGraphTests
         VerifyCount(graph, tableDefinitions.Count);
         VerifyDepths(
             graph.GetTableDepths(),
-            tableDefinitions.Select(d => d.Header.Name).ToList(),
+            tableDefinitions.Select(d => d.GetFullName()).ToList(),
             new List<int> { 1, 2 });
     }
 
