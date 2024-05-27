@@ -14,6 +14,9 @@ public class CmdArguments
     [Option('f', "folder", Required = false, HelpText = "The source/destination folder for schema and data files.")]
     public string? Folder { get; set; }
 
+    [Option('m', "mappings-file", Required = false, HelpText = "The path and file name of a json file containing key-value pairs for mapping schema names and collation names. E.g. mapping the \"dbo\" schema in SQL Server to the \"public\" schema in Postgres. There is a sample-mappings.json file accompanying the executable.")]
+    public string? MappingsFile { get; set; }
+
     [Option('l', "log-file", Required = false, HelpText = "Full path for log file.")]
     public string? LogFile { get; set; }
 
@@ -49,6 +52,10 @@ public class CmdArguments
             appSettings.Add(Constants.Config.Folder, Folder);
         }
 
+        if (!string.IsNullOrWhiteSpace(MappingsFile))
+        {
+            appSettings.Add(Constants.Config.MappingsFile, MappingsFile);
+        }
         if (!string.IsNullOrWhiteSpace(LogFile))
         {
             appSettings.Add(Constants.Config.LogFile, LogFile);
