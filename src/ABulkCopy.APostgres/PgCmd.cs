@@ -68,7 +68,6 @@ public class PgCmd : PgCommandBase, IPgCmd
         {
             qb.AppendLine(", ");
             qb.Append("    ");
-            AddConstraintName(fk.ConstraintName, qb);
             qb.Append(" foreign key (");
 
             qb.AppendIdentifierList(fk.ColumnNames);
@@ -110,8 +109,6 @@ public class PgCmd : PgCommandBase, IPgCmd
             return;
 
         qb.AppendLine(",");
-        qb.Append("    constraint ");
-        qb.AppendIdentifier(tableDefinition.PrimaryKey.Name);
         qb.Append(" primary key (");
         qb.AppendIdentifierList(tableDefinition.PrimaryKey.ColumnNames.Select(c => c.Name));
         qb.Append(") ");
