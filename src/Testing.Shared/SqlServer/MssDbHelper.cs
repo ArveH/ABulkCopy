@@ -6,7 +6,7 @@ namespace Testing.Shared.SqlServer;
 public class MssDbHelper : MssCommandBase
 {
     private readonly IDbContext _dbContext;
-    public const string TestSchemaName = "test_schema";
+    public const string TestSchemaName = "my_mss_schema";
 
     public MssDbHelper(IDbContext dbContext) : base(dbContext)
     {

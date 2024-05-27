@@ -88,7 +88,9 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
                            "    ON i.data_space_id = f.data_space_id\r\n" +
                            "WHERE o.type = 'U'\r\n" +
                            "  AND (i.index_id = 0 OR i.index_id = 1)\r\n" +
+                           "  AND s.name = @SchemaName\r\n" +
                            "  AND o.name = @TableName\r\n");
+        command.Parameters.AddWithValue("@SchemaName", schemaName);
         command.Parameters.AddWithValue("@TableName", tableName);
 
         var tableHeaders = new List<TableHeader>();

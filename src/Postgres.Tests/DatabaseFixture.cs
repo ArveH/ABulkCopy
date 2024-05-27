@@ -63,6 +63,7 @@ public class DatabaseFixture : IAsyncLifetime
         PgContext = new PgContext(new NullLoggerFactory(), Configuration);
 
         DbHelper = new PgDbHelper(PgContext);
+        await DbHelper.EnsureTestSchemaAsync();
     }
 
     public async Task CreateTable(TableDefinition tableDefinition,

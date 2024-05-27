@@ -2,7 +2,7 @@
 
 public class PgDbHelper : PgCommandBase
 {
-    public const string TestSchemaName = "test_schema";
+    public const string TestSchemaName = "my_pg_schema";
 
     public PgDbHelper(IPgContext pgContext) : base(pgContext)
     {
