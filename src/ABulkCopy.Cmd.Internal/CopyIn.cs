@@ -54,9 +54,9 @@ public class CopyIn : ICopyIn
             schemaFiles = _fileSystem.Directory.GetFiles(folder, $"*{Constants.SchemaSuffix}").ToList();
         }
 
-        _logger.Information($"Creating {{TableCount}} {"table".Plural(schemaFiles.Count)}",
+        _logger.Information($"Creating {{TableCount}} {"table".Plural(schemaFiles.Count)}...",
             schemaFiles.Count);
-        Console.WriteLine($"Creating {schemaFiles.Count} {"table".Plural(schemaFiles.Count)}.");
+        Console.WriteLine($"Creating {schemaFiles.Count} {"table".Plural(schemaFiles.Count)}...");
 
         var elapsedStr = await _pgBulkCopy.BuildDependencyGraphAsync(rdbms, schemaFiles, ct).ConfigureAwait(false);
         Console.WriteLine($"Creating dependency graph took {elapsedStr}");
