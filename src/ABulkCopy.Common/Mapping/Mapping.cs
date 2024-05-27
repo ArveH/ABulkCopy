@@ -8,14 +8,14 @@ public class Mapping : IMapping
         Dictionary<string, string?>? locations = null,
         Dictionary<string, string?>? collations = null)
     {
-        if (columns != null) Columns = columns;
-        if (schemas != null) Schemas = schemas;
-        if (locations != null) Locations = locations;
-        if (collations != null) Collations = collations;
+        Columns = columns ?? new();
+        Schemas = schemas ?? new();
+        Locations = locations ?? new();
+        Collations = collations ?? new();
     }
 
-    public Dictionary<string, string> Columns { get; } = new();
-    public Dictionary<string, string> Schemas { get; } = new();
-    public Dictionary<string, string?> Locations { get; } = new();
-    public Dictionary<string, string?> Collations { get; } = new();
+    public Dictionary<string, string> Columns { get; }
+    public Dictionary<string, string> Schemas { get; }
+    public Dictionary<string, string?> Locations { get; }
+    public Dictionary<string, string?> Collations { get; }
 }

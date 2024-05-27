@@ -29,7 +29,7 @@ public class PgTypeMapper : ITypeConverter
             throw new ArgumentException("Only SQL Server schema files can be converted to Postgres");
         }
 
-        var mappings = _mappingFactory.GetDefaultMssToPgMappings();
+        var mappings = _mappingFactory.GetMappings();
 
         var tableDefinition = new TableDefinition(Rdbms.Pg)
         {

@@ -20,6 +20,7 @@ global using Microsoft.Extensions.Configuration;
 global using Moq;
 global using Serilog;
 global using System.Diagnostics;
+global using System.IO.Abstractions.TestingHelpers;
 global using Testing.Shared;
 global using Testing.Shared.SqlServer;
 global using Xunit;

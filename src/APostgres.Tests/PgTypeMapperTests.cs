@@ -73,7 +73,11 @@ public class PgTypeMapperTests : PgTestBase
             new PgParser(),
             new ParseTree(new NodeFactory(), new SqlTypes()),
             new TokenizerFactory(new TokenFactory()),
-            new PgColumnFactory(), new MappingFactory());
+            new PgColumnFactory(), 
+            new MappingFactory(
+                TestConfiguration,
+                new MockFileSystem(),
+                TestLogger));
 
         // Act
         var tableDefinition = typeConverter.Convert(inputDefinition);

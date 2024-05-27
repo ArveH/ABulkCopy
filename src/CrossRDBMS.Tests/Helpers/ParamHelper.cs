@@ -5,6 +5,7 @@ public static class ParamHelper
     public static string[] GetOutMss(
         string connectionString,
         string? folder = null,
+        string? mappingsFile = null,
         string? logFile = null,
         string? addQuotes = null,
         string? schemaFilter = null,
@@ -15,12 +16,13 @@ public static class ParamHelper
             CopyDirection.Out.ToString(),
             Rdbms.Mss.ToString(),
             connectionString,
-            folder, logFile, addQuotes, schemaFilter, searchFilter, emptyString);
+            folder, mappingsFile, logFile, addQuotes, schemaFilter, searchFilter, emptyString);
     }
 
     public static string[] GetInPg(
         string connectionString,
         string? folder = null,
+        string? mappingsFile = null,
         string? logFile = null,
         string? addQuotes = null,
         string? schemaFilter = null,
@@ -31,7 +33,7 @@ public static class ParamHelper
             CopyDirection.In.ToString(),
             Rdbms.Pg.ToString(),
             connectionString,
-            folder, logFile, addQuotes, schemaFilter, searchFilter, emptyString);
+            folder, mappingsFile, logFile, addQuotes, schemaFilter, searchFilter, emptyString);
     }
 
     public static string[] GetArgs(
@@ -39,6 +41,7 @@ public static class ParamHelper
         string rdbms,
         string connectionString,
         string? folder= null,
+        string? mappingsFile = null,
         string? logFile= null,
         string? addQuotes= null,
         string? schemaFilter= null,
@@ -58,6 +61,11 @@ public static class ParamHelper
             "-l",
             logFile ?? Path.Combine(".", "local_out.log")
         };
+        if (mappingsFile != null)
+        {
+            args.Add("-m");
+            args.Add(mappingsFile);
+        }
         if (addQuotes != null)
         {
             args.Add("-q");

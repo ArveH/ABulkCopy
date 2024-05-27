@@ -15,6 +15,7 @@ public static class Constants
         public const string MssConnectionString = "SqlServer";
         public const string PgConnectionString = "Postgres";
         public const string Folder = "AppSettings:Folder";
+        public const string MappingsFile = "AppSettings:MappingsFile";
         public const string LogFile = "AppSettings:LogFile";
         public const string AddQuotes = "AppSettings:AddQuotes";
         public const string SchemaFilter = "AppSettings:SchemaFilter";

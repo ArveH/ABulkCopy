@@ -23,7 +23,20 @@ public class TestSchemas : TestBase
         var childId = 100;
 
         List<string> logMessages = new();
-        IFileSystem fileSystem = new MockFileSystem();
+        IFileSystem fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
+        {
+            { @"c:\mymappings.json", new MockFileData(
+                "{\r\n" +
+                "    \"Schemas\": {\r\n" +
+                "        \"\": \"public\",\r\n" +
+                "        \"dbo\": \"public\",\r\n" +
+                "        \"my_mss_schema\": \"my_pg_schema\"\r\n" +
+                "    },\r\n    \"Collations\": {\r\n" +
+                "        \"SQL_Latin1_General_CP1_CI_AI\": \"en_ci_ai\",\r\n" +
+                "        \"SQL_Latin1_General_CP1_CI_AS\": \"en_ci_as\"\r\n" +
+                "    }\r\n" +
+                "}")}
+        });
 
         var mssContext = new CopyContext(
             Rdbms.Mss,
@@ -36,13 +49,14 @@ public class TestSchemas : TestBase
         var pgContext = new CopyContext(
             Rdbms.Pg,
             CmdArguments.Create(ParamHelper.GetInPg(
-                _fixture.PgConnectionString)),
+                _fixture.PgConnectionString,
+                mappingsFile: @"c:\mymappings.json")),
             logMessages,
             _output,
             fileSystem);
 
         var parentDef = await CreateTableAsync(
-            ("dbo", parentName),
+            (MssDbHelper.TestSchemaName, parentName),
             new SqlServerInt(101, "id", false),
             parentId);
         var childDef = await CreateChildTableAsync(

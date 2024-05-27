@@ -15,7 +15,10 @@ public class PgSchemaReaderBase : PgTestBase
             new ParseTree(new NodeFactory(), new SqlTypes()),
             new TokenizerFactory(new TokenFactory()),
             new PgColumnFactory(), 
-            new MappingFactory());
+            new MappingFactory(
+                TestConfiguration, 
+                FileHelper.FileSystem,
+                TestLogger));
         SchemaReader = new PgSchemaReader(typeConverter, FileHelper.FileSystem, TestLogger);
     }
 
