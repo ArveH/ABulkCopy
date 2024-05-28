@@ -25,24 +25,26 @@ public class TestSchemas : TestBase
         List<string> logMessages = new();
         IFileSystem fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
         {
-            { @"c:\mymappings.json", new MockFileData(
-                "{\r\n" +
-                "    \"Schemas\": {\r\n" +
-                "        \"\": \"public\",\r\n" +
-                "        \"dbo\": \"public\",\r\n" +
-                "        \"my_mss_schema\": \"my_pg_schema\"\r\n" +
-                "    },\r\n    \"Collations\": {\r\n" +
-                "        \"SQL_Latin1_General_CP1_CI_AI\": \"en_ci_ai\",\r\n" +
-                "        \"SQL_Latin1_General_CP1_CI_AS\": \"en_ci_as\"\r\n" +
-                "    }\r\n" +
-                "}")}
+            {
+                @"c:\mymappings.json", new MockFileData(
+                    "{\r\n" +
+                    "    \"Schemas\": {\r\n" +
+                    "        \"\": \"public\",\r\n" +
+                    "        \"dbo\": \"public\",\r\n" +
+                    "        \"my_mss_schema\": \"my_pg_schema\"\r\n" +
+                    "    },\r\n    \"Collations\": {\r\n" +
+                    "        \"SQL_Latin1_General_CP1_CI_AI\": \"en_ci_ai\",\r\n" +
+                    "        \"SQL_Latin1_General_CP1_CI_AS\": \"en_ci_as\"\r\n" +
+                    "    }\r\n" +
+                    "}")
+            }
         });
 
         var mssContext = new CopyContext(
             Rdbms.Mss,
             CmdArguments.Create(ParamHelper.GetOutMss(
                 _fixture.MssConnectionString,
-                searchFilter: baseName + "%")),
+                searchFilter: "%" + baseName + "%")),
             logMessages,
             _output,
             fileSystem);
@@ -55,6 +57,8 @@ public class TestSchemas : TestBase
             _output,
             fileSystem);
 
+        await _fixture.MssDbHelper.DropTableAsync(("dbo", childName));
+        await _fixture.MssDbHelper.DropTableAsync((MssDbHelper.TestSchemaName, parentName));
         var parentDef = await CreateTableAsync(
             (MssDbHelper.TestSchemaName, parentName),
             new SqlServerInt(101, "id", false),
@@ -75,10 +79,20 @@ public class TestSchemas : TestBase
         // Assert
         await AssertFilesExists(
             fileSystem, parentDef.GetSchemaFileName(), parentDef.Data.FileName);
+        await AssertFilesExists(
+            fileSystem, childDef.GetSchemaFileName(), childDef.Data.FileName);
         await ValidateValueAsync(
             ("public", childDef.Header.Name),
-            childDef.ForeignKeys.First().ColumnNames.First(),
-            1);
+            childDef.Columns[0].Name,
+            childId);
+        await ValidateValueAsync(
+            ("public", childDef.Header.Name),
+            childDef.Columns[1].Name,
+            parentId);
+        await ValidateValueAsync(
+            (PgDbHelper.TestSchemaName, parentDef.Header.Name),
+            parentDef.Columns[0].Name,
+            parentId);
     }
 
     private static async Task AssertFilesExists(
@@ -105,9 +119,12 @@ public class TestSchemas : TestBase
         IColumn mssCol,
         int value)
     {
-        await _fixture.MssDbHelper.DropTableAsync(st);
         var tableDef = MssTestData.GetEmpty(st);
         tableDef.Columns.Add(mssCol);
+        tableDef.PrimaryKey = new PrimaryKey
+        {
+            ColumnNames = [new() { Name = mssCol.Name }]
+        };
         await _fixture.MssDbHelper.CreateTableAsync(tableDef);
         await _fixture.MssDbHelper.ExecuteNonQueryAsync(
             $"insert into {st.GetFullName()}({mssCol.Name}) values ({value})",
@@ -121,10 +138,13 @@ public class TestSchemas : TestBase
         TableDefinition parent,
         (int parentId, int childId) values)
     {
-        await _fixture.MssDbHelper.DropTableAsync(st);
         var tableDef = MssTestData.GetEmpty(st);
         tableDef.Columns.Add(mssCol);
         tableDef.Columns.Add(new SqlServerInt(102, "parentid", false));
+        tableDef.PrimaryKey = new PrimaryKey
+        {
+            ColumnNames = [new() { Name = mssCol.Name }]
+        };
         tableDef.ForeignKeys.Add(new ForeignKey
         {
             ColumnNames = ["parentid"],

@@ -225,7 +225,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
                            "WHERE ic.object_id = @TableId\r\n" +
                            "AND c.[type] = 'PK'\r\n" +
                            "ORDER BY ic.index_id, ic.index_column_id");
-        command.Parameters.AddWithValue("@TableName", tableHeader.Name);
+        command.Parameters.AddWithValue("@TableName", $"{tableHeader.Schema}.{tableHeader.Name}");
         command.Parameters.AddWithValue("@TableId", tableHeader.Id);
 
         PrimaryKey? pk = null;

@@ -83,8 +83,8 @@ public class DatabaseFixture : IAsyncLifetime
         _pgDbHelper = new PgDbHelper(PgContext);
         MssContext = new MssContext(TestConfiguration);
         _mssDbHelper = new MssDbHelper(MssContext, new QueryBuilderFactory());
-        //await _pgDbHelper.EnsureTestSchemaAsync();
-        //await _mssDbHelper.EnsureTestSchemaAsync();
+        await _pgDbHelper.EnsureTestSchemaAsync();
+        await _mssDbHelper.EnsureTestSchemaAsync();
     }
 
     public async Task DisposeAsync()

@@ -33,9 +33,9 @@ public class CopyOut : ICopyOut
             _config.SafeGet(Constants.Config.SchemaFilter), 
             _config.SafeGet(Constants.Config.SearchFilter), 
             ct).ConfigureAwait(false)).ToList();
-        _logger.Information($"Copy out {{TableCount}} {"table".Plural(fullNames.Count)}",
+        _logger.Information($"Copy out {{TableCount}} {"table".Plural(fullNames.Count)}...",
             fullNames.Count);
-        Console.WriteLine($"Copy out {fullNames.Count} {"table".Plural(fullNames.Count)}.");
+        Console.WriteLine($"Copy out {fullNames.Count} {"table".Plural(fullNames.Count)}...");
         var errors = 0;
         await Parallel.ForEachAsync(fullNames, ct, async (fullName, _) =>
         {
