@@ -1,17 +1,22 @@
-﻿namespace Testing.Shared.SqlServer;
+﻿using Serilog;
+
+namespace Testing.Shared.SqlServer;
 
 public class MssDbHelper : MssCommandBase
 {
     private readonly IDbContext _dbContext;
     private readonly IQueryBuilderFactory _queryBuilderFactory;
+    private readonly ILogger _logger;
     public const string TestSchemaName = "my_mss_schema";
 
     public MssDbHelper(
         IDbContext dbContext,
-        IQueryBuilderFactory queryBuilderFactory) : base(dbContext)
+        IQueryBuilderFactory queryBuilderFactory,
+        ILogger logger) : base(dbContext)
     {
         _dbContext = dbContext;
         _queryBuilderFactory = queryBuilderFactory;
+        _logger = logger;
     }
 
     public async Task EnsureTestSchemaAsync()
@@ -25,14 +30,16 @@ public class MssDbHelper : MssCommandBase
 
     public async Task CreateTableAsync(TableDefinition tableDefinition)
     {
-        var qb = _queryBuilderFactory.GetQueryBuilder();
-        await ExecuteNonQueryAsync(qb.CreateTableStmt(tableDefinition), CancellationToken.None);
+        var stmt = _queryBuilderFactory.GetQueryBuilder().CreateTableStmt(tableDefinition);
+        _logger.Verbose("Create table statement: {SqlStmt}", stmt);
+        await ExecuteNonQueryAsync(stmt, CancellationToken.None);
     }
 
     public async Task DropTableAsync(SchemaTableTuple st)
     {
-        var qb = _queryBuilderFactory.GetQueryBuilder();
-        await ExecuteNonQueryAsync(qb.DropTableStmt(st), CancellationToken.None);
+        var stmt = _queryBuilderFactory.GetQueryBuilder().DropTableStmt(st);
+        _logger.Verbose("Drop table statement: {SqlStmt}", stmt);
+        await ExecuteNonQueryAsync(stmt, CancellationToken.None);
     }
 
     public async Task InsertIntoSingleColumnTableAsync(

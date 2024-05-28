@@ -4,16 +4,22 @@ public abstract class MssTestBase
 {
     protected readonly DatabaseFixture DbFixture;
     protected readonly ILogger TestLogger;
+    protected readonly Microsoft.Extensions.Logging.ILoggerFactory TestLoggerFactory;
     protected readonly IMssSystemTables MssSystemTables;
 
     protected MssTestBase(DatabaseFixture dbFixture, ITestOutputHelper output)
     {
         DbFixture = dbFixture;
+        const string outputTemplate =
+            "{Timestamp:HH:mm:ss.fff} [{Level:u3}] {Message}    {Timestamp:yyyy-MM-dd }{Properties}{NewLine}{Exception}{NewLine}";
+
         TestLogger = new LoggerConfiguration()
             .Enrich.FromLogContext()
             .MinimumLevel.Verbose()
+            .WriteTo.Console(outputTemplate: outputTemplate)
             .WriteTo.TestOutput(output)
             .CreateLogger();
+        TestLoggerFactory = new Microsoft.Extensions.Logging.LoggerFactory().AddSerilog(TestLogger);
 
         MssSystemTables = CreateMssSystemTables();
     }
