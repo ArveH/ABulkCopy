@@ -6,18 +6,17 @@ public class MssDbHelper : MssCommandBase
 {
     private readonly IDbContext _dbContext;
     private readonly IQueryBuilderFactory _queryBuilderFactory;
-    private readonly ILogger _logger;
     public const string TestSchemaName = "my_mss_schema";
 
     public MssDbHelper(
         IDbContext dbContext,
-        IQueryBuilderFactory queryBuilderFactory,
-        ILogger logger) : base(dbContext)
+        IQueryBuilderFactory queryBuilderFactory) : base(dbContext)
     {
         _dbContext = dbContext;
         _queryBuilderFactory = queryBuilderFactory;
-        _logger = logger;
     }
+
+    public ILogger? Logger { get; set; }
 
     public async Task EnsureTestSchemaAsync()
     {
@@ -31,14 +30,14 @@ public class MssDbHelper : MssCommandBase
     public async Task CreateTableAsync(TableDefinition tableDefinition)
     {
         var stmt = _queryBuilderFactory.GetQueryBuilder().CreateTableStmt(tableDefinition);
-        _logger.Verbose("Create table statement: {SqlStmt}", stmt);
+        Logger?.Verbose("Create table statement: {SqlStmt}", stmt);
         await ExecuteNonQueryAsync(stmt, CancellationToken.None);
     }
 
     public async Task DropTableAsync(SchemaTableTuple st)
     {
         var stmt = _queryBuilderFactory.GetQueryBuilder().DropTableStmt(st);
-        _logger.Verbose("Drop table statement: {SqlStmt}", stmt);
+        Logger?.Verbose("Drop table statement: {SqlStmt}", stmt);
         await ExecuteNonQueryAsync(stmt, CancellationToken.None);
     }
 

@@ -21,6 +21,8 @@ public abstract class MssTestBase
             .CreateLogger();
         TestLoggerFactory = new Microsoft.Extensions.Logging.LoggerFactory().AddSerilog(TestLogger);
 
+        DbFixture.DbHelper.Logger = TestLogger;
+
         MssSystemTables = CreateMssSystemTables();
     }
 
