@@ -1,6 +1,4 @@
-﻿using ABulkCopy.Common.Types.Table;
-
-namespace ABulkCopy.APostgres;
+﻿namespace ABulkCopy.APostgres;
 
 public class PgCommandBase
 {
@@ -19,14 +17,14 @@ public class PgCommandBase
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
-    public async Task<object?> SelectScalarAsync(string sqlString, CancellationToken ct)
+    public async Task<object?> ExecuteScalarAsync(string sqlString, CancellationToken ct)
     {
         await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
         return await cmd.ExecuteScalarAsync(ct).ConfigureAwait(false);
     }
 
     public async Task<TReturn?> ExecuteQueryAsync<TReturn>(
-        string sqlString, 
+        string sqlString,
         Func<NpgsqlDataReader, Task<TReturn?>> func,
         CancellationToken ct)
     {

@@ -315,7 +315,7 @@ public class PgCmdTests(
         await pgCmd.CreateTableAsync(childTableDefinition, cts.Token);
         await pgCmd.ExecuteNonQueryAsync($"insert into \"{child.tableName}\" (\"Id\", \"Parent1Id\", \"col1\") values (10, 1, 1)", cts.Token);
         await pgCmd.ExecuteNonQueryAsync($"insert into \"{child.tableName}\" (\"Id\", \"Parent1Id\", \"col1\") values (11, 1, 2)", cts.Token);
-        var beforeCount = (long)(await pgCmd.SelectScalarAsync($"select count(*) from \"{child.tableName}\"", cts.Token) ?? 0);
+        var beforeCount = (long)(await pgCmd.ExecuteScalarAsync($"select count(*) from \"{child.tableName}\"", cts.Token) ?? 0);
         beforeCount.Should().Be(2, "because child table has two rows before deleting from parent table");
 
         try
@@ -324,7 +324,7 @@ public class PgCmdTests(
             await pgCmd.ExecuteNonQueryAsync($"delete from \"{parent.tableName}\" where \"col1\" = 1", cts.Token);
 
             // Assert
-            var afterCount = (long)(await pgCmd.SelectScalarAsync($"select count(*) from \"{child.tableName}\"", cts.Token) ?? 0);
+            var afterCount = (long)(await pgCmd.ExecuteScalarAsync($"select count(*) from \"{child.tableName}\"", cts.Token) ?? 0);
             afterCount.Should().Be(1, "because 1 row from child table should be delete when deleting it's foreign key");
         }
         finally

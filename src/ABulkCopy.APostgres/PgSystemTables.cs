@@ -124,7 +124,7 @@ public class PgSystemTables : PgCommandBase, IPgSystemTables
         var sqlString =
             $"select oid from pg_class where relkind = 'S' and " +
             $"relname = '{_identifier.AdjustForSystemTable(seqName.TrimSchema())}'";
-        var oid = await SelectScalarAsync(sqlString, ct).ConfigureAwait(false);
+        var oid = await ExecuteScalarAsync(sqlString, ct).ConfigureAwait(false);
         if (oid == null || oid == DBNull.Value)
         {
             _logger.Error("Can't get oid for sequence '{SequenceName}'", seqName);
@@ -152,7 +152,7 @@ public class PgSystemTables : PgCommandBase, IPgSystemTables
         qb.AppendIdentifier(tableName);
         qb.AppendLine(") )");
 
-        await SelectScalarAsync(qb.ToString(), ct);
+        await ExecuteScalarAsync(qb.ToString(), ct);
     }
 
     public async Task<string?> GetOwnedSequenceNameAsync(
@@ -161,7 +161,7 @@ public class PgSystemTables : PgCommandBase, IPgSystemTables
         var sqlString = 
             $"select pg_get_serial_sequence('{_identifier.AdjustForSystemTable(tableName)}', '{_identifier.AdjustForSystemTable(columnName)}')";
 
-        var seqName = await SelectScalarAsync(sqlString, ct).ConfigureAwait(false);
+        var seqName = await ExecuteScalarAsync(sqlString, ct).ConfigureAwait(false);
         if (seqName == null || seqName == DBNull.Value)
         {
             _logger.Error("Can't get sequence name for '{TableName}'.'{ColumnName}'",

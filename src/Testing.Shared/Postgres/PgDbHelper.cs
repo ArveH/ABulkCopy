@@ -20,6 +20,6 @@ public class PgDbHelper : PgCommandBase
 
     private async Task<T?> ExecuteScalarAsync<T>(string sql)
     {
-        return (T?)await SelectScalarAsync(sql, CancellationToken.None);
+        return (T?)await ExecuteScalarAsync(sql, CancellationToken.None);
     }
 }

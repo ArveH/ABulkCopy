@@ -16,7 +16,7 @@ public interface IPgCmd
         SchemaTableTuple st, 
         IndexDefinition indexDefinition, 
         CancellationToken ct);
-    Task<object?> SelectScalarAsync(
+    Task<object?> ExecuteScalarAsync(
         string sqlString,
         CancellationToken ct);
 }
