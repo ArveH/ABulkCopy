@@ -82,24 +82,31 @@ jobs:
       run: ls -R
   
     - name: UnitTest AParser
+      if: always()
       run: dotnet test ./AParser.Tests/bin/Debug/net8.0/AParser.Tests.dll -v m
     
     - name: UnitTest Common
+      if: always()
       run: dotnet test ./Common.Tests/bin/Debug/net8.0/Common.Tests.dll -v m 
 
     - name: UnitTest ASqlServer
+      if: always()
       run: dotnet test ./ASqlServer.Tests/bin/Debug/net8.0/ASqlServer.Tests.dll -v m
 
     - name: UnitTest APostgres
+      if: always()
       run: dotnet test ./APostgres.Tests/bin/Debug/net8.0/APostgres.Tests.dll -v m
 
     - name: DbTest SqlServer
+      if: always()
       run: dotnet test ./SqlServer.Tests/bin/Debug/net8.0/SqlServer.Tests.dll -v m
 
     - name: DbTest Postgres
+      if: always()
       run: dotnet test ./Postgres.Tests/bin/Debug/net8.0/Postgres.Tests.dll -v m
 
     - name: DbTests CrossRDBMS
+      if: always()
       run: dotnet test ./CrossRDBMS.Tests/bin/Debug/net8.0/CrossRDBMS.Tests.dll -v m
 
   release:
