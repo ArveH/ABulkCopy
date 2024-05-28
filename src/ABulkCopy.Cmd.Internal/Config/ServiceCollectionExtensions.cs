@@ -9,7 +9,8 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IMssSystemTables, MssSystemTables>();
         services.AddSingleton<IMssTableSchema, MssTableSchema>();
         services.AddSingleton<IMssColumnFactory, MssColumnFactory>();
-        
+        services.AddSingleton<IQueryBuilderFactory, ASqlServer.QueryBuilderFactory>();
+
         return services;
     }
 
@@ -30,6 +31,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ISqlTypes, SqlTypes>();
         services.AddTransient<ITokenizerFactory, TokenizerFactory>();
         services.AddTransient<AParser.Tree.IParseTree, AParser.Tree.ParseTree>();
+        services.AddSingleton<IQueryBuilderFactory, APostgres.QueryBuilderFactory>();
 
         return services;
     }
