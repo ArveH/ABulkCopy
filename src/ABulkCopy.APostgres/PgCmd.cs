@@ -3,15 +3,12 @@
 public class PgCmd : PgCommandBase, IPgCmd
 {
     private readonly IQueryBuilderFactory _queryBuilderFactory;
-    private readonly ILogger _logger;
 
     public PgCmd(
         IPgContext pgContext,
-        IQueryBuilderFactory queryBuilderFactory,
-        ILogger logger) : base(pgContext)
+        IQueryBuilderFactory queryBuilderFactory) : base(pgContext)
     {
         _queryBuilderFactory = queryBuilderFactory;
-        _logger = logger.ForContext<PgCmd>();
     }
 
     public async Task DropTableAsync(SchemaTableTuple st, CancellationToken ct)

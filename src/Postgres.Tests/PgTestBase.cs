@@ -91,8 +91,7 @@ public class PgTestBase
             DbFixture.Configuration.SafeGet(Constants.Config.PgConnectionString));
         return new ABulkCopy.APostgres.PgCmd(
             DbFixture.PgContext,
-            GetQueryBuilderFactory(appSettings),
-            TestLogger);
+            GetQueryBuilderFactory(appSettings));
     }
 
     protected IPgSystemTables GetPgSystemTables(Dictionary<string, string?>? appSettings = null)

@@ -1,5 +1,4 @@
-﻿using Microsoft.VisualStudio.TestPlatform.Utilities;
-using Serilog.Events;
+﻿using Serilog.Events;
 
 namespace CrossRDBMS.Tests.Helpers;
 
