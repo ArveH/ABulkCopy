@@ -85,24 +85,6 @@ public class PgCmd : PgCommandBase, IPgCmd
         }
     }
 
-    private void AddConstraintName(string? name, IQueryBuilder qb)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            return;
-        }
-
-        if (name.Length > MaxIdentifierLength)
-        {
-            _logger.Warning("Constraint name '{Name}' is too long. Max length is {MaxIdentifierLength} characters. Constraint name is not used.",
-                name, MaxIdentifierLength);
-            return;
-        }
-
-        qb.Append("constraint ");
-        qb.AppendIdentifier(name);
-    }
-
     private void AddPrimaryKeyClause(TableDefinition tableDefinition, IQueryBuilder qb)
     {
         if (tableDefinition.PrimaryKey == null)
