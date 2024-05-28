@@ -6,7 +6,9 @@ public class QueryBuilder : IQueryBuilder
 
     public void AppendIdentifier(string identifier)
     {
+        _sb.Append("[");
         _sb.Append(identifier);
+        _sb.Append("]");
     }
 
     public void Append(string str) => _sb.Append(str);
