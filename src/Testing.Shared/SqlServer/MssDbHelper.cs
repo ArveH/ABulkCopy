@@ -1,16 +1,17 @@
-﻿using ABulkCopy.ASqlServer;
-using ABulkCopy.Common.Database;
-
-namespace Testing.Shared.SqlServer;
+﻿namespace Testing.Shared.SqlServer;
 
 public class MssDbHelper : MssCommandBase
 {
     private readonly IDbContext _dbContext;
+    private readonly IQueryBuilderFactory _queryBuilderFactory;
     public const string TestSchemaName = "my_mss_schema";
 
-    public MssDbHelper(IDbContext dbContext) : base(dbContext)
+    public MssDbHelper(
+        IDbContext dbContext,
+        IQueryBuilderFactory queryBuilderFactory) : base(dbContext)
     {
         _dbContext = dbContext;
+        _queryBuilderFactory = queryBuilderFactory;
     }
 
     public async Task EnsureTestSchemaAsync()
@@ -24,36 +25,14 @@ public class MssDbHelper : MssCommandBase
 
     public async Task CreateTableAsync(TableDefinition tableDefinition)
     {
-        var sb = new StringBuilder();
-        sb.AppendLine($"create table [{tableDefinition.Header.Schema}].[{tableDefinition.Header.Name}] (");
-        var first = true;
-        foreach (var column in tableDefinition.Columns)
-        {
-            if (first)
-            {
-                first = false;
-            }
-            else
-            {
-                sb.AppendLine(",");
-            }
-
-            sb.Append($"    {column.Name} ");
-            sb.Append(column.GetTypeClause());
-            sb.Append(column.GetIdentityClause());
-            if (column.HasDefault)
-            {
-                throw new NotImplementedException("Test can't handle default values");
-            }
-            sb.Append(column.GetNullableClause());
-        }
-        sb.AppendLine(");");
-        await ExecuteNonQueryAsync(sb.ToString(), CancellationToken.None);
+        var qb = _queryBuilderFactory.GetQueryBuilder();
+        await ExecuteNonQueryAsync(qb.CreateTableStmt(tableDefinition), CancellationToken.None);
     }
 
     public async Task DropTableAsync(SchemaTableTuple st)
     {
-        await ExecuteNonQueryAsync($"DROP TABLE IF EXISTS [{st.schemaName}].[{st.tableName}];", CancellationToken.None);
+        var qb = _queryBuilderFactory.GetQueryBuilder();
+        await ExecuteNonQueryAsync(qb.DropTableStmt(st), CancellationToken.None);
     }
 
     public async Task InsertIntoSingleColumnTableAsync(

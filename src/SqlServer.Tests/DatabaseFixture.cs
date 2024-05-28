@@ -47,7 +47,7 @@ public class DatabaseFixture : IAsyncLifetime
         _connectionString = TestConfiguration.GetConnectionString(Constants.Config.MssConnectionString);
 
         MssDbContext = new MssContext(TestConfiguration);
-        _mssDbHelper = new MssDbHelper(MssDbContext);
+        _mssDbHelper = new MssDbHelper(MssDbContext, new QueryBuilderFactory());
         await DbHelper.EnsureTestSchemaAsync();
     }
 

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging.Abstractions;
+using QueryBuilderFactory = ABulkCopy.ASqlServer.QueryBuilderFactory;
 
 namespace CrossRDBMS.Tests;
 
@@ -81,7 +82,7 @@ public class DatabaseFixture : IAsyncLifetime
         PgContext = new PgContext(new NullLoggerFactory(), TestConfiguration);
         _pgDbHelper = new PgDbHelper(PgContext);
         MssContext = new MssContext(TestConfiguration);
-        _mssDbHelper = new MssDbHelper(MssContext);
+        _mssDbHelper = new MssDbHelper(MssContext, new QueryBuilderFactory());
         //await _pgDbHelper.EnsureTestSchemaAsync();
         //await _mssDbHelper.EnsureTestSchemaAsync();
     }

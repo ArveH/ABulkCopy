@@ -7,6 +7,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton<IDbContext, MssContext>();
         services.AddSingleton<IMssSystemTables, MssSystemTables>();
+        services.AddSingleton<IMssCmd, MssCmd>();
         services.AddSingleton<IMssTableSchema, MssTableSchema>();
         services.AddSingleton<IMssColumnFactory, MssColumnFactory>();
         services.AddSingleton<IQueryBuilderFactory, ASqlServer.QueryBuilderFactory>();
