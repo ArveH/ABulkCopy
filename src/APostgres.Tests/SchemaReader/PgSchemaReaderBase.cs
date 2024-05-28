@@ -2,7 +2,7 @@
 
 public class PgSchemaReaderBase : PgTestBase
 {
-    protected const string TableName = "MyTable";
+    protected static SchemaTableTuple TestNames = ("dbo", "MyTable");
     protected FileHelper FileHelper;
     protected ISchemaReader SchemaReader;
 
@@ -15,20 +15,24 @@ public class PgSchemaReaderBase : PgTestBase
             new ParseTree(new NodeFactory(), new SqlTypes()),
             new TokenizerFactory(new TokenFactory()),
             new PgColumnFactory(), 
-            new MappingFactory());
+            new MappingFactory(
+                TestConfiguration, 
+                FileHelper.FileSystem,
+                TestLogger));
         SchemaReader = new PgSchemaReader(typeConverter, FileHelper.FileSystem, TestLogger);
     }
 
     protected async Task<IColumn> GetColFromTableDefinition(IColumn col)
     {
-        FileHelper.CreateSingleColMssSchemaFile(TableName, col);
+        FileHelper.CreateSingleColMssSchemaFile(TestNames, col);
 
         var cts = new CancellationTokenSource();
         var tableDefinition = await SchemaReader.GetTableDefinitionAsync(
-            FileHelper.DataFolder, TableName, cts.Token).ConfigureAwait(false);
+            FileHelper.DataFolder, TestNames, cts.Token).ConfigureAwait(false);
 
         tableDefinition.Should().NotBeNull();
-        tableDefinition.Header.Name.Should().Be(TableName);
+        tableDefinition.Header.Schema.Should().Be("public");
+        tableDefinition.Header.Name.Should().Be(TestNames.tableName);
         tableDefinition.Columns.Should().HaveCount(1);
         tableDefinition.Columns[0].Should().NotBeNull("because we should be able to cast to the correct type");
         return tableDefinition.Columns[0];

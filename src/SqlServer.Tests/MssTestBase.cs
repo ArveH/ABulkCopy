@@ -4,16 +4,24 @@ public abstract class MssTestBase
 {
     protected readonly DatabaseFixture DbFixture;
     protected readonly ILogger TestLogger;
+    protected readonly Microsoft.Extensions.Logging.ILoggerFactory TestLoggerFactory;
     protected readonly IMssSystemTables MssSystemTables;
 
     protected MssTestBase(DatabaseFixture dbFixture, ITestOutputHelper output)
     {
         DbFixture = dbFixture;
+        const string outputTemplate =
+            "{Timestamp:HH:mm:ss.fff} [{Level:u3}] {Message}    {Timestamp:yyyy-MM-dd }{Properties}{NewLine}{Exception}{NewLine}";
+
         TestLogger = new LoggerConfiguration()
             .Enrich.FromLogContext()
             .MinimumLevel.Verbose()
+            .WriteTo.Console(outputTemplate: outputTemplate)
             .WriteTo.TestOutput(output)
             .CreateLogger();
+        TestLoggerFactory = new Microsoft.Extensions.Logging.LoggerFactory().AddSerilog(TestLogger);
+
+        DbFixture.DbHelper.Logger = TestLogger;
 
         MssSystemTables = CreateMssSystemTables();
     }
@@ -45,6 +53,49 @@ public abstract class MssTestBase
         }
 
         var methodName = sf.GetMethod()?.Name ?? throw new InvalidOperationException("Method is null");
-        return methodName.Length > 54 ? methodName[4..54] : methodName;
+        return methodName.Length > 34 ? methodName[4..34] : methodName;
+    }
+
+    public async Task CreateTableAsync(TableDefinition tableDefinition)
+    {
+        await DbFixture.DbHelper.CreateTableAsync(tableDefinition);
+    }
+
+    public async Task DropTableAsync(string tableName)
+    {
+        await DropTableAsync("dbo", tableName);
+    }
+
+    public async Task DropTableAsync(string schema, string tableName)
+    {
+        await DbFixture.DbHelper.DropTableAsync((schema, tableName));
+    }
+
+    public async Task InsertIntoSingleColumnTableAsync(
+        string tableName,
+        object? value,
+        SqlDbType? dbType = null)
+    {
+        await DbFixture.DbHelper.InsertIntoSingleColumnTableAsync(tableName, value, dbType);
+    }
+
+    public async Task CreateIndexAsync(string tableName, IndexDefinition indexDefinition)
+    {
+        await DbFixture.DbHelper.CreateIndexAsync(tableName, indexDefinition);
+    }
+
+    public async Task DropIndexAsync(string tableName, string indexName)
+    {
+        await DbFixture.DbHelper.DropIndexAsync(tableName, indexName);
+    }
+
+    public async Task ExecuteNonQueryAsync(string sqlString)
+    {
+        await DbFixture.DbHelper.ExecuteNonQueryAsync(sqlString, CancellationToken.None);
+    }
+
+    public async Task<T?> ExecuteScalarAsync<T>(string sqlString)
+    {
+        return await DbFixture.DbHelper.ExecuteScalarAsync<T>(sqlString);
     }
 }

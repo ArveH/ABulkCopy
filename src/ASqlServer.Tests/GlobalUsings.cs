@@ -9,3 +9,4 @@ global using System.IO.Abstractions.TestingHelpers;
 global using Testing.Shared;
 global using Testing.Shared.SqlServer;
 global using Xunit;
+global using SchemaTableTuple = (string schemaName, string tableName);

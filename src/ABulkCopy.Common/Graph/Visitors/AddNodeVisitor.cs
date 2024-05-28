@@ -46,12 +46,12 @@ public class AddNodeVisitor : VisitorBase, IAddNodeVisitor
     private bool CurrentDependsOnNewNode(INode node)
     {
         return node.TableDefinition != null &&
-               node.TableDefinition.ForeignKeys.Any(fk => fk.TableReference == _newNode.Name);
+               node.TableDefinition.ForeignKeys.Any(fk => fk.GetFullName() == _newNode.Name);
     }
 
     bool NewNodeDependsOnCurrent(INode node)
     {
-        return _newNode.TableDefinition!.ForeignKeys.Any(fk => fk.TableReference == node.Name);
+        return _newNode.TableDefinition!.ForeignKeys.Any(fk => fk.GetFullName() == node.Name);
     }
 
     public bool IsAdded { get; private set; }

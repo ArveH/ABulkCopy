@@ -29,14 +29,21 @@ public class CopyOut : ICopyOut
     {
         var sw = new Stopwatch();
         sw.Start();
-        var tableNames = (await _systemTables.GetTableNamesAsync(_config.SafeGet(Constants.Config.SearchFilter), ct).ConfigureAwait(false)).ToList();
-        _logger.Information($"Copy out {{TableCount}} {"table".Plural(tableNames.Count)}",
-            tableNames.Count);
-        Console.WriteLine($"Copy out {tableNames.Count} {"table".Plural(tableNames.Count)}.");
+        var fullNames = (await _systemTables.GetFullTableNamesAsync(
+            _config.SafeGet(Constants.Config.SchemaFilter), 
+            _config.SafeGet(Constants.Config.SearchFilter), 
+            ct).ConfigureAwait(false)).ToList();
+        _logger.Information($"Copy out {{TableCount}} {"table".Plural(fullNames.Count)}...",
+            fullNames.Count);
+        Console.WriteLine($"Copy out {fullNames.Count} {"table".Plural(fullNames.Count)}...");
         var errors = 0;
-        await Parallel.ForEachAsync(tableNames, ct, async (tableName, _) =>
+        await Parallel.ForEachAsync(fullNames, ct, async (fullName, _) =>
         {
-            if (!await CopyTableAsync(_config.Check(Constants.Config.Folder), tableName, ct).ConfigureAwait(false))
+            if (!await CopyTableAsync(
+                    _config.Check(Constants.Config.Folder), 
+                    fullName.schemaName,
+                    fullName.tableName, 
+                    ct).ConfigureAwait(false))
             {
                 Interlocked.Increment(ref errors);
             }
@@ -45,26 +52,31 @@ public class CopyOut : ICopyOut
 
         if (errors > 0)
         {
-            _logger.Warning($"Copy out {{TableCount}} {"table".Plural(tableNames.Count)} finished with {{Errors}} {"error".Plural(errors)}", 
-                tableNames.Count, errors);
-            Console.WriteLine($"Copy out {tableNames.Count} {"table".Plural(tableNames.Count)} finished with {errors} {"error".Plural(errors)}");
+            _logger.Warning($"Copy out {{TableCount}} {"table".Plural(fullNames.Count)} finished with {{Errors}} {"error".Plural(errors)}", 
+                fullNames.Count, errors);
+            Console.WriteLine($"Copy out {fullNames.Count} {"table".Plural(fullNames.Count)} finished with {errors} {"error".Plural(errors)}");
         }
         else
         {
-            _logger.Information($"Copy out {{TableCount}} {"table".Plural(tableNames.Count)} finished.", 
-                tableNames.Count);
-            Console.WriteLine($"Copy out {tableNames.Count} {"table".Plural(tableNames.Count)} finished.");
+            _logger.Information($"Copy out {{TableCount}} {"table".Plural(fullNames.Count)} finished.", 
+                fullNames.Count);
+            Console.WriteLine($"Copy out {fullNames.Count} {"table".Plural(fullNames.Count)} finished.");
         }
         _logger.Information("Copy took {Elapsed}", sw.Elapsed.ToString("g"));
         Console.WriteLine($"Copy took {sw.Elapsed:g}");
     }
 
-    private async Task<bool> CopyTableAsync(string folder, string tableName, CancellationToken ct)
+    private async Task<bool> CopyTableAsync(
+        string folder, 
+        string schemaName,
+        string tableName, 
+        CancellationToken ct)
     {
         try
         {
             // TODO: CancellationToken
-            var tabDef = await _tableSchema.GetTableInfoAsync(tableName, ct).ConfigureAwait(false);
+            var tabDef = await _tableSchema.GetTableInfoAsync(schemaName, tableName, ct)
+                .ConfigureAwait(false);
             if (tabDef == null)
             {
                 _logger.Warning("Table {SearchString} not found", tableName);
@@ -74,16 +86,16 @@ public class CopyOut : ICopyOut
             // TODO: CancellationToken
             await _schemaWriter.WriteAsync(tabDef, folder).ConfigureAwait(false);
             var rows = await _dataWriter.WriteAsync(tabDef, folder, ct).ConfigureAwait(false);
-            _logger.Information("Table '{TableName}' with {Rows} rows copied to disk",
-                tableName, rows);
-            Console.WriteLine($"Table '{tableName}' with {rows} rows copied to disk");
+            _logger.Information("Table '{SchemaName}.{TableName}' with {Rows} rows copied to disk",
+                schemaName, tableName, rows);
+            Console.WriteLine($"Table '{schemaName}.{tableName}' with {rows} rows copied to disk");
             return true;
         }
         catch (Exception ex)
         {
-            _logger.Error(ex, "Copy out from table '{TableName}' failed",
-                tableName);
-            Console.WriteLine($"Copy out from table '{tableName}' failed");
+            _logger.Error(ex, "Copy out from table '{SchemaName}.{TableName}' failed",
+                schemaName, tableName);
+            Console.WriteLine($"Copy out from table '{schemaName}.{tableName}' failed");
             return false;
         }
     }

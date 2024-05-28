@@ -5,7 +5,7 @@ public class CmdArguments
     [Option('d', "direction", Required = true, HelpText = "Copy direction. \"In\" to a database or \"Out\" from a database.")]
     public required CopyDirection Direction { get; set; }
 
-    [Option('c', "connection-string", HelpText = "The connection string")]
+    [Option('c', "connection-string", Required = true, HelpText = "The connection string")]
     public string? ConnectionString { get; set; }
 
     [Option('r', "rdbms", Required = true, HelpText = "Database Management System. \"Pg\" or \"Mss\".")]
@@ -14,11 +14,17 @@ public class CmdArguments
     [Option('f', "folder", Required = false, HelpText = "The source/destination folder for schema and data files.")]
     public string? Folder { get; set; }
 
+    [Option('m', "mappings-file", Required = false, HelpText = "The path and file name of a json file containing key-value pairs for mapping schema names and collation names. E.g. mapping the \"dbo\" schema in SQL Server to the \"public\" schema in Postgres. There is a sample-mappings.json file accompanying the executable.")]
+    public string? MappingsFile { get; set; }
+
     [Option('l', "log-file", Required = false, HelpText = "Full path for log file.")]
     public string? LogFile { get; set; }
 
     [Option('q', "add-quotes", Required = false, HelpText = "Flag to quote all identifiers. Only applicable for Postgres, where there is a significant difference in behaviour when quoting identifiers. NOTE: Postgres reserved words are always quoted. For SQL Server, this flag is ignored, and identifiers will always be quoted.")]
     public bool AddQuotes { get; set; }
+
+    [Option("schema-filter", Required = false, HelpText = "A comma separated list of schema names. When it's not used, all schemas will be copied, except 'guest', 'information_schema', 'sys' and 'logs'")]
+    public string? SchemaFilter { get; set; }
 
     [Option('s', "search-filter", Required = false, HelpText = "A string to filter table names or file names. Note that the syntax of the SearchFilter is different depending on the context. For copy in from a file system, use a RegEx in .NET format. E.g. \"\\b(clients|scopes)\\b\" will match \"clients.schema\" and \"scopes.schema\", but not \"someclients.schema\" nor \"clients2.schema\". For copy out from SQL Server, the SearchFilter is the rhs of a LIKE clause. E.g. \"a[sa][ya][sg]%\" to get all tables that starts with 'a' followed by \"sys\" or \"aag\" (but also \"asas\", \"aayg\", and other combinations). If you don't use a search-filter, all tables are copied.")]
     public string? SearchFilter { get; set; }
@@ -46,11 +52,19 @@ public class CmdArguments
             appSettings.Add(Constants.Config.Folder, Folder);
         }
 
+        if (!string.IsNullOrWhiteSpace(MappingsFile))
+        {
+            appSettings.Add(Constants.Config.MappingsFile, MappingsFile);
+        }
         if (!string.IsNullOrWhiteSpace(LogFile))
         {
             appSettings.Add(Constants.Config.LogFile, LogFile);
         }
         appSettings.Add(Constants.Config.AddQuotes, AddQuotes.ToString());
+        if (!string.IsNullOrWhiteSpace(SchemaFilter))
+        {
+            appSettings.Add(Constants.Config.SchemaFilter, SchemaFilter);
+        }
         if (!string.IsNullOrWhiteSpace(SearchFilter))
         {
             appSettings.Add(Constants.Config.SearchFilter, SearchFilter);
@@ -58,5 +72,22 @@ public class CmdArguments
         appSettings.Add(Constants.Config.EmptyString, EmptyString.ToString());
 
         return appSettings;
+    }
+
+    public static CmdArguments? Create(string[] args)
+    {
+        var parser = new Parser(cfg =>
+        {
+            cfg.CaseInsensitiveEnumValues = true;
+            cfg.HelpWriter = Console.Error;
+        });
+        var result = parser.ParseArguments<CmdArguments>(args);
+        if (result.Tag == ParserResultType.NotParsed)
+        {
+            // A usage message is written to Console.Error by the CommandLineParser
+            return null;
+        }
+
+        return result.Value;
     }
 }

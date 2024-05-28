@@ -1,16 +1,18 @@
+using ABulkCopy.Common.Extensions;
+
 namespace ASqlServer.Tests;
 
 public class MssSchemaWriterTests
 {
     private const string TestPath = @"C:\testfiles";
-    private const string TestTableName = "TestTableForTestWrite";
+    private static SchemaTableTuple TestNames = ("dbo", "TestTableForTestWrite");
     private readonly TableDefinition _originalTableDefinition;
     private readonly MockFileSystem _mockFileSystem;
     private readonly ISchemaWriter _schemaWriter;
 
     public MssSchemaWriterTests()
     {
-        _originalTableDefinition = MssTestData.GetEmpty(TestTableName);
+        _originalTableDefinition = MssTestData.GetEmpty(TestNames);
         _mockFileSystem = new MockFileSystem();
         _mockFileSystem.AddDirectory(TestPath);
         _schemaWriter = new SchemaWriter(
@@ -138,7 +140,7 @@ public class MssSchemaWriterTests
         await _schemaWriter.WriteAsync(_originalTableDefinition, TestPath);
 
         // Assert
-        var jsonTxt = await GetJsonText();
+        var jsonTxt = await _mockFileSystem.GetJsonSchemaText(TestPath, TestNames);
         var collation = col.Collation == null ? "null" : $"\"{col.Collation}\"";
         jsonTxt.Squeeze().Should().ContainEquivalentOf((
             "{\r\n" +
@@ -153,13 +155,5 @@ public class MssSchemaWriterTests
             "      \"DefaultConstraint\": null,\r\n" +
             $"      \"Collation\": {collation}\r\n" +
             "    }").Squeeze());
-    }
-
-    private async Task<string> GetJsonText()
-    {
-        var fullPath = Path.Combine(TestPath, TestTableName + Constants.SchemaSuffix);
-        _mockFileSystem.FileExists(fullPath).Should().BeTrue("because schema file should exist");
-        var jsonTxt = await _mockFileSystem.File.ReadAllTextAsync(fullPath);
-        return jsonTxt;
     }
 }

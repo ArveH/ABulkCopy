@@ -60,4 +60,12 @@ public class MssCommandBase
         await using var sqlCommand = new SqlCommand(sqlString, sqlConnection);
         await sqlCommand.ExecuteNonQueryAsync(ct);
     }
+
+    public async Task<object?> ExecuteScalarAsync(string sqlString, CancellationToken ct)
+    {
+        await using var sqlConnection = new SqlConnection(_dbContext.ConnectionString);
+        await sqlConnection.OpenAsync(ct);
+        await using var sqlCommand = new SqlCommand(sqlString, sqlConnection);
+        return await sqlCommand.ExecuteScalarAsync(ct);
+    }
 }

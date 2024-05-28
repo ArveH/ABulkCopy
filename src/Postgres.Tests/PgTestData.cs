@@ -2,7 +2,7 @@
 
 public static class PgTestData
 {
-    public static TableDefinition GetEmpty(string name)
+    public static TableDefinition GetEmpty(SchemaTableTuple st)
     {
         return new TableDefinition(Rdbms.Pg)
         {
@@ -10,9 +10,10 @@ public static class PgTestData
             {
                 Id = 1,
                 Location = "default",
-                Name = name,
-                Schema = "dbo"
-            }
+                Name = st.tableName,
+                Schema = st.schemaName
+            },
+            Data = new TableData { FileName = $"{st.schemaName}.{st.tableName}{Constants.DataSuffix}"}
         };
     }
 }

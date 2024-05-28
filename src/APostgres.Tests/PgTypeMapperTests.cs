@@ -65,7 +65,7 @@ public class PgTypeMapperTests : PgTestBase
     private void TestConvert(string tableName, IColumn defCol, string expectedType, string expectedDefault)
     {
         // Arrange
-        var inputDefinition = MssTestData.GetEmpty(tableName);
+        var inputDefinition = MssTestData.GetEmpty(("dbo", tableName));
 
         inputDefinition.Columns.Add(new SqlServerBigInt(1, "id", false));
         inputDefinition.Columns.Add(defCol);
@@ -73,7 +73,11 @@ public class PgTypeMapperTests : PgTestBase
             new PgParser(),
             new ParseTree(new NodeFactory(), new SqlTypes()),
             new TokenizerFactory(new TokenFactory()),
-            new PgColumnFactory(), new MappingFactory());
+            new PgColumnFactory(), 
+            new MappingFactory(
+                TestConfiguration,
+                new MockFileSystem(),
+                TestLogger));
 
         // Act
         var tableDefinition = typeConverter.Convert(inputDefinition);

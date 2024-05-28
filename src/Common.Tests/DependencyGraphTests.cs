@@ -26,7 +26,7 @@ public class DependencyGraphTests
         VerifyCount(graph, tableDefinitions.Count);
         VerifyDepths(
             graph.GetTableDepths(),
-            tableDefinitions.Select(d => d.Header.Name).ToList(),
+            tableDefinitions.Select(d => d.GetFullName()).ToList(),
             new List<int> { 1 });
     }
 
@@ -45,7 +45,7 @@ public class DependencyGraphTests
         VerifyCount(graph, tableDefinitions.Count);
         VerifyDepths(
             graph.GetTableDepths(),
-            tableDefinitions.Select(d => d.Header.Name).ToList(),
+            tableDefinitions.Select(d => d.GetFullName()).ToList(),
             new List<int> { 1, 1 });
     }
 
@@ -65,7 +65,7 @@ public class DependencyGraphTests
         VerifyCount(graph, tableDefinitions.Count);
         VerifyDepths(
             graph.GetTableDepths(),
-            tableDefinitions.Select(d => d.Header.Name).ToList(),
+            tableDefinitions.Select(d => d.GetFullName()).ToList(),
             new List<int> { 1, 2 });
     }
 
@@ -85,7 +85,7 @@ public class DependencyGraphTests
         VerifyCount(graph, tableDefinitions.Count);
         VerifyDepths(
             graph.GetTableDepths(),
-            tableDefinitions.Select(d => d.Header.Name).ToList(),
+            tableDefinitions.Select(d => d.GetFullName()).ToList(),
             new List<int> { 1, 2 });
     }
 
@@ -287,6 +287,7 @@ public class DependencyGraphTests
         {
             ConstraintName = $"FK_{parentName}_Id",
             ColumnNames = new List<string> { $"{parentName}_Id" },
+            SchemaReference = "dbo",
             TableReference = parentName,
             ColumnReferences = new List<string> { "Id" },
         });
@@ -314,7 +315,7 @@ public class DependencyGraphTests
         var tableDefinitions = new List<TableDefinition>();
         foreach (var name in names)
         {
-            var tabDef = MssTestData.GetEmpty(name);
+            var tabDef = MssTestData.GetEmpty(("dbo", name));
             tabDef.Columns.Add(new SqlServerBigInt(1, "Id", false));
             tableDefinitions.Add(tabDef);
         }

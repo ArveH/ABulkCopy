@@ -1,4 +1,4 @@
-﻿namespace ABulkCopy.Cmd.Internal.Factories;
+﻿namespace ABulkCopy.APostgres;
 
 public class QueryBuilderFactory : IQueryBuilderFactory
 {

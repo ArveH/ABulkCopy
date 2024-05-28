@@ -4,7 +4,7 @@ public class Program
 {
     public static async Task Main(string[] args)
     {
-        var cmdArguments = GetArguments(args);
+        var cmdArguments = CmdArguments.Create(args);
         if (cmdArguments == null) return;
         var configuration = new ConfigHelper().GetConfiguration(
             userSecretsKey: "128e015d-d8ef-4ca8-ba79-5390b26c675f",
@@ -61,22 +61,5 @@ public class Program
         {
             await Log.CloseAndFlushAsync();
         }
-    }
-
-    private static CmdArguments? GetArguments(string[] args)
-    {
-        var parser = new Parser(cfg =>
-        {
-            cfg.CaseInsensitiveEnumValues = true;
-            cfg.HelpWriter = Console.Error;
-        });
-        var result = parser.ParseArguments<CmdArguments>(args);
-        if (result.Tag == ParserResultType.NotParsed)
-        {
-            // A usage message is written to Console.Error by the CommandLineParser
-            return null;
-        }
-
-        return result.Value;
     }
 }

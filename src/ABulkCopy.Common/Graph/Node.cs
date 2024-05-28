@@ -9,7 +9,7 @@ public class Node : INode
     public Node(TableDefinition val)
     {
         TableDefinition = val;
-        Name = val.Header.Name;
+        Name = val.GetFullName();
     }
 
     public string Name { get; }

@@ -15,8 +15,8 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         _logger = logger.ForContext<MssSystemTables>();
     }
 
-    public async Task<IEnumerable<string>> GetTableNamesAsync(
-        string searchString, CancellationToken ct)
+    public async Task<IEnumerable<SchemaTableTuple>> 
+        GetFullTableNamesAsync(string schemaNames, string searchString, CancellationToken ct)
     {
         SqlCommand? command;
         if (string.IsNullOrWhiteSpace(searchString))
@@ -24,63 +24,73 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
             _logger.Information("Reading all tables");
 
             command =
-                new SqlCommand("SELECT name FROM sys.tables WITH(NOLOCK)\r\n" +
-                               " WHERE object_id not in (\r\n" +
+                new SqlCommand("SELECT s.name AS SchemaName, t.name AS TableName\r\n" +
+                               "FROM sys.tables t WITH(NOLOCK)\r\n" +
+                               "INNER JOIN sys.schemas s WITH(NOLOCK)\r\n" +
+                               "    ON t.schema_id = s.schema_id\r\n" +
+                               " WHERE t.object_id not in (\r\n" +
                                "   SELECT major_id\r\n" +
                                "     FROM sys.extended_properties WITH(NOLOCK)\r\n" +
                                "    WHERE minor_id = 0\r\n" +
                                "      AND class = 1\r\n" +
                                "      AND name = N'microsoft_database_tools_support')\r\n" +
-                               "   AND is_ms_shipped = 0\r\n" +
-                               "   AND schema_id not in (2, 3, 4, 5)\r\n" + // guest, information_schema, sys, logs
-                               "ORDER BY name");
+                               "   AND t.is_ms_shipped = 0 \r\n" +
+                               schemaNames.AddSchemaFilter() +
+                               "ORDER BY s.name, t.name");
         }
         else
         {
             _logger.Information("Reading tables where search string is '{searchString}'", searchString);
 
             command =
-                new SqlCommand("SELECT name FROM sys.tables WITH(NOLOCK)\r\n" +
+                new SqlCommand("SELECT s.name AS SchemaName, t.name AS TableName\r\n" +
+                               "FROM sys.tables t WITH(NOLOCK)\r\n" +
+                               "INNER JOIN sys.schemas s WITH(NOLOCK)\r\n" +
+                               "    ON t.schema_id = s.schema_id\r\n" +
                                " WHERE object_id not in (\r\n" +
                                "   SELECT major_id\r\n" +
                                "     FROM sys.extended_properties WITH(NOLOCK)\r\n" +
                                "    WHERE minor_id = 0\r\n" +
                                "      AND class = 1\r\n" +
                                "      AND name = N'microsoft_database_tools_support')\r\n" +
-                               "   AND name LIKE @SearchString\r\n" +
-                               "   AND is_ms_shipped = 0\r\n" +
-                               "   AND schema_id not in (2, 3, 4, 5)\r\n" + // guest, information_schema, sys, logs
-                               "ORDER BY name");
+                               "   AND t.name LIKE @SearchString\r\n" +
+                               "   AND t.is_ms_shipped = 0\r\n" +
+                               schemaNames.AddSchemaFilter() +
+                               "ORDER BY s.name, t.name");
             command.Parameters.AddWithValue("@SearchString", searchString);
         }
 
-        var tableNames = new List<string>();
+        var fullNames = new List<(string, string)>();
         await ExecuteReaderAsync(command, reader =>
         {
-            tableNames.Add(reader.GetString(0));
+            fullNames.Add((reader.GetString(0), reader.GetString(1)));
         }, ct).ConfigureAwait(false);
 
-        _logger.Information("Found {numberOfTables} tables.", tableNames.Count);
-        return tableNames;
+        _logger.Information("Found {numberOfTables} tables.", fullNames.Count);
+        return fullNames;
     }
 
     public async Task<TableHeader?> GetTableHeaderAsync(
-        string tableName, CancellationToken ct)
+        string schemaName, string tableName, CancellationToken ct)
     {
         var command =
             new SqlCommand("SELECT o.object_id AS id, " +
-                           "       OBJECT_SCHEMA_NAME(o.object_id) AS [schema], " +
+                           "       s.name AS [schema], " +
                            "       f.name AS segname,\r\n" +
                            "       IDENT_SEED(@TableName) AS seed,\r\n" +
                            "       IDENT_INCR(@TableName) AS increment " +
                            "FROM   sys.objects o WITH(NOLOCK)\r\n" +
+                           "INNER JOIN sys.schemas s WITH(NOLOCK)\r\n" +
+                           "    ON s.schema_id = o.schema_id\r\n" +
                            "INNER JOIN sys.indexes i WITH(NOLOCK)\r\n" +
                            "    ON i.object_id = o.object_id\r\n" +
                            "INNER JOIN sys.filegroups f WITH(NOLOCK)\r\n" +
                            "    ON i.data_space_id = f.data_space_id\r\n" +
                            "WHERE o.type = 'U'\r\n" +
                            "  AND (i.index_id = 0 OR i.index_id = 1)\r\n" +
+                           "  AND s.name = @SchemaName\r\n" +
                            "  AND o.name = @TableName\r\n");
+        command.Parameters.AddWithValue("@SchemaName", schemaName);
         command.Parameters.AddWithValue("@TableName", tableName);
 
         var tableHeaders = new List<TableHeader>();
@@ -116,7 +126,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
             return tableHeaders[0];
         }
 
-        _logger.Warning($"Table information for table '{tableName}' was not found");
+        _logger.Warning($"Table information for table '{tableName}' returned {tableHeaders.Count} rows");
         return null;
     }
 
@@ -154,7 +164,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
                            "FROM cte c \r\n" +
                            "LEFT JOIN sys.objects o WITH(NOLOCK) ON (c.default_object_id = o.object_id)\r\n" +
                            "LEFT JOIN sys.default_constraints d WITH(NOLOCK) ON (d.object_id = c.default_object_id)");
-        command.Parameters.AddWithValue("@TableName", tableHeader.Name);
+        command.Parameters.AddWithValue("@TableName", $"{tableHeader.Schema}.{tableHeader.Name}");
 
         var columnDefinitions = new List<IColumn>();
         await ExecuteReaderAsync(command, reader =>
@@ -215,7 +225,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
                            "WHERE ic.object_id = @TableId\r\n" +
                            "AND c.[type] = 'PK'\r\n" +
                            "ORDER BY ic.index_id, ic.index_column_id");
-        command.Parameters.AddWithValue("@TableName", tableHeader.Name);
+        command.Parameters.AddWithValue("@TableName", $"{tableHeader.Schema}.{tableHeader.Name}");
         command.Parameters.AddWithValue("@TableId", tableHeader.Id);
 
         PrimaryKey? pk = null;
@@ -273,7 +283,8 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
                     }
                 };
 
-                var indexColumns = await GetIndexColumnInfoAsync(tableHeader.Name, index.Header, ct).ConfigureAwait(false);
+                var indexColumns = await GetIndexColumnInfoAsync(
+                    (tableHeader.Schema, tableHeader.Name), index.Header, ct).ConfigureAwait(false);
                 index.Columns.AddRange(indexColumns);
                 indexes.Add(index);
 
@@ -300,6 +311,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
             new SqlCommand("SELECT DISTINCT  \r\n" +
                            "    f.name AS foreign_key_name  \r\n" +
                            "   ,object_id \r\n" +
+                           "   ,OBJECT_SCHEMA_NAME (f.referenced_object_id) AS referenced_object_schema  \r\n" +
                            "   ,OBJECT_NAME (f.referenced_object_id) AS referenced_object  \r\n" +
                            "   ,f.delete_referential_action_desc  \r\n" +
                            "   ,f.update_referential_action_desc  \r\n" +
@@ -314,9 +326,10 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
             {
                 ConstraintName = reader.GetString(0),
                 ConstraintId = reader.GetInt32(1),
-                TableReference = reader.GetString(2),
-                DeleteAction = (DeleteAction)Enum.Parse(typeof(DeleteAction), reader.GetString(3).Replace("_", ""), true),
-                UpdateAction = (UpdateAction)Enum.Parse(typeof(UpdateAction), reader.GetString(4).Replace("_", ""), true)
+                SchemaReference = reader.GetString(2),
+                TableReference = reader.GetString(3),
+                DeleteAction = (DeleteAction)Enum.Parse(typeof(DeleteAction), reader.GetString(4).Replace("_", ""), true),
+                UpdateAction = (UpdateAction)Enum.Parse(typeof(UpdateAction), reader.GetString(5).Replace("_", ""), true)
             };
             await GetForeignKeyColumnsAsync(fk, ct).ConfigureAwait(false);
             foreignKeys.Add(fk);
@@ -352,7 +365,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
     }
 
     private async Task<IEnumerable<IndexColumn>> GetIndexColumnInfoAsync(
-        string tableName, IndexHeader indexHeader, CancellationToken ct)
+        SchemaTableTuple st, IndexHeader indexHeader, CancellationToken ct)
     {
         var command =
             new SqlCommand("select COL_NAME(ic.object_id,ic.column_id) AS column_name, ic.is_descending_key\r\n" +
@@ -363,7 +376,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
                            "and i.object_id = object_id(@TableName)");
 
         command.Parameters.AddWithValue("@IndexId", indexHeader.Id);
-        command.Parameters.AddWithValue("@TableName", tableName);
+        command.Parameters.AddWithValue("@TableName", $"{st.schemaName}.{st.tableName}");
 
         var columns = new List<IndexColumn>();
         await ExecuteReaderAsync(command, reader =>
@@ -378,8 +391,8 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         }, ct).ConfigureAwait(false);
 
         _logger.Information(
-            $"Retrieved {{ColumnCount}} index {"column".Plural(columns.Count)} for index '{{TableName}}.{{IndexName}}'",
-            columns.Capacity, tableName, indexHeader.Name);
+            $"Retrieved {{ColumnCount}} index {"column".Plural(columns.Count)} for index '{{SchemaName}}{{TableName}}.{{IndexName}}'",
+            columns.Capacity, st.schemaName, st.tableName, indexHeader.Name);
 
         return columns;
     }

@@ -41,7 +41,7 @@ public class PgDataReaderOtherTypesTests : PgDataReaderTestBase
         // ReSharper disable once PossiblyMistakenUseOfInterpolatedStringInsert
         var blobFileName = $"i{0:D15}.raw";
         var blobFilePath = Path.Combine(
-            FileHelper.DataFolder, tableName, ColName, blobFileName);
+            FileHelper.DataFolder, "public." + tableName, ColName, blobFileName);
         var fileData = new MockFileData(AllTypes.SampleValues.Binary5K);
         FileHelper.FileSystem.AddFile(blobFilePath, fileData);
         

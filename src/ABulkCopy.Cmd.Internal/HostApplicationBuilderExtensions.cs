@@ -42,7 +42,6 @@ public static class HostApplicationBuilderExtensions
         services.AddTransient<IDependencyGraph, DependencyGraph>();
         services.AddTransient<IVisitorFactory, VisitorFactory>();
         services.AddSingleton<INodeFactory, NodeFactory>();
-        services.AddSingleton<IQueryBuilderFactory, QueryBuilderFactory>();
         services.AddSingleton<IIdentifier, Identifier>();
         if (rdbms == Rdbms.Mss) services.AddMssServices();
         if (rdbms == Rdbms.Pg) services.AddPgServices();

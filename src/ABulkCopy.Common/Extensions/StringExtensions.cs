@@ -21,6 +21,15 @@ public static class StringExtensions
         return Constants.Quote + str + Constants.Quote;
     }
 
+    public static string AddSchemaFilter(this string? str)
+    {
+        return string.IsNullOrWhiteSpace(str) 
+            ? "AND s.name not in ('guest', 'INFORMATION_SCHEMA', 'sys', 'logs') "
+            : "AND s.name in (" + string.Join(",", 
+                str.Split(',', StringSplitOptions.TrimEntries)
+                    .Select(s => $"'{s}'")) + ") ";
+    }
+
     public static string TrimSchema(this string str)
     {
         var parts = str.Split('.');

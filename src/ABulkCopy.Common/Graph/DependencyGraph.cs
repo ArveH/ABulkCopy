@@ -62,7 +62,8 @@ public class DependencyGraph : IDependencyGraph
     {
         for (var i = currentPos + 1; i < allTablesWithDuplicates.Length; i++)
         {
-            if (allTablesWithDuplicates[i].Header.Name == table.Header.Name)
+            if (allTablesWithDuplicates[i].Header.Schema == table.Header.Schema &&
+                allTablesWithDuplicates[i].Header.Name == table.Header.Name)
             {
                 return true;
             }

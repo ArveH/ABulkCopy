@@ -1,4 +1,6 @@
-﻿namespace SqlServer.Tests;
+﻿using Testing.Shared;
+
+namespace SqlServer.Tests;
 
 public abstract class MssDataWriterTestBase : MssTestBase
 {
@@ -12,7 +14,7 @@ public abstract class MssDataWriterTestBase : MssTestBase
         : base(dbFixture, output)
     {
         TestTableName = tableName;
-        OriginalTableDefinition = MssTestData.GetEmpty(tableName);
+        OriginalTableDefinition = MssTestData.GetEmpty(("dbo", tableName));
         MockFileSystem = new MockFileSystem();
         MockFileSystem.AddDirectory(TestPath);
         TestDataWriter = new DataWriter(
@@ -25,9 +27,9 @@ public abstract class MssDataWriterTestBase : MssTestBase
     {
         // Arrange
         OriginalTableDefinition.Columns.Add(col);
-        await DbFixture.DropTable(TestTableName);
-        await DbFixture.CreateTable(OriginalTableDefinition);
-        await DbFixture.InsertIntoSingleColumnTable(
+        await DropTableAsync(TestTableName);
+        await CreateTableAsync(OriginalTableDefinition);
+        await InsertIntoSingleColumnTableAsync(
             TestTableName, value, dbType);
         var cts = new CancellationTokenSource();
 
@@ -41,10 +43,10 @@ public abstract class MssDataWriterTestBase : MssTestBase
         }
         finally
         {
-            await DbFixture.DropTable(TestTableName);
+            await DropTableAsync(TestTableName);
         }
 
-        return await GetJsonText();
+        return await MockFileSystem.GetJsonDataText(TestPath, ("dbo", TestTableName));
     }
 
     protected async Task TestWriteUsingType(IColumn col, object? value)
@@ -66,12 +68,4 @@ public abstract class MssDataWriterTestBase : MssTestBase
 
     protected static readonly string String10K = new('a', 10000);
     protected static readonly string NString10K = new('ﯵ', 10000);
-
-    protected async Task<string> GetJsonText()
-    {
-        var fullPath = Path.Combine(TestPath, TestTableName + Constants.DataSuffix);
-        MockFileSystem.FileExists(fullPath).Should().BeTrue("because data file should exist");
-        var jsonTxt = await MockFileSystem.File.ReadAllTextAsync(fullPath);
-        return jsonTxt;
-    }
 }

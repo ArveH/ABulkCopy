@@ -35,7 +35,7 @@ public class MssTableReader : IDisposable, IMssTableReader
         _reader = await _command.ExecuteReaderAsync(
             CommandBehavior.SequentialAccess, ct).ConfigureAwait(false);
         _logger.Information("Preparing reader '{readerName}' for table '{tableName}'",
-            _readerName, tableDefinition.Header.Name);
+            _readerName, tableDefinition.GetFullName());
     }
 
     public bool IsNull(int ordinal) => Reader.IsDBNull(ordinal);

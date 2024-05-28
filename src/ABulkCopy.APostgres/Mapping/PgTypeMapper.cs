@@ -29,7 +29,7 @@ public class PgTypeMapper : ITypeConverter
             throw new ArgumentException("Only SQL Server schema files can be converted to Postgres");
         }
 
-        var mappings = _mappingFactory.GetDefaultMssToPgMappings();
+        var mappings = _mappingFactory.GetMappings();
 
         var tableDefinition = new TableDefinition(Rdbms.Pg)
         {
@@ -39,9 +39,11 @@ public class PgTypeMapper : ITypeConverter
                 Location = mappings.Locations.NullableGet(sourceDefinition.Header.Location),
                 Schema = mappings.Schemas[sourceDefinition.Header.Schema],
             },
+            Data = new TableData { FileName = sourceDefinition.Data.FileName },
             Columns = ConvertColumns(sourceDefinition, mappings).ToList()
         };
         tableDefinition.ForeignKeys.AddRange(sourceDefinition.ForeignKeys.Select(k => k.Clone()));
+        tableDefinition.ForeignKeys.ForEach(k => k.SchemaReference = mappings.Schemas[k.SchemaReference]);
         tableDefinition.Indexes.AddRange(sourceDefinition.Indexes.Select(i => i.Clone()));
         tableDefinition.PrimaryKey = sourceDefinition.PrimaryKey?.Clone();
 

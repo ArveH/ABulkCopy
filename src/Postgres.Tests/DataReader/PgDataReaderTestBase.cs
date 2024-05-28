@@ -27,11 +27,11 @@ public class PgDataReaderTestBase : PgTestBase
 
             // Assert
             return await DbFixture.SelectScalar<T>(
-                tableName, col);
+                ("public", tableName), col);
         }
         finally
         {
-            await DbFixture.DropTable(tableName);
+            await DbFixture.DropTable(("public", tableName));
         }
     }
 
@@ -40,7 +40,7 @@ public class PgDataReaderTestBase : PgTestBase
         List<IColumn> cols,
         List<string> fileData)
     {
-        var tableDefinition = await CreateTableAndDataFile(tableName, cols, fileData);
+        var tableDefinition = await CreateTableAndDataFile(("public", tableName), cols, fileData);
         var dataReader = new PgDataReader(
             DbFixture.PgContext,
             QBFactoryMock.Object,
@@ -51,15 +51,15 @@ public class PgDataReaderTestBase : PgTestBase
     }
 
     protected async Task<TableDefinition> CreateTableAndDataFile(
-        string tableName, 
+        SchemaTableTuple st, 
         List<IColumn> cols, 
         List<string> fileData)
     {
-        var tableDefinition = MssTestData.GetEmpty(tableName);
+        var tableDefinition = PgTestData.GetEmpty(st);
         cols.ForEach(tableDefinition.Columns.Add);
-        await DbFixture.DropTable(tableName);
+        await DbFixture.DropTable(st);
         await DbFixture.CreateTable(tableDefinition);
-        FileHelper.CreateDataFile(tableName, fileData);
+        FileHelper.CreateDataFile(st, fileData);
         return tableDefinition;
     }
 }

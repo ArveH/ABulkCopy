@@ -7,9 +7,9 @@ public class FileHelper
     public MockFileSystem FileSystem { get; } = new();
     public string DataFolder { get; set; } = Path.Combine(".", "testdata");
 
-    public void CreateSingleColMssSchemaFile(string tableName, IColumn col)
+    public void CreateSingleColMssSchemaFile(SchemaTableTuple st, IColumn col)
     {
-        var tableDefinition = MssTestData.GetEmpty(tableName);
+        var tableDefinition = MssTestData.GetEmpty(st);
         tableDefinition.Columns.Add(col);
         CreateSingleColMssSchemaFile(tableDefinition);
     }
@@ -27,15 +27,15 @@ public class FileHelper
 
         var fileData = new MockFileData(jsonText);
         FileSystem.AddFile(
-            Path.Combine(DataFolder, $"{tableDefinition.Header.Name}{Constants.SchemaSuffix}"),
+            Path.Combine(DataFolder, tableDefinition.GetSchemaFileName()),
             fileData);
     }
 
-    public void CreateDataFile(string tableName, List<string> rows)
+    public void CreateDataFile(SchemaTableTuple st, List<string> rows)
     {
         var fileData = new MockFileData(string.Join(Environment.NewLine, rows), Encoding.UTF8);
         FileSystem.AddFile(
-            Path.Combine(DataFolder, $"{tableName}{Constants.DataSuffix}"),
+            Path.Combine(DataFolder, st.GetDataFileName()),
             fileData);
     }
 }

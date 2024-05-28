@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging.Abstractions;
+using QueryBuilderFactory = ABulkCopy.ASqlServer.QueryBuilderFactory;
 
 namespace CrossRDBMS.Tests;
 
@@ -7,7 +8,9 @@ public class DatabaseFixture : IAsyncLifetime
     private MsSqlContainer? _mssContainer;
     private PostgreSqlContainer? _pgContainer;
     private IDbContext? _mssContext;
+    private MssDbHelper? _mssDbHelper;
     private IPgContext? _pgContext;
+    private PgDbHelper? _pgDbHelper;
     private IConfiguration? _testConfiguration;
     private string? _pgConnectionString;
     private string? _mssConnectionString;
@@ -30,10 +33,22 @@ public class DatabaseFixture : IAsyncLifetime
         set => _mssContext = value;
     }
 
+    public MssDbHelper MssDbHelper
+    {
+        get => _mssDbHelper ?? throw new ArgumentNullException(nameof(MssDbHelper));
+        set => _mssDbHelper = value;
+    }
+
     public IPgContext PgContext
     {
         get => _pgContext ?? throw new ArgumentNullException(nameof(PgContext));
         private set => _pgContext = value;
+    }
+
+    public PgDbHelper PgDbHelper
+    {
+        get => _pgDbHelper ?? throw new ArgumentNullException(nameof(PgDbHelper));
+        set => _pgDbHelper = value;
     }
 
     public async Task InitializeAsync()
@@ -65,7 +80,11 @@ public class DatabaseFixture : IAsyncLifetime
         _mssConnectionString = TestConfiguration.GetConnectionString(Constants.Config.MssConnectionString);
         _pgConnectionString = TestConfiguration.GetConnectionString(Constants.Config.PgConnectionString);
         PgContext = new PgContext(new NullLoggerFactory(), TestConfiguration);
+        _pgDbHelper = new PgDbHelper(PgContext);
         MssContext = new MssContext(TestConfiguration);
+        _mssDbHelper = new MssDbHelper(MssContext, new QueryBuilderFactory());
+        await _pgDbHelper.EnsureTestSchemaAsync();
+        await _mssDbHelper.EnsureTestSchemaAsync();
     }
 
     public async Task DisposeAsync()

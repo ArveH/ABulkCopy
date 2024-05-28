@@ -68,4 +68,41 @@ public class PgTestBase
         var identifier = new Identifier(config, dbContextMock.Object);
         return identifier;
     }
+
+    protected static IQueryBuilderFactory GetQueryBuilderFactory(
+        Dictionary<string, string?> appSettings)
+    {
+        var qbFactoryMock = new Mock<IQueryBuilderFactory>();
+        qbFactoryMock
+            .Setup(f => f.GetQueryBuilder())
+            .Returns(() => new QueryBuilder(
+                GetIdentifier(appSettings)));
+        return qbFactoryMock.Object;
+    }
+
+    protected IPgCmd GetPgCmd(Dictionary<string, string?>? appSettings = null)
+    {
+        appSettings ??= new()
+        {
+            { Constants.Config.AddQuotes, "true" },
+        };
+        appSettings.Add(
+            Constants.Config.PgConnectionString,
+            DbFixture.Configuration.SafeGet(Constants.Config.PgConnectionString));
+        return new ABulkCopy.APostgres.PgCmd(
+            DbFixture.PgContext,
+            GetQueryBuilderFactory(appSettings));
+    }
+
+    protected IPgSystemTables GetPgSystemTables(Dictionary<string, string?>? appSettings = null)
+    {
+        appSettings ??= new()
+        {
+            { Constants.Config.AddQuotes, "true" },
+        };
+        return new PgSystemTables(
+            DbFixture.PgContext,
+            GetQueryBuilderFactory(appSettings),
+            GetIdentifier(appSettings), TestLogger);
+    }
 }

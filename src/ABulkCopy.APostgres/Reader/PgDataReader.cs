@@ -25,7 +25,7 @@ public class PgDataReader : IADataReader, IDisposable
         EmptyStringFlag emptyStringFlag = EmptyStringFlag.Leave)
     {
         _logger.Information("Reading data for table '{TableName}' from '{Path}'",
-            tableDefinition.Header.Name, folder);
+            tableDefinition.GetFullName(), folder);
         await using var conn = await _context.DataSource.OpenConnectionAsync(ct).ConfigureAwait(false);
 
         var copyStmt = CreateCopyStmt(tableDefinition);
@@ -33,8 +33,7 @@ public class PgDataReader : IADataReader, IDisposable
             copyStmt, ct).ConfigureAwait(false);
 
         var path = Path.Combine(
-            folder,
-            $"{tableDefinition.Header.Name}{Constants.DataSuffix}");
+            folder, tableDefinition.Data.FileName);
         _fileReader.Open(path);
         var counter = 0L;
         // TODO: Currently, it will not continue on error.
@@ -56,7 +55,7 @@ public class PgDataReader : IADataReader, IDisposable
             catch (Exception ex)
             {
                 _logger.Error(ex, "Reading data file for table '{TableName}' failed for row {RowCounter}: {ErrorMessage}",
-                    tableDefinition.Header.Name, counter, ex.FlattenMessages());
+                    tableDefinition.GetFullName(), counter, ex.FlattenMessages());
                 errors++;
                 _fileReader.SkipToNextLine();
                 break;
@@ -66,13 +65,13 @@ public class PgDataReader : IADataReader, IDisposable
         if (errors > 0)
         {
             _logger.Error($"{{ErrorCount}} {"row".Plural(errors)} failed when reading {{RowCount}} {"row".Plural(counter)} for table '{{TableName}}' from '{{Path}}'",
-                errors, counter, tableDefinition.Header.Name, folder);
+                errors, counter, tableDefinition.GetFullName(), folder);
         }
         else
         {
             await writer.CompleteAsync(ct).ConfigureAwait(false);
             _logger.Information($"Read {{RowCount}} {"row".Plural(counter)} for table '{{TableName}}' from '{{Path}}'",
-                counter, tableDefinition.Header.Name, folder);
+                counter, tableDefinition.GetFullName(), folder);
         }
         return counter;
     }
@@ -99,7 +98,7 @@ public class PgDataReader : IADataReader, IDisposable
             {
                 var path = Path.Combine(
                     folder,
-                    tableDefinition.Header.Name,
+                    tableDefinition.Data.FileName[..^5], // Remove .data
                     col.Name,
                     colValue);
                 await writer.WriteAsync(
@@ -123,6 +122,8 @@ public class PgDataReader : IADataReader, IDisposable
     {
         var qb = _queryBuilderFactory.GetQueryBuilder();
         qb.Append("COPY ");
+        qb.AppendIdentifier(tableDefinition.Header.Schema);
+        qb.Append(".");
         qb.AppendIdentifier(tableDefinition.Header.Name);
         qb.Append(" (");
         var first = true;
