@@ -6,7 +6,9 @@ public interface IQueryBuilder
     void Append(string str);
     void AppendLine(string str);
     string ToString();
-    string CreateDropTableStmt(SchemaTableTuple st);
+    string CreateTableStmt(TableDefinition tableDefinition, bool addIfNotExists = false);
+    string DropTableStmt(SchemaTableTuple st);
+    string CreateIndexStmt(SchemaTableTuple st, IndexDefinition indexDefinition);
     void AppendIdentifierList(IEnumerable<string> names);
     void AppendColumns(TableDefinition tableDefinition);
 }

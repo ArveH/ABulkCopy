@@ -183,7 +183,7 @@ public class CopyIn : ICopyIn
             {
                 _logger.Information("Creating index '{IndexName}' for table '{TableName}'...",
                     indexDefinition.Header.Name, tableDefinition.GetFullName());
-                await _pgCmd.CreateIndexAsync(tableDefinition.GetFullName(), indexDefinition, ct).ConfigureAwait(false);
+                await _pgCmd.CreateIndexAsync(tableDefinition.GetNameTuple(), indexDefinition, ct).ConfigureAwait(false);
                 Console.WriteLine(
                     $"Created index '{indexDefinition.Header.Name}' for table '{tableDefinition.GetFullName()}'");
                 _logger.Information("Created index '{IndexName}' for table '{TableName}'",

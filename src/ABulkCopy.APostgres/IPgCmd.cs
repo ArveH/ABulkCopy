@@ -9,9 +9,11 @@ public interface IPgCmd
     Task ExecuteNonQueryAsync(
         string sqlString,
         CancellationToken ct);
-    Task DropTableAsync(SchemaTableTuple st, CancellationToken ct);
+    Task DropTableAsync(
+        SchemaTableTuple st, 
+        CancellationToken ct);
     Task CreateIndexAsync(
-        string tableName, 
+        SchemaTableTuple st, 
         IndexDefinition indexDefinition, 
         CancellationToken ct);
     Task<object?> SelectScalarAsync(
