@@ -98,7 +98,7 @@ public class PgDataReader : IADataReader, IDisposable
             {
                 var path = Path.Combine(
                     folder,
-                    tableDefinition.GetFullName(),
+                    tableDefinition.Data.FileName[..^5], // Remove .data
                     col.Name,
                     colValue);
                 await writer.WriteAsync(
