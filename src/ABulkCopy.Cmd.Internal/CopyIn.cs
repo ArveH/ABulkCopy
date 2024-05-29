@@ -64,27 +64,30 @@ public class CopyIn : ICopyIn
 
         var errors = 0;
         ITableSequencer tableSequencer = new TableSequencer(
-            allTables.Where(t => !t.IsIndependent).DistinctBy(n => n.Name), 
+            allTables.Where(t => !t.IsIndependent).DistinctBy(n => n.Name),
             allTables.Where(t => t.IsIndependent),
             _logger);
 
         var emptyStringFlag = _config.ToEnum(Constants.Config.EmptyString);
+        var skipCreate = Convert.ToBoolean(_config[Constants.Config.SkipCreate]);
 
         await Parallel.ForEachAsync(
-            tableSequencer.GetTablesReadyForCreationAsync(), 
-            ct, 
+            tableSequencer.GetTablesReadyForCreationAsync(),
+            ct,
             async (node, _) =>
             {
                 if (node.TableDefinition == null) throw new ArgumentNullException(nameof(node.TableDefinition));
-                if (!await CreateTableAsync(
-                            folder, 
-                            node.TableDefinition, 
-                            emptyStringFlag, 
+                if (!await CreateAndInsertAsync(
+                            folder,
+                            node.TableDefinition,
+                            emptyStringFlag,
+                            skipCreate,
                             ct)
                         .ConfigureAwait(false))
                 {
                     Interlocked.Increment(ref errors);
                 }
+
                 tableSequencer.TableFinished(node);
             }).ConfigureAwait(false);
 
@@ -103,73 +106,87 @@ public class CopyIn : ICopyIn
             Console.WriteLine(
                 $"Creating and filling {schemaFiles.Count} {"table".Plural(schemaFiles.Count)} finished.");
         }
+
         sw.Stop();
         _logger.Information("The total CopyIn operation took {Elapsed}", sw.Elapsed.ToString("g"));
         Console.WriteLine($"The total CopyIn operation took {sw.Elapsed:g}");
     }
 
-    private async Task<bool> CreateTableAsync(string folder,
+    private async Task<bool> CreateAndInsertAsync(
+        string folder,
         TableDefinition tableDefinition,
-        EmptyStringFlag emptyStringFlag, 
+        EmptyStringFlag emptyStringFlag,
+        bool skipCreate,
         CancellationToken ct)
     {
-        IADataReader? dataReader = null;
-        var errorOccurred = false;
+        if (!skipCreate)
+        {
+            if (!await RecreateTableAsync(tableDefinition, ct)
+                    .ConfigureAwait(false))
+            {
+                return false;
+            }
+        }
+
+        if (!await InsertDataAsync(folder, tableDefinition, emptyStringFlag, ct)
+                .ConfigureAwait(false))
+        {
+            return false;
+        }
+
+        var isIdentityColumnsOk = await ResetIdentityColumnsAsync(tableDefinition, ct)
+            .ConfigureAwait(false);
+
+        var isIndexesOk = true;
+        if (!skipCreate)
+        {
+            isIndexesOk = await CreateIndexesAsync(tableDefinition, ct)
+                .ConfigureAwait(false);
+        }
+
+        return isIdentityColumnsOk && isIndexesOk;
+    }
+
+    private async Task<bool> RecreateTableAsync(
+        TableDefinition tableDefinition,
+        CancellationToken ct)
+    {
         try
         {
-            try
-            {
-                await _pgCmd.DropTableAsync(tableDefinition.GetNameTuple(), ct).ConfigureAwait(false);
-                await _pgCmd.CreateTableAsync(tableDefinition, ct).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Couldn't create table '{TableName}'",
-                    tableDefinition.GetFullName());
-                Console.WriteLine($"Couldn't create table '{tableDefinition.GetFullName()}'");
-                return false;
-            }
-
-            try
-            {
-                dataReader = _aDataReaderFactory.Get(tableDefinition.Rdbms);
-                var rows = await dataReader.ReadAsync(folder, tableDefinition, ct, emptyStringFlag).ConfigureAwait(false);
-                Console.WriteLine($"Read {rows} {"row".Plural(rows)} for table '{tableDefinition.GetFullName()}'");
-                _logger.Information($"Read {{Rows}} {"row".Plural(rows)} for table '{{TableName}}'",
-                    rows, tableDefinition.GetFullName());
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Read data for table '{TableName}' failed",
-                    tableDefinition.GetFullName());
-                Console.WriteLine($"Read data for table '{tableDefinition.GetFullName()}' failed");
-                return false;
-            }
-
-            foreach (var columnName in tableDefinition.Columns
-                         .Where(c => c.Identity != null)
-                         .Select(c => c.Name))
-            {
-                try
-                {
-                    await _systemTables.ResetIdentityAsync(tableDefinition.GetFullName(), columnName, ct).ConfigureAwait(false);
-                    _logger.Information("Reset auto generation for {TableName}.{ColumnName}",
-                        tableDefinition.GetFullName(), columnName);
-                }
-                catch (Exception ex)
-                {
-                    _logger.Error(ex, "Reset auto generation for {TableName}.{ColumnName} failed",
-                        tableDefinition.GetFullName(), columnName);
-                    Console.WriteLine($"**ERROR**: Reset auto generation for {tableDefinition.GetFullName()}.{columnName} failed after all rows where inserted. This is a serious error! The auto generation will most likely produce duplicates.");
-                    errorOccurred = true;
-                }
-            }
+            await _pgCmd.DropTableAsync(tableDefinition.GetNameTuple(), ct).ConfigureAwait(false);
+            await _pgCmd.CreateTableAsync(tableDefinition, ct).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
-            _logger.Error(ex, "Unexpected error for table '{TableName}'",
+            _logger.Error(ex, "Couldn't create table '{TableName}'",
                 tableDefinition.GetFullName());
-            Console.WriteLine($"Unexpected error for table '{tableDefinition.GetFullName()}'");
+            Console.WriteLine($"Couldn't create table '{tableDefinition.GetFullName()}'");
+            return false;
+        }
+
+        return true;
+    }
+
+    private async Task<bool> InsertDataAsync(
+        string folder,
+        TableDefinition tableDefinition,
+        EmptyStringFlag emptyStringFlag,
+        CancellationToken ct)
+    {
+        IADataReader? dataReader = null;
+        try
+        {
+            dataReader = _aDataReaderFactory.Get(tableDefinition.Rdbms);
+            var rows = await dataReader.ReadAsync(folder, tableDefinition, ct, emptyStringFlag).ConfigureAwait(false);
+            Console.WriteLine($"Read {rows} {"row".Plural(rows)} for table '{tableDefinition.GetFullName()}'");
+            _logger.Information($"Read {{Rows}} {"row".Plural(rows)} for table '{{TableName}}'",
+                rows, tableDefinition.GetFullName());
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Read data for table '{TableName}' failed",
+                tableDefinition.GetFullName());
+            Console.WriteLine($"Read data for table '{tableDefinition.GetFullName()}' failed");
             return false;
         }
         finally
@@ -177,13 +194,50 @@ public class CopyIn : ICopyIn
             dataReader?.Dispose();
         }
 
+        return true;
+    }
+
+    private async Task<bool> ResetIdentityColumnsAsync(
+        TableDefinition tableDefinition,
+        CancellationToken ct)
+    {
+        foreach (var columnName in tableDefinition.Columns
+                     .Where(c => c.Identity != null)
+                     .Select(c => c.Name))
+        {
+            try
+            {
+                await _systemTables.ResetIdentityAsync(tableDefinition.GetFullName(), columnName, ct)
+                    .ConfigureAwait(false);
+                _logger.Information("Reset auto generation for {TableName}.{ColumnName}",
+                    tableDefinition.GetFullName(), columnName);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Reset auto generation for {TableName}.{ColumnName} failed",
+                    tableDefinition.GetFullName(), columnName);
+                Console.WriteLine(
+                    $"**ERROR**: Reset auto generation for {tableDefinition.GetFullName()}.{columnName} failed after all rows where inserted. This is a serious error! The auto generation will most likely produce duplicates.");
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private async Task<bool> CreateIndexesAsync(
+        TableDefinition tableDefinition,
+        CancellationToken ct)
+    {
+        var errorOccurred = false;
         await Parallel.ForEachAsync(tableDefinition.Indexes, ct, async (indexDefinition, _) =>
         {
             try
             {
                 _logger.Information("Creating index '{IndexName}' for table '{TableName}'...",
                     indexDefinition.Header.Name, tableDefinition.GetFullName());
-                await _pgCmd.CreateIndexAsync(tableDefinition.GetNameTuple(), indexDefinition, ct).ConfigureAwait(false);
+                await _pgCmd.CreateIndexAsync(tableDefinition.GetNameTuple(), indexDefinition, ct)
+                    .ConfigureAwait(false);
                 Console.WriteLine(
                     $"Created index '{indexDefinition.Header.Name}' for table '{tableDefinition.GetFullName()}'");
                 _logger.Information("Created index '{IndexName}' for table '{TableName}'",
@@ -199,6 +253,6 @@ public class CopyIn : ICopyIn
             }
         }).ConfigureAwait(false);
 
-        return !errorOccurred;
+        return errorOccurred;
     }
 }
