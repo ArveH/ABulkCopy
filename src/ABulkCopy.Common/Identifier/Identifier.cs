@@ -3,6 +3,7 @@
 public class Identifier : IIdentifier
 {
     private readonly bool _addQuotes;
+    private readonly bool _toLower;
     private readonly Rdbms _rdbms;
     private readonly HashSet<string> _keywords;
 
@@ -11,6 +12,7 @@ public class Identifier : IIdentifier
         IDbContext dbContext)
     {
         _addQuotes = Convert.ToBoolean(config[Constants.Config.AddQuotes]);
+        _toLower = Convert.ToBoolean(config[Constants.Config.ToLower]);
         var keywords = config.GetSection(Constants.Config.PgKeywords)
                            .Get<List<string>>()
                        ?? new List<string>();
@@ -26,6 +28,7 @@ public class Identifier : IIdentifier
 
     public string Get(string name)
     {
+        name = _toLower ? name.ToLower() : name;
         return ShouldAddQuotes(name) ? "\"" + name + "\"" : name;
     }
 
