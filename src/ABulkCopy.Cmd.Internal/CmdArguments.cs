@@ -35,6 +35,9 @@ public class CmdArguments
     [Option("skip-create", Required = false, HelpText = "This is an experimental parameter. It assumes that the tables already exists in the database, and will skip the \"create table\" step. The thought is that tables are created using Entity Framework migrations, then ABulkCopy is used to insert data. NOTE: Schema files are still needed to create the dependency graph and the copy statements, and they MUST correspond to the tables already in the database. This parameter is only used when direction = In")]
     public bool SkipCreate { get; set; }
 
+    [Option("to-lower", Required = false, HelpText = "When importing tables, all identifiers (table names, column names, etc.) will be converted to lowercase. NOTE: For Postgres, this parameter will probably have no effect, unless it's used in conjunction with the --add-quotes parameter. Postgres will \"fold\" the identifier names to lowercase anyway, unless the identifier is surrounded with quotes. This parameter is only used when direction = In")]
+    public bool ToLower { get; set; }
+
 
     public Dictionary<string, string?> ToAppSettings()
     {
@@ -66,6 +69,7 @@ public class CmdArguments
         }
         appSettings.Add(Constants.Config.AddQuotes, AddQuotes.ToString());
         appSettings.Add(Constants.Config.SkipCreate, SkipCreate.ToString());
+        appSettings.Add(Constants.Config.ToLower, ToLower.ToString());
         if (!string.IsNullOrWhiteSpace(SchemaFilter))
         {
             appSettings.Add(Constants.Config.SchemaFilter, SchemaFilter);
