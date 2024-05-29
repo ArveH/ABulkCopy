@@ -21,6 +21,7 @@ public static class Constants
         public const string SchemaFilter = "AppSettings:SchemaFilter";
         public const string SearchFilter = "AppSettings:SearchFilter";
         public const string EmptyString = "AppSettings:EmptyString";
+        public const string SkipCreate = "AppSettings:SkipCreate";
 
         public const string PgKeywords = "PgKeywords";
 
