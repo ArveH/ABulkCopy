@@ -14,9 +14,9 @@ public class MappingFactory : IMappingFactory
         _mapping = new Mapping(
             locations: GetDefaultMssToPgLocationMappings());
         var fileName = config.SafeGet(Constants.Config.MappingsFile);
+        SetDefaultMssToPgMappings();
         if (fileName == string.Empty)
         {
-            SetDefaultMssToPgMappings();
             return;
         }
 
@@ -53,15 +53,15 @@ public class MappingFactory : IMappingFactory
             }
             foreach (var (key, value) in mappingsFromFile.Schemas)
             {
-                _mapping.Schemas.Add(key, value);
+                _mapping.Schemas[key] = value;
             }
             foreach (var (key, value) in mappingsFromFile.Collations)
             {
-                _mapping.Collations.Add(key, value);
+                _mapping.Collations[key] = value;
             }
             foreach (var (key, value) in mappingsFromFile.ColumnTypes)
             {
-                _mapping.ColumnTypes.Add(key, value);
+                _mapping.ColumnTypes[key] = value;
             }
         }
         catch (MappingsFileException)

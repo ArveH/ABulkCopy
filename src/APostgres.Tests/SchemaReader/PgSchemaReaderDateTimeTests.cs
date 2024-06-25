@@ -18,14 +18,14 @@ public class PgSchemaReaderDateTimeTests : PgSchemaReaderBase
     public async Task ReadMssDateTime()
     {
         var result = await GetColFromTableDefinition(new SqlServerDateTime(1, "MyTestCol", false));
-        VerifyColumn(result, new PostgresTimestamp(1, "MyTestCol", false));
+        VerifyColumn(result, new PostgresTimestampTz(1, "MyTestCol", false));
     }
 
     [Fact]
     public async Task ReadMssDateTime2()
     {
         var result = await GetColFromTableDefinition(new SqlServerDateTime2(1, "MyTestCol", false, 5));
-        VerifyColumn(result, new PostgresTimestamp(1, "MyTestCol", false, 5));
+        VerifyColumn(result, new PostgresTimestampTz(1, "MyTestCol", false, 5));
     }
 
     [Fact]

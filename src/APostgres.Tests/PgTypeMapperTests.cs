@@ -21,7 +21,7 @@ public class PgTypeMapperTests : PgTestBase
             }
         };
 
-        TestConvert(GetName(), defCol, "smallint", expected);
+        TestConvert(GetName(), defCol, "boolean", expected);
     }
 
     [Theory]
@@ -42,7 +42,7 @@ public class PgTypeMapperTests : PgTestBase
             }
         };
 
-        TestConvert(GetName(), defCol, "timestamp", expected);
+        TestConvert(GetName(), defCol, "timestamp with time zone", expected);
     }
 
     [Theory]
@@ -65,63 +65,37 @@ public class PgTypeMapperTests : PgTestBase
     [Fact]
     public void TestConvert_When_ReadFromMappingFile_And_CustomConvert()
     {
-        // Arrange
-        var config = new ConfigHelper().GetConfiguration(null, new Dictionary<string, string?>
-        {
-            { Constants.Config.MappingsFile, "mymappings.json" }
-        });
-        var fileSystem = new MockFileSystem();
-        fileSystem.AddFile(@"c:\mymappings.json", GetMappingFile("    \"bit\": \"int\"\r\n"));
-
-        var typeConverter = new PgTypeMapper(
-            new PgParser(),
-            new ParseTree(new NodeFactory(), new SqlTypes()),
-            new TokenizerFactory(new TokenFactory()),
-            new PgColumnFactory(),
-            new MappingFactory(
-                config,
-                fileSystem,
-                TestLogger));
-
-        var defCol = new SqlServerBit(2, "status", false);
-        var inputDefinition = GetTableDefinition(GetName(), defCol);
-
-        // Act
-        var tableDefinition = typeConverter.Convert(inputDefinition);
-
-        // Assert
-        tableDefinition.Columns[1].Type.Should().Be("int");
+        TestConvertWhenUsingMappingFile(
+            "    \"bit\": \"int\"\r\n",
+            new SqlServerBit(2, "status", false),
+            "int");
     }
 
     [Fact]
     public void TestConvert_When_ReadFromMappingFile_And_FallbackConvert()
     {
-        // Arrange
-        var config = new ConfigHelper().GetConfiguration(null, new Dictionary<string, string?>
-        {
-            { Constants.Config.MappingsFile, "mymappings.json" }
-        });
-        var fileSystem = new MockFileSystem();
-        fileSystem.AddFile(@"c:\mymappings.json", GetMappingFile("    \"nvarchar\": \"varchar\"\r\n"));
+        TestConvertWhenUsingMappingFile(
+            "    \"nvarchar\": \"varchar\"\r\n",
+            new SqlServerBit(2, "status", false),
+            "boolean");
+    }
 
-        var typeConverter = new PgTypeMapper(
-            new PgParser(),
-            new ParseTree(new NodeFactory(), new SqlTypes()),
-            new TokenizerFactory(new TokenFactory()),
-            new PgColumnFactory(),
-            new MappingFactory(
-                config,
-                fileSystem,
-                TestLogger));
+    [Fact]
+    public void TestConvert_When_ReadFromMappingFile_And_TypeHasNoFallback()
+    {
+        TestConvertWhenUsingMappingFile(
+            "    \"decimal\": \"double precision\"\r\n",
+            new SqlServerDecimal(2, "amount", false, 19, 2),
+            "double precision");
+    }
 
-        var defCol = new SqlServerBit(2, "status", false);
-        var inputDefinition = GetTableDefinition(GetName(), defCol);
-
-        // Act
-        var tableDefinition = typeConverter.Convert(inputDefinition);
-
-        // Assert
-        tableDefinition.Columns[1].Type.Should().Be("boolean");
+    [Fact]
+    public void TestConvert_When_ReadFromMappingFile_And_TypeNotInCustomMapping()
+    {
+        TestConvertWhenUsingMappingFile(
+            "    \"decimal\": \"double precision\"\r\n",
+            new SqlServerBit(2, "status", false),
+            "boolean");
     }
 
     private void TestConvert(string tableName, IColumn defCol, string expectedType, string expectedDefault)
@@ -145,6 +119,38 @@ public class PgTypeMapperTests : PgTestBase
         tableDefinition.Columns[1].Type.Should().Be(expectedType);
         tableDefinition.Columns[1].HasDefault.Should().BeTrue();
         tableDefinition.Columns[1].DefaultConstraint!.Definition.Should().Be(expectedDefault);
+    }
+
+    private void TestConvertWhenUsingMappingFile(
+        string customMapping,
+        IColumn sqlCol,
+        string expectedType)
+    {
+        // Arrange
+        var config = new ConfigHelper().GetConfiguration(null, new Dictionary<string, string?>
+        {
+            { Constants.Config.MappingsFile, "mymappings.json" }
+        });
+        var fileSystem = new MockFileSystem();
+        fileSystem.AddFile(@"c:\mymappings.json", GetMappingFile(customMapping));
+
+        var typeConverter = new PgTypeMapper(
+            new PgParser(),
+            new ParseTree(new NodeFactory(), new SqlTypes()),
+            new TokenizerFactory(new TokenFactory()),
+            new PgColumnFactory(),
+            new MappingFactory(
+                config,
+                fileSystem,
+                TestLogger));
+
+        var inputDefinition = GetTableDefinition(GetName(), sqlCol);
+
+        // Act
+        var tableDefinition = typeConverter.Convert(inputDefinition);
+
+        // Assert
+        tableDefinition.Columns[1].Type.Should().Be(expectedType);
     }
 
     private static TableDefinition GetTableDefinition(string tableName, IColumn defCol)
