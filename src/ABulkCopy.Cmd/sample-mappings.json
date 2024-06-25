@@ -6,5 +6,22 @@
   "Collations": {
     "SQL_Latin1_General_CP1_CI_AI": "en_ci_ai",
     "SQL_Latin1_General_CP1_CI_AS": "en_ci_as"
+  },
+  "ColumnTypes": {
+    "binary": "bytea",
+    "bit": "boolean",
+    "datetime": "timestamptz",
+    "datetime2": "timestamptz",
+    "datetimeoffset": "timestamptz",
+    "float": "doubleprecision",
+    "nchar": "char",
+    "text": "varchar",
+    "ntext": "varchar",
+    "nvarchar": "varchar",
+    "smalldatetime": "timestamp",
+    "tinyint": "smallint",
+    "uniqueidentifier": "uuid ",
+    "image": "bytea",
+    "varbinary": "bytea"
   }
 }

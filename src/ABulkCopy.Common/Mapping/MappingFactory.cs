@@ -12,7 +12,6 @@ public class MappingFactory : IMappingFactory
     {
         _logger = logger.ForContext<MappingFactory>();
         _mapping = new Mapping(
-            columns: GetDefaultMssToPgColumnMappings(),
             locations: GetDefaultMssToPgLocationMappings());
         var fileName = config.SafeGet(Constants.Config.MappingsFile);
         if (fileName == string.Empty)
@@ -60,6 +59,10 @@ public class MappingFactory : IMappingFactory
             {
                 _mapping.Collations.Add(key, value);
             }
+            foreach (var (key, value) in mappingsFromFile.ColumnTypes)
+            {
+                _mapping.ColumnTypes.Add(key, value);
+            }
         }
         catch (MappingsFileException)
         {
@@ -79,6 +82,10 @@ public class MappingFactory : IMappingFactory
         _mapping.Schemas.Add("dbo", "public");
         _mapping.Collations.Add("SQL_Latin1_General_CP1_CI_AI", "en_ci_ai");
         _mapping.Collations.Add("SQL_Latin1_General_CP1_CI_AS", "en_ci_as");
+        foreach (var (key, value) in GetDefaultMssToPgColumnMappings())
+        {
+            _mapping.ColumnTypes.Add(key, value);
+        }
     }
 
     private Dictionary<string, string> GetDefaultMssToPgColumnMappings()

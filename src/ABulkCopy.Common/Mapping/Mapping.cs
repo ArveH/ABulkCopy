@@ -3,12 +3,12 @@
 public class Mapping : IMapping
 {
     public Mapping(
-        Dictionary<string, string>? columns = null,
+        Dictionary<string, string>? columnTypes = null,
         Dictionary<string, string>? schemas = null,
         Dictionary<string, string?>? locations = null,
         Dictionary<string, string?>? collations = null)
     {
-        ColumnTypes = columns ?? new();
+        ColumnTypes = columnTypes ?? new();
         Schemas = schemas ?? new();
         Locations = locations ?? new();
         Collations = collations ?? new();
