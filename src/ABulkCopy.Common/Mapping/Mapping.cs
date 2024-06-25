@@ -8,13 +8,13 @@ public class Mapping : IMapping
         Dictionary<string, string?>? locations = null,
         Dictionary<string, string?>? collations = null)
     {
-        Columns = columns ?? new();
+        ColumnTypes = columns ?? new();
         Schemas = schemas ?? new();
         Locations = locations ?? new();
         Collations = collations ?? new();
     }
 
-    public Dictionary<string, string> Columns { get; }
+    public Dictionary<string, string> ColumnTypes { get; }
     public Dictionary<string, string> Schemas { get; }
     public Dictionary<string, string?> Locations { get; }
     public Dictionary<string, string?> Collations { get; }

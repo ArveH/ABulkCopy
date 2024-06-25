@@ -86,9 +86,9 @@ public class MappingFactory : IMappingFactory
         return new Dictionary<string, string>
             {
                 {MssTypes.Binary, PgTypes.ByteA},
-                {MssTypes.Bit, PgTypes.SmallInt},
-                {MssTypes.DateTime, PgTypes.Timestamp},
-                {MssTypes.DateTime2, PgTypes.Timestamp},
+                {MssTypes.Bit, PgTypes.Boolean},
+                {MssTypes.DateTime, PgTypes.TimestampTz},
+                {MssTypes.DateTime2, PgTypes.TimestampTz},
                 {MssTypes.DateTimeOffset, PgTypes.TimestampTz},
                 {MssTypes.Float, PgTypes.DoublePrecision},
                 {MssTypes.NChar, PgTypes.Char},

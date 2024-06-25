@@ -71,7 +71,7 @@ public class PgTypeMapper : ITypeConverter
             var newColumn = _columnFactory.Create(
                 sourceCol.Id,
                 sourceCol.Name,
-                mappings.Columns.GetKeyIfValueNotExist(sourceCol.Type),
+                mappings.ColumnTypes.GetKeyIfValueNotExist(sourceCol.Type),
                 sourceCol.Length,
                 newPrecision,
                 newScale,
