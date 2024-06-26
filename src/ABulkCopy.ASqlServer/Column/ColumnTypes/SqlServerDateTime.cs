@@ -10,8 +10,7 @@ public class SqlServerDateTime : MssDefaultColumn
 
     public override string ToString(object value)
     {
-        // We assume that the date stored in the database is UTC,
-        // so we mark it as such.
+        // The date stored in the database is UTC, so we mark it as such.
         return ((DateTime)value).ToString("O") + "Z";
     }
 

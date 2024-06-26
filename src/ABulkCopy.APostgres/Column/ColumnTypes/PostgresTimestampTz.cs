@@ -20,7 +20,7 @@ public class PostgresTimestampTz : PgDefaultColumn
 
     public override object ToInternalType(string value)
     {
-        return DateTimeOffset.Parse(value, CultureInfo.InvariantCulture);
+        return DateTimeOffset.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
     }
 
     public override Type GetDotNetType()

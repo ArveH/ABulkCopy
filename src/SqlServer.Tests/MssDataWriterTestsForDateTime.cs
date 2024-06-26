@@ -74,7 +74,7 @@ public class MssDataWriterTestsForDateTime : MssDataWriterTestBase
     [Fact]
     public async Task TestWriteDateTimeOffset()
     {
-        var value = new DateTimeOffset(2023, 5, 19, 11, 12, 13, 233, 666, new TimeSpan(1, 0, 0)).AddTicks(8);
+        var value = new DateTimeOffset(2023, 5, 19, 11, 12, 13, 233, 666, TimeSpan.Zero).AddTicks(8);
 
         var jsonTxt = await ArrangeAndAct(
             new SqlServerDateTimeOffset(101, "MyTestCol", false),
@@ -82,7 +82,7 @@ public class MssDataWriterTestsForDateTime : MssDataWriterTestBase
             SqlDbType.DateTimeOffset);
 
         // Assert
-        jsonTxt.TrimEnd().Should().Be($"{value:O}Z,");
+        jsonTxt.TrimEnd().Should().Be($"{value.DateTime:O}Z,");
     }
 
     [Fact]

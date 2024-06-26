@@ -22,7 +22,23 @@ public class CopyFromMssToPg : TestBase
         var col = new SqlServerInt(101, "col1", false);
 
         await TestSingleTypeAsync(
-            tableName, colValue, col, colValue.ToString(), "integer");
+            tableName, col, colValue.ToString(), "integer");
+
+        await ValidateValueAsync(("public", tableName), colValue);
+    }
+
+    [Fact]
+    public async Task CopyDateTime()
+    {
+        var tableName = GetName(nameof(CopyFromMssToPg));
+        var colValue = new DateTime(2024, 11, 26, 11, 0, 0);
+        var col = new SqlServerDateTime(101, "col1", false);
+
+        await TestSingleTypeAsync(
+            tableName, col, "'2024-11-26 11:00:00'", PgTypes.TimestampTz);
+
+        var actualValue = await ValidateValueAsync(("public", tableName), colValue);
+        actualValue.Kind.Should().Be(DateTimeKind.Utc);
     }
 
     [Fact]
@@ -32,15 +48,31 @@ public class CopyFromMssToPg : TestBase
         var colValue = new DateTime(2024, 11, 26, 11, 0, 0);
         var col = new SqlServerDateTime2(101, "col1", false);
 
-        var actualValue = await TestSingleTypeAsync(
-            tableName, colValue, col, colValue.ToString("O").Quote(), PgTypes.TimestampTz);
+        await TestSingleTypeAsync(
+            tableName, col, "'2024-11-26 11:00:00'", PgTypes.TimestampTz);
 
+        var actualValue = await ValidateValueAsync(("public", tableName), colValue);
         actualValue.Kind.Should().Be(DateTimeKind.Utc);
     }
 
-    private async Task<T> TestSingleTypeAsync<T>(
+    [Fact]
+    public async Task CopyDateTimeOffset()
+    {
+        var tableName = GetName(nameof(CopyFromMssToPg));
+        var colValue = new DateTimeOffset(2024, 11, 26, 11, 0, 0, TimeSpan.Zero);
+        var col = new SqlServerDateTimeOffset(101, "col1", false);
+
+        await TestSingleTypeAsync(
+            tableName, col, "'2024-11-26 11:00:00Z'", PgTypes.TimestampTz);
+
+        // NOTE: timestamp with time zone is returned as DateTime
+        // TODO: Look into using the NodaTime package for Postgres
+        var actualValue = await ValidateValueAsync(("public", tableName), colValue.DateTime);
+        actualValue.Kind.Should().Be(DateTimeKind.Utc);
+    }
+
+    private async Task TestSingleTypeAsync(
         string tableName, 
-        T colValue, 
         IColumn col,
         string insertedValueAsString,
         string expectedPgType)
@@ -79,8 +111,6 @@ public class CopyFromMssToPg : TestBase
         // Assert
         await AssertFilesExists(fileSystem, tableName);
         await ValidateTypeInfoAsync(tableName, expectedPgType);
-        var actualValue = await ValidateValueAsync(("public", tableName), colValue);
-        return actualValue;
     }
 
     private async Task<T> ValidateValueAsync<T>(SchemaTableTuple st, T expected)
