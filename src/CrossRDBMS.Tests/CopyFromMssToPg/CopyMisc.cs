@@ -54,7 +54,7 @@ public class CopyMisc : CopyMssToPgBase
 
     private void MapTo(string mapTo)
     {
-        DummyFileSystem.AddFile(@"c:\mymappings.json", GetMappingFile(
+        DummyFileSystem.AddFile("mymappings.json", GetMappingFile(
             $"    \"bit\": \"{mapTo}\"\r\n"));
     }
 }

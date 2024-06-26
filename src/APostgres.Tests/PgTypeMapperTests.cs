@@ -132,7 +132,7 @@ public class PgTypeMapperTests : PgTestBase
             { Constants.Config.MappingsFile, "mymappings.json" }
         });
         var fileSystem = new MockFileSystem();
-        fileSystem.AddFile(@"c:\mymappings.json", GetMappingFile(customMapping));
+        fileSystem.AddFile("mymappings.json", GetMappingFile(customMapping));
 
         var typeConverter = new PgTypeMapper(
             new PgParser(),

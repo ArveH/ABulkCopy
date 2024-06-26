@@ -70,8 +70,8 @@ public class MappingFactory : IMappingFactory
         }
         catch (Exception ex)
         {
-            _logger.Error(ex, "Error reading mappings file '{File}'",
-                fileName);
+            _logger.Error(ex, "Error reading mappings file {File}. Current directory is {CurrentDir}.",
+                fileName, fileSystem.Directory.GetCurrentDirectory());
             throw new MappingsFileException($"Error reading mappings file '{fileName}'", ex);
         }
     }

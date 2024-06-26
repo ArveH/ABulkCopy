@@ -89,7 +89,7 @@ public class CopyDateTimes : CopyMssToPgBase
 
     private void MapOnlyDateTimeOffsetToTimestampTz()
     {
-        DummyFileSystem.AddFile(@"c:\mymappings.json", GetMappingFile(
+        DummyFileSystem.AddFile("mymappings.json", GetMappingFile(
             "    \"datetime\": \"timestamp\",\r\n" +
             "    \"datetime2\": \"timestamp\",\r\n" +
             "    \"datetimeoffset\": \"timestamp with time zone\"\r\n"));
@@ -97,7 +97,7 @@ public class CopyDateTimes : CopyMssToPgBase
 
     private void MapAllDateTimesToTimestampTz()
     {
-        DummyFileSystem.AddFile(@"c:\mymappings.json", GetMappingFile(
+        DummyFileSystem.AddFile("mymappings.json", GetMappingFile(
             "    \"datetime\": \"timestamp with time zone\",\r\n" +
             "    \"datetime2\": \"timestamp with time zone\",\r\n" +
             "    \"datetimeoffset\": \"timestamp with time zone\"\r\n"));
