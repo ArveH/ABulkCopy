@@ -10,7 +10,9 @@ public class SqlServerDateTime : MssDefaultColumn
 
     public override string ToString(object value)
     {
-        return Convert.ToDateTime(value).ToString("O", CultureInfo.InvariantCulture);
+        // We assume that the date stored in the database is UTC,
+        // so we mark it as such.
+        return ((DateTime)value).ToString("O") + "Z";
     }
 
     public override object ToInternalType(string value)

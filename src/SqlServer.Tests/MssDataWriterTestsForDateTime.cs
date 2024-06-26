@@ -22,23 +22,25 @@ public class MssDataWriterTestsForDateTime : MssDataWriterTestBase
     [Fact]
     public async Task TestWriteDateTime_When_NoFraction()
     {
+        var testDate = new DateTime(2023, 5, 19, 11, 12, 13);
         var jsonTxt = await ArrangeAndAct(
             new SqlServerDateTime(101, "MyTestCol", false),
-            new DateTime(2023, 5, 19, 11, 12, 13));
+            testDate);
 
         // Assert
-        jsonTxt.TrimEnd().Should().Be("2023-05-19T11:12:13.0000000,");
+        jsonTxt.TrimEnd().Should().Be($"{testDate.ToUniversalTime():O},");
     }
 
     [Fact]
     public async Task TestWriteDateTime()
     {
+        var testDate = new DateTime(2023, 5, 19, 11, 12, 13, 233);
         var jsonTxt = await ArrangeAndAct(
             new SqlServerDateTime(101, "MyTestCol", false),
-            new DateTime(2023, 5, 19, 11, 12, 13, 233));
+            testDate);
 
         // Assert
-        jsonTxt.TrimEnd().Should().Be("2023-05-19T11:12:13.2330000,");
+        jsonTxt.TrimEnd().Should().Be($"{testDate.ToUniversalTime():O},");
     }
 
     [Fact]
@@ -52,7 +54,7 @@ public class MssDataWriterTestsForDateTime : MssDataWriterTestBase
             SqlDbType.DateTime2);
 
         // Assert
-        jsonTxt.TrimEnd().Should().Be("2023-05-19T11:12:13.0550000,");
+        jsonTxt.TrimEnd().Should().Be($"{value.ToUniversalTime():O},");
     }
 
     [Fact]
@@ -66,7 +68,7 @@ public class MssDataWriterTestsForDateTime : MssDataWriterTestBase
             SqlDbType.DateTime2);
 
         // Assert
-        jsonTxt.TrimEnd().Should().Be("2023-05-19T11:12:13.2336668,");
+        jsonTxt.TrimEnd().Should().Be($"{value.ToUniversalTime():O},");
     }
 
     [Fact]
@@ -80,7 +82,7 @@ public class MssDataWriterTestsForDateTime : MssDataWriterTestBase
             SqlDbType.DateTimeOffset);
 
         // Assert
-        jsonTxt.TrimEnd().Should().Be("2023-05-19T11:12:13.2336668+01:00,");
+        jsonTxt.TrimEnd().Should().Be($"{value.ToUniversalTime():O},");
     }
 
     [Fact]

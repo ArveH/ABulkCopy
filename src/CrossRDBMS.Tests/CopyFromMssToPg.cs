@@ -37,11 +37,11 @@ public class CopyFromMssToPg : TestBase
             logMessages,
             _output,
             fileSystem);
-        var colValue = "12345";
+        var colValue = 12345;
         await CreateTableAsync(
             ("dbo", tableName),
             new SqlServerInt(101, "col1", false),
-            colValue);
+            colValue.ToString());
 
         var copyOut = mssContext.GetServices<ICopyOut>();
         var copyIn = pgContext.GetServices<ICopyIn>();
@@ -57,12 +57,58 @@ public class CopyFromMssToPg : TestBase
         await ValidateValueAsync(("public", tableName), colValue);
     }
 
-    private async Task ValidateValueAsync(SchemaTableTuple st, string expected)
+    [Fact]
+    public async Task CopyDateTime2()
+    {
+        // Arrange
+        var tableName = GetName(nameof(CopyFromMssToPg));
+        List<string> logMessages = new();
+        IFileSystem fileSystem = new MockFileSystem();
+        var mssContext = new CopyContext(
+            Rdbms.Mss,
+            CmdArguments.Create(ParamHelper.GetOutMss(
+                _fixture.MssConnectionString,
+                searchFilter: tableName)),
+            logMessages,
+            _output,
+            fileSystem);
+        var pgContext = new CopyContext(
+            Rdbms.Pg,
+            CmdArguments.Create(ParamHelper.GetInPg(
+                _fixture.PgConnectionString,
+                searchFilter: $@"\b{tableName}\b")),
+            logMessages,
+            _output,
+            fileSystem);
+        var colValue = new DateTime(2024, 11, 26, 11, 0, 0);
+        await CreateTableAsync(
+            ("dbo", tableName),
+            new SqlServerDateTime2(101, "col1", false),
+            colValue.ToString("O").Quote());
+
+        var copyOut = mssContext.GetServices<ICopyOut>();
+        var copyIn = pgContext.GetServices<ICopyIn>();
+        _identifier = pgContext.GetServices<IIdentifier>();
+
+        // Act
+        await copyOut.RunAsync(CancellationToken.None);
+        await copyIn.RunAsync(Rdbms.Pg, CancellationToken.None);
+
+        // Assert
+        await AssertFilesExists(fileSystem, tableName);
+        await ValidateTypeInfoAsync(tableName, "timestamp with time zone");
+        var actualValue = await ValidateValueAsync(("public", tableName), colValue);
+        actualValue.Kind.Should().Be(DateTimeKind.Utc);
+    }
+
+    private async Task<T> ValidateValueAsync<T>(SchemaTableTuple st, T expected)
     {
         await using var cmd = _fixture.PgContext.DataSource.CreateCommand(
             $"select col1 from {st.GetFullName()}");
-        var actual = (int?)await cmd.ExecuteScalarAsync();
-        actual.Should().Be(int.Parse(expected));
+        var actual = (T?)await cmd.ExecuteScalarAsync();
+        actual.Should().NotBeNull("because we don't expect a null value");
+        actual.Should().Be(expected);
+        return actual!;
     }
 
     private static async Task AssertFilesExists(IFileSystem fileSystem, string tableName)
