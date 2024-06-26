@@ -253,6 +253,6 @@ public class CopyIn : ICopyIn
             }
         }).ConfigureAwait(false);
 
-        return errorOccurred;
+        return !errorOccurred;
     }
 }
