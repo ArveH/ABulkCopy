@@ -1,78 +1,20 @@
-namespace CrossRDBMS.Tests;
+﻿namespace CrossRDBMS.Tests.CopyFromMssToPg;
 
-[Collection(nameof(DatabaseCollection))]
-public class CopyFromMssToPg : TestBase
+public class CopyMssToPgBase : TestBase
 {
     private readonly DatabaseFixture _fixture;
     private readonly ITestOutputHelper _output;
 
     private IIdentifier? _identifier;
 
-    public CopyFromMssToPg(DatabaseFixture fixture, ITestOutputHelper output)
+    public CopyMssToPgBase(DatabaseFixture fixture, ITestOutputHelper output)
     {
         _fixture = fixture;
         _output = output;
     }
 
-    [Fact]
-    public async Task CopyInt()
-    {
-        var tableName = GetName(nameof(CopyFromMssToPg));
-        var colValue = 12345;
-        var col = new SqlServerInt(101, "col1", false);
-
-        await TestSingleTypeAsync(
-            tableName, col, colValue.ToString(), "integer");
-
-        await ValidateValueAsync(("public", tableName), colValue);
-    }
-
-    [Fact]
-    public async Task CopyDateTime()
-    {
-        var tableName = GetName(nameof(CopyFromMssToPg));
-        var colValue = new DateTime(2024, 11, 26, 11, 0, 0);
-        var col = new SqlServerDateTime(101, "col1", false);
-
-        await TestSingleTypeAsync(
-            tableName, col, "'2024-11-26 11:00:00'", PgTypes.TimestampTz);
-
-        var actualValue = await ValidateValueAsync(("public", tableName), colValue);
-        actualValue.Kind.Should().Be(DateTimeKind.Utc);
-    }
-
-    [Fact]
-    public async Task CopyDateTime2()
-    {
-        var tableName = GetName(nameof(CopyFromMssToPg));
-        var colValue = new DateTime(2024, 11, 26, 11, 0, 0);
-        var col = new SqlServerDateTime2(101, "col1", false);
-
-        await TestSingleTypeAsync(
-            tableName, col, "'2024-11-26 11:00:00'", PgTypes.TimestampTz);
-
-        var actualValue = await ValidateValueAsync(("public", tableName), colValue);
-        actualValue.Kind.Should().Be(DateTimeKind.Utc);
-    }
-
-    [Fact]
-    public async Task CopyDateTimeOffset()
-    {
-        var tableName = GetName(nameof(CopyFromMssToPg));
-        var colValue = new DateTimeOffset(2024, 11, 26, 11, 0, 0, TimeSpan.Zero);
-        var col = new SqlServerDateTimeOffset(101, "col1", false);
-
-        await TestSingleTypeAsync(
-            tableName, col, "'2024-11-26 11:00:00Z'", PgTypes.TimestampTz);
-
-        // NOTE: timestamp with time zone is returned as DateTime
-        // TODO: Look into using the NodaTime package for Postgres
-        var actualValue = await ValidateValueAsync(("public", tableName), colValue.DateTime);
-        actualValue.Kind.Should().Be(DateTimeKind.Utc);
-    }
-
-    private async Task TestSingleTypeAsync(
-        string tableName, 
+    protected async Task TestSingleTypeAsync(
+        string tableName,
         IColumn col,
         string insertedValueAsString,
         string expectedPgType)
@@ -113,7 +55,7 @@ public class CopyFromMssToPg : TestBase
         await ValidateTypeInfoAsync(tableName, expectedPgType);
     }
 
-    private async Task<T> ValidateValueAsync<T>(SchemaTableTuple st, T expected)
+    protected async Task<T> ValidateValueAsync<T>(SchemaTableTuple st, T expected)
     {
         await using var cmd = _fixture.PgContext.DataSource.CreateCommand(
             $"select col1 from {st.GetFullName()}");
@@ -123,7 +65,7 @@ public class CopyFromMssToPg : TestBase
         return actual!;
     }
 
-    private static async Task AssertFilesExists(IFileSystem fileSystem, string tableName)
+    protected static async Task AssertFilesExists(IFileSystem fileSystem, string tableName)
     {
         var schemaFile = await fileSystem.File.ReadAllTextAsync("dbo." + tableName + ".schema");
         schemaFile.Should().NotBeNullOrEmpty("because the schema file should exist");
@@ -132,7 +74,7 @@ public class CopyFromMssToPg : TestBase
         dataFile.Should().NotBeNull("because the data file should exist");
     }
 
-    private async Task CreateTableAsync(
+    protected async Task CreateTableAsync(
         SchemaTableTuple st,
         IColumn mssCol,
         string insertedValueAsString)
@@ -146,7 +88,7 @@ public class CopyFromMssToPg : TestBase
             CancellationToken.None);
     }
 
-    private async Task ValidateTypeInfoAsync(
+    protected async Task ValidateTypeInfoAsync(
         string tableName,
         string expectedType,
         int? expectedLength = null,
@@ -178,33 +120,33 @@ public class CopyFromMssToPg : TestBase
         }
     }
 
-    private void VerifyExpectedType(NpgsqlDataReader reader, string expectedType)
+    protected void VerifyExpectedType(NpgsqlDataReader reader, string expectedType)
     {
         reader.GetString(0).Should().Be(expectedType,
-                       $"because the type should be {expectedType}");
+            $"because the type should be {expectedType}");
     }
 
-    private void VerifyExpectedScale(NpgsqlDataReader reader, int? expectedScale)
+    protected void VerifyExpectedScale(NpgsqlDataReader reader, int? expectedScale)
     {
         if (expectedScale.HasValue)
         {
             reader.IsDBNull(3).Should().BeFalse("because the column should have a scale");
             reader.GetInt32(3).Should().Be(expectedScale.Value,
-                               $"because the scale should be {expectedScale.Value}");
+                $"because the scale should be {expectedScale.Value}");
         }
     }
 
-    private void VerifyExpectedPrecision(NpgsqlDataReader reader, int? expectedPrecision)
+    protected void VerifyExpectedPrecision(NpgsqlDataReader reader, int? expectedPrecision)
     {
         if (expectedPrecision.HasValue)
         {
             reader.IsDBNull(2).Should().BeFalse("because the column should have a precision");
             reader.GetInt32(2).Should().Be(expectedPrecision.Value,
-                               $"because the precision should be {expectedPrecision.Value}");
+                $"because the precision should be {expectedPrecision.Value}");
         }
     }
 
-    private void VerifyExpectedLength(NpgsqlDataReader reader, int? expectedLength)
+    protected void VerifyExpectedLength(NpgsqlDataReader reader, int? expectedLength)
     {
         if (expectedLength.HasValue)
         {
