@@ -26,7 +26,7 @@ public class TestSchemas : TestBase
         IFileSystem fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
         {
             {
-                @"c:\mymappings.json", new MockFileData(
+                "mymappings.json", new MockFileData(
                     "{\r\n" +
                     "    \"Schemas\": {\r\n" +
                     "        \"\": \"public\",\r\n" +
@@ -52,7 +52,7 @@ public class TestSchemas : TestBase
             Rdbms.Pg,
             CmdArguments.Create(ParamHelper.GetInPg(
                 _fixture.PgConnectionString,
-                mappingsFile: @"c:\mymappings.json")),
+                mappingsFile: "mymappings.json")),
             logMessages,
             _output,
             fileSystem);

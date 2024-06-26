@@ -34,6 +34,8 @@ public class PgDataReader : IADataReader, IDisposable
 
         var path = Path.Combine(
             folder, tableDefinition.Data.FileName);
+        var rawFolder = Path.Combine(
+            folder, tableDefinition.Data.FileName[..^5]); // Remove .data
         _fileReader.Open(path);
         var counter = 0L;
         // TODO: Currently, it will not continue on error.
@@ -46,8 +48,8 @@ public class PgDataReader : IADataReader, IDisposable
                 await ReadRowAsync(
                     _fileReader, 
                     writer, 
-                    folder,
                     tableDefinition,
+                    rawFolder,
                     emptyStringFlag,
                     ct).ConfigureAwait(false);
                 counter++;
@@ -78,8 +80,8 @@ public class PgDataReader : IADataReader, IDisposable
 
     private async Task ReadRowAsync(IDataFileReader dataFileReader,
         NpgsqlBinaryImporter writer,
-        string folder,
         TableDefinition tableDefinition,
+        string rawFolder,
         EmptyStringFlag emptyStringFlag, 
         CancellationToken ct)
     {
@@ -96,13 +98,12 @@ public class PgDataReader : IADataReader, IDisposable
 
             if (col.Type.IsRaw())
             {
-                var path = Path.Combine(
-                    folder,
-                    tableDefinition.Data.FileName[..^5], // Remove .data
-                    col.Name,
-                    colValue);
                 await writer.WriteAsync(
-                    dataFileReader.ReadAllBytes(path),
+                    dataFileReader.ReadAllBytes(
+                        Path.Combine(
+                            rawFolder,
+                            col.Name,
+                            colValue)),
                     col.Type.GetNativeType(), 
                     ct).ConfigureAwait(false);
             }

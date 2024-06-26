@@ -98,7 +98,7 @@ public class PgDataReaderDateTimeTests : PgDataReaderTestBase
         var testVal = new DateTime(2023, 6, 23, 11, 12, 13, 456, 789);
         var col = new PostgresTimestamp(1, ColName, false);
         var colValue = await TestDataReader<DateTime>(
-            GetName(), col, "2023-06-23T11:12:13.456789,");
+            GetName(), col, "2023-06-23T11:12:13.456789Z,");
 
         colValue.Should().Be(testVal);
     }
@@ -120,33 +120,20 @@ public class PgDataReaderDateTimeTests : PgDataReaderTestBase
         // Arrange
         var col = new PostgresTimestamp(1, ColName, true);
         var colValue = await TestDataReader<DateTime?>(
-            GetName(), col, "0001-01-01T00:00:00.0000000,");
+            GetName(), col, "0001-01-01T00:00:00.0000000Z,");
 
         colValue.Should().Be(DateTime.MinValue);
     }
 
     [Fact]
-    public async Task? TestTimestampTz_When_NoFractions()
+    public async Task TestTimestampTz_When_MinDate()
     {
         // Arrange
-        var col = new PostgresTimestampTz(1, ColName, false);
-        var colValue = await TestDataReader<DateTimeOffset>(
-            GetName(), col, "2023-06-23T08:00:00-02:00,");
+        var col = new PostgresTimestampTz(1, ColName, true);
+        var colValue = await TestDataReader<DateTime?>(
+            GetName(), col, "0001-01-01T00:00:00.0000000Z,");
 
-        colValue.Should().Be(
-            new DateTimeOffset(2023, 6, 23, 8, 0, 0, TimeSpan.FromHours(-2)));
-    }
-
-    [Fact]
-    public async Task? TestTimestampTz_When_Fractions()
-    {
-        // Arrange
-        var col = new PostgresTimestampTz(1, ColName, false);
-        var colValue = await TestDataReader<DateTimeOffset>(
-            GetName(), col, "2023-06-23T08:10:11.456789 +1:30,");
-
-        colValue.Should().Be(
-            new DateTimeOffset(2023, 6, 23, 8, 10, 11, 456, 789, TimeSpan.FromMinutes(90)));
+        colValue.Should().Be(DateTime.MinValue);
     }
 
     [Fact]

@@ -20,7 +20,11 @@ public class PostgresTimestamp : PgDefaultColumn
 
     public override object ToInternalType(string value)
     {
-        return DateTime.Parse(value, CultureInfo.InvariantCulture);
+        // We remove the 'Z' at the end of the string because a datetime is always stored in UTC,
+        // and we don't want the time to be adjusted to the local time.
+        // NOTE: Postgres recommends to always use timestamp with time zone
+        // TODO: Consider making it an option to convert to local time or not
+        return DateTime.Parse(value.TrimEnd('Z'), CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
     }
 
     public override Type GetDotNetType()

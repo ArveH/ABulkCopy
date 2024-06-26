@@ -16,7 +16,8 @@ public class SqlServerDateTimeOffset : MssDefaultColumn
 
     public override string ToString(object value)
     {
-        return ((DateTimeOffset)value).ToString("O");
+        // The date stored in the database is UTC, so the offset is 0, and we mark it as UTC.
+        return ((DateTimeOffset)value).DateTime.ToString("O") + "Z";
     }
 
     public override object ToInternalType(string value)

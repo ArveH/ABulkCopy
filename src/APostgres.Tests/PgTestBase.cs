@@ -10,7 +10,7 @@ public class PgTestBase
     {
         const string outputTemplate =
             "{Timestamp:HH:mm:ss.fff} [{Level:u3}] {Message}    {Timestamp:yyyy-MM-dd }{Properties}{NewLine}{Exception}{NewLine}";
-        TestConfiguration = new ConfigHelper().GetConfiguration("518061ef-12d6-4e4f-ad66-f3a7f8a42557");
+        TestConfiguration = new ConfigHelper().GetConfiguration();
         var loggerConfig = new LoggerConfiguration()
             .Enrich.FromLogContext()
             .MinimumLevel.Verbose()

@@ -16,8 +16,8 @@ public class SqlServerDateTime2 : MssDefaultColumn
 
     public override string ToString(object value)
     {
-        var tmp = Convert.ToDateTime(value);
-        return ((DateTime)value).ToString("O");
+        // The date stored in the database is UTC, so we mark it as such.
+        return ((DateTime)value).ToString("O") + "Z";
     }
 
     public override object ToInternalType(string value)

@@ -53,7 +53,7 @@ public abstract class MssTestBase
         }
 
         var methodName = sf.GetMethod()?.Name ?? throw new InvalidOperationException("Method is null");
-        return methodName.Length > 34 ? methodName[4..34] : methodName;
+        return methodName.Length > 44 ? methodName[4..44] : methodName;
     }
 
     public async Task CreateTableAsync(TableDefinition tableDefinition)

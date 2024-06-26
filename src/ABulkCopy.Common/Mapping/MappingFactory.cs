@@ -12,12 +12,11 @@ public class MappingFactory : IMappingFactory
     {
         _logger = logger.ForContext<MappingFactory>();
         _mapping = new Mapping(
-            columns: GetDefaultMssToPgColumnMappings(),
             locations: GetDefaultMssToPgLocationMappings());
         var fileName = config.SafeGet(Constants.Config.MappingsFile);
+        SetDefaultMssToPgMappings();
         if (fileName == string.Empty)
         {
-            SetDefaultMssToPgMappings();
             return;
         }
 
@@ -54,11 +53,15 @@ public class MappingFactory : IMappingFactory
             }
             foreach (var (key, value) in mappingsFromFile.Schemas)
             {
-                _mapping.Schemas.Add(key, value);
+                _mapping.Schemas[key] = value;
             }
             foreach (var (key, value) in mappingsFromFile.Collations)
             {
-                _mapping.Collations.Add(key, value);
+                _mapping.Collations[key] = value;
+            }
+            foreach (var (key, value) in mappingsFromFile.ColumnTypes)
+            {
+                _mapping.ColumnTypes[key] = value;
             }
         }
         catch (MappingsFileException)
@@ -67,8 +70,8 @@ public class MappingFactory : IMappingFactory
         }
         catch (Exception ex)
         {
-            _logger.Error(ex, "Error reading mappings file '{File}'",
-                fileName);
+            _logger.Error(ex, "Error reading mappings file {File}. Current directory is {CurrentDir}.",
+                fileName, fileSystem.Directory.GetCurrentDirectory());
             throw new MappingsFileException($"Error reading mappings file '{fileName}'", ex);
         }
     }
@@ -79,6 +82,10 @@ public class MappingFactory : IMappingFactory
         _mapping.Schemas.Add("dbo", "public");
         _mapping.Collations.Add("SQL_Latin1_General_CP1_CI_AI", "en_ci_ai");
         _mapping.Collations.Add("SQL_Latin1_General_CP1_CI_AS", "en_ci_as");
+        foreach (var (key, value) in GetDefaultMssToPgColumnMappings())
+        {
+            _mapping.ColumnTypes.Add(key, value);
+        }
     }
 
     private Dictionary<string, string> GetDefaultMssToPgColumnMappings()
@@ -86,9 +93,9 @@ public class MappingFactory : IMappingFactory
         return new Dictionary<string, string>
             {
                 {MssTypes.Binary, PgTypes.ByteA},
-                {MssTypes.Bit, PgTypes.SmallInt},
-                {MssTypes.DateTime, PgTypes.Timestamp},
-                {MssTypes.DateTime2, PgTypes.Timestamp},
+                {MssTypes.Bit, PgTypes.Boolean},
+                {MssTypes.DateTime, PgTypes.TimestampTz},
+                {MssTypes.DateTime2, PgTypes.TimestampTz},
                 {MssTypes.DateTimeOffset, PgTypes.TimestampTz},
                 {MssTypes.Float, PgTypes.DoublePrecision},
                 {MssTypes.NChar, PgTypes.Char},

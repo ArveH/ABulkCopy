@@ -1,6 +1,4 @@
-﻿using DateTime = System.DateTime;
-
-namespace ABulkCopy.APostgres.Column.ColumnTypes;
+﻿namespace ABulkCopy.APostgres.Column.ColumnTypes;
 
 public class PostgresTimestampTz : PgDefaultColumn
 {
@@ -22,8 +20,7 @@ public class PostgresTimestampTz : PgDefaultColumn
 
     public override object ToInternalType(string value)
     {
-        var dt = DateTimeOffset.Parse(value, CultureInfo.InvariantCulture).UtcDateTime;
-        return new DateTimeOffset(dt, TimeSpan.Zero);
+        return DateTimeOffset.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
     }
 
     public override Type GetDotNetType()
