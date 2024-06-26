@@ -17,51 +17,34 @@ public class CopyFromMssToPg : TestBase
     [Fact]
     public async Task CopyInt()
     {
-        // Arrange
         var tableName = GetName(nameof(CopyFromMssToPg));
-        List<string> logMessages = new();
-        IFileSystem fileSystem = new MockFileSystem();
-        var mssContext = new CopyContext(
-            Rdbms.Mss,
-            CmdArguments.Create(ParamHelper.GetOutMss(
-                _fixture.MssConnectionString,
-                searchFilter: tableName)),
-            logMessages,
-            _output,
-            fileSystem);
-        var pgContext = new CopyContext(
-            Rdbms.Pg,
-            CmdArguments.Create(ParamHelper.GetInPg(
-                _fixture.PgConnectionString,
-                searchFilter: $@"\b{tableName}\b")),
-            logMessages,
-            _output,
-            fileSystem);
         var colValue = 12345;
-        await CreateTableAsync(
-            ("dbo", tableName),
-            new SqlServerInt(101, "col1", false),
-            colValue.ToString());
+        var col = new SqlServerInt(101, "col1", false);
 
-        var copyOut = mssContext.GetServices<ICopyOut>();
-        var copyIn = pgContext.GetServices<ICopyIn>();
-        _identifier = pgContext.GetServices<IIdentifier>();
-
-        // Act
-        await copyOut.RunAsync(CancellationToken.None);
-        await copyIn.RunAsync(Rdbms.Pg, CancellationToken.None);
-
-        // Assert
-        await AssertFilesExists(fileSystem, tableName);
-        await ValidateTypeInfoAsync(tableName, "integer", null, 32, 0);
-        await ValidateValueAsync(("public", tableName), colValue);
+        await TestSingleTypeAsync(
+            tableName, colValue, col, colValue.ToString(), "integer");
     }
 
     [Fact]
     public async Task CopyDateTime2()
     {
-        // Arrange
         var tableName = GetName(nameof(CopyFromMssToPg));
+        var colValue = new DateTime(2024, 11, 26, 11, 0, 0);
+        var col = new SqlServerDateTime2(101, "col1", false);
+
+        var actualValue = await TestSingleTypeAsync(
+            tableName, colValue, col, colValue.ToString("O").Quote(), PgTypes.TimestampTz);
+
+        actualValue.Kind.Should().Be(DateTimeKind.Utc);
+    }
+
+    private async Task<T> TestSingleTypeAsync<T>(
+        string tableName, 
+        T colValue, 
+        IColumn col,
+        string insertedValueAsString,
+        string expectedPgType)
+    {
         List<string> logMessages = new();
         IFileSystem fileSystem = new MockFileSystem();
         var mssContext = new CopyContext(
@@ -80,11 +63,10 @@ public class CopyFromMssToPg : TestBase
             logMessages,
             _output,
             fileSystem);
-        var colValue = new DateTime(2024, 11, 26, 11, 0, 0);
         await CreateTableAsync(
             ("dbo", tableName),
-            new SqlServerDateTime2(101, "col1", false),
-            colValue.ToString("O").Quote());
+            col,
+            insertedValueAsString);
 
         var copyOut = mssContext.GetServices<ICopyOut>();
         var copyIn = pgContext.GetServices<ICopyIn>();
@@ -96,9 +78,9 @@ public class CopyFromMssToPg : TestBase
 
         // Assert
         await AssertFilesExists(fileSystem, tableName);
-        await ValidateTypeInfoAsync(tableName, "timestamp with time zone");
+        await ValidateTypeInfoAsync(tableName, expectedPgType);
         var actualValue = await ValidateValueAsync(("public", tableName), colValue);
-        actualValue.Kind.Should().Be(DateTimeKind.Utc);
+        return actualValue;
     }
 
     private async Task<T> ValidateValueAsync<T>(SchemaTableTuple st, T expected)
@@ -123,14 +105,14 @@ public class CopyFromMssToPg : TestBase
     private async Task CreateTableAsync(
         SchemaTableTuple st,
         IColumn mssCol,
-        string value)
+        string insertedValueAsString)
     {
         await _fixture.MssDbHelper.DropTableAsync(st);
         var tableDef = MssTestData.GetEmpty(st);
         tableDef.Columns.Add(mssCol);
         await _fixture.MssDbHelper.CreateTableAsync(tableDef);
         await _fixture.MssDbHelper.ExecuteNonQueryAsync(
-            $"insert into {st.GetFullName()}(col1) values ({value})",
+            $"insert into {st.GetFullName()}(col1) values ({insertedValueAsString})",
             CancellationToken.None);
     }
 
