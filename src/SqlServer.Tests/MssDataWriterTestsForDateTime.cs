@@ -22,31 +22,31 @@ public class MssDataWriterTestsForDateTime : MssDataWriterTestBase
     [Fact]
     public async Task TestWriteDateTime_When_NoFraction()
     {
-        var testDate = new DateTime(2023, 5, 19, 11, 12, 13);
+        var testDate = new DateTime(2023, 5, 19, 11, 12, 13, DateTimeKind.Utc);
         var jsonTxt = await ArrangeAndAct(
             new SqlServerDateTime(101, "MyTestCol", false),
             testDate);
 
         // Assert
-        jsonTxt.TrimEnd().Should().Be($"{testDate.ToUniversalTime():O},");
+        jsonTxt.TrimEnd().Should().Be($"{testDate:O},");
     }
 
     [Fact]
     public async Task TestWriteDateTime()
     {
-        var testDate = new DateTime(2023, 5, 19, 11, 12, 13, 233);
+        var testDate = new DateTime(2023, 5, 19, 11, 12, 13, 233, DateTimeKind.Utc);
         var jsonTxt = await ArrangeAndAct(
             new SqlServerDateTime(101, "MyTestCol", false),
             testDate);
 
         // Assert
-        jsonTxt.TrimEnd().Should().Be($"{testDate.ToUniversalTime():O},");
+        jsonTxt.TrimEnd().Should().Be($"{testDate:O},");
     }
 
     [Fact]
     public async Task TestWriteDateTime2()
     {
-        var value = new DateTime(2023, 5, 19, 11, 12, 13, 55);
+        var value = new DateTime(2023, 5, 19, 11, 12, 13, 55, DateTimeKind.Utc);
 
         var jsonTxt = await ArrangeAndAct(
             new SqlServerDateTime2(101, "MyTestCol", false),
@@ -54,13 +54,13 @@ public class MssDataWriterTestsForDateTime : MssDataWriterTestBase
             SqlDbType.DateTime2);
 
         // Assert
-        jsonTxt.TrimEnd().Should().Be($"{value.ToUniversalTime():O},");
+        jsonTxt.TrimEnd().Should().Be($"{value:O},");
     }
 
     [Fact]
     public async Task TestWriteDateTime2_When_NanoSeconds()
     {
-        var value = new DateTime(2023, 5, 19, 11, 12, 13, 233, 666).AddTicks(8);
+        var value = new DateTime(2023, 5, 19, 11, 12, 13, 233, 666, DateTimeKind.Utc).AddTicks(8);
 
         var jsonTxt = await ArrangeAndAct(
             new SqlServerDateTime2(101, "MyTestCol", false),
@@ -68,7 +68,7 @@ public class MssDataWriterTestsForDateTime : MssDataWriterTestBase
             SqlDbType.DateTime2);
 
         // Assert
-        jsonTxt.TrimEnd().Should().Be($"{value.ToUniversalTime():O},");
+        jsonTxt.TrimEnd().Should().Be($"{value:O},");
     }
 
     [Fact]
@@ -82,7 +82,7 @@ public class MssDataWriterTestsForDateTime : MssDataWriterTestBase
             SqlDbType.DateTimeOffset);
 
         // Assert
-        jsonTxt.TrimEnd().Should().Be($"{value.ToUniversalTime():O},");
+        jsonTxt.TrimEnd().Should().Be($"{value:O}Z,");
     }
 
     [Fact]
