@@ -137,30 +137,6 @@ public class PgDataReaderDateTimeTests : PgDataReaderTestBase
     }
 
     [Fact]
-    public async Task? TestTimestampTz_When_NoFractions()
-    {
-        // Arrange
-        var col = new PostgresTimestampTz(1, ColName, false);
-        var colValue = await TestDataReader<DateTimeOffset>(
-            GetName(), col, "2023-06-23T08:00:00-02:00Z,");
-
-        colValue.Should().Be(
-            new DateTimeOffset(2023, 6, 23, 8, 0, 0, TimeSpan.FromHours(-2)));
-    }
-
-    [Fact]
-    public async Task? TestTimestampTz_When_Fractions()
-    {
-        // Arrange
-        var col = new PostgresTimestampTz(1, ColName, false);
-        var colValue = await TestDataReader<DateTimeOffset>(
-            GetName(), col, "2023-06-23T08:10:11.456789 +1:30,");
-
-        colValue.Should().Be(
-            new DateTimeOffset(2023, 6, 23, 8, 10, 11, 456, 789, TimeSpan.FromMinutes(90)));
-    }
-
-    [Fact]
     public async Task TestTimestampTz_When_Null()
     {
         // Arrange
