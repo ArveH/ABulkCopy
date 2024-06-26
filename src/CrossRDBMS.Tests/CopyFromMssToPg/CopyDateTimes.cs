@@ -102,23 +102,4 @@ public class CopyDateTimes : CopyMssToPgBase
             "    \"datetime2\": \"timestamp with time zone\",\r\n" +
             "    \"datetimeoffset\": \"timestamp with time zone\"\r\n"));
     }
-
-    private static MockFileData GetMappingFile(string typeConversions)
-    {
-        return new MockFileData(
-            "{\r\n" +
-            "    \"Schemas\": {\r\n" +
-            "        \"\": \"public\",\r\n" +
-            "        \"dbo\": \"public\",\r\n" +
-            "        \"my_mss_schema\": \"my_pg_schema\"\r\n" +
-            "    },\r\n" +
-            "    \"Collations\": {\r\n" +
-            "        \"SQL_Latin1_General_CP1_CI_AI\": \"en_ci_ai\",\r\n" +
-            "        \"SQL_Latin1_General_CP1_CI_AS\": \"en_ci_as\"\r\n" +
-            "    },\r\n" +
-            "  \"ColumnTypes\": {\r\n" +
-            typeConversions +
-            "  }\r\n" +
-            "}");
-    }
 }
