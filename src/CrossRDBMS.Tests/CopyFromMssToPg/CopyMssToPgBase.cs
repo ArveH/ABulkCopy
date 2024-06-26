@@ -4,6 +4,9 @@ public class CopyMssToPgBase : TestBase
 {
     private readonly DatabaseFixture _fixture;
     private readonly ITestOutputHelper _output;
+    protected MockFileSystem DummyFileSystem;
+    protected string[]? MssArguments;
+    protected string[]? PgArguments;
 
     private IIdentifier? _identifier;
 
@@ -11,6 +14,7 @@ public class CopyMssToPgBase : TestBase
     {
         _fixture = fixture;
         _output = output;
+        DummyFileSystem  = new MockFileSystem();
     }
 
     protected async Task TestSingleTypeAsync(
@@ -20,23 +24,20 @@ public class CopyMssToPgBase : TestBase
         string expectedPgType)
     {
         List<string> logMessages = new();
-        IFileSystem fileSystem = new MockFileSystem();
+        var mssArgs = MssArguments ?? ParamHelper.GetOutMss(_fixture.MssConnectionString, searchFilter: tableName);
+        var pgArgs = PgArguments ?? ParamHelper.GetInPg(_fixture.PgConnectionString, searchFilter: $@"\b{tableName}\b");
         var mssContext = new CopyContext(
             Rdbms.Mss,
-            CmdArguments.Create(ParamHelper.GetOutMss(
-                _fixture.MssConnectionString,
-                searchFilter: tableName)),
+            CmdArguments.Create(mssArgs),
             logMessages,
             _output,
-            fileSystem);
+            DummyFileSystem);
         var pgContext = new CopyContext(
             Rdbms.Pg,
-            CmdArguments.Create(ParamHelper.GetInPg(
-                _fixture.PgConnectionString,
-                searchFilter: $@"\b{tableName}\b")),
+            CmdArguments.Create(pgArgs),
             logMessages,
             _output,
-            fileSystem);
+            DummyFileSystem);
         await CreateTableAsync(
             ("dbo", tableName),
             col,
@@ -51,7 +52,7 @@ public class CopyMssToPgBase : TestBase
         await copyIn.RunAsync(Rdbms.Pg, CancellationToken.None);
 
         // Assert
-        await AssertFilesExists(fileSystem, tableName);
+        await AssertFilesExists(DummyFileSystem, tableName);
         await ValidateTypeInfoAsync(tableName, expectedPgType);
     }
 
