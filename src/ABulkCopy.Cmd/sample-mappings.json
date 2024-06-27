@@ -20,7 +20,7 @@
     "nvarchar": "varchar",
     "smalldatetime": "timestamp with time zone",
     "tinyint": "smallint",
-    "uniqueidentifier": "uuid ",
+    "uniqueidentifier": "uuid",
     "image": "bytea",
     "varbinary": "bytea"
   }

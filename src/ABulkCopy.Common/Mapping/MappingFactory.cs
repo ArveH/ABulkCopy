@@ -115,7 +115,7 @@ public class MappingFactory : IMappingFactory
 
     private void CheckBitConversion(string key, string value)
     {
-        if (key == "bit" && value != "boolean")
+        if (key == MssTypes.Bit && value != "boolean")
         {
             ConvertBitToBool = false;
         }

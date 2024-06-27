@@ -22,6 +22,7 @@ public class PgTypeMapper : ITypeConverter
         _tokenizerFactory = tokenizerFactory;
         _columnFactory = columnFactory;
         _mappingFactory = mappingFactory;
+        pgParser.Modifiers.ConvertBitToBoolean = _mappingFactory.ConvertBitToBool;
     }
 
     public TableDefinition Convert(TableDefinition sourceDefinition)
@@ -93,7 +94,7 @@ public class PgTypeMapper : ITypeConverter
         tokenizer.GetNext();
         var root = _parseTree.CreateExpression(tokenizer);
 
-        if (col.Type != MssTypes.Bit || !_mappingFactory.ConvertBitToBool)
+        if (col.Type != MssTypes.Bit)
         {
             return _pgParser.Parse(tokenizer, root);
         }
@@ -104,7 +105,7 @@ public class PgTypeMapper : ITypeConverter
     private string ChangeNumberOnlyToBoolean(INode root, ITokenizer tokenizer)
     {
         var constNode = root.StripParentheses();
-        if (constNode != null && constNode.IsSimpleValue())
+        if (_pgParser.Modifiers.ConvertBitToBoolean && constNode != null && constNode.IsSimpleValue())
         {
             return _pgParser.ParseLeafNode(tokenizer, constNode) == "1" ? "true" : "false";
         }
