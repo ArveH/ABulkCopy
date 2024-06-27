@@ -86,14 +86,14 @@ public class PgTypeMapper : ITypeConverter
         return newColumns;
     }
 
-    private string SetDefaultConstraint(IColumn sourceCol)
+    private string SetDefaultConstraint(IColumn col)
     {
         var tokenizer = _tokenizerFactory.GetTokenizer();
-        tokenizer.Initialize(sourceCol.DefaultConstraint!.Definition);
+        tokenizer.Initialize(col.DefaultConstraint!.Definition);
         tokenizer.GetNext();
         var root = _parseTree.CreateExpression(tokenizer);
 
-        if (!_mappingFactory.ConvertBitToBool)
+        if (col.Type != MssTypes.Bit || !_mappingFactory.ConvertBitToBool)
         {
             return _pgParser.Parse(tokenizer, root);
         }
