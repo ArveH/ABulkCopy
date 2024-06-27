@@ -14,8 +14,6 @@ public class PgParserTests : ParserTestBase
     [InlineData("23.1", "23.1")]
     [InlineData("-.1", "-.1")]
     [InlineData("-0.1", "-0.1")]
-    [InlineData("(CONVERT([bit],(0)))", "((0)::integer)")]
-    [InlineData("convert(bit, 1)", "1::integer")]
     [InlineData("'arve'", "'arve'")]
     [InlineData("N'arve'", "N'arve'")]
     [InlineData("''", "''")]
@@ -45,6 +43,23 @@ public class PgParserTests : ParserTestBase
         result.Should().Be(expected);
     }
 
+    [Theory]
+    [InlineData("(CONVERT([bit],(0)))", false, "((0)::integer)")]
+    [InlineData("convert(bit, 1)", false, "1::integer")]
+    [InlineData("(CONVERT([bit],(0)))", true, "((0)::boolean)")]
+    [InlineData("convert(bit, 1)", true, "1::boolean")]
+    public void TestParseConvert_Using_BitToBoolModifier(
+        string testSql, bool bitToBool, string expected)
+    {
+        var tokenizer = GetTokenizer();
+        var node = CreateExpressionNode(testSql, tokenizer);
+        IPgParser parser = new PgParser();
+        parser.Modifiers.ConvertBitToBoolean = bitToBool;
+
+        var result = parser.Parse(tokenizer, node);
+
+        result.Should().Be(expected);
+    }
 
     private INode CreateExpressionNode(string sql, ITokenizer tokenizer)
     {

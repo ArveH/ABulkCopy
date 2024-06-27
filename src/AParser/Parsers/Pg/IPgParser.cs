@@ -2,6 +2,7 @@
 
 public interface IPgParser
 {
+    ParserModifiers Modifiers { get; }
     string Parse(ITokenizer tokenizer, INode node);
     string ParseExpression(ITokenizer tokenizer, INode node);
     string ParseConvertFunction(ITokenizer tokenizer, INode node);

@@ -2,6 +2,8 @@
 
 public class PgParser : IPgParser
 {
+    public ParserModifiers Modifiers { get; } = new();
+
     public string Parse(ITokenizer tokenizer, INode node)
     {
         switch (node.Type)
@@ -48,8 +50,8 @@ public class PgParser : IPgParser
             .ToString().ToLower();
         return sqlType switch
         {
-            "bit" => ParseConvertToNumber(tokenizer, node),
-            "[bit]" => ParseConvertToNumber(tokenizer, node),
+            "bit" => ParseConvertBit(tokenizer, node),
+            "[bit]" => ParseConvertBit(tokenizer, node),
             "datetime" => ParseConvertToTimestamp(tokenizer, node),
             "[datetime]" => ParseConvertToTimestamp(tokenizer, node),
             "smalldatetime" => ParseConvertToTimestamp(tokenizer, node),
@@ -78,6 +80,15 @@ public class PgParser : IPgParser
         }
         return $"to_timestamp('{longDate}', 'YYYYMMDD HH24:MI:SS:FF3')";
 
+    }
+
+    public string ParseConvertBit(ITokenizer tokenizer, INode node)
+    {
+        var convertTo = Modifiers.ConvertBitToBoolean
+            ? "::boolean"
+            : "::integer";
+
+        return ParseExpression(tokenizer, node.Children[4]) + convertTo;
     }
 
     public string ParseConvertToNumber(ITokenizer tokenizer, INode node)
