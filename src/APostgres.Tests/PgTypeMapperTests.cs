@@ -9,7 +9,25 @@ public class PgTypeMapperTests : PgTestBase
     [Theory]
     [InlineData("((0))", "((0))")]
     [InlineData("((1))", "((1))")]
-    public void TestConvert_When_MssBitDefault(string val, string expected)
+    public void TestConvert_When_MssBitDefault_When_BitMapsToSmallInt(string val, string expected)
+    {
+        var defCol = new SqlServerBit(2, "status", false)
+        {
+            DefaultConstraint = new DefaultDefinition
+            {
+                Name = "DF__atswbstas__activ__1DE5A643",
+                Definition = val,
+                IsSystemNamed = true
+            }
+        };
+
+        TestConvert(GetName(), defCol, "boolean", expected);
+    }
+
+    [Theory]
+    [InlineData("((0))", "false")]
+    [InlineData("((1))", "true")]
+    public void TestConvert_When_MssBitDefault_When_BitMapsToBoolean(string val, string expected)
     {
         var defCol = new SqlServerBit(2, "status", false)
         {

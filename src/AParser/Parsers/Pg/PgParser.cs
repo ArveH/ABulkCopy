@@ -103,7 +103,7 @@ public class PgParser : IPgParser
                ")";
     }
 
-    public static string ParseLeafNode(ITokenizer tokenizer, INode node)
+    public string ParseLeafNode(ITokenizer tokenizer, INode node)
     {
         return tokenizer.GetSpan(node.Tokens.First()).ToString();
     }

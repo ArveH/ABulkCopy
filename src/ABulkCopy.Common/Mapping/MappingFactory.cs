@@ -24,6 +24,7 @@ public class MappingFactory : IMappingFactory
     }
 
     public IMapping GetMappings() => _mapping;
+    public bool ConvertBitToBool { get; private set; } = true;
 
     private static Dictionary<string, string?> GetDefaultMssToPgLocationMappings()
     {
@@ -62,6 +63,7 @@ public class MappingFactory : IMappingFactory
             foreach (var (key, value) in mappingsFromFile.ColumnTypes)
             {
                 _mapping.ColumnTypes[key] = value;
+                CheckBitConversion(key, value);
             }
         }
         catch (MappingsFileException)
@@ -85,6 +87,7 @@ public class MappingFactory : IMappingFactory
         foreach (var (key, value) in GetDefaultMssToPgColumnMappings())
         {
             _mapping.ColumnTypes.Add(key, value);
+            CheckBitConversion(key, value);
         }
     }
 
@@ -108,5 +111,13 @@ public class MappingFactory : IMappingFactory
                 {MssTypes.Image, PgTypes.ByteA},
                 {MssTypes.VarBinary, PgTypes.ByteA}
             };
+    }
+
+    private void CheckBitConversion(string key, string value)
+    {
+        if (key == "bit" && value != "boolean")
+        {
+            ConvertBitToBool = false;
+        }
     }
 }

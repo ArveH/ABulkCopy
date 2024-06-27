@@ -14,6 +14,7 @@ global using ABulkCopy.Common.Types.Index;
 global using ABulkCopy.Common.Types.Table;
 global using ABulkCopy.Common.Utils;
 global using AParser;
+global using AParser.Extensions;
 global using AParser.Parsers.Pg;
 global using AParser.Tree;
 global using Microsoft.Extensions.Configuration;
