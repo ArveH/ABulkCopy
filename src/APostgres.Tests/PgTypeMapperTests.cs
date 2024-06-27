@@ -7,8 +7,8 @@ public class PgTypeMapperTests : PgTestBase
     }
 
     [Theory]
-    [InlineData("((0))", "((0))")]
-    [InlineData("((1))", "((1))")]
+    [InlineData("((0))", "false")]
+    [InlineData("((1))", "true")]
     public void TestConvert_When_MssBitDefault(string val, string expected)
     {
         var defCol = new SqlServerBit(2, "status", false)
