@@ -6,17 +6,20 @@ public static class DataFolder
     {
         if (Directory.Exists(folder)) return CmdStatus.Exists;
 
-        Console.Write($"Create '{folder}' [y|n] (n is default)? ");
-        var key = Console.ReadKey();
-        Console.WriteLine();
-        if (key.KeyChar is 'y' or 'Y' or '\n')
+        try
         {
             Directory.CreateDirectory(folder);
             Log.Information("Folder '{Folder}' created", folder);
             Console.WriteLine($"Folder '{folder}' created");
             return CmdStatus.Created;
         }
-
-        return CmdStatus.ShouldExit;
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Folder {Folder} couldn't be created. ABulkCopy.Cmd finished.",
+                folder);
+            Console.WriteLine($"Folder {folder} couldn't be created. {ex.Message} ABulkCopy.Cmd finished.");
+            Console.WriteLine(ex.Message);
+            return CmdStatus.ShouldExit;
+        }
     }
 }

@@ -39,9 +39,7 @@ public class Program
                 var folder = configuration.Check(Constants.Config.Folder);
                 if (DataFolder.CreateIfNotExists(folder) == CmdStatus.ShouldExit)
                 {
-                    Log.Information("Folder {Folder} didn't exist. ABulkCopy.Cmd finished.",
-                        folder);
-                    Console.WriteLine($"Folder {folder} didn't exist. ABulkCopy.Cmd finished.");
+                    Console.WriteLine("ABulkCopy.Cmd finished.");
                     return;
                 }
 
