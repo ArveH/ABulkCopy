@@ -23,7 +23,7 @@ public class CmdArguments
     [Option('l', "log-file", Required = false, HelpText = "Full path for log file.")]
     public string? LogFile { get; set; }
 
-    [Option('m', "mappings-file", Required = false, HelpText = "The path and file name of a json file containing key-value pairs for mapping schema names, collation names and some simple type mapping. E.g. mapping the \"dbo\" schema in SQL Server to the \"public\" schema in Postgres. There is a sample-mappings.json file accompanying the executable. For column types, you should only map bit and datetime types (see documentation:  This parameter is only used when direction = In")]
+    [Option('m', "mappings-file", Required = false, HelpText = "The path and file name of a json file containing key-value pairs for mapping schema names, collation names and some simple type mapping. E.g. mapping the \"dbo\" schema in SQL Server to the \"public\" schema in Postgres. There is a sample-mappings.json file accompanying the executable. For column types, you should only map bit and datetime types (see documentation: https://arveh.github.io/ABulkCopy.Docs/command_line_parameters/#-m-mappings-file-in-only). This parameter is only used when direction = In")]
     public string? MappingsFile { get; set; }
 
     [Option("schema-filter", Required = false, HelpText = "A comma separated list of schema names. When it's not used, all schemas will be copied, except 'guest', 'information_schema', 'sys' and 'logs'. This parameter is only used when direction = Out")]
