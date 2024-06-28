@@ -15,9 +15,9 @@ public static class DataFolder
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Folder {Folder} couldn't be created. ABulkCopy.Cmd finished.",
+            Log.Error(ex, "Folder {Folder} couldn't be created.",
                 folder);
-            Console.WriteLine($"Folder {folder} couldn't be created. {ex.Message} ABulkCopy.Cmd finished.");
+            Console.WriteLine($"Folder {folder} couldn't be created.");
             Console.WriteLine(ex.Message);
             return CmdStatus.ShouldExit;
         }
