@@ -132,30 +132,18 @@ jobs:
         type: 'zip'
         filename: 'release.zip'
 
+    - name: List files after zip and creating release
+      run: ls -R
+    
     - name: Create release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+      id: upload-release-asset
+      uses: softprops/action-gh-release@v2
       with:
+        files: ./release.zip
+        token: ${{ secrets.GITHUB_TOKEN }}
+        name: Release ${{ env.currentVersion }}
         tag_name: ${{ env.currentVersion }}
-        release_name: Release ${{ env.currentVersion }}
         body: |
           You can find the release notes [here.](https://arveh.github.io/ABulkCopy.Docs/release_notes/)
         draft: false
         prerelease: true
-
-    - name: List files after zip and creating release
-      run: ls -R
-
-    - name: Upload Release Asset
-      id: upload-release-asset 
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} # See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-        asset_path: ./release.zip
-        asset_name: release-${{ env.currentVersion }}.zip
-        asset_content_type: application/zip
-    
