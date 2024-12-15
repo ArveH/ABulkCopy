@@ -45,16 +45,24 @@ jobs:
         overrideConfig: |
           next-version=${{ github.event.inputs.version }}
 
-    - name: Publish
+    - name: Publish Windows
       if: github.event_name == 'workflow_dispatch'
-      run: dotnet publish ${{env.consoleProjFile}} -c Release
+      run: dotnet publish ${{env.consoleProjFile}} -c Release -r win-x64
+
+    - name: Publish Linux
+      if: github.event_name == 'workflow_dispatch'
+      run: dotnet publish ${{env.consoleProjFile}} -c Release -r linux-arm64
+
+    - name: Publish Mac
+      if: github.event_name == 'workflow_dispatch'
+      run: dotnet publish ${{env.consoleProjFile}} -c Release -r osx-arm64
 
     - name: Upload program artifact
       if: github.event_name == 'workflow_dispatch'
       uses: actions/upload-artifact@v4
       with:
         name: program
-        path: ./src/ABulkCopy.Cmd/bin/Release/net8.0/win-x64/publish
+        path: ./src/ABulkCopy.Cmd/bin/Release/net8.0
 
     - name: Display structure of artifact files
       run: ls -R
