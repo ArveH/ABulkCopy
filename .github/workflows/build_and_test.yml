@@ -47,22 +47,22 @@ jobs:
 
     - name: Publish Windows
       if: github.event_name == 'workflow_dispatch'
-      run: dotnet publish ${{env.consoleProjFile}} -c Release -r win-x64
+      run: dotnet publish ${{env.consoleProjFile}} -c Release -r win-x64 -o ./output/windows
 
     - name: Publish Linux
       if: github.event_name == 'workflow_dispatch'
-      run: dotnet publish ${{env.consoleProjFile}} -c Release -r linux-arm64
+      run: dotnet publish ${{env.consoleProjFile}} -c Release -r linux-arm64 -o ./output/linux
 
     - name: Publish Mac
       if: github.event_name == 'workflow_dispatch'
-      run: dotnet publish ${{env.consoleProjFile}} -c Release -r osx-arm64
+      run: dotnet publish ${{env.consoleProjFile}} -c Release -r osx-arm64 -o ./output/mac
 
     - name: Upload program artifact
       if: github.event_name == 'workflow_dispatch'
       uses: actions/upload-artifact@v4
       with:
         name: program
-        path: ./src/ABulkCopy.Cmd/bin/Release/net8.0
+        path: ./output/
 
     - name: Display structure of artifact files
       run: ls -R
