@@ -1,17 +1,19 @@
 ﻿namespace ABulkCopy.APostgres;
 
-public class PgSystemTables : PgCommandBase, IPgSystemTables
+public class PgSystemTables : IPgSystemTables
 {
+    private readonly IDbRawCommand _dbRawCommand;
     private readonly IQueryBuilderFactory _queryBuilderFactory;
     private readonly IIdentifier _identifier;
     private readonly ILogger _logger;
 
     public PgSystemTables(
-        IPgContext pgContext,
+        IDbRawCommand dbRawCommand,
         IQueryBuilderFactory queryBuilderFactory,
         IIdentifier identifier,
-        ILogger logger) : base(pgContext)
+        ILogger logger)
     {
+        _dbRawCommand = dbRawCommand;
         _queryBuilderFactory = queryBuilderFactory;
         _identifier = identifier;
         _logger = logger.ForContext<PgSystemTables>();
@@ -31,7 +33,7 @@ public class PgSystemTables : PgCommandBase, IPgSystemTables
                         "    ON tc.constraint_name = kcu.constraint_name\r\n" +
                         "        AND tc.table_schema = kcu.table_schema\r\n" +
                         $"WHERE tc.constraint_type = 'PRIMARY KEY' AND tc.table_name='{_identifier.AdjustForSystemTable(tableHeader.Name)}'";
-        return await ExecuteQueryAsync(
+        return await _dbRawCommand.ExecuteQueryAsync(
             sqlString,
             async reader =>
             {
@@ -84,7 +86,7 @@ public class PgSystemTables : PgCommandBase, IPgSystemTables
                         "       cl.oid = con.confrelid\r\n" +
                         "   join pg_namespace n on\r\n" +
                         "       n.oid = cl.relnamespace\r\n";
-        return await ExecuteQueryAsync<ForeignKey>(
+        return await _dbRawCommand.ExecuteQueryAsync<ForeignKey>(
             sqlString,
             async reader =>
             {
@@ -124,7 +126,7 @@ public class PgSystemTables : PgCommandBase, IPgSystemTables
         var sqlString =
             $"select oid from pg_class where relkind = 'S' and " +
             $"relname = '{_identifier.AdjustForSystemTable(seqName.TrimSchema())}'";
-        var oid = await ExecuteScalarAsync(sqlString, ct).ConfigureAwait(false);
+        var oid = await _dbRawCommand.ExecuteScalarAsync(sqlString, ct).ConfigureAwait(false);
         if (oid == null || oid == DBNull.Value)
         {
             _logger.Error("Can't get oid for sequence '{SequenceName}'", seqName);
@@ -152,7 +154,7 @@ public class PgSystemTables : PgCommandBase, IPgSystemTables
         qb.AppendIdentifier(tableName);
         qb.AppendLine(") )");
 
-        await ExecuteScalarAsync(qb.ToString(), ct);
+        await _dbRawCommand.ExecuteScalarAsync(qb.ToString(), ct);
     }
 
     public async Task<string?> GetOwnedSequenceNameAsync(
@@ -161,7 +163,7 @@ public class PgSystemTables : PgCommandBase, IPgSystemTables
         var sqlString = 
             $"select pg_get_serial_sequence('{_identifier.AdjustForSystemTable(tableName)}', '{_identifier.AdjustForSystemTable(columnName)}')";
 
-        var seqName = await ExecuteScalarAsync(sqlString, ct).ConfigureAwait(false);
+        var seqName = await _dbRawCommand.ExecuteScalarAsync(sqlString, ct).ConfigureAwait(false);
         if (seqName == null || seqName == DBNull.Value)
         {
             _logger.Error("Can't get sequence name for '{TableName}'.'{ColumnName}'",
@@ -194,7 +196,7 @@ public class PgSystemTables : PgCommandBase, IPgSystemTables
                         "       att.attrelid = con.confrelid and att.attnum = con.child\r\n" +
                         "   join pg_attribute att2 on\r\n" +
                         "       att2.attrelid = con.conrelid and att2.attnum = con.parent";
-        return await ExecuteQueryAsync<(string child, string parent)>(
+        return await _dbRawCommand.ExecuteQueryAsync<(string child, string parent)>(
             sqlString,
             async reader =>
             {
