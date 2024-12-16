@@ -1,3 +1,4 @@
+global using System.Data.Common;
 global using ABulkCopy.APostgres.Column;
 global using ABulkCopy.APostgres.Column.ColumnTypes;
 global using ABulkCopy.APostgres.Extensions;
