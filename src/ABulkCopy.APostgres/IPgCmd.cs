@@ -13,4 +13,6 @@ public interface IPgCmd
         SchemaTableTuple st, 
         IndexDefinition indexDefinition, 
         CancellationToken ct);
+
+    Task EnsureSchemaAsync(string name);
 }

@@ -1,4 +1,4 @@
-namespace ABulkCopy.APostgres.DbRaw;
+namespace ABulkCopy.Common.Database;
 
 public interface IDbRawFactory
 {

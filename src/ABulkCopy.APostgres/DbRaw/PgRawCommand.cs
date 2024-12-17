@@ -1,16 +1,16 @@
 namespace ABulkCopy.APostgres.DbRaw;
 
-public class PgRawCommand : IDbRawCommand
+public class PgRawCommand : IPgRawCommand
 {
     private readonly IPgContext _pgContext;
-    private readonly IDbRawFactory _dbRawFactory;
+    private readonly IPgRawFactory _pgRawFactory;
 
     public PgRawCommand(
         IPgContext pgContext,
-        IDbRawFactory dbRawFactory)
+        IPgRawFactory pgRawFactory)
     {
         _pgContext = pgContext;
-        _dbRawFactory = dbRawFactory;
+        _pgRawFactory = pgRawFactory;
     }
     
     public async Task ExecuteNonQueryAsync(string sqlString, CancellationToken ct)
@@ -33,7 +33,7 @@ public class PgRawCommand : IDbRawCommand
         await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
         await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
 
-        return await func(_dbRawFactory.CreateReader(reader));
+        return await func(_pgRawFactory.CreateReader(reader));
     }
 
     public async Task<IEnumerable<TReturn>> ExecuteQueryAsync<TReturn>(
@@ -44,6 +44,6 @@ public class PgRawCommand : IDbRawCommand
         await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
         await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
 
-        return await func(_dbRawFactory.CreateReader(reader));
+        return await func(_pgRawFactory.CreateReader(reader));
     }
 }

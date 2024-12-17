@@ -1,4 +1,6 @@
-﻿namespace ABulkCopy.Cmd.Internal.Config;
+﻿using ABulkCopy.APostgres.DbRaw;
+
+namespace ABulkCopy.Cmd.Internal.Config;
 
 public static class ServiceCollectionExtensions
 {
@@ -22,6 +24,8 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IDbContext>(s => s.GetRequiredService<PgContext>());
         services.AddSingleton<IPgContext>(s => s.GetRequiredService<PgContext>());
         services.AddSingleton<IPgCmd, PgCmd>();
+        services.AddSingleton<IPgRawFactory, PgRawFactory>();
+        services.AddSingleton<IPgRawCommand, PgRawCommand>();
         services.AddSingleton<ITypeConverter, PgTypeMapper>();
         services.AddSingleton<IPgColumnFactory, PgColumnFactory>();
         services.AddSingleton<IPgSystemTables, PgSystemTables>();

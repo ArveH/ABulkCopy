@@ -1,6 +1,6 @@
 namespace ABulkCopy.APostgres.DbRaw;
 
-public class DbRawFactory : IDbRawFactory
+public class PgRawFactory : IPgRawFactory
 {
     public IDbRawReader CreateReader(DbDataReader reader)
     {

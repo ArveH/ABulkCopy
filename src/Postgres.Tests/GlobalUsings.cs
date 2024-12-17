@@ -25,7 +25,6 @@ global using System.Text;
 global using ABulkCopy.Common.Extensions;
 global using Testcontainers.PostgreSql;
 global using Testing.Shared;
-global using Testing.Shared.Postgres;
 global using Xunit;
 global using Xunit.Abstractions;
 global using SchemaTableTuple = (string schemaName, string tableName);

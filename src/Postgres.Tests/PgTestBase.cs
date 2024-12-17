@@ -1,4 +1,6 @@
-﻿namespace Postgres.Tests;
+﻿using ABulkCopy.APostgres.DbRaw;
+
+namespace Postgres.Tests;
 
 public class PgTestBase
 {
@@ -80,6 +82,13 @@ public class PgTestBase
         return qbFactoryMock.Object;
     }
 
+    protected IPgRawCommand GetRawCommand()
+    {
+        return new PgRawCommand(
+            DbFixture.PgContext,
+            new PgRawFactory());
+    }
+
     protected IPgCmd GetPgCmd(Dictionary<string, string?>? appSettings = null)
     {
         appSettings ??= new()
@@ -90,7 +99,7 @@ public class PgTestBase
             Constants.Config.PgConnectionString,
             DbFixture.Configuration.SafeGet(Constants.Config.PgConnectionString));
         return new ABulkCopy.APostgres.PgCmd(
-            DbFixture.PgContext,
+            GetRawCommand(),
             GetQueryBuilderFactory(appSettings));
     }
 
@@ -101,7 +110,7 @@ public class PgTestBase
             { Constants.Config.AddQuotes, "true" },
         };
         return new PgSystemTables(
-            DbFixture.PgContext,
+            GetRawCommand(),
             GetQueryBuilderFactory(appSettings),
             GetIdentifier(appSettings), TestLogger);
     }

@@ -19,4 +19,5 @@ global using System.Text;
 global using System.Text.Encodings.Web;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
+global using ABulkCopy.APostgres.DbRaw;
 global using SchemaTableTuple = (string schemaName, string tableName);

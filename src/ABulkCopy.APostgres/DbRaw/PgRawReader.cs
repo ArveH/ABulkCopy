@@ -1,6 +1,6 @@
 namespace ABulkCopy.APostgres.DbRaw;
 
-public class PgRawReader : IDbRawReader
+public class PgRawReader : IPgRawReader
 {
     private readonly NpgsqlDataReader _reader;
     

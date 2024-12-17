@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging.Abstractions;
+﻿using ABulkCopy.APostgres.DbRaw;
+using Microsoft.Extensions.Logging.Abstractions;
 using QueryBuilderFactory = ABulkCopy.ASqlServer.QueryBuilderFactory;
 
 namespace CrossRDBMS.Tests;
@@ -10,11 +11,12 @@ public class DatabaseFixture : IAsyncLifetime
     private IDbContext? _mssContext;
     private MssDbHelper? _mssDbHelper;
     private IPgContext? _pgContext;
-    private PgDbHelper? _pgDbHelper;
     private IConfiguration? _testConfiguration;
     private string? _pgConnectionString;
     private string? _mssConnectionString;
-
+    
+    public const string PgTestSchemaName = "my_pg_schema";
+    
     public string MssConnectionString =>
         _mssConnectionString ?? throw new ArgumentNullException(nameof(MssConnectionString));
 
@@ -43,12 +45,6 @@ public class DatabaseFixture : IAsyncLifetime
     {
         get => _pgContext ?? throw new ArgumentNullException(nameof(PgContext));
         private set => _pgContext = value;
-    }
-
-    public PgDbHelper PgDbHelper
-    {
-        get => _pgDbHelper ?? throw new ArgumentNullException(nameof(PgDbHelper));
-        set => _pgDbHelper = value;
     }
 
     public async Task InitializeAsync()
@@ -80,10 +76,12 @@ public class DatabaseFixture : IAsyncLifetime
         _mssConnectionString = TestConfiguration.GetConnectionString(Constants.Config.MssConnectionString);
         _pgConnectionString = TestConfiguration.GetConnectionString(Constants.Config.PgConnectionString);
         PgContext = new PgContext(new NullLoggerFactory(), TestConfiguration);
-        _pgDbHelper = new PgDbHelper(PgContext);
+        var pgCmd = new PgCmd(
+            new PgRawCommand(PgContext, new PgRawFactory()),
+            new QueryBuilderFactory());
         MssContext = new MssContext(TestConfiguration);
         _mssDbHelper = new MssDbHelper(MssContext, new QueryBuilderFactory());
-        await _pgDbHelper.EnsureTestSchemaAsync();
+        await pgCmd.EnsureSchemaAsync(PgTestSchemaName);
         await _mssDbHelper.EnsureTestSchemaAsync();
     }
 

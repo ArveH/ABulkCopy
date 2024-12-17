@@ -90,7 +90,7 @@ public class TestSchemas : TestBase
             childDef.Columns[1].Name,
             parentId);
         await ValidateValueAsync(
-            (PgDbHelper.TestSchemaName, parentDef.Header.Name),
+            (DatabaseFixture.PgTestSchemaName, parentDef.Header.Name),
             parentDef.Columns[0].Name,
             parentId);
     }
