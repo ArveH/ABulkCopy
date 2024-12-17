@@ -18,4 +18,14 @@ public class PgRawReader : IPgRawReader
     public decimal GetDecimal(int ordinal) => _reader.GetDecimal(ordinal);
 
     public bool IsDBNull(int ordinal) => _reader.IsDBNull(ordinal);
+
+    public void Dispose()
+    {
+        _reader.Dispose();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _reader.DisposeAsync();
+    }
 }

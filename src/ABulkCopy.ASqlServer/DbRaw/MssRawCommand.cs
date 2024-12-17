@@ -15,7 +15,7 @@ public class MssRawCommand : IMssRawCommand
 
     public async Task ExecuteReaderAsync(
         SqlCommand command,
-        Action<SqlDataReader> readFunc,
+        Action<IDbRawReader> readFunc,
         CancellationToken ct)
     {
         var connection = new SqlConnection(_dbContext.ConnectionString);
@@ -25,10 +25,11 @@ public class MssRawCommand : IMssRawCommand
             await connection.OpenAsync(ct).ConfigureAwait(false);
             await using (command.ConfigureAwait(false))
             {
-                await using var reader = await command.ExecuteReaderAsync(ct).ConfigureAwait(false);
-                while (await reader.ReadAsync(ct).ConfigureAwait(false))
+                await using var dbRawReader = 
+                    _mssRawFactory.CreateReader(await command.ExecuteReaderAsync(ct).ConfigureAwait(false));
+                while (await dbRawReader.ReadAsync(ct).ConfigureAwait(false))
                 {
-                    readFunc(reader);
+                    readFunc(dbRawReader);
                 }
             }
         }
@@ -36,7 +37,7 @@ public class MssRawCommand : IMssRawCommand
 
     public async Task ExecuteReaderAsync(
         SqlCommand command,
-        Func<SqlDataReader, Task> readFunc,
+        Func<IDbRawReader, Task> readFunc,
         CancellationToken ct)
     {
         var connection = new SqlConnection(_dbContext.ConnectionString);
@@ -46,10 +47,11 @@ public class MssRawCommand : IMssRawCommand
             await connection.OpenAsync(ct).ConfigureAwait(false);
             await using (command.ConfigureAwait(false))
             {
-                await using var reader = await command.ExecuteReaderAsync(ct).ConfigureAwait(false);
-                while (await reader.ReadAsync(ct).ConfigureAwait(false))
+                await using var dbRawReader = 
+                    _mssRawFactory.CreateReader(await command.ExecuteReaderAsync(ct).ConfigureAwait(false));
+                while (await dbRawReader.ReadAsync(ct).ConfigureAwait(false))
                 {
-                    await readFunc(reader).ConfigureAwait(false);
+                    await readFunc(dbRawReader).ConfigureAwait(false);
                 }
             }
         }

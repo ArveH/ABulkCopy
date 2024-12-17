@@ -1,6 +1,8 @@
+using System.Data;
+
 namespace ABulkCopy.Common.Database;
 
-public interface IDbRawReader
+public interface IDbRawReader : IDisposable, IAsyncDisposable
 {
     Task<bool> ReadAsync(CancellationToken cancellationToken);
     string GetString(int ordinal);
