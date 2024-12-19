@@ -48,4 +48,14 @@ public class PgRawCommand : IPgRawCommand
 
         return await func(dbRawReader);
     }
+
+    public Task ExecuteReaderAsync(DbCommand command, Action<IDbRawReader> readFunc, CancellationToken ct)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task ExecuteReaderAsync(DbCommand command, Func<IDbRawReader, Task> readFunc, CancellationToken ct)
+    {
+        throw new NotImplementedException();
+    }
 }

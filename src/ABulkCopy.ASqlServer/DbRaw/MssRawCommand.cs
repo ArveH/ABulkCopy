@@ -1,24 +1,15 @@
 namespace ABulkCopy.ASqlServer.DbRaw;
 
-public class MssRawCommand : IMssRawCommand
+public class MssRawCommand(
+    IDbContext dbContext,
+    IMssRawFactory mssRawFactory) : IMssRawCommand
 {
-        private readonly IDbContext _dbContext;
-        private readonly IMssRawFactory _mssRawFactory;
-
-        public MssRawCommand(
-        IDbContext dbContext,
-        IMssRawFactory mssRawFactory)
-        {
-            _dbContext = dbContext;
-            _mssRawFactory = mssRawFactory;
-        }
-
     public async Task ExecuteReaderAsync(
-        SqlCommand command,
+        DbCommand command,
         Action<IDbRawReader> readFunc,
         CancellationToken ct)
     {
-        var connection = new SqlConnection(_dbContext.ConnectionString);
+        var connection = new SqlConnection(dbContext.ConnectionString);
         await using (connection.ConfigureAwait(false))
         {
             command.Connection = connection;
@@ -26,7 +17,7 @@ public class MssRawCommand : IMssRawCommand
             await using (command.ConfigureAwait(false))
             {
                 await using var dbRawReader = 
-                    _mssRawFactory.CreateReader(await command.ExecuteReaderAsync(ct).ConfigureAwait(false));
+                    mssRawFactory.CreateReader(await command.ExecuteReaderAsync(ct).ConfigureAwait(false));
                 while (await dbRawReader.ReadAsync(ct).ConfigureAwait(false))
                 {
                     readFunc(dbRawReader);
@@ -36,19 +27,19 @@ public class MssRawCommand : IMssRawCommand
     }
 
     public async Task ExecuteReaderAsync(
-        SqlCommand command,
+        DbCommand command,
         Func<IDbRawReader, Task> readFunc,
         CancellationToken ct)
     {
-        var connection = new SqlConnection(_dbContext.ConnectionString);
+        var connection = new SqlConnection(dbContext.ConnectionString);
         await using (connection.ConfigureAwait(false))
         {
             command.Connection = connection;
             await connection.OpenAsync(ct).ConfigureAwait(false);
             await using (command.ConfigureAwait(false))
             {
-                await using var dbRawReader = 
-                    _mssRawFactory.CreateReader(await command.ExecuteReaderAsync(ct).ConfigureAwait(false));
+                await using var dbRawReader =
+                    mssRawFactory.CreateReader(await command.ExecuteReaderAsync(ct).ConfigureAwait(false));
                 while (await dbRawReader.ReadAsync(ct).ConfigureAwait(false))
                 {
                     await readFunc(dbRawReader).ConfigureAwait(false);
@@ -62,11 +53,11 @@ public class MssRawCommand : IMssRawCommand
         Func<IDbRawReader, Task<TReturn?>> func, 
         CancellationToken ct)
     {
-        await using var connection = new SqlConnection(_dbContext.ConnectionString);
+        await using var connection = new SqlConnection(dbContext.ConnectionString);
         await using var command = new SqlCommand(sqlString, connection);
         await connection.OpenAsync(ct).ConfigureAwait(false);
         await using var reader = await command.ExecuteReaderAsync(ct).ConfigureAwait(false);
-        return await func(_mssRawFactory.CreateReader(reader));
+        return await func(mssRawFactory.CreateReader(reader)).ConfigureAwait(false);
     }
 
     public async Task<IEnumerable<TReturn>> ExecuteQueryAsync<TReturn>(
@@ -74,28 +65,28 @@ public class MssRawCommand : IMssRawCommand
         Func<IDbRawReader, Task<IEnumerable<TReturn>>> func, 
         CancellationToken ct)
     {
-        await using var connection = new SqlConnection(_dbContext.ConnectionString);
+        await using var connection = new SqlConnection(dbContext.ConnectionString);
         await using var command = new SqlCommand(sqlString, connection);
         await connection.OpenAsync(ct).ConfigureAwait(false);
         await using var reader = await command.ExecuteReaderAsync(ct).ConfigureAwait(false);
-        return await func(_mssRawFactory.CreateReader(reader));
+        return await func(mssRawFactory.CreateReader(reader)).ConfigureAwait(false);
     }
 
     public async Task ExecuteNonQueryAsync(
         string sqlString,
         CancellationToken ct)
     {
-        await using var sqlConnection = new SqlConnection(_dbContext.ConnectionString);
-        await sqlConnection.OpenAsync(ct);
+        await using var sqlConnection = new SqlConnection(dbContext.ConnectionString);
+        await sqlConnection.OpenAsync(ct).ConfigureAwait(false);
         await using var sqlCommand = new SqlCommand(sqlString, sqlConnection);
-        await sqlCommand.ExecuteNonQueryAsync(ct);
+        await sqlCommand.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
     public async Task<object?> ExecuteScalarAsync(string sqlString, CancellationToken ct)
     {
-        await using var sqlConnection = new SqlConnection(_dbContext.ConnectionString);
-        await sqlConnection.OpenAsync(ct);
+        await using var sqlConnection = new SqlConnection(dbContext.ConnectionString);
+        await sqlConnection.OpenAsync(ct).ConfigureAwait(false);
         await using var sqlCommand = new SqlCommand(sqlString, sqlConnection);
-        return await sqlCommand.ExecuteScalarAsync(ct);
+        return await sqlCommand.ExecuteScalarAsync(ct).ConfigureAwait(false);
     }
 }
