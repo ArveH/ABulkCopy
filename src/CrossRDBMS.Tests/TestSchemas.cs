@@ -3,11 +3,16 @@
 [Collection(nameof(DatabaseCollection))]
 public class TestSchemas : TestBase
 {
+    private readonly IMssCmd _mssCmd;
     private readonly DatabaseFixture _fixture;
     private readonly ITestOutputHelper _output;
 
-    public TestSchemas(DatabaseFixture fixture, ITestOutputHelper output)
+    public TestSchemas(
+        IMssCmd mssCmd,
+        DatabaseFixture fixture, 
+        ITestOutputHelper output)
     {
+        _mssCmd = mssCmd;
         _fixture = fixture;
         _output = output;
     }
@@ -57,10 +62,10 @@ public class TestSchemas : TestBase
             _output,
             fileSystem);
 
-        await _fixture.MssDbHelper.DropTableAsync(("dbo", childName));
-        await _fixture.MssDbHelper.DropTableAsync((MssDbHelper.TestSchemaName, parentName));
+        await _mssCmd.DropTableAsync(("dbo", childName), CancellationToken.None);
+        await _mssCmd.DropTableAsync((DatabaseFixture.MssTestSchemaName, parentName), CancellationToken.None);
         var parentDef = await CreateTableAsync(
-            (MssDbHelper.TestSchemaName, parentName),
+            (DatabaseFixture.MssTestSchemaName, parentName),
             new SqlServerInt(101, "id", false),
             parentId);
         var childDef = await CreateChildTableAsync(
@@ -125,8 +130,8 @@ public class TestSchemas : TestBase
         {
             ColumnNames = [new() { Name = mssCol.Name }]
         };
-        await _fixture.MssDbHelper.CreateTableAsync(tableDef);
-        await _fixture.MssDbHelper.ExecuteNonQueryAsync(
+        await _mssCmd.CreateTableAsync(tableDef, CancellationToken.None);
+        await _fixture.MssRawCommand.ExecuteNonQueryAsync(
             $"insert into {st.GetFullName()}({mssCol.Name}) values ({value})",
             CancellationToken.None);
         return tableDef;
@@ -153,8 +158,8 @@ public class TestSchemas : TestBase
             ColumnReferences = [parent.Columns.First().Name],
             DeleteAction = DeleteAction.Cascade
         });
-        await _fixture.MssDbHelper.CreateTableAsync(tableDef);
-        await _fixture.MssDbHelper.ExecuteNonQueryAsync(
+        await _mssCmd.CreateTableAsync(tableDef, CancellationToken.None);
+        await _fixture.MssRawCommand.ExecuteNonQueryAsync(
             $"insert into {st.GetFullName()}({mssCol.Name}, parentid) values ({values.childId}, {values.parentId})",
             CancellationToken.None);
 

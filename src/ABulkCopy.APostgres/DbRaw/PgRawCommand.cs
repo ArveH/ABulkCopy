@@ -19,6 +19,11 @@ public class PgRawCommand : IPgRawCommand
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
+    public Task ExecuteNonQueryAsync(DbCommand command, CancellationToken ct)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task<object?> ExecuteScalarAsync(string sqlString, CancellationToken ct)
     {
         await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);

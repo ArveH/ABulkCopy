@@ -1,5 +1,4 @@
-﻿using ABulkCopy.APostgres.DbRaw;
-using Microsoft.Extensions.Logging.Abstractions;
+﻿using ABulkCopy.ASqlServer.DbRaw;
 using QueryBuilderFactory = ABulkCopy.ASqlServer.QueryBuilderFactory;
 
 namespace CrossRDBMS.Tests;
@@ -8,14 +7,15 @@ public class DatabaseFixture : IAsyncLifetime
 {
     private MsSqlContainer? _mssContainer;
     private PostgreSqlContainer? _pgContainer;
+    private IMssRawCommand? _mssRawCommand;
     private IDbContext? _mssContext;
-    private MssDbHelper? _mssDbHelper;
     private IPgContext? _pgContext;
     private IConfiguration? _testConfiguration;
     private string? _pgConnectionString;
     private string? _mssConnectionString;
     
     public const string PgTestSchemaName = "my_pg_schema";
+    public const string MssTestSchemaName = "my_mss_schema";
     
     public string MssConnectionString =>
         _mssConnectionString ?? throw new ArgumentNullException(nameof(MssConnectionString));
@@ -35,12 +35,12 @@ public class DatabaseFixture : IAsyncLifetime
         set => _mssContext = value;
     }
 
-    public MssDbHelper MssDbHelper
+    public IMssRawCommand MssRawCommand
     {
-        get => _mssDbHelper ?? throw new ArgumentNullException(nameof(MssDbHelper));
-        set => _mssDbHelper = value;
+        get => _mssRawCommand ?? throw new ArgumentNullException(nameof(MssRawCommand));
+        set => _mssRawCommand = value;
     }
-
+    
     public IPgContext PgContext
     {
         get => _pgContext ?? throw new ArgumentNullException(nameof(PgContext));
@@ -75,14 +75,15 @@ public class DatabaseFixture : IAsyncLifetime
         }
         _mssConnectionString = TestConfiguration.GetConnectionString(Constants.Config.MssConnectionString);
         _pgConnectionString = TestConfiguration.GetConnectionString(Constants.Config.PgConnectionString);
+        _mssRawCommand = new MssRawCommand(
+            MssContext,
+            new MssRawFactory());
         PgContext = new PgContext(new NullLoggerFactory(), TestConfiguration);
         var pgCmd = new PgCmd(
             new PgRawCommand(PgContext, new PgRawFactory()),
             new QueryBuilderFactory());
         MssContext = new MssContext(TestConfiguration);
-        _mssDbHelper = new MssDbHelper(MssContext, new QueryBuilderFactory());
         await pgCmd.EnsureSchemaAsync(PgTestSchemaName);
-        await _mssDbHelper.EnsureTestSchemaAsync();
     }
 
     public async Task DisposeAsync()

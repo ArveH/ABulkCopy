@@ -48,6 +48,7 @@ public class MssRawCommand(
         }
     }
     
+    // TODO: Rename to scalar?
     public async Task<TReturn?> ExecuteQueryAsync<TReturn>(
         string sqlString, 
         Func<IDbRawReader, Task<TReturn?>> func, 
@@ -80,6 +81,16 @@ public class MssRawCommand(
         await sqlConnection.OpenAsync(ct).ConfigureAwait(false);
         await using var sqlCommand = new SqlCommand(sqlString, sqlConnection);
         await sqlCommand.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+    }
+    
+    public async Task ExecuteNonQueryAsync(
+        DbCommand command,
+        CancellationToken ct)
+    {
+        await using var sqlConnection = new SqlConnection(dbContext.ConnectionString);
+        await sqlConnection.OpenAsync(ct).ConfigureAwait(false);
+        command.Connection = sqlConnection;
+        await command.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
     public async Task<object?> ExecuteScalarAsync(string sqlString, CancellationToken ct)

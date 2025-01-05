@@ -2,6 +2,7 @@
 
 public class CopyMssToPgBase : TestBase
 {
+    private readonly IMssCmd _mssCmd;
     private readonly DatabaseFixture _fixture;
     private readonly ITestOutputHelper _output;
     protected MockFileSystem DummyFileSystem;
@@ -10,8 +11,12 @@ public class CopyMssToPgBase : TestBase
 
     private IIdentifier? _identifier;
 
-    public CopyMssToPgBase(DatabaseFixture fixture, ITestOutputHelper output)
+    public CopyMssToPgBase(
+        IMssCmd mssCmd,
+        DatabaseFixture fixture, 
+        ITestOutputHelper output)
     {
+        _mssCmd = mssCmd;
         _fixture = fixture;
         _output = output;
         DummyFileSystem  = new MockFileSystem();
@@ -80,11 +85,11 @@ public class CopyMssToPgBase : TestBase
         IColumn mssCol,
         string insertedValueAsString)
     {
-        await _fixture.MssDbHelper.DropTableAsync(st);
+        await _mssCmd.DropTableAsync(st, CancellationToken.None);
         var tableDef = MssTestData.GetEmpty(st);
         tableDef.Columns.Add(mssCol);
-        await _fixture.MssDbHelper.CreateTableAsync(tableDef);
-        await _fixture.MssDbHelper.ExecuteNonQueryAsync(
+        await _mssCmd.CreateTableAsync(tableDef, CancellationToken.None);
+        await _fixture.MssRawCommand.ExecuteNonQueryAsync(
             $"insert into {st.GetFullName()}(col1) values ({insertedValueAsString})",
             CancellationToken.None);
     }

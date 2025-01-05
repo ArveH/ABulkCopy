@@ -5,6 +5,10 @@ public interface IDbRawCommand
     Task ExecuteNonQueryAsync(
         string sqlString, 
         CancellationToken ct);
+
+    Task ExecuteNonQueryAsync(
+        DbCommand command,
+        CancellationToken ct);
     
     Task<object?> ExecuteScalarAsync(
         string sqlString, 

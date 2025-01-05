@@ -4,24 +4,32 @@ public class DatabaseFixture : IAsyncLifetime
 {
     private MsSqlContainer? _mssContainer;
     private IDbContext? _mssDbContext;
-    private MssDbHelper? _mssDbHelper;
+    private IMssRawCommand? _mssRawCommand;
+    private IMssCmd? _mssCmd;
     private IConfiguration? _testConfiguration;
     private string? _connectionString;
 
     public string MssConnectionString => _connectionString ?? throw new ArgumentNullException(nameof(MssConnectionString));
-
+    public const string TestSchemaName = "my_mss_schema";
+    
     public IDbContext MssDbContext
     {
         get => _mssDbContext ?? throw new ArgumentNullException(nameof(MssDbContext));
         set => _mssDbContext = value;
     }
-
-    public MssDbHelper DbHelper
+    
+    public IMssRawCommand MssRawCommand
     {
-        get => _mssDbHelper ?? throw new ArgumentNullException(nameof(MssDbHelper));
-        set => _mssDbHelper = value;
+        get => _mssRawCommand ?? throw new ArgumentNullException(nameof(MssRawCommand));
+        private set => _mssRawCommand = value;
     }
 
+    public IMssCmd MssCmd
+    {
+        get => _mssCmd ?? throw new ArgumentNullException(nameof(MssCmd));
+        private set => _mssCmd = value;
+    }
+    
     public IConfiguration TestConfiguration
     {
         get => _testConfiguration ?? throw new ArgumentNullException(nameof(TestConfiguration));
@@ -47,8 +55,13 @@ public class DatabaseFixture : IAsyncLifetime
         _connectionString = TestConfiguration.GetConnectionString(Constants.Config.MssConnectionString);
 
         MssDbContext = new MssContext(TestConfiguration);
-        _mssDbHelper = new MssDbHelper(MssDbContext, new QueryBuilderFactory());
-        await DbHelper.EnsureTestSchemaAsync();
+        _mssRawCommand = new MssRawCommand(MssDbContext, new MssRawFactory());
+        _mssCmd = new MssCmd(
+            _mssRawCommand, 
+            new QueryBuilderFactory(), 
+            new LoggerConfiguration().WriteTo.Console().CreateLogger());
+        
+        await MssCmd.EnsureSchemaAsync(TestSchemaName);
     }
 
     public async Task DisposeAsync()

@@ -22,6 +22,8 @@ global using Serilog.Sinks.ListOfString;
 global using System.Diagnostics;
 global using System.IO.Abstractions;
 global using System.IO.Abstractions.TestingHelpers;
+global using ABulkCopy.APostgres.DbRaw;
+global using Microsoft.Extensions.Logging.Abstractions;
 global using Testcontainers.MsSql;
 global using Testcontainers.PostgreSql;
 global using Testing.Shared.SqlServer;

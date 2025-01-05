@@ -6,9 +6,6 @@ public interface IMssCmd
         TableDefinition tableDefinition,
         CancellationToken ct,
         bool addIfNotExists = false);
-    Task ExecuteNonQueryAsync(
-        string sqlString,
-        CancellationToken ct);
     Task DropTableAsync(
         SchemaTableTuple st,
         CancellationToken ct);
@@ -16,8 +13,11 @@ public interface IMssCmd
         SchemaTableTuple st,
         IndexDefinition indexDefinition,
         CancellationToken ct);
-    Task<object?> ExecuteScalarAsync(
-        string sqlString,
-        CancellationToken ct);
 
+    Task EnsureSchemaAsync(string name);
+
+    Task DropIndexAsync(
+        SchemaTableTuple st, 
+        string indexName,
+        CancellationToken ct);
 }
