@@ -3,16 +3,13 @@
 [Collection(nameof(DatabaseCollection))]
 public class TestSchemas : TestBase
 {
-    private readonly IMssCmd _mssCmd;
     private readonly DatabaseFixture _fixture;
     private readonly ITestOutputHelper _output;
 
     public TestSchemas(
-        IMssCmd mssCmd,
         DatabaseFixture fixture, 
         ITestOutputHelper output)
     {
-        _mssCmd = mssCmd;
         _fixture = fixture;
         _output = output;
     }
@@ -62,8 +59,8 @@ public class TestSchemas : TestBase
             _output,
             fileSystem);
 
-        await _mssCmd.DropTableAsync(("dbo", childName), CancellationToken.None);
-        await _mssCmd.DropTableAsync((DatabaseFixture.MssTestSchemaName, parentName), CancellationToken.None);
+        await _fixture.MssCmd.DropTableAsync(("dbo", childName), CancellationToken.None);
+        await _fixture.MssCmd.DropTableAsync((DatabaseFixture.MssTestSchemaName, parentName), CancellationToken.None);
         var parentDef = await CreateTableAsync(
             (DatabaseFixture.MssTestSchemaName, parentName),
             new SqlServerInt(101, "id", false),
@@ -130,7 +127,7 @@ public class TestSchemas : TestBase
         {
             ColumnNames = [new() { Name = mssCol.Name }]
         };
-        await _mssCmd.CreateTableAsync(tableDef, CancellationToken.None);
+        await _fixture.MssCmd.CreateTableAsync(tableDef, CancellationToken.None);
         await _fixture.MssRawCommand.ExecuteNonQueryAsync(
             $"insert into {st.GetFullName()}({mssCol.Name}) values ({value})",
             CancellationToken.None);
@@ -158,7 +155,7 @@ public class TestSchemas : TestBase
             ColumnReferences = [parent.Columns.First().Name],
             DeleteAction = DeleteAction.Cascade
         });
-        await _mssCmd.CreateTableAsync(tableDef, CancellationToken.None);
+        await _fixture.MssCmd.CreateTableAsync(tableDef, CancellationToken.None);
         await _fixture.MssRawCommand.ExecuteNonQueryAsync(
             $"insert into {st.GetFullName()}({mssCol.Name}, parentid) values ({values.childId}, {values.parentId})",
             CancellationToken.None);

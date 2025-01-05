@@ -8,6 +8,7 @@ public class DatabaseFixture : IAsyncLifetime
     private MsSqlContainer? _mssContainer;
     private PostgreSqlContainer? _pgContainer;
     private IMssRawCommand? _mssRawCommand;
+    private IMssCmd? _mssCmd;
     private IDbContext? _mssContext;
     private IPgContext? _pgContext;
     private IConfiguration? _testConfiguration;
@@ -39,6 +40,12 @@ public class DatabaseFixture : IAsyncLifetime
     {
         get => _mssRawCommand ?? throw new ArgumentNullException(nameof(MssRawCommand));
         set => _mssRawCommand = value;
+    }
+    
+    public IMssCmd MssCmd
+    {
+        get => _mssCmd ?? throw new ArgumentNullException(nameof(MssCmd));
+        set => _mssCmd = value;
     }
     
     public IPgContext PgContext
@@ -75,14 +82,18 @@ public class DatabaseFixture : IAsyncLifetime
         }
         _mssConnectionString = TestConfiguration.GetConnectionString(Constants.Config.MssConnectionString);
         _pgConnectionString = TestConfiguration.GetConnectionString(Constants.Config.PgConnectionString);
-        _mssRawCommand = new MssRawCommand(
-            MssContext,
-            new MssRawFactory());
         PgContext = new PgContext(new NullLoggerFactory(), TestConfiguration);
         var pgCmd = new PgCmd(
             new PgRawCommand(PgContext, new PgRawFactory()),
             new QueryBuilderFactory());
         MssContext = new MssContext(TestConfiguration);
+        _mssRawCommand = new MssRawCommand(
+            MssContext,
+            new MssRawFactory());
+        _mssCmd = new MssCmd(
+            _mssRawCommand,
+            new QueryBuilderFactory(),
+            new LoggerConfiguration().WriteTo.Console().CreateLogger());
         await pgCmd.EnsureSchemaAsync(PgTestSchemaName);
     }
 

@@ -4,10 +4,9 @@ namespace CrossRDBMS.Tests.CopyFromMssToPg;
 public class CopyDateTimes : CopyMssToPgBase
 {
     public CopyDateTimes(
-        IMssCmd mssCmd,
         DatabaseFixture fixture, 
         ITestOutputHelper output) 
-        : base(mssCmd, fixture, output)
+        : base(fixture, output)
     {
         PgArguments = ParamHelper.GetInPg(
             fixture.PgConnectionString,

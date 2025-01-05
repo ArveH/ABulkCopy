@@ -1,4 +1,5 @@
 ﻿using ABulkCopy.APostgres.DbRaw;
+using ABulkCopy.ASqlServer.DbRaw;
 
 namespace ABulkCopy.Cmd.Internal.Config;
 
@@ -9,6 +10,8 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton<IDbContext, MssContext>();
         services.AddSingleton<IMssSystemTables, MssSystemTables>();
+        services.AddSingleton<IMssRawCommand, MssRawCommand>();
+        services.AddSingleton<IMssRawFactory, MssRawFactory>();
         services.AddSingleton<IMssCmd, MssCmd>();
         services.AddSingleton<IMssTableSchema, MssTableSchema>();
         services.AddSingleton<IMssColumnFactory, MssColumnFactory>();

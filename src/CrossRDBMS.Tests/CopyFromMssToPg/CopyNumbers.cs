@@ -1,8 +1,8 @@
 namespace CrossRDBMS.Tests.CopyFromMssToPg;
 
 [Collection(nameof(DatabaseCollection))]
-public class CopyNumbers(IMssCmd mssCmd, DatabaseFixture fixture, ITestOutputHelper output) 
-    : CopyMssToPgBase(mssCmd, fixture, output)
+public class CopyNumbers(DatabaseFixture fixture, ITestOutputHelper output) 
+    : CopyMssToPgBase(fixture, output)
 {
     [Fact]
     public async Task CopyInt()
