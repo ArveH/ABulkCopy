@@ -1,4 +1,6 @@
-﻿namespace SqlServer.Tests;
+﻿using DotNet.Testcontainers.Builders;
+
+namespace SqlServer.Tests;
 
 public class DatabaseFixture : IAsyncLifetime
 {
@@ -34,7 +36,11 @@ public class DatabaseFixture : IAsyncLifetime
             "5a78c96d-6df9-4362-ba25-4afceae69c52");
         if (TestConfiguration.UseContainer())
         {
-            _mssContainer = new MsSqlBuilder().Build();
+            _mssContainer = new MsSqlBuilder()
+                .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
+                .WithPortBinding(1433, true)
+                .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(1433))
+                .Build();
             await _mssContainer.StartAsync();
             TestConfiguration = new ConfigHelper().GetConfiguration(
                     "5a78c96d-6df9-4362-ba25-4afceae69c52", 
