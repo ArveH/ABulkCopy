@@ -2,8 +2,8 @@
 
 public interface IDataFileReader
 {
-    void Open(string path);
-    public string? ReadColumn(string colName, EmptyStringFlag emptyString = EmptyStringFlag.Leave);
+    void Open(string path, InsertSettings insertSettings);
+    public string? ReadColumn(string colName);
     void ReadColumnSeparator(string colName);
     void ReadNewLine();
     public bool IsEndOfFile { get; }

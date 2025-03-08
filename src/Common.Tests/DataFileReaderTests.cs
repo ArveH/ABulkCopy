@@ -149,16 +149,16 @@ public class DataFileReaderTests : CommonTestBase
     {
         // Arrange
         _tableDefinition.Columns.Add(new PostgresVarChar(1, ColName, false, 100, "en_ci_as"));
-        var dataFileReader = Arrange($"{Constants.QuoteChar}{testValue}{Constants.QuoteChar},");
+        var dataFileReader = Arrange($"{Constants.QuoteChar}{testValue}{Constants.QuoteChar},", null, emptyStringFlag);
 
         // Act
-        var stringVal = dataFileReader.ReadColumn(ColName, emptyStringFlag);
+        var stringVal = dataFileReader.ReadColumn(ColName);
 
         // Assert
         stringVal.Should().Be(expectedValue);
     }
 
-    private IDataFileReader Arrange(string row1, string? row2 = null)
+    private IDataFileReader Arrange(string row1, string? row2 = null, EmptyStringFlag emptyStringFlag = EmptyStringFlag.Leave)
     {
         var rows = new List<string> { row1 };
         if (row2 != null)
@@ -170,7 +170,7 @@ public class DataFileReaderTests : CommonTestBase
         var path = Path.Combine(
             _fileHelper.DataFolder,
             $"dbo.{TestTableName}{Constants.DataSuffix}");
-        dataFileReader.Open(path);
+        dataFileReader.Open(path, new InsertSettings{EmptyStringFlag = emptyStringFlag});
         return dataFileReader;
     }
 }

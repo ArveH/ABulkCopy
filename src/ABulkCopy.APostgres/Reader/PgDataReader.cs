@@ -1,4 +1,6 @@
-﻿namespace ABulkCopy.APostgres.Reader;
+﻿using ABulkCopy.Common.Config;
+
+namespace ABulkCopy.APostgres.Reader;
 
 public class PgDataReader : IADataReader, IDisposable
 {
@@ -22,7 +24,7 @@ public class PgDataReader : IADataReader, IDisposable
     public async Task<long> ReadAsync(string folder,
         TableDefinition tableDefinition,
         CancellationToken ct,
-        EmptyStringFlag emptyStringFlag = EmptyStringFlag.Leave)
+        InsertSettings insertSettings)
     {
         _logger.Information("Reading data for table '{TableName}' from '{Path}'",
             tableDefinition.GetFullName(), folder);
@@ -36,7 +38,7 @@ public class PgDataReader : IADataReader, IDisposable
             folder, tableDefinition.Data.FileName);
         var rawFolder = Path.Combine(
             folder, tableDefinition.Data.FileName[..^5]); // Remove .data
-        _fileReader.Open(path);
+        _fileReader.Open(path, insertSettings);
         var counter = 0L;
         // TODO: Currently, it will not continue on error.
         var errors = 0L;
@@ -50,7 +52,6 @@ public class PgDataReader : IADataReader, IDisposable
                     writer, 
                     tableDefinition,
                     rawFolder,
-                    emptyStringFlag,
                     ct).ConfigureAwait(false);
                 counter++;
             }
@@ -82,14 +83,13 @@ public class PgDataReader : IADataReader, IDisposable
         NpgsqlBinaryImporter writer,
         TableDefinition tableDefinition,
         string rawFolder,
-        EmptyStringFlag emptyStringFlag, 
         CancellationToken ct)
     {
         await writer.StartRowAsync(ct).ConfigureAwait(false);
 
         foreach (var col in tableDefinition.Columns)
         {
-            var colValue = dataFileReader.ReadColumn(col.Name, emptyStringFlag);
+            var colValue = dataFileReader.ReadColumn(col.Name);
             if (colValue == null)
             {
                 await writer.WriteNullAsync(ct).ConfigureAwait(false);

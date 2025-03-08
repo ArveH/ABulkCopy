@@ -21,6 +21,17 @@ public class PgDataReaderStringTests : PgDataReaderTestBase
 
         colValue.Should().Be(testVal.PadRight(10, ' '));
     }
+    
+    [Fact]
+    public async Task TestVarChar_When_NullByteInMiddle()
+    {
+        // Arrange
+        var col = new PostgresVarChar(1, ColName, false, 10);
+        var colValue = await TestDataReader<string>(
+            GetName(), col, $"{Constants.QuoteChar}{"123\0456"}{Constants.QuoteChar}{Constants.ColumnSeparatorChar}");
+    
+        colValue.Should().Be("123456");
+    }
 
     [Fact]
     public async Task TestChar_When_Null()
@@ -146,7 +157,7 @@ public class PgDataReaderStringTests : PgDataReaderTestBase
         var cts = new CancellationTokenSource();
 
         // Act
-        await dataReader.ReadAsync(FileHelper.DataFolder, tableDefinition, cts.Token, EmptyStringFlag.Single);
+        await dataReader.ReadAsync(FileHelper.DataFolder, tableDefinition, cts.Token, new InsertSettings {EmptyStringFlag = EmptyStringFlag.Single});
 
         //Assert
         var colValue = await DbFixture.SelectScalar<string>(
