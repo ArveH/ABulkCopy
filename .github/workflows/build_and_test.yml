@@ -47,15 +47,19 @@ jobs:
 
     - name: Publish Windows
       if: github.event_name == 'workflow_dispatch'
-      run: dotnet publish ${{env.consoleProjFile}} -c Release -r win-x64 -o ./output/windows
+      run: dotnet publish ${{env.consoleProjFile}} -c Release -r win-x64 -o ./output/windows-x64
 
-    - name: Publish Linux
+    - name: Publish Linux Arm64
       if: github.event_name == 'workflow_dispatch'
-      run: dotnet publish ${{env.consoleProjFile}} -c Release -r linux-arm64 -o ./output/linux
+      run: dotnet publish ${{env.consoleProjFile}} -c Release -r linux-arm64 -o ./output/linux-arm64
+
+    - name: Publish Linux x64
+      if: github.event_name == 'workflow_dispatch'
+      run: dotnet publish ${{env.consoleProjFile}} -c Release -r linux-x64 -o ./output/linux-x64
 
     - name: Publish Mac
       if: github.event_name == 'workflow_dispatch'
-      run: dotnet publish ${{env.consoleProjFile}} -c Release -r osx-arm64 -o ./output/mac
+      run: dotnet publish ${{env.consoleProjFile}} -c Release -r osx-arm64 --self-contained true -o ./output/mac-arm64
 
     - name: Upload program artifact
       if: github.event_name == 'workflow_dispatch'

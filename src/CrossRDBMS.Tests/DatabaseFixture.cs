@@ -1,4 +1,6 @@
-﻿using ABulkCopy.ASqlServer.DbRaw;
+using DotNet.Testcontainers.Builders;
+using Microsoft.Extensions.Logging.Abstractions;
+using ABulkCopy.ASqlServer.DbRaw;
 using QueryBuilderFactory = ABulkCopy.ASqlServer.QueryBuilderFactory;
 
 namespace CrossRDBMS.Tests;
@@ -61,7 +63,12 @@ public class DatabaseFixture : IAsyncLifetime
         if (TestConfiguration.UseContainer())
         {
             _mssContainer =
-                new MsSqlBuilder().Build();
+                new MsSqlBuilder()
+                    .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
+                    .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
+                    .WithPortBinding(1433, true)
+                    .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(1433))
+                    .Build();
             _pgContainer =
                 new PostgreSqlBuilder()
                     .WithPortBinding(54770, 5432)

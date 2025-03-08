@@ -6,6 +6,6 @@ public interface IADataReader
         string folder, 
         TableDefinition tableDefinition,
         CancellationToken ct,
-        EmptyStringFlag emptyStringFlag = EmptyStringFlag.Leave);
+        InsertSettings insertSettings);
     void Dispose();
 }
