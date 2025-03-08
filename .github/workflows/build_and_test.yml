@@ -59,7 +59,7 @@ jobs:
 
     - name: Publish Mac
       if: github.event_name == 'workflow_dispatch'
-      run: dotnet publish ${{env.consoleProjFile}} -c Release -r osx-arm64 -o ./output/mac-arm64
+      run: dotnet publish ${{env.consoleProjFile}} -c Release -r osx-arm64 --self-contained true -o ./output/mac-arm64
 
     - name: Upload program artifact
       if: github.event_name == 'workflow_dispatch'
