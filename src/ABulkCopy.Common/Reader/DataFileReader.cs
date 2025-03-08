@@ -12,6 +12,12 @@ public class DataFileReader : IDataFileReader, IDisposable
     }
 
     private readonly StringBuilder _columnHolder = new(10_485_760);
+    
+    private InsertSettings? _insertSettings;
+    private InsertSettings InsertSettings
+    {
+        get => _insertSettings ?? throw new NotInitializedException("You must call Open() before accessing InsertSettings");
+    }
 
     public DataFileReader(
         IFileSystem fileSystem,
@@ -25,8 +31,9 @@ public class DataFileReader : IDataFileReader, IDisposable
     public long RowCounter { get; private set; }
     public int CurrentChar { get; private set; }
 
-    public void Open(string path)
+    public void Open(string path, InsertSettings insertSettings)
     {
+        _insertSettings = insertSettings with {};
         var fileStream = _fileSystem.FileStream.New(path, FileMode.Open);
         InternalStream = new StreamReader(fileStream, new UTF8Encoding(false));
         ReadChar();
@@ -38,7 +45,7 @@ public class DataFileReader : IDataFileReader, IDisposable
         return _fileSystem.File.ReadAllBytes(path);
     }
 
-    public string? ReadColumn(string colName, EmptyStringFlag emptyString = EmptyStringFlag.Leave)
+    public string? ReadColumn(string colName)
     {
         _logger.Verbose("Reading value for column '{ColumnName}' row {RowCount}",
             RowCounter, colName);
@@ -46,7 +53,7 @@ public class DataFileReader : IDataFileReader, IDisposable
         if (CurrentChar == Constants.QuoteChar)
         {
             ReadQuotedValue(colName);
-            if (emptyString == EmptyStringFlag.Leave)
+            if (InsertSettings.EmptyStringFlag == EmptyStringFlag.Leave)
             {
                 return _columnHolder.ToString();
             }
@@ -56,7 +63,7 @@ public class DataFileReader : IDataFileReader, IDisposable
                 return _columnHolder.ToString();
             }
 
-            switch (emptyString)
+            switch (InsertSettings.EmptyStringFlag)
             {
                 case EmptyStringFlag.ForceSingle:
                     return " ";
@@ -112,6 +119,13 @@ public class DataFileReader : IDataFileReader, IDisposable
 
     private void AddChar()
     {
+        if (CurrentChar == 0 && InsertSettings.SkipZeroByteInString)
+        {
+            _logger.Information("Zero byte found in column '{ColName}' in line {RowCounter}. " +
+                            "Skipping it.",
+                _columnHolder, RowCounter);
+            return;
+        }
         _columnHolder.Append((char)CurrentChar);
     }
 

@@ -47,7 +47,7 @@ public class PgDataReaderTestBase : PgTestBase
             new DataFileReader(FileHelper.FileSystem, TestLogger), 
             TestLogger);
         var cts = new CancellationTokenSource();
-        await dataReader.ReadAsync(FileHelper.DataFolder, tableDefinition, cts.Token);
+        await dataReader.ReadAsync(FileHelper.DataFolder, tableDefinition, cts.Token, new InsertSettings());
     }
 
     protected async Task<TableDefinition> CreateTableAndDataFile(

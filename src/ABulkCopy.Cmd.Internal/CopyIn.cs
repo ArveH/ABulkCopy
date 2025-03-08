@@ -70,6 +70,12 @@ public class CopyIn : ICopyIn
 
         var emptyStringFlag = _config.ToEnum(Constants.Config.EmptyString);
         var skipCreate = Convert.ToBoolean(_config[Constants.Config.SkipCreate]);
+        var insertSettings = new InsertSettings
+        {
+            EmptyStringFlag = emptyStringFlag,
+            SkipCreate = skipCreate
+            // SkipZeroByteInString is always true and not configurable yet 
+        };
 
         await Parallel.ForEachAsync(
             tableSequencer.GetTablesReadyForCreationAsync(),
@@ -80,8 +86,7 @@ public class CopyIn : ICopyIn
                 if (!await CreateAndInsertAsync(
                             folder,
                             node.TableDefinition,
-                            emptyStringFlag,
-                            skipCreate,
+                            insertSettings,
                             ct)
                         .ConfigureAwait(false))
                 {
@@ -115,11 +120,10 @@ public class CopyIn : ICopyIn
     private async Task<bool> CreateAndInsertAsync(
         string folder,
         TableDefinition tableDefinition,
-        EmptyStringFlag emptyStringFlag,
-        bool skipCreate,
+        InsertSettings insertSettings,
         CancellationToken ct)
     {
-        if (!skipCreate)
+        if (!insertSettings.SkipCreate)
         {
             if (!await RecreateTableAsync(tableDefinition, ct)
                     .ConfigureAwait(false))
@@ -128,7 +132,7 @@ public class CopyIn : ICopyIn
             }
         }
 
-        if (!await InsertDataAsync(folder, tableDefinition, emptyStringFlag, ct)
+        if (!await InsertDataAsync(folder, tableDefinition, insertSettings, ct)
                 .ConfigureAwait(false))
         {
             return false;
@@ -138,7 +142,7 @@ public class CopyIn : ICopyIn
             .ConfigureAwait(false);
 
         var isIndexesOk = true;
-        if (!skipCreate)
+        if (!insertSettings.SkipCreate)
         {
             isIndexesOk = await CreateIndexesAsync(tableDefinition, ct)
                 .ConfigureAwait(false);
@@ -170,14 +174,14 @@ public class CopyIn : ICopyIn
     private async Task<bool> InsertDataAsync(
         string folder,
         TableDefinition tableDefinition,
-        EmptyStringFlag emptyStringFlag,
+        InsertSettings insertSettings,
         CancellationToken ct)
     {
         IADataReader? dataReader = null;
         try
         {
             dataReader = _aDataReaderFactory.Get(tableDefinition.Rdbms);
-            var rows = await dataReader.ReadAsync(folder, tableDefinition, ct, emptyStringFlag).ConfigureAwait(false);
+            var rows = await dataReader.ReadAsync(folder, tableDefinition, ct, insertSettings).ConfigureAwait(false);
             Console.WriteLine($"Read {rows} {"row".Plural(rows)} for table '{tableDefinition.GetFullName()}'");
             _logger.Information($"Read {{Rows}} {"row".Plural(rows)} for table '{{TableName}}'",
                 rows, tableDefinition.GetFullName());
