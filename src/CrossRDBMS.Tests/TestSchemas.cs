@@ -34,7 +34,8 @@ public class TestSchemas : TestBase
                     "        \"\": \"public\",\r\n" +
                     "        \"dbo\": \"public\",\r\n" +
                     "        \"my_mss_schema\": \"my_pg_schema\"\r\n" +
-                    "    },\r\n    \"Collations\": {\r\n" +
+                    "    },\r\n" +
+                    "    \"Collations\": {\r\n" +
                     "        \"SQL_Latin1_General_CP1_CI_AI\": \"en_ci_ai\",\r\n" +
                     "        \"SQL_Latin1_General_CP1_CI_AS\": \"en_ci_as\"\r\n" +
                     "    }\r\n" +

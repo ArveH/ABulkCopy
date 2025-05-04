@@ -7,12 +7,14 @@ namespace CrossRDBMS.Tests;
 
 public class DatabaseFixture : IAsyncLifetime
 {
-    private MsSqlContainer? _mssContainer;
     private PostgreSqlContainer? _pgContainer;
+    private IPgContext? _pgContext;
+    
+    private MsSqlContainer? _mssContainer;
     private IMssRawCommand? _mssRawCommand;
     private IMssCmd? _mssCmd;
     private IDbContext? _mssContext;
-    private IPgContext? _pgContext;
+
     private IConfiguration? _testConfiguration;
     private string? _pgConnectionString;
     private string? _mssConnectionString;
@@ -87,12 +89,14 @@ public class DatabaseFixture : IAsyncLifetime
                     }
                 });
         }
-        _mssConnectionString = TestConfiguration.GetConnectionString(Constants.Config.MssConnectionString);
         _pgConnectionString = TestConfiguration.GetConnectionString(Constants.Config.PgConnectionString);
         PgContext = new PgContext(new NullLoggerFactory(), TestConfiguration);
         var pgCmd = new PgCmd(
             new PgRawCommand(PgContext, new PgRawFactory()),
             new QueryBuilderFactory());
+        await pgCmd.EnsureSchemaAsync(PgTestSchemaName);
+
+        _mssConnectionString = TestConfiguration.GetConnectionString(Constants.Config.MssConnectionString);
         MssContext = new MssContext(TestConfiguration);
         _mssRawCommand = new MssRawCommand(
             MssContext,
@@ -101,7 +105,7 @@ public class DatabaseFixture : IAsyncLifetime
             _mssRawCommand,
             new QueryBuilderFactory(),
             new LoggerConfiguration().WriteTo.Console().CreateLogger());
-        await pgCmd.EnsureSchemaAsync(PgTestSchemaName);
+        await _mssCmd.EnsureSchemaAsync(MssTestSchemaName);
     }
 
     public async Task DisposeAsync()
