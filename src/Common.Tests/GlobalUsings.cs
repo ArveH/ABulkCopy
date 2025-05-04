@@ -7,6 +7,7 @@ global using ABulkCopy.Common.Extensions;
 global using ABulkCopy.Common.Graph;
 global using ABulkCopy.Common.Identifier;
 global using ABulkCopy.Common.Reader;
+global using ABulkCopy.Common.Scripts;
 global using ABulkCopy.Common.Serialization;
 global using ABulkCopy.Common.TestData;
 global using ABulkCopy.Common.Types;
