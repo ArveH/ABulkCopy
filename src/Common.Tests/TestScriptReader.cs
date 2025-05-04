@@ -1,3 +1,5 @@
+using ABulkCopy.Common.Exceptions;
+
 namespace Common.Tests;
 
 public class TestScriptReader
@@ -27,5 +29,31 @@ public class TestScriptReader
         var sqlStatements = await scriptsReader.ReadAsync(TestFileName).ToListAsync();
 
         sqlStatements.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task TestReadSingleStatement_When_MissingEndOfStatement_Then_Ok()
+    {
+        var fileHelper = new FileHelper();
+        var fileData = new MockFileData("first statement", Encoding.UTF8);
+        fileHelper.FileSystem.AddFile("TestScriptReader.sql", fileData);
+        var scriptsReader = new ScriptReader(fileHelper.FileSystem);
+        
+        var sqlStatements = await scriptsReader.ReadAsync(TestFileName).ToListAsync();
+
+        sqlStatements.Count.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task TestReadSeveralLines_When_MissingEndOfStatement_Then_SingleStatement()
+    {
+        var fileHelper = new FileHelper();
+        var fileData = new MockFileData("statement1;" + Environment.NewLine + Environment.NewLine + "statement2;" + Environment.NewLine, Encoding.UTF8);
+        fileHelper.FileSystem.AddFile("TestScriptReader.sql", fileData);
+        var scriptsReader = new ScriptReader(fileHelper.FileSystem);
+        
+        var sqlStatements = await scriptsReader.ReadAsync(TestFileName).ToListAsync();
+
+        sqlStatements.Count.Should().Be(1);
     }
 }
