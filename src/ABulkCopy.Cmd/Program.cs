@@ -28,6 +28,18 @@ public class Program
             builder.ConfigureServices(cmdArguments.Rdbms, configuration);
             var host = builder.Build();
 
+            if (!string.IsNullOrWhiteSpace(cmdArguments.PreScript))
+            {
+                if (!File.Exists(cmdArguments.PreScript))
+                {
+                    Log.Error("PreScript file '{PreScript}' does not exist", cmdArguments.PreScript);
+                    Console.WriteLine($"PreScript file '{cmdArguments.PreScript}' does not exist");
+                    return;
+                }
+                Log.Warning("Running PreScript is not implemented yet.");
+                Console.WriteLine("Running PreScript is not implemented yet.");
+            }
+
             if (cmdArguments.Direction == CopyDirection.In)
             {
                 var copyIn = host.Services.GetRequiredService<ICopyIn>();
