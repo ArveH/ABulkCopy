@@ -1,17 +1,17 @@
 namespace ABulkCopy.Common.Scripts;
 
-public class ScriptsReader
+public class ScriptReader
 {
     private readonly IFileSystem _fileSystem;
 
-    public ScriptsReader(IFileSystem fileSystem)
+    public ScriptReader(IFileSystem fileSystem)
     {
         _fileSystem = fileSystem;
     }
 
-    public async IAsyncEnumerable<string> GetScriptsAsync(string scriptFile)
+    public async IAsyncEnumerable<string> ReadAsync(string scriptFile)
     {
-        if (!File.Exists(scriptFile))
+        if (!_fileSystem.File.Exists(scriptFile))
         {
             throw new FileNotFoundException($"File {scriptFile} not found");
         }
