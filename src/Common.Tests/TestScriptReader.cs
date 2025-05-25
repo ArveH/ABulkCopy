@@ -14,7 +14,7 @@ public class TestScriptReader
     [Fact]
     public async Task TestRead_When_ScriptFileNotFound()
     {
-        var act = async () => await _scriptsReader.ReadAsync(TestFileName).ToListAsync();
+        var act = async () => await _scriptsReader.ReadAsync(TestFileName, CancellationToken.None).ToListAsync();
         
         await act.Should().ThrowAsync<FileNotFoundException>()
             .WithMessage("File TestScriptReader.sql not found");
@@ -30,7 +30,7 @@ public class TestScriptReader
         var fileData = new MockFileData(fileContent, Encoding.UTF8);
         _fileHelper.FileSystem.AddFile(TestFileName, fileData);
         
-        var sqlStatements = await _scriptsReader.ReadAsync(TestFileName).ToListAsync();
+        var sqlStatements = await _scriptsReader.ReadAsync(TestFileName, CancellationToken.None).ToListAsync();
 
         sqlStatements.Count.Should().Be(expectedNoOfStatements);
     }

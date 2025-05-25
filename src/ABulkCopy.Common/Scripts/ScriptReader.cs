@@ -1,6 +1,8 @@
+using System.Runtime.CompilerServices;
+
 namespace ABulkCopy.Common.Scripts;
 
-public class ScriptReader
+public class ScriptReader : IScriptReader
 {
     private readonly IFileSystem _fileSystem;
 
@@ -9,7 +11,7 @@ public class ScriptReader
         _fileSystem = fileSystem;
     }
 
-    public async IAsyncEnumerable<string> ReadAsync(string scriptFile)
+    public async IAsyncEnumerable<string> ReadAsync(string scriptFile, [EnumeratorCancellation] CancellationToken ct)
     {
         if (!_fileSystem.File.Exists(scriptFile))
         {
@@ -21,6 +23,10 @@ public class ScriptReader
         var file = _fileSystem.File.OpenText(scriptFile);
         while (!file.EndOfStream)
         {
+            if (ct.IsCancellationRequested)
+            {
+                yield break;
+            }
             var stmt = await ReadStatementAsync(file, sb);
             if (string.IsNullOrEmpty(stmt))
             {
