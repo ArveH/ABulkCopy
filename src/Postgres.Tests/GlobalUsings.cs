@@ -1,5 +1,6 @@
 global using ABulkCopy.APostgres;
 global using ABulkCopy.APostgres.Column.ColumnTypes;
+global using ABulkCopy.APostgres.DbRaw;
 global using ABulkCopy.APostgres.Reader;
 global using ABulkCopy.Common;
 global using ABulkCopy.Common.Config;
@@ -23,6 +24,7 @@ global using System.Diagnostics;
 global using System.IO.Abstractions.TestingHelpers;
 global using System.Text;
 global using ABulkCopy.Common.Extensions;
+global using ABulkCopy.Common.Scripts;
 global using Testcontainers.PostgreSql;
 global using Testing.Shared;
 global using Xunit;

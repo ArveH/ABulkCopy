@@ -1,6 +1,4 @@
-﻿using ABulkCopy.APostgres.DbRaw;
-
-namespace Postgres.Tests;
+﻿namespace Postgres.Tests;
 
 public class PgTestBase
 {

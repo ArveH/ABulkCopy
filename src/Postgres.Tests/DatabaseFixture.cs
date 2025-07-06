@@ -1,5 +1,4 @@
-﻿using ABulkCopy.APostgres.DbRaw;
-using Microsoft.Extensions.Logging.Abstractions;
+﻿using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Postgres.Tests;
 
