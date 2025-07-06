@@ -9,9 +9,11 @@ public class TestScriptRunner
         var mockFileSystem = new MockFileSystem();
         var scriptReader = new ScriptReader(mockFileSystem);
         var mockRawCommand = new Mock<IDbRawCommand>();
+        var mockLogger = new Mock<ILogger>();
 
         // Act
-        var runner = new ScriptRunner(scriptReader, mockRawCommand.Object);
+        var runner = new ScriptRunner(
+            scriptReader, mockRawCommand.Object, mockLogger.Object);
 
         // Assert
         await Assert.ThrowsAsync<FileNotFoundException>(
@@ -23,11 +25,13 @@ public class TestScriptRunner
     {
         // Arrange
         var mockScriptReader = new Mock<IScriptReader>();
+        var mockLogger = new Mock<ILogger>();
         mockScriptReader
             .Setup(r => r.ReadAsync(It.IsAny<string>(), CancellationToken.None))
             .Returns(GetMockedItems());
         var mockRawCommand = new Mock<IDbRawCommand>();
-        var runner = new ScriptRunner(mockScriptReader.Object, mockRawCommand.Object);
+        var runner = new ScriptRunner(
+            mockScriptReader.Object, mockRawCommand.Object, mockLogger.Object);
         
         // Act
         await runner.ExecuteAsync("script.sql", CancellationToken.None);
