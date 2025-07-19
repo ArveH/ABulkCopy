@@ -21,6 +21,7 @@ global using System.Data;
 global using System.Diagnostics;
 global using System.IO.Abstractions.TestingHelpers;
 global using ABulkCopy.ASqlServer.DbRaw;
+global using ABulkCopy.Common.Scripts;
 global using Testcontainers.MsSql;
 global using Testing.Shared.SqlServer;
 global using Xunit.Abstractions;
