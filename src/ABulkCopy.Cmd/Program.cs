@@ -60,6 +60,20 @@ public class Program
                 await copyOut.RunAsync(cts.Token);
             }
 
+            if (!string.IsNullOrWhiteSpace(cmdArguments.PostScript))
+            {
+                if (!File.Exists(cmdArguments.PostScript))
+                {
+                    Log.Error("PostScript file '{PreScript}' does not exist", cmdArguments.PostScript);
+                    Console.WriteLine($"PostScript file '{cmdArguments.PostScript}' does not exist");
+                    return;
+                }
+                var scriptRunner = host.Services.GetRequiredService<IScriptRunner>();
+                var (succeededCommands, failedCommands) = await scriptRunner.ExecuteAsync(cmdArguments.PostScript, cts.Token);
+                Log.Information("Executed post-script: {PostScript}. Succeeded: {Succeeded}, Failed: {Failed}",
+                    cmdArguments.PostScript, succeededCommands, failedCommands);
+            }
+            
             Log.Information("ABulkCopy.Cmd finished.");
             Console.WriteLine("ABulkCopy.Cmd finished.");
         }

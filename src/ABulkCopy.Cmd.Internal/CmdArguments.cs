@@ -32,8 +32,11 @@ public class CmdArguments
     [Option('s', "search-filter", Required = false, HelpText = "A string to filter table names or file names. Note that the syntax of the SearchFilter is different depending on the context. For copy in from a file system, use a RegEx in .NET format. E.g. \"\\b(clients|scopes)\\b\" will match \"clients.schema\" and \"scopes.schema\", but not \"someclients.schema\" nor \"clients2.schema\". For copy out from SQL Server, the SearchFilter is the rhs of a LIKE clause. E.g. \"a[sa][ya][sg]%\" to get all tables that starts with 'a' followed by \"sys\" or \"aag\" (but also \"asas\", \"aayg\", and other combinations). If you don't use a search-filter, all tables are copied.")]
     public string? SearchFilter { get; set; }
 
-    [Option("pre-script", Required = false, HelpText = "Path to a script file to be executed before the copy. This is useful for creating collations or other database objects that are needed before the copy. The script is executed in the context of the database specified in the connection string. This parameter is only used when direction = In")]
+    [Option("pre-script", Required = false, HelpText = "Path to a script file to be executed before the copy. This is useful for creating collations or other database objects that are needed before the copy. The script is executed in the context of the database specified in the connection string.")]
     public string? PreScript { get; set; }
+    
+    [Option("post-script", Required = false, HelpText = "Path to a script file to be executed after the copy. This is useful for fixing the __EFMigrationsHistory table after copying from a database with different migrations. The script is executed in the context of the database specified in the connection string.")]
+    public string? PostScript { get; set; }
     
     [Option("skip-create", Required = false, HelpText = "This is an experimental parameter. It assumes that the tables already exists in the database, and will skip the \"create table\" step. The thought is that tables are created using Entity Framework migrations, then ABulkCopy is used to insert data. NOTE: Schema files are still needed to create the dependency graph and the copy statements, and they MUST correspond to the tables already in the database. This parameter is only used when direction = In")]
     public bool SkipCreate { get; set; }
