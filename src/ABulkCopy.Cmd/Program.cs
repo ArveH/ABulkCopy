@@ -36,8 +36,10 @@ public class Program
                     Console.WriteLine($"PreScript file '{cmdArguments.PreScript}' does not exist");
                     return;
                 }
-                Log.Warning("Running PreScript is not implemented yet.");
-                Console.WriteLine("Running PreScript is not implemented yet.");
+                var scriptRunner = host.Services.GetRequiredService<IScriptRunner>();
+                var (succeededCommands, failedCommands) = await scriptRunner.ExecuteAsync(cmdArguments.PreScript, cts.Token);
+                Log.Information("Executed pre-script: {PreScript}. Succeeded: {Succeeded}, Failed: {Failed}",
+                    cmdArguments.PreScript, succeededCommands, failedCommands);
             }
 
             if (cmdArguments.Direction == CopyDirection.In)

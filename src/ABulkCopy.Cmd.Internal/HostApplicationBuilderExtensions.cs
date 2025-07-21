@@ -1,5 +1,6 @@
 ﻿using ABulkCopy.Cmd.Internal.Config;
 using ABulkCopy.Cmd.Internal.Factories;
+using ABulkCopy.Common.Scripts;
 using Microsoft.Extensions.Logging;
 
 namespace ABulkCopy.Cmd.Internal;
@@ -43,6 +44,8 @@ public static class HostApplicationBuilderExtensions
         services.AddTransient<IVisitorFactory, VisitorFactory>();
         services.AddSingleton<INodeFactory, NodeFactory>();
         services.AddSingleton<IIdentifier, Identifier>();
+        services.AddSingleton<IScriptReader, ScriptReader>();
+        services.AddSingleton<IScriptRunner, ScriptRunner>();
         if (rdbms == Rdbms.Mss) services.AddMssServices();
         if (rdbms == Rdbms.Pg) services.AddPgServices();
     }

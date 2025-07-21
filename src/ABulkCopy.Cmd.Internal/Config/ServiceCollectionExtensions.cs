@@ -12,6 +12,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IMssSystemTables, MssSystemTables>();
         services.AddSingleton<IMssRawCommand, MssRawCommand>();
         services.AddSingleton<IMssRawFactory, MssRawFactory>();
+        services.AddSingleton<IDbRawFactory, MssRawFactory>();
         services.AddSingleton<IMssCmd, MssCmd>();
         services.AddSingleton<IMssTableSchema, MssTableSchema>();
         services.AddSingleton<IMssColumnFactory, MssColumnFactory>();
@@ -29,6 +30,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IPgCmd, PgCmd>();
         services.AddSingleton<IPgRawFactory, PgRawFactory>();
         services.AddSingleton<IPgRawCommand, PgRawCommand>();
+        services.AddSingleton<IDbRawCommand, PgRawCommand>();
         services.AddSingleton<ITypeConverter, PgTypeMapper>();
         services.AddSingleton<IPgColumnFactory, PgColumnFactory>();
         services.AddSingleton<IPgSystemTables, PgSystemTables>();

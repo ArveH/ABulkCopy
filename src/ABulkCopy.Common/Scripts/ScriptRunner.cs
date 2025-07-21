@@ -1,6 +1,6 @@
 namespace ABulkCopy.Common.Scripts;
 
-public class ScriptRunner
+public class ScriptRunner : IScriptRunner
 {
     private readonly IScriptReader _scriptReader;
     private readonly IDbRawCommand _rawCommand;
