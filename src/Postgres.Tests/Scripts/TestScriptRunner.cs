@@ -1,9 +1,15 @@
 namespace Postgres.Tests.Scripts;
 
 [Collection(nameof(DatabaseCollection))]
-public class TestScriptRunner(DatabaseFixture dbFixture, ITestOutputHelper output) 
-    : PgTestBase(dbFixture, output)
+public class TestScriptRunner : PgTestBase
 {
+    private readonly DatabaseFixture _dbFixture;
+
+    public TestScriptRunner(DatabaseFixture dbFixture, ITestOutputHelper output) : base(dbFixture, output)
+    {
+        _dbFixture = dbFixture;
+    }
+
     [Fact]
     public async Task TestRunScript_When_LegalSql()
     {
@@ -14,7 +20,7 @@ public class TestScriptRunner(DatabaseFixture dbFixture, ITestOutputHelper outpu
         mockFileSystem.AddFile(Path.Combine(".", fileName), fileData);
         var scriptReader = new ScriptReader(mockFileSystem);
         var runner = new ScriptRunner(
-            scriptReader, dbFixture.PgRawCommand, TestLogger);
+            scriptReader, _dbFixture.PgRawCommand, TestLogger);
 
         // Act
         var (succeedCounter, errorCounter) = await runner.ExecuteAsync(fileName, CancellationToken.None);
@@ -34,7 +40,7 @@ public class TestScriptRunner(DatabaseFixture dbFixture, ITestOutputHelper outpu
         mockFileSystem.AddFile(Path.Combine(".", fileName), fileData);
         var scriptReader = new ScriptReader(mockFileSystem);
         var runner = new ScriptRunner(
-            scriptReader, dbFixture.PgRawCommand, TestLogger);
+            scriptReader, _dbFixture.PgRawCommand, TestLogger);
 
         // Act
         var (succeedCounter, errorCounter) = await runner.ExecuteAsync(fileName, CancellationToken.None);
