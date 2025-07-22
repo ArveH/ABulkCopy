@@ -1,16 +1,17 @@
 ﻿namespace ABulkCopy.ASqlServer;
 
-public class MssSystemTables : MssCommandBase, IMssSystemTables
+public class MssSystemTables : IMssSystemTables
 {
+    private readonly IMssRawCommand _rawCommand;
     private readonly IMssColumnFactory _columnFactory;
     private readonly ILogger _logger;
 
     public MssSystemTables(
-        IDbContext dbContext,
+        IMssRawCommand rawCommand,
         IMssColumnFactory columnFactory,
         ILogger logger)
-        : base(dbContext)
     {
+        _rawCommand = rawCommand;
         _columnFactory = columnFactory;
         _logger = logger.ForContext<MssSystemTables>();
     }
@@ -61,7 +62,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         }
 
         var fullNames = new List<(string, string)>();
-        await ExecuteReaderAsync(command, reader =>
+        await _rawCommand.ExecuteReaderAsync(command, reader =>
         {
             fullNames.Add((reader.GetString(0), reader.GetString(1)));
         }, ct).ConfigureAwait(false);
@@ -94,7 +95,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         command.Parameters.AddWithValue("@TableName", tableName);
 
         var tableHeaders = new List<TableHeader>();
-        await ExecuteReaderAsync(command, reader =>
+        await _rawCommand.ExecuteReaderAsync(command, reader =>
         {
             Identity? identity = null;
             if (!reader.IsDBNull(3))
@@ -167,7 +168,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         command.Parameters.AddWithValue("@TableName", $"{tableHeader.Schema}.{tableHeader.Name}");
 
         var columnDefinitions = new List<IColumn>();
-        await ExecuteReaderAsync(command, reader =>
+        await _rawCommand.ExecuteReaderAsync(command, reader =>
         {
             var columnDef = _columnFactory.Create(
                 reader.GetInt32(0),
@@ -197,7 +198,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
                 {
                     Name = reader.GetString(9),
                     Definition = reader.GetString(10),
-                    IsSystemNamed = reader.IsDBNull(11) ? false : reader.GetBoolean(11)
+                    IsSystemNamed = !reader.IsDBNull(11) && reader.GetBoolean(11)
                 };
             }
 
@@ -229,7 +230,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         command.Parameters.AddWithValue("@TableId", tableHeader.Id);
 
         PrimaryKey? pk = null;
-        await ExecuteReaderAsync(command, reader =>
+        await _rawCommand.ExecuteReaderAsync(command, reader =>
         {
             pk ??= new PrimaryKey { Name = reader.GetString(0) };
 
@@ -266,7 +267,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         command.Parameters.AddWithValue("@TableId", tableHeader.Id);
 
         var indexes = new List<IndexDefinition>();
-        await ExecuteReaderAsync(command, async reader =>
+        await _rawCommand.ExecuteReaderAsync(command, async reader =>
         {
             try
             {
@@ -320,7 +321,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         command.Parameters.AddWithValue("@TableId", tableHeader.Id);
 
         var foreignKeys = new List<ForeignKey>();
-        await ExecuteReaderAsync(command, async reader =>
+        await _rawCommand.ExecuteReaderAsync(command, async reader =>
         {
             var fk = new ForeignKey
             {
@@ -352,7 +353,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
                            "ORDER BY fc.constraint_column_id");
         command.Parameters.AddWithValue("@ConstraintId", foreignKey.ConstraintId);
 
-        await ExecuteReaderAsync(command, reader =>
+        await _rawCommand.ExecuteReaderAsync(command, reader =>
         {
             foreignKey.ColumnNames.Add(reader.GetString(0));
             foreignKey.ColumnReferences.Add(reader.GetString(1));
@@ -379,7 +380,7 @@ public class MssSystemTables : MssCommandBase, IMssSystemTables
         command.Parameters.AddWithValue("@TableName", $"{st.schemaName}.{st.tableName}");
 
         var columns = new List<IndexColumn>();
-        await ExecuteReaderAsync(command, reader =>
+        await _rawCommand.ExecuteReaderAsync(command, reader =>
         {
             var column = new IndexColumn
             {

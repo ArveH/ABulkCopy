@@ -190,7 +190,7 @@ public class PgCmdTests(
     public async Task TestCreateTable_When_ForeignKeyFromDifferentSchema()
     {
         // Arrange
-        SchemaTableTuple parent = (PgDbHelper.TestSchemaName, GetName() + "_parent");
+        SchemaTableTuple parent = (DatabaseFixture.TestSchemaName, GetName() + "_parent");
         SchemaTableTuple child = ("public", GetName() + "_child");
         await DbFixture.DropTable(child);
         await DbFixture.DropTable(parent);
@@ -301,30 +301,31 @@ public class PgCmdTests(
                 ("col2", false),
             });
         var pgCmd = GetPgCmd();
+        var dbRawCommand = GetRawCommand();
         var cts = new CancellationTokenSource();
         await pgCmd.CreateTableAsync(parent1TableDefinition, cts.Token);
-        await pgCmd.ExecuteNonQueryAsync($"insert into \"{parent.tableName}\" (\"Parent1Id\", \"col1\", \"col2\") values (1, 1, 1)", cts.Token);
-        await pgCmd.ExecuteNonQueryAsync($"insert into \"{parent.tableName}\" (\"Parent1Id\", \"col1\", \"col2\") values (1, 2, 1)", cts.Token);
+        await dbRawCommand.ExecuteNonQueryAsync($"insert into \"{parent.tableName}\" (\"Parent1Id\", \"col1\", \"col2\") values (1, 1, 1)", cts.Token);
+        await dbRawCommand.ExecuteNonQueryAsync($"insert into \"{parent.tableName}\" (\"Parent1Id\", \"col1\", \"col2\") values (1, 2, 1)", cts.Token);
         var childTableDefinition = GetChildTableDefinition(
             child,
             new List<(SchemaTableTuple, List<string>)>
             {
-                (parent, new() { "Parent1Id", "col1" })
+                (parent, ["Parent1Id", "col1"])
             });
         childTableDefinition.ForeignKeys.First().DeleteAction = DeleteAction.Cascade;
         await pgCmd.CreateTableAsync(childTableDefinition, cts.Token);
-        await pgCmd.ExecuteNonQueryAsync($"insert into \"{child.tableName}\" (\"Id\", \"Parent1Id\", \"col1\") values (10, 1, 1)", cts.Token);
-        await pgCmd.ExecuteNonQueryAsync($"insert into \"{child.tableName}\" (\"Id\", \"Parent1Id\", \"col1\") values (11, 1, 2)", cts.Token);
-        var beforeCount = (long)(await pgCmd.ExecuteScalarAsync($"select count(*) from \"{child.tableName}\"", cts.Token) ?? 0);
+        await dbRawCommand.ExecuteNonQueryAsync($"insert into \"{child.tableName}\" (\"Id\", \"Parent1Id\", \"col1\") values (10, 1, 1)", cts.Token);
+        await dbRawCommand.ExecuteNonQueryAsync($"insert into \"{child.tableName}\" (\"Id\", \"Parent1Id\", \"col1\") values (11, 1, 2)", cts.Token);
+        var beforeCount = (long)(await dbRawCommand.ExecuteScalarAsync($"select count(*) from \"{child.tableName}\"", cts.Token) ?? 0);
         beforeCount.Should().Be(2, "because child table has two rows before deleting from parent table");
 
         try
         {
             // Act
-            await pgCmd.ExecuteNonQueryAsync($"delete from \"{parent.tableName}\" where \"col1\" = 1", cts.Token);
+            await dbRawCommand.ExecuteNonQueryAsync($"delete from \"{parent.tableName}\" where \"col1\" = 1", cts.Token);
 
             // Assert
-            var afterCount = (long)(await pgCmd.ExecuteScalarAsync($"select count(*) from \"{child.tableName}\"", cts.Token) ?? 0);
+            var afterCount = (long)(await dbRawCommand.ExecuteScalarAsync($"select count(*) from \"{child.tableName}\"", cts.Token) ?? 0);
             afterCount.Should().Be(1, "because 1 row from child table should be delete when deleting it's foreign key");
         }
         finally

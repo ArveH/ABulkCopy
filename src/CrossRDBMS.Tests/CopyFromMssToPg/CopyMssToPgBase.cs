@@ -10,7 +10,9 @@ public class CopyMssToPgBase : TestBase
 
     private IIdentifier? _identifier;
 
-    public CopyMssToPgBase(DatabaseFixture fixture, ITestOutputHelper output)
+    public CopyMssToPgBase(
+        DatabaseFixture fixture, 
+        ITestOutputHelper output)
     {
         _fixture = fixture;
         _output = output;
@@ -80,11 +82,11 @@ public class CopyMssToPgBase : TestBase
         IColumn mssCol,
         string insertedValueAsString)
     {
-        await _fixture.MssDbHelper.DropTableAsync(st);
+        await _fixture.MssCmd.DropTableAsync(st, CancellationToken.None);
         var tableDef = MssTestData.GetEmpty(st);
         tableDef.Columns.Add(mssCol);
-        await _fixture.MssDbHelper.CreateTableAsync(tableDef);
-        await _fixture.MssDbHelper.ExecuteNonQueryAsync(
+        await _fixture.MssCmd.CreateTableAsync(tableDef, CancellationToken.None);
+        await _fixture.MssRawCommand.ExecuteNonQueryAsync(
             $"insert into {st.GetFullName()}(col1) values ({insertedValueAsString})",
             CancellationToken.None);
     }

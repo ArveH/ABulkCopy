@@ -6,7 +6,7 @@ public class DatabaseFixture : IAsyncLifetime
 {
     private PostgreSqlContainer? _pgContainer;
     private IPgContext? _pgContext;
-    private PgDbHelper? _pgDbHelper;
+    private IPgRawCommand? _pgRawCommand;
     private readonly IParseTree _parseTree = new ParseTree(new NodeFactory(), new SqlTypes());
     private readonly IPgParser _parser = new PgParser();
     private readonly ITokenizerFactory _tokenizerFactory = new TokenizerFactory(new TokenFactory());
@@ -14,7 +14,8 @@ public class DatabaseFixture : IAsyncLifetime
     private string? _connectionString;
 
     public string PgConnectionString => _connectionString ?? throw new ArgumentNullException(nameof(PgConnectionString));
-
+    public const string TestSchemaName = "my_pg_schema";
+    
     public IConfiguration Configuration
     {
         get => _configuration ?? throw new ArgumentNullException(nameof(Configuration));
@@ -27,10 +28,10 @@ public class DatabaseFixture : IAsyncLifetime
         private set => _pgContext = value;
     }
 
-    public PgDbHelper DbHelper
+    public IPgRawCommand PgRawCommand
     {
-        get => _pgDbHelper ?? throw new ArgumentNullException(nameof(PgDbHelper));
-        private set => _pgDbHelper = value;
+        get => _pgRawCommand ?? throw new ArgumentNullException(nameof(PgRawCommand));
+        private set => _pgRawCommand = value;
     }
 
     public async Task InitializeAsync()
@@ -62,8 +63,8 @@ public class DatabaseFixture : IAsyncLifetime
         _connectionString = Configuration.GetConnectionString(Constants.Config.PgConnectionString);
         PgContext = new PgContext(new NullLoggerFactory(), Configuration);
 
-        DbHelper = new PgDbHelper(PgContext);
-        await DbHelper.EnsureTestSchemaAsync();
+        PgRawCommand = new PgRawCommand(PgContext, new PgRawFactory());
+        await PgRawCommand.ExecuteNonQueryAsync($"CREATE SCHEMA IF NOT EXISTS {TestSchemaName}", CancellationToken.None);
     }
 
     public async Task CreateTable(TableDefinition tableDefinition,

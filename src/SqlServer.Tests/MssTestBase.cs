@@ -1,4 +1,6 @@
-﻿namespace SqlServer.Tests;
+﻿using System.Data.SqlClient;
+
+namespace SqlServer.Tests;
 
 public abstract class MssTestBase
 {
@@ -20,9 +22,7 @@ public abstract class MssTestBase
             .WriteTo.TestOutput(output)
             .CreateLogger();
         TestLoggerFactory = new Microsoft.Extensions.Logging.LoggerFactory().AddSerilog(TestLogger);
-
-        DbFixture.DbHelper.Logger = TestLogger;
-
+        
         MssSystemTables = CreateMssSystemTables();
     }
 
@@ -33,8 +33,9 @@ public abstract class MssTestBase
             .NotBeNullOrWhiteSpace("because the connection string should be set");
         IMssColumnFactory colFactory = new MssColumnFactory();
         IMssSystemTables systemTables = new MssSystemTables(
-            DbFixture.MssDbContext,
-            colFactory, TestLogger);
+            DbFixture.MssRawCommand,
+            colFactory, 
+            TestLogger);
         return systemTables;
     }
 
@@ -58,7 +59,7 @@ public abstract class MssTestBase
 
     public async Task CreateTableAsync(TableDefinition tableDefinition)
     {
-        await DbFixture.DbHelper.CreateTableAsync(tableDefinition);
+        await DbFixture.MssCmd.CreateTableAsync(tableDefinition, CancellationToken.None);
     }
 
     public async Task DropTableAsync(string tableName)
@@ -68,34 +69,51 @@ public abstract class MssTestBase
 
     public async Task DropTableAsync(string schema, string tableName)
     {
-        await DbFixture.DbHelper.DropTableAsync((schema, tableName));
+        await DbFixture.MssCmd.DropTableAsync((schema, tableName), CancellationToken.None);
     }
-
+    
     public async Task InsertIntoSingleColumnTableAsync(
         string tableName,
         object? value,
-        SqlDbType? dbType = null)
+        SqlDbType? dbType = null,
+        CancellationToken ct = default)
     {
-        await DbFixture.DbHelper.InsertIntoSingleColumnTableAsync(tableName, value, dbType);
+        var sqlString = $"insert into [{tableName}] values (@Value);";
+        await using var sqlCommand = new SqlCommand(sqlString);
+        if (dbType == null)
+        {
+            sqlCommand.Parameters.AddWithValue("@Value", value ?? DBNull.Value);
+        }
+        else
+        {
+            // Note: Since dbType is nullable, we have to cast to non-nullable
+            // otherwise we get the wrong SqlParameter constructor
+            // and dbType is treated as the value instead of the SqlDbType
+            var sqlParameter = new SqlParameter("@Value", (SqlDbType)dbType);
+            sqlParameter.Value = value ?? DBNull.Value;
+            sqlCommand.Parameters.Add(sqlParameter);
+        }
+        await DbFixture.MssRawCommand.ExecuteNonQueryAsync(
+            sqlCommand, ct).ConfigureAwait(false);
     }
 
     public async Task CreateIndexAsync(string tableName, IndexDefinition indexDefinition)
     {
-        await DbFixture.DbHelper.CreateIndexAsync(tableName, indexDefinition);
+        await DbFixture.MssCmd.CreateIndexAsync(("dbo", tableName), indexDefinition, CancellationToken.None);
     }
 
     public async Task DropIndexAsync(string tableName, string indexName)
     {
-        await DbFixture.DbHelper.DropIndexAsync(tableName, indexName);
+        await DbFixture.MssCmd.DropIndexAsync(("dbo", tableName), indexName, CancellationToken.None);
     }
 
     public async Task ExecuteNonQueryAsync(string sqlString)
     {
-        await DbFixture.DbHelper.ExecuteNonQueryAsync(sqlString, CancellationToken.None);
+        await DbFixture.MssRawCommand.ExecuteNonQueryAsync(sqlString, CancellationToken.None);
     }
 
     public async Task<T?> ExecuteScalarAsync<T>(string sqlString)
     {
-        return await DbFixture.DbHelper.ExecuteScalarAsync<T>(sqlString);
+        return (T?)await DbFixture.MssRawCommand.ExecuteScalarAsync(sqlString, CancellationToken.None);
     }
 }

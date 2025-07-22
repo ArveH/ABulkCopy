@@ -6,7 +6,9 @@ public class TestSchemas : TestBase
     private readonly DatabaseFixture _fixture;
     private readonly ITestOutputHelper _output;
 
-    public TestSchemas(DatabaseFixture fixture, ITestOutputHelper output)
+    public TestSchemas(
+        DatabaseFixture fixture, 
+        ITestOutputHelper output)
     {
         _fixture = fixture;
         _output = output;
@@ -32,7 +34,8 @@ public class TestSchemas : TestBase
                     "        \"\": \"public\",\r\n" +
                     "        \"dbo\": \"public\",\r\n" +
                     "        \"my_mss_schema\": \"my_pg_schema\"\r\n" +
-                    "    },\r\n    \"Collations\": {\r\n" +
+                    "    },\r\n" +
+                    "    \"Collations\": {\r\n" +
                     "        \"SQL_Latin1_General_CP1_CI_AI\": \"en_ci_ai\",\r\n" +
                     "        \"SQL_Latin1_General_CP1_CI_AS\": \"en_ci_as\"\r\n" +
                     "    }\r\n" +
@@ -57,10 +60,10 @@ public class TestSchemas : TestBase
             _output,
             fileSystem);
 
-        await _fixture.MssDbHelper.DropTableAsync(("dbo", childName));
-        await _fixture.MssDbHelper.DropTableAsync((MssDbHelper.TestSchemaName, parentName));
+        await _fixture.MssCmd.DropTableAsync(("dbo", childName), CancellationToken.None);
+        await _fixture.MssCmd.DropTableAsync((DatabaseFixture.MssTestSchemaName, parentName), CancellationToken.None);
         var parentDef = await CreateTableAsync(
-            (MssDbHelper.TestSchemaName, parentName),
+            (DatabaseFixture.MssTestSchemaName, parentName),
             new SqlServerInt(101, "id", false),
             parentId);
         var childDef = await CreateChildTableAsync(
@@ -90,7 +93,7 @@ public class TestSchemas : TestBase
             childDef.Columns[1].Name,
             parentId);
         await ValidateValueAsync(
-            (PgDbHelper.TestSchemaName, parentDef.Header.Name),
+            (DatabaseFixture.PgTestSchemaName, parentDef.Header.Name),
             parentDef.Columns[0].Name,
             parentId);
     }
@@ -125,8 +128,8 @@ public class TestSchemas : TestBase
         {
             ColumnNames = [new() { Name = mssCol.Name }]
         };
-        await _fixture.MssDbHelper.CreateTableAsync(tableDef);
-        await _fixture.MssDbHelper.ExecuteNonQueryAsync(
+        await _fixture.MssCmd.CreateTableAsync(tableDef, CancellationToken.None);
+        await _fixture.MssRawCommand.ExecuteNonQueryAsync(
             $"insert into {st.GetFullName()}({mssCol.Name}) values ({value})",
             CancellationToken.None);
         return tableDef;
@@ -153,8 +156,8 @@ public class TestSchemas : TestBase
             ColumnReferences = [parent.Columns.First().Name],
             DeleteAction = DeleteAction.Cascade
         });
-        await _fixture.MssDbHelper.CreateTableAsync(tableDef);
-        await _fixture.MssDbHelper.ExecuteNonQueryAsync(
+        await _fixture.MssCmd.CreateTableAsync(tableDef, CancellationToken.None);
+        await _fixture.MssRawCommand.ExecuteNonQueryAsync(
             $"insert into {st.GetFullName()}({mssCol.Name}, parentid) values ({values.childId}, {values.parentId})",
             CancellationToken.None);
 

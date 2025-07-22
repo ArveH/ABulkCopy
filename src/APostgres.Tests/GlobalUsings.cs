@@ -9,6 +9,7 @@ global using ABulkCopy.Common.Database;
 global using ABulkCopy.Common.Identifier;
 global using ABulkCopy.Common.Mapping;
 global using ABulkCopy.Common.Reader;
+global using ABulkCopy.Common.Scripts;
 global using ABulkCopy.Common.Types;
 global using ABulkCopy.Common.Types.Column;
 global using ABulkCopy.Common.Types.Table;

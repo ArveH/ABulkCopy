@@ -3,7 +3,10 @@ namespace CrossRDBMS.Tests.CopyFromMssToPg;
 [Collection(nameof(DatabaseCollection))]
 public class CopyMisc : CopyMssToPgBase
 {
-    public CopyMisc(DatabaseFixture fixture, ITestOutputHelper output) : base(fixture, output)
+    public CopyMisc(
+        DatabaseFixture fixture, 
+        ITestOutputHelper output) 
+        : base(fixture, output)
     {
         PgArguments = ParamHelper.GetInPg(
             fixture.PgConnectionString,

@@ -28,6 +28,20 @@ public class Program
             builder.ConfigureServices(cmdArguments.Rdbms, configuration);
             var host = builder.Build();
 
+            if (!string.IsNullOrWhiteSpace(cmdArguments.PreScript))
+            {
+                if (!File.Exists(cmdArguments.PreScript))
+                {
+                    Log.Error("PreScript file '{PreScript}' does not exist", cmdArguments.PreScript);
+                    Console.WriteLine($"PreScript file '{cmdArguments.PreScript}' does not exist");
+                    return;
+                }
+                var scriptRunner = host.Services.GetRequiredService<IScriptRunner>();
+                var (succeededCommands, failedCommands) = await scriptRunner.ExecuteAsync(cmdArguments.PreScript, cts.Token);
+                Log.Information("Executed pre-script: {PreScript}. Succeeded: {Succeeded}, Failed: {Failed}",
+                    cmdArguments.PreScript, succeededCommands, failedCommands);
+            }
+
             if (cmdArguments.Direction == CopyDirection.In)
             {
                 var copyIn = host.Services.GetRequiredService<ICopyIn>();
@@ -46,6 +60,20 @@ public class Program
                 await copyOut.RunAsync(cts.Token);
             }
 
+            if (!string.IsNullOrWhiteSpace(cmdArguments.PostScript))
+            {
+                if (!File.Exists(cmdArguments.PostScript))
+                {
+                    Log.Error("PostScript file '{PreScript}' does not exist", cmdArguments.PostScript);
+                    Console.WriteLine($"PostScript file '{cmdArguments.PostScript}' does not exist");
+                    return;
+                }
+                var scriptRunner = host.Services.GetRequiredService<IScriptRunner>();
+                var (succeededCommands, failedCommands) = await scriptRunner.ExecuteAsync(cmdArguments.PostScript, cts.Token);
+                Log.Information("Executed post-script: {PostScript}. Succeeded: {Succeeded}, Failed: {Failed}",
+                    cmdArguments.PostScript, succeededCommands, failedCommands);
+            }
+            
             Log.Information("ABulkCopy.Cmd finished.");
             Console.WriteLine("ABulkCopy.Cmd finished.");
         }

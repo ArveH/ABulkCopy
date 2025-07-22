@@ -1,21 +1,27 @@
-﻿using DotNet.Testcontainers.Builders;
+using DotNet.Testcontainers.Builders;
 using Microsoft.Extensions.Logging.Abstractions;
+using ABulkCopy.ASqlServer.DbRaw;
 using QueryBuilderFactory = ABulkCopy.ASqlServer.QueryBuilderFactory;
 
 namespace CrossRDBMS.Tests;
 
 public class DatabaseFixture : IAsyncLifetime
 {
-    private MsSqlContainer? _mssContainer;
     private PostgreSqlContainer? _pgContainer;
-    private IDbContext? _mssContext;
-    private MssDbHelper? _mssDbHelper;
     private IPgContext? _pgContext;
-    private PgDbHelper? _pgDbHelper;
+    
+    private MsSqlContainer? _mssContainer;
+    private IMssRawCommand? _mssRawCommand;
+    private IMssCmd? _mssCmd;
+    private IDbContext? _mssContext;
+
     private IConfiguration? _testConfiguration;
     private string? _pgConnectionString;
     private string? _mssConnectionString;
-
+    
+    public const string PgTestSchemaName = "my_pg_schema";
+    public const string MssTestSchemaName = "my_mss_schema";
+    
     public string MssConnectionString =>
         _mssConnectionString ?? throw new ArgumentNullException(nameof(MssConnectionString));
 
@@ -34,22 +40,22 @@ public class DatabaseFixture : IAsyncLifetime
         set => _mssContext = value;
     }
 
-    public MssDbHelper MssDbHelper
+    public IMssRawCommand MssRawCommand
     {
-        get => _mssDbHelper ?? throw new ArgumentNullException(nameof(MssDbHelper));
-        set => _mssDbHelper = value;
+        get => _mssRawCommand ?? throw new ArgumentNullException(nameof(MssRawCommand));
+        set => _mssRawCommand = value;
     }
-
+    
+    public IMssCmd MssCmd
+    {
+        get => _mssCmd ?? throw new ArgumentNullException(nameof(MssCmd));
+        set => _mssCmd = value;
+    }
+    
     public IPgContext PgContext
     {
         get => _pgContext ?? throw new ArgumentNullException(nameof(PgContext));
         private set => _pgContext = value;
-    }
-
-    public PgDbHelper PgDbHelper
-    {
-        get => _pgDbHelper ?? throw new ArgumentNullException(nameof(PgDbHelper));
-        set => _pgDbHelper = value;
     }
 
     public async Task InitializeAsync()
@@ -83,14 +89,23 @@ public class DatabaseFixture : IAsyncLifetime
                     }
                 });
         }
-        _mssConnectionString = TestConfiguration.GetConnectionString(Constants.Config.MssConnectionString);
         _pgConnectionString = TestConfiguration.GetConnectionString(Constants.Config.PgConnectionString);
         PgContext = new PgContext(new NullLoggerFactory(), TestConfiguration);
-        _pgDbHelper = new PgDbHelper(PgContext);
+        var pgCmd = new PgCmd(
+            new PgRawCommand(PgContext, new PgRawFactory()),
+            new QueryBuilderFactory());
+        await pgCmd.EnsureSchemaAsync(PgTestSchemaName);
+
+        _mssConnectionString = TestConfiguration.GetConnectionString(Constants.Config.MssConnectionString);
         MssContext = new MssContext(TestConfiguration);
-        _mssDbHelper = new MssDbHelper(MssContext, new QueryBuilderFactory());
-        await _pgDbHelper.EnsureTestSchemaAsync();
-        await _mssDbHelper.EnsureTestSchemaAsync();
+        _mssRawCommand = new MssRawCommand(
+            MssContext,
+            new MssRawFactory());
+        _mssCmd = new MssCmd(
+            _mssRawCommand,
+            new QueryBuilderFactory(),
+            new LoggerConfiguration().WriteTo.Console().CreateLogger());
+        await _mssCmd.EnsureSchemaAsync(MssTestSchemaName);
     }
 
     public async Task DisposeAsync()
