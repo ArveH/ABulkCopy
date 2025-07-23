@@ -11,7 +11,7 @@ public class MssTestGetTableNamesMultipleSchemas(
         var guid = Guid.NewGuid().ToString("N");
         var testTableName = "T_" + guid;
         var tableList = await TestGetTableNamesAsync(guid, "", testTableName);
-        tableList.Count().Should().Be(2);
+        tableList.Count.Should().Be(2);
         tableList[0].schemaName.Should().Be("dbo");
         tableList[0].tableName.Should().Be(testTableName);
         tableList[1].schemaName.Should().Be(DatabaseFixture.TestSchemaName);
@@ -24,7 +24,7 @@ public class MssTestGetTableNamesMultipleSchemas(
         var guid = Guid.NewGuid().ToString("N");
         var testTableName = "T_" + guid;
         var tableList = await TestGetTableNamesAsync(guid, "dbo", testTableName);
-        tableList.Count().Should().Be(1);
+        tableList.Count.Should().Be(1);
         tableList[0].schemaName.Should().Be("dbo");
         tableList[0].tableName.Should().Be(testTableName);
     }
@@ -34,7 +34,7 @@ public class MssTestGetTableNamesMultipleSchemas(
     {
         var guid = Guid.NewGuid().ToString("N");
         var tableList = await TestGetTableNamesAsync(guid, "dbo", "DoesNotExist");
-        tableList.Count().Should().Be(0);
+        tableList.Count.Should().Be(0);
     }
 
     [Fact]
@@ -42,7 +42,7 @@ public class MssTestGetTableNamesMultipleSchemas(
     {
         var guid = Guid.NewGuid().ToString("N");
         var tableList = await TestGetTableNamesAsync(guid, "dbo", "%");
-        tableList.Count().Should().BeGreaterThanOrEqualTo(3);
+        tableList.Count.Should().BeGreaterThanOrEqualTo(3);
     }
 
     private async Task<List<SchemaTableTuple>> TestGetTableNamesAsync(
