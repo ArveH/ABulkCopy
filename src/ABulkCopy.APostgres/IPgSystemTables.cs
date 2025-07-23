@@ -1,6 +1,6 @@
 ﻿namespace ABulkCopy.APostgres;
 
-public interface IPgSystemTables
+public interface IPgSystemTables: ISystemTables
 {
     Task<PrimaryKey?> GetPrimaryKeyAsync(
         TableHeader tableHeader, 

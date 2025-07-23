@@ -1,9 +1,7 @@
 ﻿namespace ABulkCopy.ASqlServer;
 
-public interface IMssSystemTables
+public interface IMssSystemTables: ISystemTables
 {
-    Task<IEnumerable<SchemaTableTuple>> GetFullTableNamesAsync(
-        string schemaNames, string searchString, CancellationToken ct);
     Task<TableHeader?> GetTableHeaderAsync(string schemaName, string tableName, CancellationToken ct);
     Task<IEnumerable<IColumn>> GetTableColumnInfoAsync(TableHeader tableHeader, CancellationToken ct);
     Task<PrimaryKey?> GetPrimaryKeyAsync(TableHeader tableHeader, CancellationToken ct);

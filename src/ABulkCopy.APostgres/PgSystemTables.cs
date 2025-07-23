@@ -19,6 +19,11 @@ public class PgSystemTables : IPgSystemTables
         _logger = logger.ForContext<PgSystemTables>();
     }
 
+    public Task<IEnumerable<SchemaTableTuple>> GetFullTableNamesAsync(string schemaNames, string searchString, CancellationToken ct)
+    {
+        throw new NotImplementedException();
+    }
+    
     public async Task<PrimaryKey?> GetPrimaryKeyAsync(
         TableHeader tableHeader, CancellationToken ct)
     {
@@ -52,7 +57,7 @@ public class PgSystemTables : IPgSystemTables
                 }
 
                 _logger.Information(
-                    "Retrieved primary key {@PrimaryKey} for '{tableName}'",
+                    "Retrieved primary key {@PrimaryKey} for '{TableName}'",
                     pk, tableHeader.Name);
                 return pk;
             },
