@@ -13,6 +13,8 @@ public class PgRawCommand : IPgRawCommand
         _pgRawFactory = pgRawFactory;
     }
     
+    public NpgsqlDataSource DataSource => _pgContext.DataSource;
+    
     public async Task ExecuteNonQueryAsync(string sqlString, CancellationToken ct)
     {
         await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
@@ -54,13 +56,35 @@ public class PgRawCommand : IPgRawCommand
         return await func(dbRawReader);
     }
 
-    public Task ExecuteReaderAsync(DbCommand command, Action<IDbRawReader> readFunc, CancellationToken ct)
+    public async Task ExecuteReaderAsync(DbCommand command, Action<IDbRawReader> readFunc, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        await using var dbRawReader = _pgRawFactory.CreateReader(
+            await command.ExecuteReaderAsync(ct).ConfigureAwait(false));
+
+        if (dbRawReader == null)
+        {
+            throw new InvalidOperationException("Failed to create IDbRawReader from DbDataReader.");
+        }
+
+        while (await dbRawReader.ReadAsync(ct).ConfigureAwait(false))
+        {
+            readFunc(dbRawReader);
+        }
     }
 
-    public Task ExecuteReaderAsync(DbCommand command, Func<IDbRawReader, Task> readFunc, CancellationToken ct)
+    public async Task ExecuteReaderAsync(DbCommand command, Func<IDbRawReader, Task> readFunc, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        await using var dbRawReader = _pgRawFactory.CreateReader(
+            await command.ExecuteReaderAsync(ct).ConfigureAwait(false));
+
+        if (dbRawReader == null)
+        {
+            throw new InvalidOperationException("Failed to create IDbRawReader from DbDataReader.");
+        }
+
+        while (await dbRawReader.ReadAsync(ct).ConfigureAwait(false))
+        {
+            await readFunc(dbRawReader).ConfigureAwait(false);
+        }
     }
 }

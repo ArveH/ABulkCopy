@@ -5,6 +5,7 @@ public class PgTestBase
     protected readonly ILogger TestLogger;
     protected readonly Microsoft.Extensions.Logging.ILoggerFactory TestLoggerFactory;
     protected readonly DatabaseFixture DbFixture;
+    protected readonly IPgSystemTables PgSystemTables;
 
     protected PgTestBase(DatabaseFixture dbFixture, ITestOutputHelper output)
     {
@@ -30,12 +31,25 @@ public class PgTestBase
         }
 
         TestLogger = loggerConfig.CreateLogger();
-
         TestLoggerFactory = new Microsoft.Extensions.Logging.LoggerFactory().AddSerilog(TestLogger);
+
+        PgSystemTables = CreatePgSystemTables();
+    }
+    
+    protected IPgSystemTables CreatePgSystemTables(Dictionary<string, string?>? appSettings = null)
+    {
+        appSettings ??= new()
+        {
+            { Constants.Config.AddQuotes, "false" },
+        };
+        return new PgSystemTables(
+            DbFixture.PgRawCommand,
+            GetQueryBuilderFactory(appSettings),
+            GetIdentifier(appSettings), TestLogger);
     }
 
     //[MethodImpl(MethodImplOptions.NoInlining)]
-    protected string GetName()
+    protected static string GetName()
     {
         var st = new StackTrace();
         // Frames:
@@ -51,12 +65,13 @@ public class PgTestBase
 
         var methodName = sf.GetMethod()?.Name ?? throw new InvalidOperationException("Method is null");
         var methodName20 = methodName.Length > 24 ? methodName[4..24] : methodName;
-        var machineName20 = Environment.MachineName.Length > 20 ? Environment.MachineName[..20] : Environment.MachineName;
+        var machineNameAlphaNum = new string(Environment.MachineName.Where(char.IsLetterOrDigit).ToArray());
+        var machineName20 = machineNameAlphaNum.Length > 20 ? machineNameAlphaNum[..20] : machineNameAlphaNum;
 
         return machineName20 + methodName20;
     }
 
-    protected static Identifier GetIdentifier(
+    private static Identifier GetIdentifier(
         Dictionary<string, string?> appSettings,
         Rdbms rdbms = Rdbms.Pg)
     {
@@ -80,36 +95,13 @@ public class PgTestBase
         return qbFactoryMock.Object;
     }
 
-    protected IPgRawCommand GetRawCommand()
+    protected async Task DropTableAsync(string schema, string tableName)
     {
-        return new PgRawCommand(
-            DbFixture.PgContext,
-            new PgRawFactory());
+        await DbFixture.PgCmd.DropTableAsync((schema, tableName), CancellationToken.None);
     }
 
-    protected IPgCmd GetPgCmd(Dictionary<string, string?>? appSettings = null)
+    protected async Task ExecuteNonQueryAsync(string sqlString)
     {
-        appSettings ??= new()
-        {
-            { Constants.Config.AddQuotes, "true" },
-        };
-        appSettings.Add(
-            Constants.Config.PgConnectionString,
-            DbFixture.Configuration.SafeGet(Constants.Config.PgConnectionString));
-        return new ABulkCopy.APostgres.PgCmd(
-            GetRawCommand(),
-            GetQueryBuilderFactory(appSettings));
-    }
-
-    protected IPgSystemTables GetPgSystemTables(Dictionary<string, string?>? appSettings = null)
-    {
-        appSettings ??= new()
-        {
-            { Constants.Config.AddQuotes, "true" },
-        };
-        return new PgSystemTables(
-            GetRawCommand(),
-            GetQueryBuilderFactory(appSettings),
-            GetIdentifier(appSettings), TestLogger);
+        await DbFixture.PgRawCommand.ExecuteNonQueryAsync(sqlString, CancellationToken.None);
     }
 }

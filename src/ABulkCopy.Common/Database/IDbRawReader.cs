@@ -1,5 +1,3 @@
-using System.Data;
-
 namespace ABulkCopy.Common.Database;
 
 public interface IDbRawReader : IDisposable, IAsyncDisposable

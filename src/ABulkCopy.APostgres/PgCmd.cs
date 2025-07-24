@@ -22,8 +22,6 @@ public class PgCmd : IPgCmd
     }
 
     public async Task CreateTableAsync(
-        
-        
         TableDefinition tableDefinition, 
         CancellationToken ct,
         bool addIfNotExists = false)

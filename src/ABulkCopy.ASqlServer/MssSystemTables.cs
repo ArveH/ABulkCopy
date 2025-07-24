@@ -2,6 +2,7 @@
 
 public class MssSystemTables : IMssSystemTables
 {
+    private const string TableNameParameter = "@TableName";
     private readonly IMssRawCommand _rawCommand;
     private readonly IMssColumnFactory _columnFactory;
     private readonly ILogger _logger;
@@ -36,12 +37,12 @@ public class MssSystemTables : IMssSystemTables
                                "      AND class = 1\r\n" +
                                "      AND name = N'microsoft_database_tools_support')\r\n" +
                                "   AND t.is_ms_shipped = 0 \r\n" +
-                               schemaNames.AddSchemaFilter() +
+                               schemaNames.MssAddSchemaFilter() +
                                "ORDER BY s.name, t.name");
         }
         else
         {
-            _logger.Information("Reading tables where search string is '{searchString}'", searchString);
+            _logger.Information("Reading tables where search string is '{SearchString}'", searchString);
 
             command =
                 new SqlCommand("SELECT s.name AS SchemaName, t.name AS TableName\r\n" +
@@ -56,7 +57,7 @@ public class MssSystemTables : IMssSystemTables
                                "      AND name = N'microsoft_database_tools_support')\r\n" +
                                "   AND t.name LIKE @SearchString\r\n" +
                                "   AND t.is_ms_shipped = 0\r\n" +
-                               schemaNames.AddSchemaFilter() +
+                               schemaNames.MssAddSchemaFilter() +
                                "ORDER BY s.name, t.name");
             command.Parameters.AddWithValue("@SearchString", searchString);
         }
@@ -67,7 +68,7 @@ public class MssSystemTables : IMssSystemTables
             fullNames.Add((reader.GetString(0), reader.GetString(1)));
         }, ct).ConfigureAwait(false);
 
-        _logger.Information("Found {numberOfTables} tables.", fullNames.Count);
+        _logger.Information("Found {NumberOfTables} tables.", fullNames.Count);
         return fullNames;
     }
 
@@ -92,7 +93,7 @@ public class MssSystemTables : IMssSystemTables
                            "  AND s.name = @SchemaName\r\n" +
                            "  AND o.name = @TableName\r\n");
         command.Parameters.AddWithValue("@SchemaName", schemaName);
-        command.Parameters.AddWithValue("@TableName", tableName);
+        command.Parameters.AddWithValue(TableNameParameter, tableName);
 
         var tableHeaders = new List<TableHeader>();
         await _rawCommand.ExecuteReaderAsync(command, reader =>
@@ -119,7 +120,7 @@ public class MssSystemTables : IMssSystemTables
         if (tableHeaders.Count == 1)
         {
             _logger.Information(
-                "Retrieved table info for '{tableName}': Id={id}, Schema='{schema}', Location='{location}'",
+                "Retrieved table info for '{TableName}': Id={Id}, Schema='{Schema}', Location='{Location}'",
                 tableName,
                 tableHeaders[0].Id,
                 tableHeaders[0].Schema,
@@ -127,7 +128,8 @@ public class MssSystemTables : IMssSystemTables
             return tableHeaders[0];
         }
 
-        _logger.Warning($"Table information for table '{tableName}' returned {tableHeaders.Count} rows");
+        _logger.Warning("Table information for table '{TableName}' returned {TableHeaderCount} rows",
+            tableName, tableHeaders.Count);
         return null;
     }
 
@@ -165,7 +167,7 @@ public class MssSystemTables : IMssSystemTables
                            "FROM cte c \r\n" +
                            "LEFT JOIN sys.objects o WITH(NOLOCK) ON (c.default_object_id = o.object_id)\r\n" +
                            "LEFT JOIN sys.default_constraints d WITH(NOLOCK) ON (d.object_id = c.default_object_id)");
-        command.Parameters.AddWithValue("@TableName", $"{tableHeader.Schema}.{tableHeader.Name}");
+        command.Parameters.AddWithValue(TableNameParameter, $"{tableHeader.Schema}.{tableHeader.Name}");
 
         var columnDefinitions = new List<IColumn>();
         await _rawCommand.ExecuteReaderAsync(command, reader =>
@@ -184,7 +186,7 @@ public class MssSystemTables : IMssSystemTables
             {
                 if (tableHeader.Identity == null)
                 {
-                    _logger.Error("Table doesn't have an Identity, but column '{ColumnName}' is_identity = true",
+                    _logger.Error("Table doesn't have an Identity, but column '{ColumnName}' IsIdentity = true",
                         columnDef.Name);
                     throw new ArgumentNullException(
                         nameof(tableHeader.Identity),
@@ -204,11 +206,11 @@ public class MssSystemTables : IMssSystemTables
 
             columnDefinitions.Add(columnDef);
 
-            _logger.Verbose("Added column: {@columnDefinition}",
-                columnDefinitions.Last());
+            _logger.Verbose("Added column: {@ColumnDefinition}",
+                columnDefinitions[^1]);
         }, ct).ConfigureAwait(false);
         _logger.Information(
-            "Retrieved column info for {colCount} columns on '{tableName}'",
+            "Retrieved column info for {ColCount} columns on '{TableName}'",
             columnDefinitions.Count,
             tableHeader.Name);
         return columnDefinitions;
@@ -226,7 +228,7 @@ public class MssSystemTables : IMssSystemTables
                            "WHERE ic.object_id = @TableId\r\n" +
                            "AND c.[type] = 'PK'\r\n" +
                            "ORDER BY ic.index_id, ic.index_column_id");
-        command.Parameters.AddWithValue("@TableName", $"{tableHeader.Schema}.{tableHeader.Name}");
+        command.Parameters.AddWithValue(TableNameParameter, $"{tableHeader.Schema}.{tableHeader.Name}");
         command.Parameters.AddWithValue("@TableId", tableHeader.Id);
 
         PrimaryKey? pk = null;
@@ -241,7 +243,7 @@ public class MssSystemTables : IMssSystemTables
             });
         }, ct).ConfigureAwait(false);
         _logger.Information(
-            "Retrieved primary key {@PrimaryKey} for '{tableName}'",
+            "Retrieved primary key {@PrimaryKey} for '{TableName}'",
             pk, tableHeader.Name);
         return pk;
     }
@@ -299,8 +301,8 @@ public class MssSystemTables : IMssSystemTables
         }, ct).ConfigureAwait(false);
 
         _logger.Information(
-            $"Retrieved {{IndexCount}} {"index".Plural(indexes.Count)} for table '{{tableName}}'",
-            indexes.Capacity, tableHeader.Name);
+            "Retrieved {IndexCount} {IndexPlural} for table '{TableName}'",
+            indexes.Capacity, "index".Plural(indexes.Count), tableHeader.Name);
 
         return indexes;
     }
@@ -377,7 +379,7 @@ public class MssSystemTables : IMssSystemTables
                            "and i.object_id = object_id(@TableName)");
 
         command.Parameters.AddWithValue("@IndexId", indexHeader.Id);
-        command.Parameters.AddWithValue("@TableName", $"{st.schemaName}.{st.tableName}");
+        command.Parameters.AddWithValue(TableNameParameter, $"{st.schemaName}.{st.tableName}");
 
         var columns = new List<IndexColumn>();
         await _rawCommand.ExecuteReaderAsync(command, reader =>
@@ -392,8 +394,8 @@ public class MssSystemTables : IMssSystemTables
         }, ct).ConfigureAwait(false);
 
         _logger.Information(
-            $"Retrieved {{ColumnCount}} index {"column".Plural(columns.Count)} for index '{{SchemaName}}{{TableName}}.{{IndexName}}'",
-            columns.Capacity, st.schemaName, st.tableName, indexHeader.Name);
+            "Retrieved {ColumnCount} index {ColumnPlural} for index '{SchemaName}.{TableName}.{IndexName}'",
+            columns.Capacity, "column".Plural(columns.Count), st.schemaName, st.tableName, indexHeader.Name);
 
         return columns;
     }

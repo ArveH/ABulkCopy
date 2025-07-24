@@ -4,18 +4,20 @@ namespace Postgres.Tests;
 
 public class DatabaseFixture : IAsyncLifetime
 {
-    private PostgreSqlContainer? _pgContainer;
-    private IPgContext? _pgContext;
-    private IPgRawCommand? _pgRawCommand;
-    private readonly IParseTree _parseTree = new ParseTree(new NodeFactory(), new SqlTypes());
+    public const string DefaultSchemaName = "public";
+    public const string TestSchemaName = "my_pg_schema";
     private readonly IPgParser _parser = new PgParser();
+    private readonly IParseTree _parseTree = new ParseTree(new NodeFactory(), new SqlTypes());
     private readonly ITokenizerFactory _tokenizerFactory = new TokenizerFactory(new TokenFactory());
     private IConfiguration? _configuration;
     private string? _connectionString;
+    private IPgCmd? _pgCmd;
+    private PostgreSqlContainer? _pgContainer;
+    private IPgContext? _pgContext;
+    private IPgRawCommand? _pgRawCommand;
 
     public string PgConnectionString => _connectionString ?? throw new ArgumentNullException(nameof(PgConnectionString));
-    public const string TestSchemaName = "my_pg_schema";
-    
+
     public IConfiguration Configuration
     {
         get => _configuration ?? throw new ArgumentNullException(nameof(Configuration));
@@ -34,13 +36,19 @@ public class DatabaseFixture : IAsyncLifetime
         private set => _pgRawCommand = value;
     }
 
+    public IPgCmd PgCmd
+    {
+        get => _pgCmd ?? throw new ArgumentNullException(nameof(PgCmd));
+        private set => _pgCmd = value;
+    }
+
     public async Task InitializeAsync()
     {
         Configuration = new ConfigHelper().GetConfiguration(
             "ed7ee99b-0e84-4e9a-9eb5-985d610aeb8b",
             new()
             {
-                { Constants.Config.AddQuotes, "true" }
+                { Constants.Config.AddQuotes, "false" }
             });
         if (Configuration.UseContainer())
         {
@@ -57,7 +65,7 @@ public class DatabaseFixture : IAsyncLifetime
                         "ConnectionStrings:" + Constants.Config.PgConnectionString,
                         _pgContainer.GetConnectionString()
                     },
-                    { Constants.Config.AddQuotes, "true" }
+                    { Constants.Config.AddQuotes, "false" }
                 });
         }
         _connectionString = Configuration.GetConnectionString(Constants.Config.PgConnectionString);
@@ -65,10 +73,13 @@ public class DatabaseFixture : IAsyncLifetime
 
         PgRawCommand = new PgRawCommand(PgContext, new PgRawFactory());
         await PgRawCommand.ExecuteNonQueryAsync($"CREATE SCHEMA IF NOT EXISTS {TestSchemaName}", CancellationToken.None);
+
+        PgCmd = new ABulkCopy.APostgres.PgCmd(PgRawCommand, new QueryBuilderFactory(GetIdentifier()));
     }
 
+
     public async Task CreateTable(TableDefinition tableDefinition,
-    bool addQuote = true,
+    bool addQuote = false,
     bool addIfNotExists = false)
     {
         var sb = new StringBuilder();
@@ -111,25 +122,25 @@ public class DatabaseFixture : IAsyncLifetime
         await ExecuteNonQuery(sb.ToString());
     }
 
-    public async Task DropTable(SchemaTableTuple st, bool addQuote = true)
+    public async Task DropTable(SchemaTableTuple st, bool addQuote = false)
     {
         var sqlString = $"drop table if exists {st.GetFullName(GetIdentifier(addQuote))};";
         await ExecuteNonQuery(sqlString);
     }
 
-    public async Task<long> GetRowCount(SchemaTableTuple st, bool addQuote = true)
+    public async Task<long> GetRowCount(SchemaTableTuple st, bool addQuote = false)
     {
         var sqlString = $"select count(*) from {st.GetFullName(GetIdentifier(addQuote))};";
         await using var cmd = PgContext.DataSource.CreateCommand(sqlString);
         var reader = await cmd.ExecuteReaderAsync();
         if (!await reader.ReadAsync()) throw new SqlNullValueException();
 
-        if (reader.IsDBNull(0)) return 0L;
+        if (await reader.IsDBNullAsync(0)) return 0L;
 
-        return reader.GetFieldValue<long>(0);
+        return await reader.GetFieldValueAsync<long>(0);
     }
 
-    public async Task<T?> SelectScalar<T>(SchemaTableTuple st, IColumn col, bool addQuote = true)
+    public async Task<T?> SelectScalar<T>(SchemaTableTuple st, IColumn col, bool addQuote = false)
     {
         var identifier = GetIdentifier(addQuote);
         var sqlString = $"select {identifier.Get(col.Name)} from {st.GetFullName(identifier)};";
@@ -137,12 +148,12 @@ public class DatabaseFixture : IAsyncLifetime
         var reader = await cmd.ExecuteReaderAsync();
         if (!await reader.ReadAsync()) throw new SqlNullValueException();
 
-        if (reader.IsDBNull(0)) return default(T);
+        if (await reader.IsDBNullAsync(0)) return default(T);
 
-        return reader.GetFieldValue<T>(0);
+        return await reader.GetFieldValueAsync<T>(0);
     }
 
-    public async Task<List<T?>> SelectColumn<T>(SchemaTableTuple st, string colName, bool addQuote = true)
+    public async Task<List<T?>> SelectColumn<T>(SchemaTableTuple st, string colName, bool addQuote = false)
     {
         var identifier = GetIdentifier(addQuote);
         var sqlString = $"select {identifier.Get(colName)} from {st.GetFullName(identifier)};";
@@ -151,7 +162,7 @@ public class DatabaseFixture : IAsyncLifetime
         var result = new List<T?>();
         while (await reader.ReadAsync())
         {
-            result.Add(reader.IsDBNull(0) ? default : reader.GetFieldValue<T>(0));
+            result.Add(await reader.IsDBNullAsync(0) ? default : await reader.GetFieldValueAsync<T>(0));
         }
 
         return result;
@@ -163,7 +174,7 @@ public class DatabaseFixture : IAsyncLifetime
         await cmd.ExecuteNonQueryAsync();
     }
 
-    protected Identifier GetIdentifier(bool addQuote = true)
+    private Identifier GetIdentifier(bool addQuote = false)
     {
         var appSettings = new Dictionary<string, string?>
         {
@@ -175,7 +186,6 @@ public class DatabaseFixture : IAsyncLifetime
         var identifier = new Identifier(config, PgContext);
         return identifier;
     }
-
 
     public async Task DisposeAsync()
     {

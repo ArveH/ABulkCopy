@@ -8,7 +8,9 @@ public static class StringExtensions
     public static string Plural<T>(this string str, T cnt)
         where T : INumber<T>
     {
-        return str + (cnt != T.CreateChecked(1) ? str.EndsWith("x") ? "es" : "s" : "");
+        if (cnt == T.CreateChecked(1)) return str;
+
+        return str.EndsWith('x') ? str + "es" : str + "s";
     }
 
     public static bool IsRaw(this string str)
@@ -21,11 +23,20 @@ public static class StringExtensions
         return Constants.Quote + str + Constants.Quote;
     }
 
-    public static string AddSchemaFilter(this string? str)
+    public static string MssAddSchemaFilter(this string? str)
     {
         return string.IsNullOrWhiteSpace(str) 
             ? "AND s.name not in ('guest', 'INFORMATION_SCHEMA', 'sys', 'logs') "
             : "AND s.name in (" + string.Join(",", 
+                str.Split(',', StringSplitOptions.TrimEntries)
+                    .Select(s => $"'{s}'")) + ") ";
+    }
+
+    public static string PgAddSchemaFilter(this string? str)
+    {
+        return string.IsNullOrWhiteSpace(str) 
+            ? "AND table_schema not in ('pg_catalog', 'information_schema') "
+            : "AND table_schema in (" + string.Join(",", 
                 str.Split(',', StringSplitOptions.TrimEntries)
                     .Select(s => $"'{s}'")) + ") ";
     }

@@ -1,14 +1,14 @@
-﻿namespace SqlServer.Tests.SystemTables;
+﻿namespace Postgres.Tests.SystemTables;
 
-public class MssTestGetTableNamesBase(
+public class PgTestGetTableNamesBase(
     DatabaseFixture dbFixture, ITestOutputHelper output)
-    : MssTestBase(dbFixture, output)
+    : PgTestBase(dbFixture, output)
 {
     private async Task CreateTableAsync(string schema, string tableName)
     {
         await DropTableAsync(schema, tableName);
         await ExecuteNonQueryAsync(
-            $"CREATE TABLE [{schema}].[{tableName}](\r\n\t[ExactNumBigInt] [bigint] NOT NULL)");
+            $"CREATE TABLE {schema}.{tableName}(\r\n\tExactNumBigInt bigint NOT NULL)");
     }
 
     protected async Task<List<SchemaTableTuple>> CreateAndCleanupTablesAsync(

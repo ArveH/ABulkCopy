@@ -19,9 +19,42 @@ public class PgSystemTables : IPgSystemTables
         _logger = logger.ForContext<PgSystemTables>();
     }
 
-    public Task<IEnumerable<SchemaTableTuple>> GetFullTableNamesAsync(string schemaNames, string searchString, CancellationToken ct)
+    public async Task<IEnumerable<SchemaTableTuple>> GetFullTableNamesAsync(string schemaNames, string searchString, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        await using var command = _pgRawCommand.DataSource.CreateCommand();
+        if (string.IsNullOrWhiteSpace(searchString))
+        {
+            _logger.Information("Reading all tables");
+
+            command.CommandText =
+            "SELECT table_schema, table_name\n" +
+            "FROM information_schema.tables\n" +
+            "WHERE table_type = 'BASE TABLE'\n" +
+            schemaNames.PgAddSchemaFilter() +
+            "ORDER BY table_schema, table_name";
+        }
+        else
+        {
+            _logger.Information("Reading tables where search string is '{SearchString}'", searchString);
+
+            command.CommandText =
+                "SELECT table_schema, table_name\n" +
+                "FROM information_schema.tables\n" +
+                "WHERE table_type = 'BASE TABLE'\n" +
+                "   AND table_name ILIKE @SearchString\r\n" +
+                schemaNames.PgAddSchemaFilter() +
+                "ORDER BY table_schema, table_name";
+            command.Parameters.AddWithValue("@SearchString", searchString);
+        }
+
+        var fullNames = new List<(string, string)>();
+        await _pgRawCommand.ExecuteReaderAsync(command, reader =>
+        {
+            fullNames.Add((reader.GetString(0), reader.GetString(1)));
+        }, ct).ConfigureAwait(false);
+
+        _logger.Information("Found {NumberOfTables} tables.", fullNames.Count);
+        return fullNames;
     }
     
     public async Task<PrimaryKey?> GetPrimaryKeyAsync(

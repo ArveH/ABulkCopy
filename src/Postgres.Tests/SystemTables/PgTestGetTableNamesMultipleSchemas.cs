@@ -1,9 +1,9 @@
-﻿namespace SqlServer.Tests.SystemTables;
+﻿namespace Postgres.Tests.SystemTables;
 
 [Collection(nameof(DatabaseCollection))]
-public class MssTestGetTableNamesMultipleSchemas(
+public class PgTestGetTableNamesMultipleSchemas(
     DatabaseFixture dbFixture, ITestOutputHelper output)
-    : MssTestGetTableNamesBase(dbFixture, output)
+    : PgTestGetTableNamesBase(dbFixture, output)
 {
     [Fact]
     public async Task TestGetTableNames_When_SameTableInDifferentSchemas()
@@ -12,8 +12,8 @@ public class MssTestGetTableNamesMultipleSchemas(
         var testTableName = "T_" + guid;
         var tableList = await TestGetTableNamesAsync(guid, "", testTableName);
         tableList.Count.Should().Be(2);
-        tableList.Count(t => t.tableName == testTableName).Should().Be(2);
-        tableList.Count(t => t.schemaName == "dbo").Should().Be(1);
+        tableList.Count(t => t.tableName.Equals(testTableName, StringComparison.InvariantCultureIgnoreCase)).Should().Be(2);
+        tableList.Count(t => t.schemaName == DatabaseFixture.DefaultSchemaName).Should().Be(1);
         tableList.Count(t => t.schemaName == DatabaseFixture.TestSchemaName).Should().Be(1);
     }
 
@@ -22,17 +22,17 @@ public class MssTestGetTableNamesMultipleSchemas(
     {
         var guid = Guid.NewGuid().ToString("N");
         var testTableName = "T_" + guid;
-        var tableList = await TestGetTableNamesAsync(guid, "dbo", testTableName);
+        var tableList = await TestGetTableNamesAsync(guid, DatabaseFixture.DefaultSchemaName, testTableName);
         tableList.Count.Should().Be(1);
-        tableList[0].schemaName.Should().Be("dbo");
-        tableList[0].tableName.Should().Be(testTableName);
+        tableList[0].schemaName.Should().BeEquivalentTo(DatabaseFixture.DefaultSchemaName);
+        tableList[0].tableName.Should().BeEquivalentTo(testTableName);
     }
 
     [Fact]
     public async Task TestGetTableNames_When_TableNotExist()
     {
         var guid = Guid.NewGuid().ToString("N");
-        var tableList = await TestGetTableNamesAsync(guid, "dbo", "DoesNotExist");
+        var tableList = await TestGetTableNamesAsync(guid, DatabaseFixture.DefaultSchemaName, "DoesNotExist");
         tableList.Count.Should().Be(0);
     }
 
@@ -40,7 +40,7 @@ public class MssTestGetTableNamesMultipleSchemas(
     public async Task TestGetTableNames_When_AllTables()
     {
         var guid = Guid.NewGuid().ToString("N");
-        var tableList = await TestGetTableNamesAsync(guid, "dbo", "%");
+        var tableList = await TestGetTableNamesAsync(guid, DatabaseFixture.DefaultSchemaName, "%");
         tableList.Count.Should().BeGreaterThanOrEqualTo(3);
     }
 
@@ -51,13 +51,13 @@ public class MssTestGetTableNamesMultipleSchemas(
         var testTables = new List<SchemaTableTuple>
         {
             new(DatabaseFixture.TestSchemaName, testTableName),
-            new("dbo", testTableName),
-            new("dbo", "T_ExtraTable"),
+            new(DatabaseFixture.DefaultSchemaName, testTableName),
+            new(DatabaseFixture.DefaultSchemaName, "T_ExtraTable"),
         };
         return await CreateAndCleanupTablesAsync(testTables, async () =>
         {
             // Act
-            var result = await MssSystemTables.GetFullTableNamesAsync(
+            var result = await PgSystemTables.GetFullTableNamesAsync(
                 schemaName, searchString, CancellationToken.None);
 
             return result.ToList();

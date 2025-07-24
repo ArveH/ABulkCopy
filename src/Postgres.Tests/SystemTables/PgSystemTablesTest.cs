@@ -1,4 +1,4 @@
-﻿namespace Postgres.Tests.PgCmd;
+﻿namespace Postgres.Tests.SystemTables;
 
 [Collection(nameof(DatabaseCollection))]
 public class PgSystemTablesTest(DatabaseFixture dbFixture, ITestOutputHelper output)
@@ -16,9 +16,9 @@ public class PgSystemTablesTest(DatabaseFixture dbFixture, ITestOutputHelper out
         try
         {
             // Arrange
-            var systemTables = GetPgSystemTables();
+            var systemTables = CreatePgSystemTables();
             await CreateTableWithIdentityColumn(tableName, colName, 100);
-            await DbFixture.ExecuteNonQuery($"insert into \"{tableName}\" (\"Name\") values ('Arve3')");
+            await DbFixture.ExecuteNonQuery($"insert into {tableName} (Name) values ('Arve3')");
 
             // Act
             await systemTables.ResetIdentityAsync(tableName, colName, CancellationToken.None);
@@ -51,7 +51,7 @@ public class PgSystemTablesTest(DatabaseFixture dbFixture, ITestOutputHelper out
         inputDefinition.Columns.Add(new PostgresVarChar(2, "Name", true, 100));
         await DbFixture.DropTable(("public", tableName));
         await DbFixture.CreateTable(inputDefinition);
-        await DbFixture.ExecuteNonQuery($"insert into \"{tableName}\" (\"Name\") values ('Arve1')");
-        await DbFixture.ExecuteNonQuery($"insert into \"{tableName}\" (\"Name\") values ('Arve2')");
+        await DbFixture.ExecuteNonQuery($"insert into {tableName} (Name) values ('Arve1')");
+        await DbFixture.ExecuteNonQuery($"insert into {tableName} (Name) values ('Arve2')");
     }
 }
