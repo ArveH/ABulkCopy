@@ -17,6 +17,8 @@ public class MssRawReader : IMssRawReader
 
     public int GetInt32(int ordinal) => _reader.GetInt32(ordinal);
     
+    public uint GetUInt32(int ordinal) => _reader.GetFieldValue<uint>(ordinal);
+    
     public decimal GetDecimal(int ordinal) => _reader.GetDecimal(ordinal);
     
     public bool GetBoolean(int ordinal) => _reader.GetBoolean(ordinal);

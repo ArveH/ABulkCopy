@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-
-namespace ABulkCopy.ASqlServer;
+﻿namespace ABulkCopy.ASqlServer;
 
 public class MssContext : IDbContext
 {

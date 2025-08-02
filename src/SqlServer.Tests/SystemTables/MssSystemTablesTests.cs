@@ -36,7 +36,6 @@ public class MssSystemTablesTests(DatabaseFixture dbFixture, ITestOutputHelper o
         columnInfo[23].Length.Should().Be(-1, "because we are dealing with nvarchar(max)");
         columnInfo[23].Collation.Should().Be("SQL_Latin1_General_CP1_CI_AS");
         columnInfo[23].IsNullable.Should().BeTrue("because column 23 is nullable");
-
     }
 
     [Fact]

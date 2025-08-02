@@ -16,6 +16,8 @@ public class PgRawReader : IPgRawReader
     public short GetInt16(int ordinal) => _reader.GetInt16(ordinal);
 
     public int GetInt32(int ordinal) => _reader.GetInt32(ordinal);
+    
+    public uint GetUInt32(int ordinal) => _reader.GetFieldValue<uint>(ordinal);
 
     public decimal GetDecimal(int ordinal) => _reader.GetDecimal(ordinal);
     

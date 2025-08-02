@@ -71,7 +71,7 @@ public class PgTestBase
         return machineName20 + methodName20;
     }
 
-    private static Identifier GetIdentifier(
+    protected static Identifier GetIdentifier(
         Dictionary<string, string?> appSettings,
         Rdbms rdbms = Rdbms.Pg)
     {

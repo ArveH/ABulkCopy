@@ -57,6 +57,80 @@ public class PgSystemTables : IPgSystemTables
         return fullNames;
     }
     
+    private async Task<(uint id, string location)?> GetIdAndLocationAsync(
+        string schemaName, string tableName, CancellationToken ct)
+    {
+        await using var command = _pgRawCommand.DataSource.CreateCommand();
+        command.CommandText = StaticQueries.GetTableIdAndLocation();
+        command.Parameters.AddWithValue("@SchemaName", schemaName);
+        command.Parameters.AddWithValue("@TableName", tableName);
+
+        (uint id, string location)? result = null;
+        await _pgRawCommand.ExecuteReaderAsync(command, reader =>
+        {
+            result = new ValueTuple<uint, string>(reader.GetUInt32(0), reader.GetString(1));
+        }, ct).ConfigureAwait(false);
+
+        if (result == null)
+        {
+            _logger.Warning("Table '{TableName}' not found in schema '{SchemaName}'", tableName, schemaName);
+        }
+
+        return result;
+    }
+    
+    public async Task<TableHeader?> GetTableHeaderAsync(
+        string schemaName, string tableName, CancellationToken ct)
+    {
+        var result = await GetIdAndLocationAsync(schemaName, tableName, ct).ConfigureAwait(false);
+        if (!result.HasValue)
+        {
+            _logger.Warning("Table Id and Location not found for '{SchemaName}.{TableName}'", tableName, schemaName);
+            return null;
+        }
+
+        var tableHeader = new TableHeader
+        {
+            Id = (int)result.Value.id,
+            Schema = schemaName,
+            Name = tableName,
+            Location = result.Value.location
+        };
+        
+        var identityColumns = await GetIdentityColumnsAsync(tableHeader.Id, ct).ConfigureAwait(false);
+        tableHeader.Identity = identityColumns.FirstOrDefault();
+        // TODO: Remove Identity from TableHeader
+        if (tableHeader.Identity == null)
+        {
+            _logger.Debug("No identity columns found for '{SchemaName}.{TableName}'", schemaName, tableName);
+        }
+
+        _logger.Information("Retrieved table header {@TableHeader} for '{SchemaName}.{TableName}'",
+            tableHeader, schemaName, tableName);
+        return tableHeader;
+    }
+    
+    private async Task<IEnumerable<Identity>> GetIdentityColumnsAsync(
+        int tableId, CancellationToken ct)
+    {
+        await using var command = _pgRawCommand.DataSource.CreateCommand();
+        command.CommandText = StaticQueries.GetIdentityColumns();
+        command.Parameters.AddWithValue("@TableId", tableId);
+
+        var identities = new List<Identity>();
+        await _pgRawCommand.ExecuteReaderAsync(command, reader =>
+        {
+            var identity = new Identity(
+                reader.GetString(0), 
+                reader.GetInt32(1), 
+                reader.GetInt32(2),
+                reader.GetString(3)[0]);
+            identities.Add(identity);
+        }, ct).ConfigureAwait(false);
+
+        return identities;
+    }
+    
     public async Task<PrimaryKey?> GetPrimaryKeyAsync(
         TableHeader tableHeader, CancellationToken ct)
     {

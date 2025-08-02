@@ -2,6 +2,10 @@
 
 public interface IPgSystemTables: ISystemTables
 {
+    Task<TableHeader?> GetTableHeaderAsync(
+        string schemaName, 
+        string tableName, 
+        CancellationToken ct);
     Task<PrimaryKey?> GetPrimaryKeyAsync(
         TableHeader tableHeader, 
         CancellationToken ct);
