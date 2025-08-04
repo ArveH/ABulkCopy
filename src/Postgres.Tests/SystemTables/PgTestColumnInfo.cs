@@ -1,0 +1,99 @@
+namespace Postgres.Tests.SystemTables;
+
+[Collection(nameof(DatabaseCollection))]
+public class PgTestColumnInfo(DatabaseFixture dbFixture, ITestOutputHelper output)
+    : PgTestBase(dbFixture, output)
+{
+    [Fact]
+    public async Task TestGetColumnInfo_When_AllTypes()
+    {
+        // Arrange
+        var tableName = GetName();
+        await DropTableAsync(DatabaseFixture.DefaultSchemaName, tableName);
+        await ExecuteNonQueryAsync(
+            CreateTableWithAllTypesStatement(DatabaseFixture.DefaultSchemaName, tableName, GetIdentifier()));
+        var tableHeader = await PgSystemTables.GetTableHeaderAsync(
+            DatabaseFixture.DefaultSchemaName, tableName, CancellationToken.None);
+        tableHeader.Should().NotBeNull();
+
+        // Act
+        var columnInfo = (await PgSystemTables.GetTableColumnInfoAsync(tableHeader!, CancellationToken.None)).ToList();
+
+        // Assert
+        columnInfo.Should().NotBeNull();
+        columnInfo.Count.Should().Be(28);
+        columnInfo[0].Name.Should().Be("Id");
+        columnInfo[0].Type.Should().Be(MssTypes.BigInt);
+        columnInfo[0].IsNullable.Should().BeFalse();
+        columnInfo[0].Identity.Should().NotBeNull();
+        columnInfo[0].Identity!.Seed.Should().Be(1);
+        columnInfo[0].Identity!.Increment.Should().Be(1);
+        columnInfo[9].Precision.Should().Be(28, "because decimal column has precision 28");
+        columnInfo[9].Scale.Should().Be(3, "because decimal column has scale 3");
+        columnInfo[23].Type.Should().Be(MssTypes.NVarChar);
+        columnInfo[23].Length.Should().Be(-1, "because we are dealing with nvarchar(max)");
+        columnInfo[23].Collation.Should().Be("SQL_Latin1_General_CP1_CI_AS");
+        columnInfo[23].IsNullable.Should().BeTrue("because column 23 is nullable");
+    }
+
+    private static IIdentifier GetIdentifier()
+    {
+        Dictionary<string, string?> appSettings = new()
+        {
+            { Constants.Config.AddQuotes, "false" },
+        };
+        return GetIdentifier(appSettings);
+    }
+    
+    private static string CreateTableWithAllTypesStatement(
+        string schemaName, string tableName, IIdentifier identifier)
+    {
+        var sb = new StringBuilder();
+        sb.Append($"CREATE TABLE ");
+        sb.Append(identifier.Get(schemaName));
+        sb.Append('.');
+        sb.Append(identifier.Get(tableName));
+        sb.AppendLine(" (");
+        sb.Append("    ").Append(identifier.Get("Test_SmallInt")).AppendLine(" SMALLINT NOT NULL,");
+        sb.Append("    ").Append(identifier.Get("Test_Integer")).AppendLine(" INTEGER NOT NULL,");
+        sb.Append("    ").Append(identifier.Get("Test_BigInt")).AppendLine(" BIGINT NOT NULL,");
+        sb.Append("    ").Append(identifier.Get("Test_Decimal")).AppendLine(" DECIMAL(10, 2) NOT NULL,");
+        sb.Append("    ").Append(identifier.Get("Test_Numeric")).AppendLine(" NUMERIC(10, 2) NOT NULL,");
+        sb.Append("    ").Append(identifier.Get("Test_Real")).AppendLine(" REAL NOT NULL,");
+        sb.Append("    ").Append(identifier.Get("Test_DoublePrecision")).AppendLine(" DOUBLE PRECISION NOT NULL,");
+        sb.Append("    ").Append(identifier.Get("Test_SmallSerial")).AppendLine(" SMALLSERIAL NOT NULL,");
+        sb.Append("    ").Append(identifier.Get("Test_Serial")).AppendLine(" SERIAL NOT NULL,");
+        sb.Append("    ").Append(identifier.Get("Test_BigSerial")).AppendLine(" BIGSERIAL,");
+        sb.Append("    ").Append(identifier.Get("Test_Money")).AppendLine(" MONEY,");
+        sb.Append("    ").Append(identifier.Get("Test_Char")).AppendLine(" CHAR(10),");
+        sb.Append("    ").Append(identifier.Get("Test_Varchar")).AppendLine(" VARCHAR(255),");
+        sb.Append("    ").Append(identifier.Get("Test_Text")).AppendLine(" TEXT,");
+        sb.Append("    ").Append(identifier.Get("Test_Bytea")).AppendLine(" BYTEA,");
+        sb.Append("    ").Append(identifier.Get("Test_Timestamp")).AppendLine(" TIMESTAMP NOT NULL,");
+        sb.Append("    ").Append(identifier.Get("Test_TimestampTz")).AppendLine(" TIMESTAMPTZ NOT NULL,");
+        sb.Append("    ").Append(identifier.Get("Test_Date")).AppendLine(" DATE NOT NULL,");
+        sb.Append("    ").Append(identifier.Get("Test_Time")).AppendLine(" TIME NOT NULL,");
+        sb.Append("    ").Append(identifier.Get("Test_TimeTz")).AppendLine(" TIMETZ NOT NULL,");
+        sb.Append("    ").Append(identifier.Get("Test_Interval")).AppendLine(" INTERVAL NOT NULL,");
+        sb.Append("    ").Append(identifier.Get("Test_Boolean")).AppendLine(" BOOLEAN NOT NULL,");
+        sb.Append("    ").Append(identifier.Get("Test_Uuid")).AppendLine(" UUID NOT NULL,");
+        // sb.Append("    ").Append(identifier.Get("Test_Json")).AppendLine(" JSON,");
+        // sb.Append("    ").Append(identifier.Get("Test_Jsonb")).AppendLine(" JSONB,");
+        // sb.Append("    ").Append(identifier.Get("Test_Xml")).AppendLine(" XML,");
+        // sb.Append("    ").Append(identifier.Get("Test_Point")).AppendLine(" POINT,");
+        // sb.Append("    ").Append(identifier.Get("Test_Line")).AppendLine(" LINE,");
+        // sb.Append("    ").Append(identifier.Get("Test_Lseg")).AppendLine(" LSEG,");
+        // sb.Append("    ").Append(identifier.Get("Test_Box")).AppendLine(" BOX,");
+        // sb.Append("    ").Append(identifier.Get("Test_Path")).AppendLine(" PATH,");
+        // sb.Append("    ").Append(identifier.Get("Test_Polygon")).AppendLine(" POLYGON,");
+        // sb.Append("    ").Append(identifier.Get("Test_Circle")).AppendLine(" CIRCLE,");
+        // sb.Append("    ").Append(identifier.Get("Test_Cidr")).AppendLine(" CIDR,");
+        // sb.Append("    ").Append(identifier.Get("Test_Inet")).AppendLine(" INET,");
+        // sb.Append("    ").Append(identifier.Get("Test_MacAddr")).AppendLine(" MACADDR,");
+        // sb.Append("    ").Append(identifier.Get("Test_Bit")).AppendLine(" BIT(8),");
+        // sb.Append("    ").Append(identifier.Get("Test_Varbit")).AppendLine(" VARBIT(8)");
+        sb.AppendLine(");");
+        return sb.ToString();
+    }
+}
+

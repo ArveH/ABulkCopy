@@ -6,6 +6,9 @@ public interface IPgSystemTables: ISystemTables
         string schemaName, 
         string tableName, 
         CancellationToken ct);
+    Task<IEnumerable<IColumn>> GetTableColumnInfoAsync(
+        TableHeader tableHeader, 
+        CancellationToken ct);
     Task<PrimaryKey?> GetPrimaryKeyAsync(
         TableHeader tableHeader, 
         CancellationToken ct);

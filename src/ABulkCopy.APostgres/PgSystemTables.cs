@@ -3,23 +3,27 @@
 public class PgSystemTables : IPgSystemTables
 {
     private readonly IPgRawCommand _pgRawCommand;
+    private readonly IPgColumnFactory _columnFactory;
     private readonly IQueryBuilderFactory _queryBuilderFactory;
     private readonly IIdentifier _identifier;
     private readonly ILogger _logger;
 
     public PgSystemTables(
         IPgRawCommand pgRawCommand,
+        IPgColumnFactory columnFactory,
         IQueryBuilderFactory queryBuilderFactory,
         IIdentifier identifier,
         ILogger logger)
     {
         _pgRawCommand = pgRawCommand;
+        _columnFactory = columnFactory;
         _queryBuilderFactory = queryBuilderFactory;
         _identifier = identifier;
         _logger = logger.ForContext<PgSystemTables>();
     }
 
-    public async Task<IEnumerable<SchemaTableTuple>> GetFullTableNamesAsync(string schemaNames, string searchString, CancellationToken ct)
+    public async Task<IEnumerable<SchemaTableTuple>> GetFullTableNamesAsync(
+        string schemaNames, string searchString, CancellationToken ct)
     {
         await using var command = _pgRawCommand.DataSource.CreateCommand();
         if (string.IsNullOrWhiteSpace(searchString))
@@ -109,7 +113,34 @@ public class PgSystemTables : IPgSystemTables
             tableHeader, schemaName, tableName);
         return tableHeader;
     }
-    
+
+    public async Task<IEnumerable<IColumn>> GetTableColumnInfoAsync(
+        TableHeader tableHeader, CancellationToken ct)
+    {
+        await using var command = _pgRawCommand.DataSource.CreateCommand();
+        command.CommandText = StaticQueries.GetColumnInfo();
+        command.Parameters.AddWithValue("@TableId", tableHeader.Id);
+
+        var columns = new List<IColumn>();
+        await _pgRawCommand.ExecuteReaderAsync(command, reader =>
+        {
+            var column = _columnFactory.Create(
+                reader.GetInt32(0), // ColumnId
+                reader.GetString(1), // Name
+                reader.GetString(2), // DataType
+                reader.GetInt32(3), // Length
+                reader.GetInt32(4), // Precision
+                reader.GetInt32(5), // Scale
+                reader.GetBoolean(6), // IsNullable
+                reader.GetString(7) // CollationName
+            );
+            columns.Add(column);
+        }, ct).ConfigureAwait(false);
+
+        _logger.Information("Retrieved {ColumnCount} columns for '{SchemaName}.{TableName}'",
+            columns.Count, tableHeader.Schema, tableHeader.Name);
+        return columns;
+    }
     private async Task<IEnumerable<Identity>> GetIdentityColumnsAsync(
         int tableId, CancellationToken ct)
     {

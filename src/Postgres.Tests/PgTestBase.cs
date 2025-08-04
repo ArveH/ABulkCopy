@@ -1,4 +1,6 @@
-﻿namespace Postgres.Tests;
+﻿using ABulkCopy.APostgres.Column;
+
+namespace Postgres.Tests;
 
 public class PgTestBase
 {
@@ -44,6 +46,7 @@ public class PgTestBase
         };
         return new PgSystemTables(
             DbFixture.PgRawCommand,
+            new PgColumnFactory(),
             GetQueryBuilderFactory(appSettings),
             GetIdentifier(appSettings), TestLogger);
     }

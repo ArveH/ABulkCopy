@@ -27,4 +27,25 @@ public static class StaticQueries
             "JOIN pg_sequence s ON s.seqrelid = seq.oid\n" +
             "WHERE a.attrelid = @TableId\n";
     }
+
+    public static string GetColumnInfo()
+    {
+        return
+            "SELECT att.attnum AS column_id,\n" +
+            "       att.attname AS column_name,\n" +
+            "       typ.typname AS type_name,\n" +
+            "       CASE WHEN typ.typname IN ('varchar', 'bpchar') THEN (att.atttypmod - 4) ELSE att.attlen END AS length,\n" +
+            "       CASE WHEN typ.typname = 'numeric' THEN ((att.atttypmod - 4) >> 16) ELSE NULL END AS precision,\n" +
+            "       CASE WHEN typ.typname = 'numeric' THEN (att.atttypmod - 4) & 65535 ELSE NULL END AS scale,\n" +
+            "       NOT att.attnotnull AS is_nullable,\n" +
+            "       CASE WHEN co.collname = 'default' THEN db.datcollate ELSE co.collname END AS collation_name,\n" +
+            "       pg_get_expr(ad.adbin, ad.adrelid) AS column_default\n" +
+            "FROM pg_attribute att\n" +
+            "JOIN pg_class cls ON cls.oid = att.attrelid\n" +
+            "JOIN pg_type typ ON typ.oid = att.atttypid\n" +
+            "LEFT JOIN pg_attrdef ad ON ad.adrelid = att.attrelid AND ad.adnum = att.attnum\n" +
+            "LEFT JOIN pg_collation co ON att.attcollation = co.oid\n" +
+            "JOIN pg_database db ON db.datname = current_database()\n" +
+            "WHERE att.attnum > 0 AND NOT att.attisdropped and cls.oid = @TableId\n";
+    }
 }
