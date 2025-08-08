@@ -67,11 +67,11 @@ public class PgTestBase
         }
 
         var methodName = sf.GetMethod()?.Name ?? throw new InvalidOperationException("Method is null");
-        var methodName20 = methodName.Length > 24 ? methodName[4..24] : methodName;
+        var methodNameShort = methodName.Length > 34 ? methodName[4..34] : methodName;
         var machineNameAlphaNum = new string(Environment.MachineName.Where(char.IsLetterOrDigit).ToArray());
-        var machineName20 = machineNameAlphaNum.Length > 20 ? machineNameAlphaNum[..20] : machineNameAlphaNum;
+        var machineNameShort = machineNameAlphaNum.Length > 10 ? machineNameAlphaNum[..10] : machineNameAlphaNum;
 
-        return machineName20 + methodName20;
+        return machineNameShort + methodNameShort;
     }
 
     protected static Identifier GetIdentifier(
