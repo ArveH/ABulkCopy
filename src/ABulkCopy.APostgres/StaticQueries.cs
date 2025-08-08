@@ -25,7 +25,9 @@ public static class StaticQueries
             "JOIN pg_depend d ON d.refobjid = c.oid AND d.refobjsubid = a.attnum\n" +
             "JOIN pg_class seq ON seq.oid = d.objid AND seq.relkind = 'S'\n" +
             "JOIN pg_sequence s ON s.seqrelid = seq.oid\n" +
-            "WHERE a.attrelid = @TableId\n";
+            "WHERE a.attrelid = @TableId\n" +
+            "  AND a.attidentity IN ('a', 'd')\n" +
+            "  AND NOT a.attisdropped\n";
     }
 
     public static string GetColumnInfo()
@@ -46,6 +48,7 @@ public static class StaticQueries
             "LEFT JOIN pg_attrdef ad ON ad.adrelid = att.attrelid AND ad.adnum = att.attnum\n" +
             "LEFT JOIN pg_collation co ON att.attcollation = co.oid\n" +
             "JOIN pg_database db ON db.datname = current_database()\n" +
-            "WHERE att.attnum > 0 AND NOT att.attisdropped and cls.oid = @TableId\n";
+            "WHERE att.attnum > 0 AND NOT att.attisdropped and cls.oid = @TableId\n" +
+            "ORDER BY att.attnum;\n";
     }
 }

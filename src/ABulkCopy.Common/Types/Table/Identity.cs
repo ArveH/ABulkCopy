@@ -2,7 +2,7 @@
 
 public class Identity
 {
-    public Identity(string? name=null, int seed=1, int increment=1, char type = 'a')
+    public Identity(string? name=null, long seed=1, long increment=1, char type = 'a')
     {
         if (type != 'a' && type != 'd')
             throw new ArgumentException("Type must be 'a' or 'd'", nameof(type));
@@ -12,8 +12,8 @@ public class Identity
         Type = type;
     }
     public string? ColumnName { get; set; }
-    public int Seed { get; set; }
-    public int Increment { get; set; }
+    public long Seed { get; set; }
+    public long Increment { get; set; }
     private char _type = 'a';
     public char Type
     {

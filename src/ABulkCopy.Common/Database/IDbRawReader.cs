@@ -3,10 +3,12 @@ namespace ABulkCopy.Common.Database;
 public interface IDbRawReader : IDisposable, IAsyncDisposable
 {
     Task<bool> ReadAsync(CancellationToken cancellationToken);
+    char GetChar(int ordinal);
     string GetString(int ordinal);
     short GetInt16(int ordinal);
     int GetInt32(int ordinal);
     uint GetUInt32(int ordinal);
+    long GetInt64(int ordinal);
     decimal GetDecimal(int ordinal);
     bool GetBoolean(int ordinal);
     byte GetByte(int ordinal);

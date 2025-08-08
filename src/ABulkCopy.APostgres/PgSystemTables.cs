@@ -66,8 +66,8 @@ public class PgSystemTables : IPgSystemTables
     {
         await using var command = _pgRawCommand.DataSource.CreateCommand();
         command.CommandText = StaticQueries.GetTableIdAndLocation();
-        command.Parameters.AddWithValue("@SchemaName", schemaName);
-        command.Parameters.AddWithValue("@TableName", tableName);
+        command.Parameters.AddWithValue("@SchemaName", _identifier.AdjustForSystemTable(schemaName));
+        command.Parameters.AddWithValue("@TableName", _identifier.AdjustForSystemTable(tableName));
 
         (uint id, string location)? result = null;
         await _pgRawCommand.ExecuteReaderAsync(command, reader =>
@@ -125,15 +125,16 @@ public class PgSystemTables : IPgSystemTables
         await _pgRawCommand.ExecuteReaderAsync(command, reader =>
         {
             var column = _columnFactory.Create(
-                reader.GetInt32(0), // ColumnId
+                reader.GetInt16(0), // ColumnId
                 reader.GetString(1), // Name
                 reader.GetString(2), // DataType
-                reader.GetInt32(3), // Length
-                reader.GetInt32(4), // Precision
-                reader.GetInt32(5), // Scale
+                reader.IsDBNull(3) ? 0 : reader.GetInt32(3), // Length
+                reader.IsDBNull(4) ? null : reader.GetInt32(4), // Precision
+                reader.IsDBNull(5) ? null : reader.GetInt32(5), // Scale
                 reader.GetBoolean(6), // IsNullable
-                reader.GetString(7) // CollationName
+                reader.IsDBNull(7) ? null : reader.GetString(7) // CollationName
             );
+            column.DefaultConstraint = reader.IsDBNull(8) ? null : new() {Definition = reader.GetString(8)};
             columns.Add(column);
         }, ct).ConfigureAwait(false);
 
@@ -141,6 +142,7 @@ public class PgSystemTables : IPgSystemTables
             columns.Count, tableHeader.Schema, tableHeader.Name);
         return columns;
     }
+    
     private async Task<IEnumerable<Identity>> GetIdentityColumnsAsync(
         int tableId, CancellationToken ct)
     {
@@ -153,9 +155,9 @@ public class PgSystemTables : IPgSystemTables
         {
             var identity = new Identity(
                 reader.GetString(0), 
-                reader.GetInt32(1), 
-                reader.GetInt32(2),
-                reader.GetString(3)[0]);
+                reader.GetInt64(1), 
+                reader.GetInt64(2),
+                reader.GetChar(3));
             identities.Add(identity);
         }, ct).ConfigureAwait(false);
 
