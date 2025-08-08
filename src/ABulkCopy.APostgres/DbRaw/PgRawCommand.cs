@@ -68,6 +68,11 @@ public class PgRawCommand : IPgRawCommand
 
         while (await dbRawReader.ReadAsync(ct).ConfigureAwait(false))
         {
+            if (ct.IsCancellationRequested)
+            {
+                return;
+            }
+
             readFunc(dbRawReader);
         }
     }

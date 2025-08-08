@@ -135,14 +135,30 @@ public class PgSystemTables : IPgSystemTables
                 reader.IsDBNull(7) ? null : reader.GetString(7) // CollationName
             );
             column.DefaultConstraint = reader.IsDBNull(8) ? null : new() {Definition = reader.GetString(8)};
+
             columns.Add(column);
         }, ct).ConfigureAwait(false);
+        await SetIdentityProperties(tableHeader, columns, ct);
 
         _logger.Information("Retrieved {ColumnCount} columns for '{SchemaName}.{TableName}'",
             columns.Count, tableHeader.Schema, tableHeader.Name);
         return columns;
     }
-    
+
+    private async Task SetIdentityProperties(TableHeader tableHeader, List<IColumn> columns, CancellationToken ct)
+    {
+        var identityColumns = (await GetIdentityColumnsAsync(tableHeader.Id, ct).ConfigureAwait(false)).ToList();
+
+        foreach (var column in columns)
+        {
+            var identity = identityColumns.FirstOrDefault(ic => ic.ColumnName == column.Name);
+            if (identity != null)
+            {
+                column.Identity = identity;
+            }
+        }
+    }
+
     private async Task<IEnumerable<Identity>> GetIdentityColumnsAsync(
         int tableId, CancellationToken ct)
     {

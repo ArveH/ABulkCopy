@@ -40,7 +40,7 @@ public class PgColumnFactory : IPgColumnFactory
             PgTypes.Float4 => new PostgresReal(id, name, isNullable),
             PgTypes.SmallInt => new PostgresSmallInt(id, name, isNullable),
             PgTypes.Int2 => new PostgresSmallInt(id, name, isNullable),
-            PgTypes.Text => new PostgresText(id, name, isNullable),
+            PgTypes.Text => new PostgresText(id, name, isNullable, collation),
             PgTypes.Time => new PostgresTime(id, name, isNullable, precision),
             PgTypes.Timestamp => new PostgresTimestamp(id, name, isNullable, precision),
             PgTypes.TimestampTz => new PostgresTimestampTz(id, name, isNullable, precision),

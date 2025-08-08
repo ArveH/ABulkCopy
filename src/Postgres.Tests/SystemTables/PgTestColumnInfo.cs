@@ -9,9 +9,10 @@ public class PgTestColumnInfo(DatabaseFixture dbFixture, ITestOutputHelper outpu
     {
         // Arrange
         var tableName = GetName();
+        var identifier = GetIdentifier();
         await DropTableAsync(DatabaseFixture.DefaultSchemaName, tableName);
         await ExecuteNonQueryAsync(
-            CreateTableWithAllTypesStatement(DatabaseFixture.DefaultSchemaName, tableName, GetIdentifier()));
+            CreateTableWithAllTypesStatement(DatabaseFixture.DefaultSchemaName, tableName, identifier));
         var tableHeader = await PgSystemTables.GetTableHeaderAsync(
             DatabaseFixture.DefaultSchemaName, tableName, CancellationToken.None);
         tableHeader.Should().NotBeNull();
@@ -21,19 +22,19 @@ public class PgTestColumnInfo(DatabaseFixture dbFixture, ITestOutputHelper outpu
 
         // Assert
         columnInfo.Should().NotBeNull();
-        columnInfo.Count.Should().Be(28);
-        columnInfo[0].Name.Should().Be("Id");
+        columnInfo.Count.Should().Be(22);
+        columnInfo[0].Name.Should().Be(identifier.AdjustForSystemTable("Id"));
         columnInfo[0].Type.Should().Be(PgTypes.BigInt);
         columnInfo[0].IsNullable.Should().BeFalse();
         columnInfo[0].Identity.Should().NotBeNull();
         columnInfo[0].Identity!.Seed.Should().Be(1);
         columnInfo[0].Identity!.Increment.Should().Be(1);
-        columnInfo[9].Precision.Should().Be(28, "because decimal column has precision 28");
-        columnInfo[9].Scale.Should().Be(3, "because decimal column has scale 3");
-        columnInfo[23].Type.Should().Be(PgTypes.VarChar);
-        columnInfo[23].Length.Should().Be(-1, "because we are dealing with nvarchar(max)");
-        columnInfo[23].Collation.Should().Be("SQL_Latin1_General_CP1_CI_AS");
-        columnInfo[23].IsNullable.Should().BeTrue("because column 23 is nullable");
+        columnInfo[5].Precision.Should().Be(28, "because decimal column has precision 28");
+        columnInfo[5].Scale.Should().Be(3, "because decimal column has scale 3");
+        columnInfo[14].Type.Should().Be(PgTypes.Text);
+        columnInfo[14].Length.Should().BeGreaterThanOrEqualTo(Int32.MaxValue/2);
+        columnInfo[14].Collation.Should().Be("en_ci_as");
+        columnInfo[14].IsNullable.Should().BeTrue();
     }
 
     private static IIdentifier GetIdentifier()
@@ -58,17 +59,17 @@ public class PgTestColumnInfo(DatabaseFixture dbFixture, ITestOutputHelper outpu
         sb.Append("    ").Append(identifier.Get("Test_SmallInt")).AppendLine(" SMALLINT NOT NULL,");
         sb.Append("    ").Append(identifier.Get("Test_Integer")).AppendLine(" INTEGER NOT NULL,");
         sb.Append("    ").Append(identifier.Get("Test_BigInt")).AppendLine(" BIGINT NOT NULL,");
-        sb.Append("    ").Append(identifier.Get("Test_Decimal")).AppendLine(" DECIMAL(10, 2) NOT NULL,");
-        sb.Append("    ").Append(identifier.Get("Test_Numeric")).AppendLine(" NUMERIC(10, 2) NOT NULL,");
+        sb.Append("    ").Append(identifier.Get("Test_Decimal")).AppendLine(" DECIMAL(28, 3) NOT NULL,");
+        sb.Append("    ").Append(identifier.Get("Test_Numeric")).AppendLine(" NUMERIC(28, 3) NOT NULL,");
         sb.Append("    ").Append(identifier.Get("Test_Real")).AppendLine(" REAL NOT NULL,");
         sb.Append("    ").Append(identifier.Get("Test_DoublePrecision")).AppendLine(" DOUBLE PRECISION NOT NULL,");
         sb.Append("    ").Append(identifier.Get("Test_SmallSerial")).AppendLine(" SMALLSERIAL NOT NULL,");
         sb.Append("    ").Append(identifier.Get("Test_Serial")).AppendLine(" SERIAL NOT NULL,");
         sb.Append("    ").Append(identifier.Get("Test_BigSerial")).AppendLine(" BIGSERIAL,");
         sb.Append("    ").Append(identifier.Get("Test_Money")).AppendLine(" MONEY,");
-        sb.Append("    ").Append(identifier.Get("Test_Char")).AppendLine(" CHAR(10),");
-        sb.Append("    ").Append(identifier.Get("Test_Varchar")).AppendLine(" VARCHAR(255),");
-        sb.Append("    ").Append(identifier.Get("Test_Text")).AppendLine(" TEXT,");
+        sb.Append("    ").Append(identifier.Get("Test_Char")).AppendLine(" CHAR(10) COLLATE en_ci_as,");
+        sb.Append("    ").Append(identifier.Get("Test_Varchar")).AppendLine(" VARCHAR(255) COLLATE en_ci_as,");
+        sb.Append("    ").Append(identifier.Get("Test_Text")).AppendLine(" TEXT COLLATE en_ci_as,");
         sb.Append("    ").Append(identifier.Get("Test_Bytea")).AppendLine(" BYTEA,");
         sb.Append("    ").Append(identifier.Get("Test_Timestamp")).AppendLine(" TIMESTAMP NOT NULL,");
         sb.Append("    ").Append(identifier.Get("Test_TimestampTz")).AppendLine(" TIMESTAMPTZ NOT NULL,");

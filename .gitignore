@@ -34,6 +34,7 @@ Icon?@
 **/.idea/**/*.iml
 **/.idea/**/contentModel.xml
 **/.idea/**/modules.xml
+**/.idea/**/copilotDiffState.xml
 
 # User-specific files
 *.rsuser
