@@ -11,7 +11,36 @@ public class MssTestColumnInfo(DatabaseFixture dbFixture, ITestOutputHelper outp
         var tableName = GetName();
         await DropTableAsync(tableName);
         await ExecuteNonQueryAsync(
-            $"CREATE TABLE [dbo].[{tableName}](\r\n\t[Id] [bigint] IDENTITY(1,1) NOT NULL,\r\n\t[ExactNumBigInt] [bigint] NOT NULL,\r\n\t[ExactNumInt] [int] NOT NULL,\r\n\t[ExactNumSmallInt] [smallint] NOT NULL,\r\n\t[ExactNumTinyInt] [tinyint] NOT NULL,\r\n\t[ExactNumBit] [bit] NOT NULL,\r\n\t[ExactNumMoney] [money] NOT NULL,\r\n\t[ExactNumSmallMoney] [smallmoney] NOT NULL,\r\n\t[ExactNumDecimal] [decimal](28, 3) NOT NULL,\r\n\t[ExactNumNumeric] [numeric](28, 3) NOT NULL,\r\n\t[ApproxNumFloat] [float] NOT NULL,\r\n\t[ApproxNumReal] [real] NOT NULL,\r\n\t[DTDate] [date] NOT NULL,\r\n\t[DTDateTime] [datetime] NOT NULL,\r\n\t[DTDateTime2] [datetime2](7) NOT NULL,\r\n\t[DTSmallDateTime] [smalldatetime] NOT NULL,\r\n\t[DTDateTimeOffset] [datetimeoffset](7) NOT NULL,\r\n\t[DTTime] [time](7) NOT NULL,\r\n\t[CharStrChar20] [char](20) NULL,\r\n\t[CharStrVarchar20] [varchar](20) NULL,\r\n\t[CharStrVarchar10K] [varchar](max) NULL,\r\n\t[CharStrNChar20] [nchar](20) NULL,\r\n\t[CharStrNVarchar20] [nvarchar](20) NULL,\r\n\t[CharStrNVarchar10K] [nvarchar](max) NULL,\r\n\t[BinBinary5K] [binary](5000) NULL,\r\n\t[BinVarbinary10K] [varbinary](max) NULL,\r\n\t[OtherGuid] [uniqueidentifier] NOT NULL,\r\n\t[OtherXml] [xml] NULL,\r\n CONSTRAINT [PK_{tableName}] PRIMARY KEY CLUSTERED \r\n(\r\n\t[Id] ASC\r\n))");
+            $"CREATE TABLE [dbo].[{tableName}](" + Environment.NewLine +
+            "\t[Id] [bigint] IDENTITY(1,1) NOT NULL," + Environment.NewLine +
+            "\t[ExactNumBigInt] [bigint] NOT NULL," + Environment.NewLine +
+            "\t[ExactNumInt] [int] NOT NULL," + Environment.NewLine +
+            "\t[ExactNumSmallInt] [smallint] NOT NULL," + Environment.NewLine +
+            "\t[ExactNumTinyInt] [tinyint] NOT NULL," + Environment.NewLine +
+            "\t[ExactNumBit] [bit] NOT NULL," + Environment.NewLine +
+            "\t[ExactNumMoney] [money] NOT NULL," + Environment.NewLine +
+            "\t[ExactNumSmallMoney] [smallmoney] NOT NULL," + Environment.NewLine +
+            "\t[ExactNumDecimal] [decimal](28, 3) NOT NULL," + Environment.NewLine +
+            "\t[ExactNumNumeric] [numeric](28, 3) NOT NULL," + Environment.NewLine +
+            "\t[ApproxNumFloat] [float] NOT NULL," + Environment.NewLine +
+            "\t[ApproxNumReal] [real] NOT NULL," + Environment.NewLine +
+            "\t[DTDate] [date] NOT NULL," + Environment.NewLine +
+            "\t[DTDateTime] [datetime] NOT NULL," + Environment.NewLine +
+            "\t[DTDateTime2] [datetime2](7) NOT NULL," + Environment.NewLine +
+            "\t[DTSmallDateTime] [smalldatetime] NOT NULL," + Environment.NewLine +
+            "\t[DTDateTimeOffset] [datetimeoffset](7) NOT NULL," + Environment.NewLine +
+            "\t[DTTime] [time](7) NOT NULL," + Environment.NewLine +
+            "\t[CharStrChar20] [char](20) NULL," + Environment.NewLine +
+            "\t[CharStrVarchar20] [varchar](20) NULL," + Environment.NewLine +
+            "\t[CharStrVarchar10K] [varchar](max) NULL," + Environment.NewLine +
+            "\t[CharStrNChar20] [nchar](20) NULL," + Environment.NewLine +
+            "\t[CharStrNVarchar20] [nvarchar](20) NULL," + Environment.NewLine +
+            "\t[CharStrNVarchar10K] [nvarchar](max) NULL," + Environment.NewLine +
+            "\t[BinBinary5K] [binary](5000) NULL," + Environment.NewLine +
+            "\t[BinVarbinary10K] [varbinary](max) NULL," + Environment.NewLine +
+            "\t[OtherGuid] [uniqueidentifier] NOT NULL," + Environment.NewLine +
+            "\t[OtherXml] [xml] NULL," + Environment.NewLine +
+            " CONSTRAINT [PK_{tableName}] PRIMARY KEY CLUSTERED ([Id] ASC))");
         var tableHeader = await MssSystemTables.GetTableHeaderAsync(
             "dbo", tableName, CancellationToken.None);
         tableHeader.Should().NotBeNull();
@@ -78,12 +107,12 @@ public class MssTestColumnInfo(DatabaseFixture dbFixture, ITestOutputHelper outp
         await ExecuteNonQueryAsync($"DROP DEFAULT IF EXISTS {constraintName};");
         await ExecuteNonQueryAsync($"CREATE DEFAULT {constraintName} AS 0;");
         await ExecuteNonQueryAsync(
-            $"CREATE TABLE {tableName}(\r\n" +
-            $"  id INTEGER,\r\n" +
-            $"  int1 INT NOT NULL DEFAULT 0,\r\n" +
-            $"  int2 INT NOT NULL CONSTRAINT df_bulkcopy_int DEFAULT 0,\r\n" +
-            $"  int3 INT NOT NULL,\r\n" +
-            $"  date1 DATETIME2 NOT NULL DEFAULT GETDATE());");
+            $"CREATE TABLE {tableName}(" + Environment.NewLine +
+            "  id INTEGER," + Environment.NewLine +
+            "  int1 INT NOT NULL DEFAULT 0," + Environment.NewLine +
+            "  int2 INT NOT NULL CONSTRAINT df_bulkcopy_int DEFAULT 0," + Environment.NewLine +
+            "  int3 INT NOT NULL," + Environment.NewLine +
+            "  date1 DATETIME2 NOT NULL DEFAULT GETDATE());");
         await ExecuteNonQueryAsync($"exec sp_bindefault '{constraintName}', '{tableName}.int3'");
 
     }
