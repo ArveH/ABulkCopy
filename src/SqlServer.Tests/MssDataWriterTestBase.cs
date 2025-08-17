@@ -31,15 +31,14 @@ public abstract class MssDataWriterTestBase : MssTestBase
         await CreateTableAsync(OriginalTableDefinition);
         await InsertIntoSingleColumnTableAsync(
             TestTableName, value, dbType);
-        var cts = new CancellationTokenSource();
-
+        
         // Act
         try
         {
             await TestDataWriter.WriteAsync(
                 OriginalTableDefinition,
                 TestPath,
-                cts.Token);
+                CancellationToken.None);
         }
         finally
         {

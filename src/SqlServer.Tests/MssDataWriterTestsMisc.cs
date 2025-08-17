@@ -35,7 +35,6 @@ public class MssDataWriterTestsMisc : MssDataWriterTestBase
         await CreateTableAsync(OriginalTableDefinition);
         await InsertIntoSingleColumnTableAsync(
             TestTableName, value, SqlDbType.VarBinary);
-        var cts = new CancellationTokenSource();
 
         // Act
         try
@@ -43,7 +42,7 @@ public class MssDataWriterTestsMisc : MssDataWriterTestBase
             await TestDataWriter.WriteAsync(
                 OriginalTableDefinition,
                 TestPath,
-                cts.Token);
+                CancellationToken.None);
         }
         finally
         {
@@ -68,15 +67,14 @@ public class MssDataWriterTestsMisc : MssDataWriterTestBase
         await CreateTableAsync(OriginalTableDefinition);
         await InsertIntoSingleColumnTableAsync(
             TestTableName, value, SqlDbType.Image);
-        var cts = new CancellationTokenSource();
-
+        
         // Act
         try
         {
             await TestDataWriter.WriteAsync(
                 OriginalTableDefinition,
                 TestPath, 
-                cts.Token);
+                CancellationToken.None);
         }
         finally
         {
@@ -104,15 +102,14 @@ public class MssDataWriterTestsMisc : MssDataWriterTestBase
             TestTableName, null, SqlDbType.VarBinary);
         await InsertIntoSingleColumnTableAsync(
             TestTableName, AllTypes.SampleValues.Binary5K, SqlDbType.VarBinary);
-        var cts = new CancellationTokenSource();
-
+        
         // Act
         try
         {
             await TestDataWriter.WriteAsync(
                 OriginalTableDefinition,
                 TestPath, 
-                cts.Token);
+                CancellationToken.None);
         }
         finally
         {

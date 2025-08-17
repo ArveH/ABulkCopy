@@ -154,10 +154,9 @@ public class PgDataReaderStringTests : PgDataReaderTestBase
             QBFactoryMock.Object,
             new DataFileReader(FileHelper.FileSystem, TestLogger),
             TestLogger);
-        var cts = new CancellationTokenSource();
 
         // Act
-        await dataReader.ReadAsync(FileHelper.DataFolder, tableDefinition, cts.Token, new InsertSettings {EmptyStringFlag = EmptyStringFlag.Single});
+        await dataReader.ReadAsync(FileHelper.DataFolder, tableDefinition, CancellationToken.None, new InsertSettings {EmptyStringFlag = EmptyStringFlag.Single});
 
         //Assert
         var colValue = await DbFixture.SelectScalar<string>(
