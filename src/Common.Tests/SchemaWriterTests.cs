@@ -61,8 +61,10 @@ public class SchemaWriterTests
             "    \"Schema\": \"dbo\",\r\n" +
             "    \"Location\": \"default\",\r\n" +
             "    \"Identity\": {\r\n" +
+            "        \"ColumnName\": null,\r\n" +
             "        \"Seed\": 1,\r\n" +
-            "        \"Increment\": 1\r\n" +
+            "        \"Increment\": 1,\r\n" +
+            "        \"Type\": \"a\"\r\n" +
             "      }\r\n" +
             "}").Squeeze());
     }
