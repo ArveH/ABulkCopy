@@ -1,7 +1,7 @@
 ﻿namespace Postgres.Tests.SystemTables;
 
 [Collection(nameof(DatabaseCollection))]
-public class PgSystemTablesTest(DatabaseFixture dbFixture, ITestOutputHelper output)
+public class PgTestResetIdentityColumn(DatabaseFixture dbFixture, ITestOutputHelper output)
     : PgTestBase(dbFixture, output)
 {
     [Theory]

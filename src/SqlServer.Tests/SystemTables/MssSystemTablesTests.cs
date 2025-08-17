@@ -12,8 +12,13 @@ public class MssSystemTablesTests(DatabaseFixture dbFixture, ITestOutputHelper o
         // Arrange
         var tableName = GetName();
         await DropTableAsync(tableName);
-        await ExecuteNonQueryAsync($"CREATE TABLE [{tableName}]([Key1] int NOT NULL, [Key2] int NOT NULL, [AnotherCol] nvarchar(20), \r\nCONSTRAINT [PK_{tableName}] PRIMARY KEY CLUSTERED \r\n(\r\n\t[Key1] ASC,\r\n\t[Key2] ASC\r\n))");
-
+        await ExecuteNonQueryAsync(
+            $"CREATE TABLE [{tableName}]([Key1] int NOT NULL, [Key2] int NOT NULL, [AnotherCol] nvarchar(20), " + Environment.NewLine +
+            "CONSTRAINT [PK_{tableName}] PRIMARY KEY CLUSTERED " + Environment.NewLine +
+            "(" + Environment.NewLine +
+            "\t[Key1] ASC," + Environment.NewLine +
+            "\t[Key2] ASC" + Environment.NewLine +
+            "))");
         var tableHeader = await MssSystemTables.GetTableHeaderAsync(
             "dbo", tableName, CancellationToken.None);
         tableHeader.Should().NotBeNull();
