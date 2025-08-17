@@ -53,13 +53,4 @@ public class PgTestPrimaryKey : PgTestBase
         // Assert
         pk.Should().BeNull($"because {tableName} doesn't have a primary key");
     }
-    
-    private static IIdentifier GetIdentifier()
-    {
-        Dictionary<string, string?> appSettings = new()
-        {
-            { Constants.Config.AddQuotes, "false" },
-        };
-        return GetIdentifier(appSettings);
-    }
 }

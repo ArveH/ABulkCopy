@@ -89,15 +89,6 @@ public class PgTestColumnInfo : PgTestBase
         return sb.ToString();
     }
     
-    private static IIdentifier GetIdentifier()
-    {
-        Dictionary<string, string?> appSettings = new()
-        {
-            { Constants.Config.AddQuotes, "false" },
-        };
-        return GetIdentifier(appSettings);
-    }
-    
     private static string CreateTableWithAllTypesStatement(
         string schemaName, string tableName, IIdentifier identifier)
     {

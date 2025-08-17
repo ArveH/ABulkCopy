@@ -73,6 +73,16 @@ public class PgTestBase
 
         return machineNameShort + methodNameShort;
     }
+    
+        
+    protected static IIdentifier GetIdentifier()
+    {
+        Dictionary<string, string?> appSettings = new()
+        {
+            { Constants.Config.AddQuotes, "false" },
+        };
+        return GetIdentifier(appSettings);
+    }
 
     protected static Identifier GetIdentifier(
         Dictionary<string, string?> appSettings,

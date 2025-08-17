@@ -3,7 +3,7 @@ using ForeignKey = ABulkCopy.Common.Types.Table.ForeignKey;
 namespace SqlServer.Tests.SystemTables;
 
 [Collection(nameof(DatabaseCollection))]
-public class MssSystemTablesTests(DatabaseFixture dbFixture, ITestOutputHelper output) 
+public class MssTestForeignKey(DatabaseFixture dbFixture, ITestOutputHelper output) 
     : MssTestBase(dbFixture, output)
 {
     [Fact]
