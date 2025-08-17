@@ -36,6 +36,24 @@ public class PgTestPrimaryKey : PgTestBase
         pk.ColumnNames[1].Direction.Should().Be(Direction.Ascending);
     }
     
+    [Fact]
+    public async Task TestGetPrimaryKey_When_NotExist()
+    {
+        // Arrange
+        var tableName = GetName();
+        await DropTableAsync(DatabaseFixture.DefaultSchemaName, tableName);
+        await ExecuteNonQueryAsync($"CREATE TABLE {tableName}(Key1 int NOT NULL, Key2 int NOT NULL, AnotherCol varchar(20))");
+        var tableHeader = await PgSystemTables.GetTableHeaderAsync(
+            DatabaseFixture.DefaultSchemaName, tableName, CancellationToken.None);
+        tableHeader.Should().NotBeNull();
+
+        // Act
+        var pk = await PgSystemTables.GetPrimaryKeyAsync(tableHeader!, CancellationToken.None);
+
+        // Assert
+        pk.Should().BeNull($"because {tableName} doesn't have a primary key");
+    }
+    
     private static IIdentifier GetIdentifier()
     {
         Dictionary<string, string?> appSettings = new()
