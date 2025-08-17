@@ -2,11 +2,11 @@
 
 public class Identity
 {
-    public Identity(string? name=null, long seed=1, long increment=1, char type = 'a')
+    public Identity(string? columnName=null, long seed=1, long increment=1, char type = 'a')
     {
         if (type != 'a' && type != 'd')
             throw new ArgumentException("Type must be 'a' or 'd'", nameof(type));
-        ColumnName = name;
+        ColumnName = columnName;
         Seed = seed;
         Increment = increment;
         Type = type;
