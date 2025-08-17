@@ -44,6 +44,7 @@ public class PgColumnFactory : IPgColumnFactory
             PgTypes.Time => new PostgresTime(id, name, isNullable, precision),
             PgTypes.Timestamp => new PostgresTimestamp(id, name, isNullable, precision),
             PgTypes.TimestampTz => new PostgresTimestampTz(id, name, isNullable, precision),
+            PgTypes.TimestampWithTimeZone => new PostgresTimestampTz(id, name, isNullable, precision),
             PgTypes.Uuid => new PostgresUuid(id, name, isNullable),
             _ => throw new ArgumentOutOfRangeException(nameof(nativeType), nativeType, null)
         };

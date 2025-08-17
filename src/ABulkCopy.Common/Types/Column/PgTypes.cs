@@ -27,6 +27,7 @@ public static class PgTypes
     public const string Time = "time";
     public const string Timestamp = "timestamp";
     public const string TimestampTz = "timestamptz";
+    public const string TimestampWithTimeZone = "timestamp with time zone";
     public const string Uuid = "uuid";
     public const string VarChar = "varchar";
 
@@ -50,6 +51,7 @@ public static class PgTypes
         Time,
         Timestamp,
         TimestampTz,
+        TimestampWithTimeZone,
         Uuid,
         VarChar
     };

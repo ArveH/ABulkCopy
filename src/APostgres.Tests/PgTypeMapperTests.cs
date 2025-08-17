@@ -42,7 +42,7 @@ public class PgTypeMapperTests : PgTestBase
             }
         };
 
-        TestConvert(GetName(), defCol, "timestamp with time zone", expected);
+        TestConvert(GetName(), defCol, "timestamptz", expected);
     }
 
     [Theory]
