@@ -1,24 +1,24 @@
-﻿namespace ABulkCopy.ASqlServer.Table;
+namespace ABulkCopy.APostgres.Table;
 
-public class MssTableSchema : ITableSchema
+public class PgTableSchema : ITableSchema
 {
-    private readonly IMssSystemTables _systemTables;
+    private readonly IPgSystemTables _systemTables;
     private readonly ILogger _logger;
 
-    public MssTableSchema(
-        IMssSystemTables systemTables,
+    public PgTableSchema(
+        IPgSystemTables systemTables,
         ILogger logger)
     {
         _systemTables = systemTables;
-        _logger = logger.ForContext<MssTableSchema>();
+        _logger = logger.ForContext<PgTableSchema>();
     }
-
+    
     public async Task<TableDefinition?> GetTableInfoAsync(
         string schemaName, string tableName, CancellationToken ct)
     {
         if (schemaName == string.Empty)
         {
-            schemaName = "dbo";
+            schemaName = "public";
         }
 
         var tableHeader = await _systemTables.GetTableHeaderAsync(

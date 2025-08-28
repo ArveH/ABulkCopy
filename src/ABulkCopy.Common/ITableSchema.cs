@@ -1,6 +1,6 @@
-﻿namespace ABulkCopy.ASqlServer.Table;
+namespace ABulkCopy.Common;
 
-public interface IMssTableSchema
+public interface ITableSchema
 {
     Task<TableDefinition?> GetTableInfoAsync(
         string schemaName, string tableName, CancellationToken ct);

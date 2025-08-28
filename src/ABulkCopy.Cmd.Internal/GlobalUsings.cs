@@ -2,10 +2,13 @@
 
 global using ABulkCopy.APostgres;
 global using ABulkCopy.APostgres.Column;
+global using ABulkCopy.APostgres.DbRaw;
 global using ABulkCopy.APostgres.Mapping;
 global using ABulkCopy.APostgres.Reader;
+global using ABulkCopy.APostgres.Table;
 global using ABulkCopy.ASqlServer;
 global using ABulkCopy.ASqlServer.Column;
+global using ABulkCopy.ASqlServer.DbRaw;
 global using ABulkCopy.ASqlServer.Table;
 global using ABulkCopy.Common;
 global using ABulkCopy.Common.Config;
