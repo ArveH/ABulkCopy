@@ -7,7 +7,7 @@ public abstract class MssTestBase
     protected readonly DatabaseFixture DbFixture;
     protected readonly ILogger TestLogger;
     protected readonly Microsoft.Extensions.Logging.ILoggerFactory TestLoggerFactory;
-    protected readonly IMssSystemTables MssSystemTables;
+    protected readonly ISystemTables MssSystemTables;
 
     protected MssTestBase(DatabaseFixture dbFixture, ITestOutputHelper output)
     {
@@ -26,20 +26,20 @@ public abstract class MssTestBase
         MssSystemTables = CreateMssSystemTables();
     }
 
-    private IMssSystemTables CreateMssSystemTables()
+    private ISystemTables CreateMssSystemTables()
     {
         var connectionString = DbFixture.TestConfiguration.GetConnectionString(Constants.Config.MssConnectionString);
         connectionString.Should()
             .NotBeNullOrWhiteSpace("because the connection string should be set");
         IMssColumnFactory colFactory = new MssColumnFactory();
-        IMssSystemTables systemTables = new MssSystemTables(
+        ISystemTables systemTables = new MssSystemTables(
             DbFixture.MssRawCommand,
             colFactory, 
             TestLogger);
         return systemTables;
     }
 
-    protected string GetName()
+    protected static string GetName()
     {
         var st = new StackTrace();
         // Frames:

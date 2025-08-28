@@ -1,6 +1,6 @@
 ﻿namespace ABulkCopy.ASqlServer;
 
-public class MssSystemTables : IMssSystemTables
+public class MssSystemTables : ISystemTables
 {
     private const string TableNameParameter = "@TableName";
     private readonly IMssRawCommand _rawCommand;

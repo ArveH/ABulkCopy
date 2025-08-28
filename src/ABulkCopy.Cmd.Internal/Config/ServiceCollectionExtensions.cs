@@ -7,7 +7,6 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton<IDbContext, MssContext>();
         services.AddSingleton<ISystemTables, MssSystemTables>();
-        services.AddSingleton<IMssSystemTables, MssSystemTables>();
         services.AddSingleton<ITableSchema, MssTableSchema>();
         services.AddSingleton<IMssRawCommand, MssRawCommand>();
         services.AddSingleton<IMssRawFactory, MssRawFactory>();

@@ -19,4 +19,7 @@ public interface ISystemTables
     Task<IEnumerable<ForeignKey>> GetForeignKeysAsync(
         TableHeader tableHeader, 
         CancellationToken ct);
+    Task<IEnumerable<IndexDefinition>> GetIndexesAsync(
+        TableHeader tableHeader, 
+        CancellationToken ct);
 }                                                                                                                                                                                                        

@@ -2,11 +2,11 @@
 
 public class MssTableSchema : ITableSchema
 {
-    private readonly IMssSystemTables _systemTables;
+    private readonly ISystemTables _systemTables;
     private readonly ILogger _logger;
 
     public MssTableSchema(
-        IMssSystemTables systemTables,
+        ISystemTables systemTables,
         ILogger logger)
     {
         _systemTables = systemTables;
