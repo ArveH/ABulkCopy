@@ -3,7 +3,7 @@
 public class CopyOut : ICopyOut
 {
     private readonly IConfiguration _config;
-    private readonly IMssSystemTables _systemTables;
+    private readonly ISystemTables _systemTables;
     private readonly IMssTableSchema _tableSchema;
     private readonly IDataWriter _dataWriter;
     private readonly ISchemaWriter _schemaWriter;
@@ -11,7 +11,7 @@ public class CopyOut : ICopyOut
 
     public CopyOut(
         IConfiguration config,
-        IMssSystemTables systemTables,
+        ISystemTables systemTables,
         IMssTableSchema tableSchema,
         IDataWriter dataWriter,
         ISchemaWriter schemaWriter,
