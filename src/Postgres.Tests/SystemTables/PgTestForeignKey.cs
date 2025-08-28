@@ -51,8 +51,8 @@ public class PgTestForeignKey : PgTestBase
             var foreignKeys = fks.ToList();
             foreignKeys.Should().NotBeNull();
             foreignKeys.Count.Should().Be(2);
-            VerifyForeignKey(foreignKeys[0], childTable, parent1Table, _identifier.AdjustForSystemTable("Parent1Id"));
-            VerifyForeignKey(foreignKeys[1], childTable, parent2Table, _identifier.AdjustForSystemTable("Parent2Id"));
+            VerifyForeignKey(foreignKeys[0], _identifier.AdjustForSystemTable("Parent1Id"));
+            VerifyForeignKey(foreignKeys[1], _identifier.AdjustForSystemTable("Parent2Id"));
         }
         finally
         {
@@ -64,8 +64,6 @@ public class PgTestForeignKey : PgTestBase
 
     private void VerifyForeignKey(
         ForeignKey foreignKey,
-        string childTable,
-        string parentTable,
         string fkColName)
     {
         foreignKey.ColumnNames[0].Should().Be(fkColName);
