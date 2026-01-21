@@ -243,14 +243,75 @@ public class PgSystemTables : IPgSystemTables
         TableHeader tableHeader, CancellationToken ct)
     {
         await using var command = _rawCommand.DataSource.CreateCommand();
-        command.CommandText = StaticQueries.GetIdentityColumns();
-        command.Parameters.AddWithValue("@TableId", tableHeader.Id);
+        command.CommandText = StaticQueries.GetIndexInfo();
+        command.Parameters.AddWithValue("@SchemaName", tableHeader.Schema);
+        command.Parameters.AddWithValue("@TableName", tableHeader.Name);
 
-        var indexes = new List<IndexDefinition>();
+        var indexDict = new Dictionary<string, IndexDefinition>();
+        
+        await _rawCommand.ExecuteReaderAsync(
+            command,
+            async reader =>
+            {
+                while (await reader.ReadAsync(ct).ConfigureAwait(false))
+                {
+                    var indexName = reader.GetString(0);
+                    var accessMethod = reader.GetString(1);
+                    var isPrimary = reader.GetBoolean(2);
+                    var isUnique = reader.GetBoolean(3);
+                    var isValid = reader.GetBoolean(4);
+                    var isClustered = reader.GetBoolean(5);
+                    
+                    // Skip primary key indexes as they are constraints, not regular indexes
+                    if (isPrimary)
+                        continue;
+                    
+                    // Get or create the index definition
+                    if (!indexDict.TryGetValue(indexName, out var indexDef))
+                    {
+                        var type = (IndexType)Enum.Parse(typeof(IndexType), accessMethod, true);
+                        indexDef = new IndexDefinition
+                        {
+                            Header = new IndexHeader
+                            {
+                                Id = 0,
+                                Name = indexName,
+                                TableId = 0,
+                                Location = "",
+                                IsUnique = isUnique,
+                                Type = type,
+                                IsClustered = isClustered,
+                            }
+                        };
+                        indexDict[indexName] = indexDef;
+                        _logger.Verbose("Added index: {IndexName}", indexDef.Header.Name);
+                    }
+                    
+                    // Add column information if available (columns 6-10)
+                    if (!reader.IsDBNull(6)) // column_position
+                    {
+                        var columnPosition = reader.GetInt32(6);
+                        var columnName = reader.IsDBNull(7) ? null : reader.GetString(7);
+                        var descOrder = reader.GetBoolean(8);
+                        var nullsFirst = reader.GetBoolean(9);
+                        var columnExpression = reader.IsDBNull(10) ? null : reader.GetString(10);
+                        
+                        var indexColumn = new IndexColumn
+                        {
+                            Name = columnName ?? columnExpression ?? $"expr_{columnPosition}",
+                            Direction = descOrder ? Direction.Descending : Direction.Ascending
+                        };
+                        indexDef.Columns.Add(indexColumn);
+                    }
+                }
+            },
+            ct);
+        
+        var indexes = indexDict.Values.ToList();
         
         _logger.Information(
             "Retrieved {IndexCount} {IndexPlural} for table '{TableName}'",
-            indexes.Capacity, "index".Plural(indexes.Count), tableHeader.Name);
+            indexes.Count, "index".Plural(indexes.Count), tableHeader.Name);
 
         return indexes;
     }

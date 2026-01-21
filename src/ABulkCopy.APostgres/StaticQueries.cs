@@ -51,4 +51,34 @@ public static class StaticQueries
             "WHERE att.attnum > 0 AND NOT att.attisdropped and cls.oid = @TableId\n" +
             "ORDER BY att.attnum;\n";
     }
+
+    public static string GetIndexInfo()
+    {
+        return
+            "SELECT" + Environment.NewLine + 
+            "    i.relname                     AS index_name," + Environment.NewLine + 
+            "    am.amname                     AS access_method," + Environment.NewLine + 
+            "    ix.indisprimary               AS is_primary," + Environment.NewLine + 
+            "    ix.indisunique                AS is_unique," + Environment.NewLine + 
+            "    ix.indisvalid                 AS is_valid," + Environment.NewLine + 
+            "    ix.indisclustered             AS is_clustered," + Environment.NewLine + 
+            "    cols.ord::int                 AS column_position," + Environment.NewLine + 
+            "    a.attname                     AS column_name,          -- NULL for expression" + Environment.NewLine + 
+            "    (ix.indoption[cols.ord::int] & 1) = 1 AS desc_order,   -- DESC flag" + Environment.NewLine + 
+            "    (ix.indoption[cols.ord::int] & 2) = 2 AS nulls_first,  -- NULLS FIRST flag" + Environment.NewLine + 
+            "    pg_get_indexdef(ix.indexrelid, cols.ord::int, true) AS column_expression" + Environment.NewLine + 
+            "FROM pg_index ix" + Environment.NewLine + 
+            "         JOIN pg_class i         ON i.oid = ix.indexrelid" + Environment.NewLine + 
+            "         JOIN pg_class t         ON t.oid = ix.indrelid" + Environment.NewLine + 
+            "         JOIN pg_namespace n     ON n.oid = t.relnamespace" + Environment.NewLine + 
+            "         JOIN pg_am am           ON am.oid = i.relam" + Environment.NewLine + 
+            "         LEFT JOIN pg_constraint c ON c.conindid = ix.indexrelid" + Environment.NewLine + 
+            "         LEFT JOIN LATERAL unnest(ix.indkey) WITH ORDINALITY AS cols(attnum, ord) ON true" + Environment.NewLine + 
+            "         LEFT JOIN pg_attribute a ON a.attrelid = t.oid AND a.attnum = cols.attnum" + Environment.NewLine + 
+            "WHERE n.nspname = @SchemaName          " + Environment.NewLine + 
+            "  AND t.relname = @TableName " + Environment.NewLine + 
+            "  AND c.contype IS NULL " + Environment.NewLine + 
+            "  AND ix.indisvalid " + Environment.NewLine + 
+            "ORDER BY index_name, column_position;";
+    }
 }
