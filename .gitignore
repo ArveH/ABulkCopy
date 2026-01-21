@@ -20,6 +20,8 @@ Icon?@
 **/.idea/shelf/*
 **/.idea/dictionaries
 **/.idea/httpRequests/
+**/.idea/copilot*
+
 
 # Sensitive or high-churn files
 **/.idea/**/dataSources/
