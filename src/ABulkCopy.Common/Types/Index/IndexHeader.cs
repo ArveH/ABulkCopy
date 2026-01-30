@@ -2,8 +2,8 @@
 
 public class IndexHeader
 {
-    public int Id { get; set; }
-    public int TableId { get; set; }
+    public long Id { get; set; }
+    public long TableId { get; set; }
     public required string Name { get; set; }
     public IndexType Type { get; set; }
     public bool IsClustered { get; set; }

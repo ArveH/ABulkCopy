@@ -243,18 +243,20 @@ public class PgSystemTables : IPgSystemTables
         TableHeader tableHeader, CancellationToken ct)
     {
         await using var command = _rawCommand.DataSource.CreateCommand();
-        command.CommandText = StaticQueries.GetIndexInfo();
+        command.CommandText = StaticQueries.GetIndexInfoWithoutColumnInfo();
         command.Parameters.AddWithValue("@SchemaName", _identifier.AdjustForSystemTable(tableHeader.Schema));
         command.Parameters.AddWithValue("@TableName", _identifier.AdjustForSystemTable(tableHeader.Name));
 
-        var indexDict = new Dictionary<string, IndexDefinition>();
-        
+        var indexes = new List<IndexDefinition>();
         await _rawCommand.ExecuteReaderAsync(
             command,
-            ReadAllIndexesForTable(tableHeader, indexDict, ct),
+            ReadAllIndexesForTable(indexes, ct),
             ct);
-        
-        var indexes = indexDict.Values.ToList();
+
+        foreach (var indexDefinition in indexes)
+        {
+            await AddIndexColumnInformationAsync(indexDefinition, ct);
+        }
         
         _logger.Information(
             "Retrieved {IndexCount} {IndexPlural} for table '{TableName}'",
@@ -263,82 +265,72 @@ public class PgSystemTables : IPgSystemTables
         return indexes;
     }
 
+    private async Task AddIndexColumnInformationAsync(IndexDefinition indexDefinition, CancellationToken ct)
+    {
+        await using var command = _rawCommand.DataSource.CreateCommand();
+        command.CommandText = StaticQueries.GetColumnInfoForIndex();
+        command.Parameters.AddWithValue("@IndexRelId", indexDefinition.Header.Id);
+        
+         await _rawCommand.ExecuteReaderAsync(
+            command,
+            reader =>
+            {
+                var columnName = reader.IsDBNull(0) ? null : reader.GetString(0);
+                var columnPosition = reader.GetInt32(1);
+                var descOrder = !reader.IsDBNull(2) && reader.GetBoolean(2);
+                _ = !reader.IsDBNull(3) && reader.GetBoolean(3);
+                var columnExpression = reader.IsDBNull(4) ? null : reader.GetString(4);
+
+                var indexColumn = new IndexColumn
+                {
+                    Name = columnName ?? columnExpression ?? $"expr_{columnPosition}",
+                    Direction = descOrder ? Direction.Descending : Direction.Ascending
+                };
+                indexDefinition.Columns.Add(indexColumn);
+                return Task.CompletedTask;
+            },
+            ct);
+    }
+
     private Func<IDbRawReader, Task> ReadAllIndexesForTable(
-        TableHeader tableHeader, 
-        Dictionary<string, IndexDefinition> indexDict, 
+        List<IndexDefinition> indexes, 
         CancellationToken ct)
     {
         return async reader =>
         {
-            try
+            do
             {
-                do
-                {
-                    ReadSingleIndexInformation(reader, indexDict);
-                } while (await reader.ReadAsync(ct).ConfigureAwait(false));
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Failed reading index information for table {SchemaName}.{TableName}",
-                    tableHeader.Schema, tableHeader.Name);
-                Console.WriteLine(ex);
-                throw;
-            }
+                var indexDefinition = ReadSingleIndexInformation(reader);
+                indexes.Add(indexDefinition);
+            } while (await reader.ReadAsync(ct).ConfigureAwait(false));
         };
     }
 
-    private void ReadSingleIndexInformation(
-        IDbRawReader reader, 
-        Dictionary<string, IndexDefinition> indexDict)
+    private IndexDefinition ReadSingleIndexInformation(IDbRawReader reader)
     {
-        var indexName = reader.GetString(0);
-        var accessMethod = reader.GetString(1);
-        var isPrimary = reader.GetBoolean(2);
-        var isUnique = reader.GetBoolean(3);
-        var isValid = reader.GetBoolean(4);
+        var tableOid = reader.GetUInt32(0);
+        var indexName = reader.GetString(1);
+        var indexOid = reader.GetUInt32(2);
+        var accessMethod = reader.GetString(3);
+        var isUnique = reader.GetBoolean(4);
         var isClustered = reader.GetBoolean(5);
 
-        // Skip primary key indexes as they are constraints, not regular indexes
-        if (isPrimary)
-            return;
-
-        // Get or create the index definition
-        if (!indexDict.TryGetValue(indexName, out var indexDef))
+        var type = (IndexType)Enum.Parse(typeof(IndexType), accessMethod, true);
+        var indexDef = new IndexDefinition
         {
-            var type = (IndexType)Enum.Parse(typeof(IndexType), accessMethod, true);
-            indexDef = new IndexDefinition
+            Header = new IndexHeader
             {
-                Header = new IndexHeader
-                {
-                    Id = 0,
-                    Name = indexName,
-                    TableId = 0,
-                    Location = "",
-                    IsUnique = isUnique,
-                    Type = type,
-                    IsClustered = isClustered,
-                }
-            };
-            indexDict[indexName] = indexDef;
-            _logger.Verbose("Added index: {IndexName}", indexDef.Header.Name);
-        }
-
-        // Add column information if available (columns 6-10)
-        if (!reader.IsDBNull(6)) // column_position
-        {
-            var columnPosition = reader.GetInt32(6);
-            var columnName = reader.IsDBNull(7) ? null : reader.GetString(7);
-            var descOrder = !reader.IsDBNull(8) && reader.GetBoolean(8);
-            _ = !reader.IsDBNull(9) && reader.GetBoolean(9);
-            var columnExpression = reader.IsDBNull(10) ? null : reader.GetString(10);
-
-            var indexColumn = new IndexColumn
-            {
-                Name = columnName ?? columnExpression ?? $"expr_{columnPosition}",
-                Direction = descOrder ? Direction.Descending : Direction.Ascending
-            };
-            indexDef.Columns.Add(indexColumn);
-        }
+                Id = indexOid,
+                Name = indexName,
+                TableId = tableOid,
+                Location = "",
+                IsUnique = isUnique,
+                Type = type,
+                IsClustered = isClustered,
+            }
+        };
+        _logger.Verbose("Added index: {IndexName}", indexDef.Header.Name);
+        return indexDef;
     }
 
     private async Task SetIdentityProperties(TableHeader tableHeader, List<IColumn> columns, CancellationToken ct)
@@ -356,7 +348,7 @@ public class PgSystemTables : IPgSystemTables
     }
 
     private async Task<IEnumerable<Identity>> GetIdentityColumnsAsync(
-        int tableId, CancellationToken ct)
+        long tableId, CancellationToken ct)
     {
         await using var command = _rawCommand.DataSource.CreateCommand();
         command.CommandText = StaticQueries.GetIdentityColumns();

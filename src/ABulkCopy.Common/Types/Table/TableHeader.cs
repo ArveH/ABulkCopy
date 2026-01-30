@@ -2,7 +2,7 @@
 
 public class TableHeader
 {
-    public int Id { get; set; }
+    public long Id { get; set; }
     public required string Name { get; set; }
     public required string Schema { get; set; }
     public string? Location { get; set; }

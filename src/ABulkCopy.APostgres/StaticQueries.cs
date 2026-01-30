@@ -85,12 +85,11 @@ public static class StaticQueries
     public static string GetIndexInfoWithoutColumnInfo()
     {
         return "SELECT" + Environment.NewLine + 
+               "    ix.indrelid                   AS table_oid," + Environment.NewLine + 
                "    i.relname                     AS index_name," + Environment.NewLine + 
                "    ix.indexrelid                 AS indexrelid," + Environment.NewLine + 
                "    am.amname                     AS access_method," + Environment.NewLine + 
-               "    ix.indisprimary               AS is_primary," + Environment.NewLine + 
                "    ix.indisunique                AS is_unique," + Environment.NewLine + 
-               "    ix.indisvalid                 AS is_valid," + Environment.NewLine + 
                "    ix.indisclustered             AS is_clustered" + Environment.NewLine + 
                "FROM pg_index ix" + Environment.NewLine + 
                "         JOIN pg_class i         ON i.oid = ix.indexrelid" + Environment.NewLine + 
@@ -98,7 +97,9 @@ public static class StaticQueries
                "         JOIN pg_namespace n     ON n.oid = t.relnamespace" + Environment.NewLine + 
                "         JOIN pg_am am           ON am.oid = i.relam" + Environment.NewLine + 
                "WHERE n.nspname = @SchemaName" + Environment.NewLine + 
-               "  AND t.relname = @TableName" + Environment.NewLine + 
+               "  AND t.relname = @TableName" + Environment.NewLine +
+               "  AND NOT ix.indisprimary" + Environment.NewLine +
+               "  AND ix.indisvalid" + Environment.NewLine + 
                "ORDER BY index_name;";
     }
 

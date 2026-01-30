@@ -4,7 +4,7 @@ namespace Postgres.Tests.SystemTables;
 public class PgTestGetIndexes : PgTestBase, IAsyncLifetime
 {
     private readonly CancellationTokenSource _cts = new();
-    private string _tableName;
+    private string _tableName = string.Empty;
     private readonly IIdentifier _identifier;
 
     public PgTestGetIndexes(DatabaseFixture dbFixture, ITestOutputHelper output) 
@@ -23,28 +23,33 @@ public class PgTestGetIndexes : PgTestBase, IAsyncLifetime
         await DropTableAsync(DatabaseFixture.DefaultSchemaName, _tableName);
     }
 
-    [Fact]
-    public async Task TestGetIndexes_When_BTreeIndex_SingleColumn()
+    [Theory]
+    [InlineData(IndexType.BTree, "USING btree (col1)")]
+    [InlineData(IndexType.BTree, "(col1)")]
+    [InlineData(IndexType.Hash, "USING hash (col1)")]
+    [InlineData(IndexType.Gist, "USING gist (to_tsvector('english', text_col))")]
+    [InlineData(IndexType.Gin, "USING gin (to_tsvector('english', text_col))")]
+    [InlineData(IndexType.Brin, "USING brin (col1)")]
+    [InlineData(IndexType.SpGist, "USING spgist (text_col)")]
+    public async Task TestGetIndexes_When_Type(IndexType expectedType, string usingClause)
     {
         // Arrange
         _tableName = GetName();
         var tableHeader = await CreateTestTable();
         
-        var indexName = tableHeader!.Name.ToLower() + "_btree_idx";
+        var indexName = tableHeader!.Name.ToLower() + "_idx";
         await ExecuteNonQueryAsync(
-            $"CREATE INDEX {indexName} ON {tableHeader.Name.ToLower()} USING btree (col1)");
+            $"CREATE INDEX {indexName} ON {tableHeader.Name.ToLower()} {usingClause}");
 
         // Act
         var indexes = (await PgSystemTables.GetIndexesAsync(tableHeader, _cts.Token)).ToList();
 
         // Assert
-        indexes.Should().NotBeNull();
+        VerifyStandardIndexValues(indexes[0]);
         indexes.Count.Should().Be(1);
         indexes[0].Header.Name.Should().Be(_identifier.AdjustForSystemTable(indexName));
-        indexes[0].Header.TableId.Should().Be(0);
         indexes[0].Header.IsUnique.Should().BeFalse();
-        indexes[0].Header.Type.Should().Be(IndexType.BTree);
-        indexes[0].Header.IsClustered.Should().BeFalse();
+        indexes[0].Header.Type.Should().Be(expectedType);
     }
 
     [Fact]
@@ -62,7 +67,7 @@ public class PgTestGetIndexes : PgTestBase, IAsyncLifetime
         var indexes = (await PgSystemTables.GetIndexesAsync(tableHeader, _cts.Token)).ToList();
 
         // Assert
-        indexes.Should().NotBeNull();
+        VerifyStandardIndexValues(indexes[0]);
         indexes.Count.Should().Be(1);
         indexes[0].Header.Name.Should().Be(_identifier.AdjustForSystemTable(indexName));
         indexes[0].Header.Type.Should().Be(IndexType.BTree);
@@ -84,125 +89,11 @@ public class PgTestGetIndexes : PgTestBase, IAsyncLifetime
         var indexes = (await PgSystemTables.GetIndexesAsync(tableHeader, _cts.Token)).ToList();
 
         // Assert
-        indexes.Should().NotBeNull();
+        VerifyStandardIndexValues(indexes[0]);
         indexes.Count.Should().Be(1);
         indexes[0].Header.Name.Should().Be(_identifier.AdjustForSystemTable(indexName));
         indexes[0].Header.IsUnique.Should().BeTrue();
         indexes[0].Header.Type.Should().Be(IndexType.BTree);
-    }
-
-    [Fact]
-    public async Task TestGetIndexes_When_HashIndex()
-    {
-        // Arrange
-        _tableName = GetName();
-        var tableHeader = await CreateTestTable();
-        
-        var indexName = tableHeader!.Name.ToLower() + "_hash_idx";
-        await ExecuteNonQueryAsync(
-            $"CREATE INDEX {indexName} ON {tableHeader.Name.ToLower()} USING hash (col1)");
-
-        // Act
-        var indexes = (await PgSystemTables.GetIndexesAsync(tableHeader, _cts.Token)).ToList();
-
-        // Assert
-        indexes.Should().NotBeNull();
-        indexes.Count.Should().Be(1);
-        indexes[0].Header.Name.Should().Be(_identifier.AdjustForSystemTable(indexName));
-        indexes[0].Header.Type.Should().Be(IndexType.Hash);
-        indexes[0].Header.IsUnique.Should().BeFalse();
-    }
-
-    [Fact]
-    public async Task TestGetIndexes_When_GistIndex()
-    {
-        // Arrange
-        _tableName = GetName();
-        var tableHeader = await CreateTestTable(true);
-        
-        // Create a GiST index on a text column using tsvector
-        var indexName = tableHeader!.Name.ToLower() + "_gist_idx";
-        await ExecuteNonQueryAsync(
-            $"CREATE INDEX {indexName} ON {tableHeader.Name.ToLower()} USING gist (to_tsvector('english', text_col))");
-
-        // Act
-        var indexes = (await PgSystemTables.GetIndexesAsync(tableHeader, _cts.Token)).ToList();
-
-        // Assert
-        indexes.Should().NotBeNull();
-        indexes.Count.Should().Be(1);
-        indexes[0].Header.Name.Should().Be(_identifier.AdjustForSystemTable(indexName));
-        indexes[0].Header.Type.Should().Be(IndexType.Gist);
-        indexes[0].Header.IsUnique.Should().BeFalse();
-    }
-
-    [Fact]
-    public async Task TestGetIndexes_When_GinIndex()
-    {
-        // Arrange
-        _tableName = GetName();
-        var tableHeader = await CreateTestTable(true);
-        
-        // Create a GIN index on a text column using tsvector
-        var indexName = tableHeader!.Name.ToLower() + "_gin_idx";
-        await ExecuteNonQueryAsync(
-            $"CREATE INDEX {indexName} ON {tableHeader.Name.ToLower()} USING gin (to_tsvector('english', text_col))");
-
-        // Act
-        var indexes = (await PgSystemTables.GetIndexesAsync(tableHeader, _cts.Token)).ToList();
-
-        // Assert
-        indexes.Should().NotBeNull();
-        indexes.Count.Should().Be(1);
-        indexes[0].Header.Name.Should().Be(_identifier.AdjustForSystemTable(indexName));
-        indexes[0].Header.Type.Should().Be(IndexType.Gin);
-        indexes[0].Header.IsUnique.Should().BeFalse();
-    }
-
-    [Fact]
-    public async Task TestGetIndexes_When_BrinIndex()
-    {
-        // Arrange
-        _tableName = GetName();
-        var tableHeader = await CreateTestTable();
-        
-        // Create a BRIN index
-        var indexName = tableHeader!.Name.ToLower() + "_brin_idx";
-        await ExecuteNonQueryAsync(
-            $"CREATE INDEX {indexName} ON {tableHeader.Name.ToLower()} USING brin (col1)");
-
-        // Act
-        var indexes = (await PgSystemTables.GetIndexesAsync(tableHeader, _cts.Token)).ToList();
-
-        // Assert
-        indexes.Should().NotBeNull();
-        indexes.Count.Should().Be(1);
-        indexes[0].Header.Name.Should().Be(_identifier.AdjustForSystemTable(indexName));
-        indexes[0].Header.Type.Should().Be(IndexType.Brin);
-        indexes[0].Header.IsUnique.Should().BeFalse();
-    }
-
-    [Fact]
-    public async Task TestGetIndexes_When_SpGistIndex()
-    {
-        // Arrange
-        _tableName = GetName();
-        var tableHeader = await CreateTestTable(true);
-        
-        // Create a SP-GiST index on a text column
-        var indexName = tableHeader!.Name.ToLower() + "_spgist_idx";
-        await ExecuteNonQueryAsync(
-            $"CREATE INDEX {indexName} ON {tableHeader.Name.ToLower()} USING spgist (text_col)");
-
-        // Act
-        var indexes = (await PgSystemTables.GetIndexesAsync(tableHeader, _cts.Token)).ToList();
-
-        // Assert
-        indexes.Should().NotBeNull();
-        indexes.Count.Should().Be(1);
-        indexes[0].Header.Name.Should().Be(_identifier.AdjustForSystemTable(indexName));
-        indexes[0].Header.Type.Should().Be(IndexType.SpGist);
-        indexes[0].Header.IsUnique.Should().BeFalse();
     }
 
     [Fact]
@@ -275,7 +166,7 @@ public class PgTestGetIndexes : PgTestBase, IAsyncLifetime
     {
         // Arrange
         _tableName = GetName();
-        var tableHeader = await CreateTestTable(true);
+        var tableHeader = await CreateTestTable();
         
         var indexName = tableHeader!.Name.ToLower() + "_expr_idx";
         await ExecuteNonQueryAsync(
@@ -289,6 +180,8 @@ public class PgTestGetIndexes : PgTestBase, IAsyncLifetime
         indexes.Count.Should().Be(1);
         indexes[0].Header.Name.Should().Be(_identifier.AdjustForSystemTable(indexName));
         indexes[0].Header.Type.Should().Be(IndexType.BTree);
+        indexes[0].Columns.Count.Should().Be(1);
+        indexes[0].Columns[0].Name.Should().Be("lower(text_col)");
     }
 
     [Fact]
@@ -313,26 +206,28 @@ public class PgTestGetIndexes : PgTestBase, IAsyncLifetime
         indexes[0].Header.Type.Should().Be(IndexType.BTree);
     }
 
-    private async Task<TableHeader?> CreateTestTable(bool useTextCol = false)
+    private async Task<TableHeader?> CreateTestTable()
     {
         await DropTableAsync(DatabaseFixture.DefaultSchemaName, _tableName);
 
         var tableDef = PgTestData.GetEmpty((DatabaseFixture.DefaultSchemaName, _tableName));
         tableDef.Columns.Add(new PostgresInt(1, "col1", false));
-        if (useTextCol)
-        {
-            tableDef.Columns.Add(new PostgresText(2, "text_col", false));
-        }
-        else
-        {
-            tableDef.Columns.Add(new PostgresInt(2, "col2", false));
-            tableDef.Columns.Add(new PostgresInt(3, "col3", false));
-        }
+        tableDef.Columns.Add(new PostgresInt(2, "col2", false));
+        tableDef.Columns.Add(new PostgresInt(3, "col3", false));
+        tableDef.Columns.Add(new PostgresText(4, "text_col", false));
         await DbFixture.CreateTable(tableDef);
         var tableHeader = await PgSystemTables.GetTableHeaderAsync(
             DatabaseFixture.DefaultSchemaName, _tableName, _cts.Token);
         
         tableHeader.Should().NotBeNull("because table should exist");
         return tableHeader;
+    }
+
+    private void VerifyStandardIndexValues(IndexDefinition? indexDefinition)
+    {
+        indexDefinition.Should().NotBeNull();
+        indexDefinition!.Header.Id.Should().BeGreaterThan(0);
+        indexDefinition.Header.TableId.Should().BeGreaterThan(0);
+        indexDefinition.Header.IsClustered.Should().BeFalse();
     }
 }

@@ -83,7 +83,7 @@ public class MssGetIndexesTest : MssTestBase
         return await MssSystemTables.GetTableHeaderAsync("dbo", _testTableName, _cts.Token);
     }
 
-    private async Task CreateIndex(int tableId, List<IndexColumn> columns)
+    private async Task CreateIndex(long tableId, List<IndexColumn> columns)
     {
         var indexDef = new IndexDefinition
         {
