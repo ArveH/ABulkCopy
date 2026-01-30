@@ -32,9 +32,9 @@ public class PgRawCommand : IPgRawCommand
         return await cmd.ExecuteScalarAsync(ct).ConfigureAwait(false);
     }
 
-    public async Task<TReturn?> ExecuteQueryAsync<TReturn>(
+    public async Task<IEnumerable<TReturn>> ExecuteQueryAsync<TReturn>(
         string sqlString,
-        Func<IDbRawReader, Task<TReturn?>> func,
+        Func<IDbRawReader, Task<IEnumerable<TReturn>>> func,
         CancellationToken ct)
     {
         await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
@@ -43,7 +43,7 @@ public class PgRawCommand : IPgRawCommand
 
         return await func(dbRawReader);
     }
-    
+
     public async Task<TReturn?> ExecuteQueryAsync<TReturn>(
         string sqlString,
         IEnumerable<(string name, object value)> parameters,
@@ -56,18 +56,6 @@ public class PgRawCommand : IPgRawCommand
             cmd.Parameters.AddWithValue(valueTuple.name, valueTuple.value);
         }
         
-        await using var dbRawReader = _pgRawFactory.CreateReader(
-            await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false));
-
-        return await func(dbRawReader);
-    }
-
-    public async Task<IEnumerable<TReturn>> ExecuteQueryAsync<TReturn>(
-        string sqlString,
-        Func<IDbRawReader, Task<IEnumerable<TReturn>>> func,
-        CancellationToken ct)
-    {
-        await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
         await using var dbRawReader = _pgRawFactory.CreateReader(
             await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false));
 

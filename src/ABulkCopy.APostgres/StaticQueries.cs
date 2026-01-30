@@ -54,16 +54,16 @@ public static class StaticQueries
 
     public static string GetPrimaryKey()
     {
-        return "SELECT tc.table_schema," +
-               "       tc.constraint_name," +
-               "       tc.table_name," +
-               "       kcu.column_name" +
-               "FROM information_schema.table_constraints AS tc" +
-               "    JOIN information_schema.key_column_usage AS kcu" +
-               "        ON tc.constraint_name = kcu.constraint_name" +
-               "            AND tc.table_schema = kcu.table_schema" +
-               "WHERE tc.constraint_type = 'PRIMARY KEY' " +
-               "  AND tc.table_name=@TableName";
+        return "SELECT tc.table_schema," + Environment.NewLine +
+               "       tc.constraint_name," + Environment.NewLine +
+               "       tc.table_name," + Environment.NewLine +
+               "       kcu.column_name " + Environment.NewLine +
+               "FROM information_schema.table_constraints AS tc" + Environment.NewLine +
+               "    JOIN information_schema.key_column_usage AS kcu" + Environment.NewLine +
+               "        ON tc.constraint_name = kcu.constraint_name" + Environment.NewLine +
+               "            AND tc.table_schema = kcu.table_schema " + Environment.NewLine +
+               "WHERE tc.constraint_type = 'PRIMARY KEY' " + Environment.NewLine +
+               "  AND tc.table_name = @TableName";
     }
 
     public static string GetIndexInfo()
