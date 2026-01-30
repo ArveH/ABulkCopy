@@ -295,6 +295,8 @@ public class MssSystemTables : ISystemTables
             }
             catch (Exception ex)
             {
+                _logger.Error(ex, "Failed reading index information for table {SchemaName}.{TableName}",
+                    tableHeader.Schema, tableHeader.Name);
                 Console.WriteLine(ex);
                 throw;
             }
