@@ -43,6 +43,24 @@ public class PgRawCommand : IPgRawCommand
 
         return await func(dbRawReader);
     }
+    
+    public async Task<TReturn?> ExecuteQueryAsync<TReturn>(
+        string sqlString,
+        IEnumerable<(string name, object value)> parameters,
+        Func<IDbRawReader, Task<TReturn?>> func,
+        CancellationToken ct)
+    {
+        await using var cmd = _pgContext.DataSource.CreateCommand(sqlString);
+        foreach (var valueTuple in parameters)
+        {
+            cmd.Parameters.AddWithValue(valueTuple.name, valueTuple.value);
+        }
+        
+        await using var dbRawReader = _pgRawFactory.CreateReader(
+            await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false));
+
+        return await func(dbRawReader);
+    }
 
     public async Task<IEnumerable<TReturn>> ExecuteQueryAsync<TReturn>(
         string sqlString,

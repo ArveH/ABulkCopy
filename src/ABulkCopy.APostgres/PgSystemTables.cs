@@ -126,23 +126,13 @@ public class PgSystemTables : IPgSystemTables
     public async Task<PrimaryKey?> GetPrimaryKeyAsync(
         TableHeader tableHeader, CancellationToken ct)
     {
-        var sqlString = "SELECT\r\n" +
-                        "    tc.table_schema,\r\n" +
-                        "    tc.constraint_name,\r\n" +
-                        "    tc.table_name,\r\n" +
-                        "    kcu.column_name\r\n" +
-                        "FROM\r\n" +
-                        "    information_schema.table_constraints AS tc\r\n" +
-                        "    JOIN information_schema.key_column_usage AS kcu\r\n" +
-                        "    ON tc.constraint_name = kcu.constraint_name\r\n" +
-                        "        AND tc.table_schema = kcu.table_schema\r\n" +
-                        $"WHERE tc.constraint_type = 'PRIMARY KEY' AND tc.table_name='{_identifier.AdjustForSystemTable(tableHeader.Name)}'";
         return await _rawCommand.ExecuteQueryAsync(
-            sqlString,
+            StaticQueries.GetPrimaryKey(), 
+            [("@TableName", _identifier.AdjustForSystemTable(tableHeader.Name))],
             async reader =>
             {
                 var isSomethingRead = await reader.ReadAsync(ct).ConfigureAwait(false);
-                if (!isSomethingRead) return default;
+                if (!isSomethingRead) return null;
 
                 var pk = new PrimaryKey
                 {

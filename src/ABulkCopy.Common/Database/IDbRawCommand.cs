@@ -24,6 +24,12 @@ public interface IDbRawCommand
         Func<IDbRawReader, Task<IEnumerable<TReturn>>> func,
         CancellationToken ct);
     
+    Task<TReturn?> ExecuteQueryAsync<TReturn>(
+        string sqlString,
+        IEnumerable<(string name, object value)> parameters,
+        Func<IDbRawReader, Task<TReturn?>> func,
+        CancellationToken ct);
+    
     Task ExecuteReaderAsync(
         DbCommand command,
         Action<IDbRawReader> readFunc,
