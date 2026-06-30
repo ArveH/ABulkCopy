@@ -18,6 +18,8 @@ public static class PgTypes
     public const string Float8 = "float8";
     public const string Int = "int";
     public const string Int4 = "int4";
+    public const string Json = "json";
+    public const string Jsonb = "jsonb";
     public const string Money = "money";
     public const string Numeric = "numeric";
     public const string Real = "real";
@@ -43,6 +45,8 @@ public static class PgTypes
         Decimal,
         DoublePrecision,
         Int,
+        Json,
+        Jsonb,
         Money,
         Numeric,
         Real,
