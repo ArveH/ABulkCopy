@@ -20,6 +20,7 @@ Icon?@
 **/.idea/shelf/*
 **/.idea/dictionaries
 **/.idea/httpRequests/
+**/.idea/**/copilot.data.migration*.xml
 
 # Sensitive or high-churn files
 **/.idea/**/dataSources/
