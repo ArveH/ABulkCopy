@@ -6,7 +6,9 @@ description: Add support for a new Postgres column type (e.g. json, jsonb, inter
 # Add a new Postgres type
 
 Adds one Postgres type to the `Pg*` provider so `CopyOut`/`CopyIn` handle it.
-`Mss` = SQL Server, `Pg` = Postgres. Reference: the json/jsonb work (string-backed type, mirrors SQL Server `xml`).
+`Mss` = SQL Server, `Pg` = Postgres. Reference: `PostgresJson` / `PostgresJsonb` (string-backed, mirror SQL Server `xml`).
+
+**One class per Postgres type — never share.** Even types that look alike differ semantically: `json` stores the exact text; `jsonb` stores a normalized binary form (duplicate keys removed, keys reordered, whitespace stripped). Give each its own column class, factory case, and test, even when the serialization code is identical today.
 
 ## Pick a base class
 

@@ -1,23 +1,23 @@
 namespace Postgres.Tests.SystemTables.ColumnInfo;
 
 [Collection(nameof(DatabaseCollection))]
-public class PgTestJsonColumn : PgTestBase
+public class PgTestJsonbColumn : PgTestBase
 {
     private readonly IIdentifier _identifier;
-    public PgTestJsonColumn(DatabaseFixture dbFixture, ITestOutputHelper output)
+    public PgTestJsonbColumn(DatabaseFixture dbFixture, ITestOutputHelper output)
         : base(dbFixture, output)
     {
         _identifier = GetIdentifier();
     }
 
     [Fact]
-    public async Task TestGetColumnInfo_When_Json()
+    public async Task TestGetColumnInfo_When_Jsonb()
     {
         // Arrange
         var tableName = GetName();
         await DropTableAsync(DatabaseFixture.DefaultSchemaName, tableName);
         await ExecuteNonQueryAsync(
-            CreateTableWithColumn(DatabaseFixture.DefaultSchemaName, tableName, "json"));
+            CreateTableWithColumn(DatabaseFixture.DefaultSchemaName, tableName, "jsonb"));
         var tableHeader = await PgSystemTables.GetTableHeaderAsync(
             DatabaseFixture.DefaultSchemaName, tableName, CancellationToken.None);
         tableHeader.Should().NotBeNull();
@@ -28,14 +28,28 @@ public class PgTestJsonColumn : PgTestBase
 
         // Assert
         columnInfo.Count.Should().Be(2);
-        var jsonColumn = columnInfo[1];
-        jsonColumn.Should().BeOfType<PostgresJson>();
-        jsonColumn.Type.Should().Be(PgTypes.Json);
-        jsonColumn.GetTypeClause().Should().Be(PgTypes.Json);
-        jsonColumn.IsNullable.Should().BeTrue();
-        jsonColumn.GetDotNetType().Should().Be<string>();
-        // json preserves the exact text (whitespace, duplicate keys, key order)
-        jsonColumn.ToString("{\"b\": 1,  \"a\": 2}").Should().Be("'{\"b\": 1,  \"a\": 2}'");
+        var jsonbColumn = columnInfo[1];
+        jsonbColumn.Should().BeOfType<PostgresJsonb>();
+        jsonbColumn.Type.Should().Be(PgTypes.Jsonb);
+        jsonbColumn.GetTypeClause().Should().Be(PgTypes.Jsonb);
+        jsonbColumn.IsNullable.Should().BeTrue();
+        jsonbColumn.GetDotNetType().Should().Be<string>();
+    }
+
+    [Fact]
+    public async Task TestSerialize_Jsonb_IsNormalizedByPostgres()
+    {
+        // Arrange: column reads the value Postgres returns, which for jsonb is the
+        // normalized form (duplicate keys removed, keys reordered, whitespace stripped).
+        var column = new PostgresJsonb(1, "col1", isNullable: true);
+
+        // Act: ask Postgres for the stored jsonb text of a messy literal.
+        var stored = (string)(await DbFixture.PgRawCommand.ExecuteScalarAsync(
+            "select '{\"b\": 1,  \"a\": 2, \"a\": 3}'::jsonb::text", CancellationToken.None))!;
+
+        // Assert: jsonb dedups (a=3 wins) and reorders keys, unlike json which preserves text.
+        stored.Should().Be("{\"a\": 3, \"b\": 1}");
+        column.ToString(stored).Should().Be("'{\"a\": 3, \"b\": 1}'");
     }
 
     private string CreateTableWithColumn(
