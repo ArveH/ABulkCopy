@@ -1,11 +1,15 @@
-﻿namespace ABulkCopy.Common.Utils;
+﻿using ABulkCopy.Common.Identifier;
+
+namespace ABulkCopy.Common.Utils;
 
 public class SelectCreator : ISelectCreator
 {
+    private readonly IIdentifier _identifier;
     private readonly ILogger _logger;
 
-    public SelectCreator(ILogger logger)
+    public SelectCreator(IIdentifier identifier, ILogger logger)
     {
+        _identifier = identifier;
         _logger = logger;
     }
 
@@ -19,13 +23,13 @@ public class SelectCreator : ISelectCreator
         }
         
         var columns = tableDefinition.Columns
-            .Select(c => $"[{c.Name}]").ToList();
+            .Select(c => _identifier.Get(c.Name)).ToList();
 
         _logger.Debug(
             "Created select statement for table '{TableName}' with '{ColumnCount}' columns",
             tableDefinition.GetFullName(), columns.Count);
         return "SELECT " 
                + string.Join(", ", columns) 
-               + $" FROM [{tableDefinition.Header.Schema}].[{tableDefinition.Header.Name}]";
+               + $" FROM {_identifier.Get(tableDefinition.Header.Schema)}.{_identifier.Get(tableDefinition.Header.Name)}";
     }
 }
