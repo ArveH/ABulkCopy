@@ -132,7 +132,7 @@ public class DatabaseFixture : IAsyncLifetime
     {
         var sqlString = $"select count(*) from {st.GetFullName(GetIdentifier(addQuote))};";
         await using var cmd = PgContext.DataSource.CreateCommand(sqlString);
-        var reader = await cmd.ExecuteReaderAsync();
+        await using var reader = await cmd.ExecuteReaderAsync();
         if (!await reader.ReadAsync()) throw new SqlNullValueException();
 
         if (await reader.IsDBNullAsync(0)) return 0L;
@@ -145,7 +145,7 @@ public class DatabaseFixture : IAsyncLifetime
         var identifier = GetIdentifier(addQuote);
         var sqlString = $"select {identifier.Get(col.Name)} from {st.GetFullName(identifier)};";
         await using var cmd = PgContext.DataSource.CreateCommand(sqlString);
-        var reader = await cmd.ExecuteReaderAsync();
+        await using var reader = await cmd.ExecuteReaderAsync();
         if (!await reader.ReadAsync()) throw new SqlNullValueException();
 
         if (await reader.IsDBNullAsync(0)) return default(T);
@@ -158,7 +158,7 @@ public class DatabaseFixture : IAsyncLifetime
         var identifier = GetIdentifier(addQuote);
         var sqlString = $"select {identifier.Get(colName)} from {st.GetFullName(identifier)};";
         await using var cmd = PgContext.DataSource.CreateCommand(sqlString);
-        var reader = await cmd.ExecuteReaderAsync();
+        await using var reader = await cmd.ExecuteReaderAsync();
         var result = new List<T?>();
         while (await reader.ReadAsync())
         {

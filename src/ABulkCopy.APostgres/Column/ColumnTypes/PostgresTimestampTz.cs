@@ -15,6 +15,12 @@ public class PostgresTimestampTz : PgDefaultColumn
 
     public override string ToString(object value)
     {
+        if (value is DateTime dateTime)
+        {
+            // Npgsql returns timestamp with time zone as a DateTime in UTC
+            return new DateTimeOffset(dateTime.ToUniversalTime()).ToString("O");
+        }
+
         return ((DateTimeOffset)value).ToString("O");
     }
 

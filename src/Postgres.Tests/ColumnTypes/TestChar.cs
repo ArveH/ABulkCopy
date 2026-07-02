@@ -1,37 +1,11 @@
-using ABulkCopy.Common.Writer;
-
 namespace Postgres.Tests.ColumnTypes;
 
 [Collection(nameof(DatabaseCollection))]
-public class TestChar : PgTestBase
+public class TestChar : PgColumnTypeTestBase
 {
-    private const string ColName = "Col1";
-    private static readonly string OutFolder = Path.Combine(".", "testout");
-
-    private readonly FileHelper _fileHelper = new();
-    private readonly Mock<IQueryBuilderFactory> _qbFactoryMock = new();
-    private readonly IDataWriter _dataWriter;
-
     public TestChar(DatabaseFixture dbFixture, ITestOutputHelper output)
         : base(dbFixture, output)
     {
-        _qbFactoryMock.Setup(f => f.GetQueryBuilder())
-            .Returns(() => new QueryBuilder(
-                new Identifier(dbFixture.Configuration, DbFixture.PgContext)));
-        _fileHelper.FileSystem.AddDirectory(OutFolder);
-        var selectCreator = new SelectCreator(GetIdentifier(), TestLogger);
-        var tableReaderFactoryMock = new Mock<ITableReaderFactory>();
-        tableReaderFactoryMock
-            .Setup(f => f.GetTableReader(It.IsAny<IDbContext>()))
-            .Returns((IDbContext dbContext) => new PgTableReader(selectCreator, TestLogger)
-            {
-                ConnectionString = dbContext.ConnectionString
-            });
-        _dataWriter = new DataWriter(
-            DbFixture.PgContext,
-            tableReaderFactoryMock.Object,
-            _fileHelper.FileSystem,
-            TestLogger);
     }
 
     [Fact]
@@ -128,7 +102,9 @@ public class TestChar : PgTestBase
         SchemaTableTuple st = (DatabaseFixture.DefaultSchemaName, tableName);
         var col = new PostgresChar(1, ColName, true, 10);
         var values = new List<string?> { "Arve", null, "O'Hara", "" };
-        var inputRows = values.Select(CreateRow).ToList();
+        var inputRows = values
+            .Select(v => ToRow(v == null ? null : QuoteCell(v)))
+            .ToList();
         var tableDefinition = await CreateTableAndDataFileAsync(st, col, inputRows);
         try
         {
@@ -164,86 +140,14 @@ public class TestChar : PgTestBase
         string? inputValue,
         string? expectedFileValue = null)
     {
-        // Arrange
-        SchemaTableTuple st = (DatabaseFixture.DefaultSchemaName, tableName);
-        var col = new PostgresChar(1, ColName, true, length);
-        var tableDefinition = await CreateTableAndDataFileAsync(
-            st, col, [CreateRow(inputValue)]);
-        try
-        {
-            // Act (copy in)
-            var rowsRead = await CopyInAsync(tableDefinition);
-
-            // Assert
-            rowsRead.Should().Be(1);
-            var dbValue = await DbFixture.SelectScalar<string>(st, col);
-            if (inputValue == null)
-            {
-                dbValue.Should().BeNull();
-            }
-            else
-            {
-                dbValue.Should().Be(inputValue.PadRight(length));
-            }
-
-            // Act (copy out)
-            var outText = await CopyOutAsync(tableDefinition);
-
-            // Assert
-            expectedFileValue ??= inputValue?.TrimEnd(' ');
-            outText.TrimEnd('\r', '\n').Should().Be(CreateRow(expectedFileValue));
-        }
-        finally
-        {
-            await DbFixture.DropTable(st);
-        }
-    }
-
-    private async Task<TableDefinition> CreateTableAndDataFileAsync(
-        SchemaTableTuple st,
-        IColumn col,
-        List<string> fileRows)
-    {
-        var tableDefinition = PgTestData.GetEmpty(st);
-        tableDefinition.Columns.Add(col);
-        await DbFixture.DropTable(st);
-        await DbFixture.CreateTable(tableDefinition);
-        _fileHelper.CreateDataFile(st, fileRows);
-        return tableDefinition;
-    }
-
-    private async Task<long> CopyInAsync(TableDefinition tableDefinition)
-    {
-        var dataReader = new PgDataReader(
-            DbFixture.PgContext,
-            _qbFactoryMock.Object,
-            new DataFileReader(_fileHelper.FileSystem, TestLogger),
-            TestLogger);
-        return await dataReader.ReadAsync(
-            _fileHelper.DataFolder,
-            tableDefinition,
-            CancellationToken.None,
-            new InsertSettings());
-    }
-
-    private async Task<string> CopyOutAsync(TableDefinition tableDefinition)
-    {
-        await _dataWriter.WriteAsync(
-            tableDefinition, OutFolder, CancellationToken.None);
-        return await _fileHelper.FileSystem.GetJsonDataText(
-            OutFolder, (tableDefinition.Header.Schema, tableDefinition.Header.Name));
-    }
-
-    private static string CreateRow(string? value)
-    {
-        if (value == null)
-        {
-            return Constants.ColumnSeparator;
-        }
-
-        return Constants.Quote
-               + value.Replace(Constants.Quote, Constants.Quote + Constants.Quote)
-               + Constants.Quote
-               + Constants.ColumnSeparator;
+        // char(n) is padded with spaces in the db, and the padding is
+        // trimmed again on copy out
+        expectedFileValue ??= inputValue?.TrimEnd(' ');
+        await TestColumnRoundTrip(
+            tableName,
+            new PostgresChar(1, ColName, true, length),
+            inputValue == null ? null : QuoteCell(inputValue),
+            inputValue?.PadRight(length),
+            expectedFileValue == null ? null : QuoteCell(expectedFileValue));
     }
 }
