@@ -32,6 +32,7 @@ Behavior of the type decides the base for the new column class (`src/ABulkCopy.A
 3. **`src/ABulkCopy.APostgres/Column/PgColumnFactory.cs`** — add `PgTypes.Foo => new PostgresFoo(...)` to the switch. The factory receives the `typname` from `PgSystemTables.GetColumnInfo`. Add every alias (e.g. `int8`/`bigint`, `float4`/`real`).
 4. **`src/ABulkCopy.APostgres/Extensions/StringExtensions.cs`** — add `PgTypes.Foo => NpgsqlDbType.Foo` to `GetNativeType` (used by copy-in binary import).
 5. **`src/Postgres.Tests/SystemTables/ColumnInfo/PgTestFooColumn.cs`** — integration test (DB-backed). Mirror `PgTestJsonColumn`: create table with the column, `GetTableColumnInfoAsync`, assert `Type`, `GetTypeClause()`, `GetDotNetType()`, `ToString(...)` output.
+6. **`src/Postgres.Tests/ColumnTypes/TestFoo.cs`** — end-to-end round-trip tests (copy in + copy out) — use the `add-pg-column-type-tests` skill.
 
 ## Verify
 
@@ -46,5 +47,5 @@ DB tests need Docker (`Testing:UseContainer=true`) or a reachable Pg connection 
 
 - The factory's `default` branch throws `ArgumentOutOfRangeException(nativeType)` — a missing case there is the usual symptom of an unsupported type.
 - `length`/`precision`/`scale` come from the column-info query; pass them through only if the type clause needs them. Variable-length types report `attlen = -1`.
-- Full Pg copy-**out** is also gated by `TableReaderFactory` (only `MssTableReader` wired today). Column-type handling is independent of that — adding the type makes schema read + data serialization correct regardless.
+- Pg copy-**out** runs through `PgTableReader` (wired in `TableReaderFactory`). `ToString(value)` receives whatever CLR type **Npgsql returns** — not necessarily `GetDotNetType()` (e.g. timestamptz comes back as a UTC `DateTime`, not `DateTimeOffset`). Handle both.
 - For a string-backed type, extending `PgTemplateStrColumn` gives `ToInternalType`/`GetDotNetType` free; override only `ToString` (trim) and `GetTypeClause`.
