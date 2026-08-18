@@ -50,9 +50,9 @@ public class PgTestGetTableNamesMultipleSchemas(
         var testTableName = "T_" + guid;
         var testTables = new List<SchemaTableTuple>
         {
-            new(DatabaseFixture.TestSchemaName, testTableName),
-            new(DatabaseFixture.DefaultSchemaName, testTableName),
-            new(DatabaseFixture.DefaultSchemaName, "T_ExtraTable"),
+            new(DatabaseFixture.TestSchemaName, testTableName, false),
+            new(DatabaseFixture.DefaultSchemaName, testTableName, false),
+            new(DatabaseFixture.DefaultSchemaName, "T_ExtraTable", false),
         };
         return await CreateAndCleanupTablesAsync(testTables, async () =>
         {

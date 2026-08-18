@@ -14,7 +14,7 @@ public static class TableDefinitionExtensions
 
     public static SchemaTableTuple GetNameTuple(this TableDefinition tableDefinition)
     {
-        return (tableDefinition.Header.Schema, tableDefinition.Header.Name);
+        return (tableDefinition.Header.Schema, tableDefinition.Header.Name, tableDefinition.Header.IsCaseSensitive);
     }
 
     public static string GetSchemaFileName(this TableDefinition tableDefinition)

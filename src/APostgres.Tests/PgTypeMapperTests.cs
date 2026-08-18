@@ -155,7 +155,7 @@ public class PgTypeMapperTests : PgTestBase
 
     private static TableDefinition GetTableDefinition(string tableName, IColumn defCol)
     {
-        var inputDefinition = MssTestData.GetEmpty(("dbo", tableName));
+        var inputDefinition = MssTestData.GetEmpty(("dbo", tableName, false));
 
         inputDefinition.Columns.Add(new SqlServerBigInt(1, "id", false));
         inputDefinition.Columns.Add(defCol);

@@ -19,4 +19,4 @@ global using System.Data.Common;
 global using System.Data.SqlClient;
 global using System.Globalization;
 global using System.Text;
-global using SchemaTableTuple = (string schemaName, string tableName);
+global using SchemaTableTuple = (string schemaName, string tableName, bool isCaseSensitive);

@@ -2,7 +2,7 @@
 
 public class PgSchemaReaderBase : PgTestBase
 {
-    protected static SchemaTableTuple TestNames = ("dbo", "MyTable");
+    protected static SchemaTableTuple TestNames = ("dbo", "MyTable", false);
     protected FileHelper FileHelper;
     protected ISchemaReader SchemaReader;
 

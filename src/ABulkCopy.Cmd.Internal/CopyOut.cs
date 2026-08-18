@@ -37,12 +37,11 @@ public class CopyOut : ICopyOut
             fullNames.Count);
         Console.WriteLine($"Copy out {fullNames.Count} {TablePlural(fullNames)}...");
         var errors = 0;
-        await Parallel.ForEachAsync(fullNames, ct, async (fullName, _) =>
+        await Parallel.ForEachAsync(fullNames, ct, async (nameTuple, _) =>
         {
             if (!await CopyTableAsync(
-                    _config.Check(Constants.Config.Folder), 
-                    fullName.schemaName,
-                    fullName.tableName, 
+                    _config.Check(Constants.Config.Folder),
+                    nameTuple,
                     ct).ConfigureAwait(false))
             {
                 Interlocked.Increment(ref errors);
@@ -67,15 +66,15 @@ public class CopyOut : ICopyOut
     }
 
     private async Task<bool> CopyTableAsync(
-        string folder, 
-        string schemaName,
-        string tableName, 
+        string folder,
+        SchemaTableTuple st,
         CancellationToken ct)
     {
+        var (schemaName, tableName, _) = st;
         try
         {
             // TODO: CancellationToken
-            var tabDef = await _tableSchema.GetTableInfoAsync(schemaName, tableName, ct)
+            var tabDef = await _tableSchema.GetTableInfoAsync(st, ct)
                 .ConfigureAwait(false);
             if (tabDef == null)
             {

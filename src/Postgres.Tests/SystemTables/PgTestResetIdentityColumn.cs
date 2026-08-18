@@ -24,20 +24,20 @@ public class PgTestResetIdentityColumn(DatabaseFixture dbFixture, ITestOutputHel
             await systemTables.ResetIdentityAsync(tableName, colName, CancellationToken.None);
 
             // Assert
-            var identityValues = (await DbFixture.SelectColumn<long>(("public", tableName), colName)).ToList();
+            var identityValues = (await DbFixture.SelectColumn<long>(("public", tableName, false), colName)).ToList();
             identityValues.Count.Should().Be(3);
             identityValues.Should().Contain(120);
         }
         finally
         {
-            await DbFixture.DropTable(("public", tableName));
+            await DbFixture.DropTable(("public", tableName, false));
         }
     }
 
     private async Task CreateTableWithIdentityColumn(
         string tableName, string colName, int seed)
     {
-        var inputDefinition = PgTestData.GetEmpty(("public", tableName));
+        var inputDefinition = PgTestData.GetEmpty(("public", tableName, false));
         inputDefinition.Header.Identity = new Identity
         {
             Increment = 10,
@@ -49,7 +49,7 @@ public class PgTestResetIdentityColumn(DatabaseFixture dbFixture, ITestOutputHel
         };
         inputDefinition.Columns.Add(identityCol);
         inputDefinition.Columns.Add(new PostgresVarChar(2, "Name", true, 100));
-        await DbFixture.DropTable(("public", tableName));
+        await DbFixture.DropTable(("public", tableName, false));
         await DbFixture.CreateTable(inputDefinition);
         await DbFixture.ExecuteNonQuery($"insert into {tableName} (Name) values ('Arve1')");
         await DbFixture.ExecuteNonQuery($"insert into {tableName} (Name) values ('Arve2')");

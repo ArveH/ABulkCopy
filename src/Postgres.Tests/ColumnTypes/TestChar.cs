@@ -99,7 +99,7 @@ public class TestChar : PgColumnTypeTestBase
     public async Task TestChar_When_MultipleRows()
     {
         var tableName = GetName();
-        SchemaTableTuple st = (DatabaseFixture.DefaultSchemaName, tableName);
+        SchemaTableTuple st = (DatabaseFixture.DefaultSchemaName, tableName, false);
         var col = new PostgresChar(1, ColName, true, 10);
         var values = new List<string?> { "Arve", null, "O'Hara", "" };
         var inputRows = values

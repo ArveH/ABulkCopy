@@ -26,4 +26,4 @@ global using ABulkCopy.Common.Scripts;
 global using Testcontainers.MsSql;
 global using Testing.Shared.SqlServer;
 global using Xunit.Abstractions;
-global using SchemaTableTuple = (string schemaName, string tableName);
+global using SchemaTableTuple = (string schemaName, string tableName, bool isCaseSensitive);

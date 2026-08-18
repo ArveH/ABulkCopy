@@ -33,4 +33,4 @@ global using System.Diagnostics;
 global using System.IO.Abstractions;
 global using System.Text.RegularExpressions;
 global using Serilog.Settings.Configuration;
-global using SchemaTableTuple = (string schemaName, string tableName);
+global using SchemaTableTuple = (string schemaName, string tableName, bool isCaseSensitive);

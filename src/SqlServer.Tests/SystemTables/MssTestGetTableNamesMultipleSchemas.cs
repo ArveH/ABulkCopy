@@ -50,9 +50,9 @@ public class MssTestGetTableNamesMultipleSchemas(
         var testTableName = "T_" + guid;
         var testTables = new List<SchemaTableTuple>
         {
-            new(DatabaseFixture.TestSchemaName, testTableName),
-            new("dbo", testTableName),
-            new("dbo", "T_ExtraTable"),
+            new(DatabaseFixture.TestSchemaName, testTableName, false),
+            new("dbo", testTableName, false),
+            new("dbo", "T_ExtraTable", false),
         };
         return await CreateAndCleanupTablesAsync(testTables, async () =>
         {

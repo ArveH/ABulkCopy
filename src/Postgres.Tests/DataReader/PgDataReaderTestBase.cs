@@ -27,11 +27,11 @@ public class PgDataReaderTestBase : PgTestBase
 
             // Assert
             return await DbFixture.SelectScalar<T>(
-                ("public", tableName), col);
+                ("public", tableName, false), col);
         }
         finally
         {
-            await DbFixture.DropTable(("public", tableName));
+            await DbFixture.DropTable(("public", tableName, false));
         }
     }
 
@@ -40,7 +40,7 @@ public class PgDataReaderTestBase : PgTestBase
         List<IColumn> cols,
         List<string> fileData)
     {
-        var tableDefinition = await CreateTableAndDataFile(("public", tableName), cols, fileData);
+        var tableDefinition = await CreateTableAndDataFile(("public", tableName, false), cols, fileData);
         var dataReader = new PgDataReader(
             DbFixture.PgContext,
             QBFactoryMock.Object,

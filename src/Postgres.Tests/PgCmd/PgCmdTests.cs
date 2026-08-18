@@ -10,7 +10,7 @@ public class PgCmdTests(
     {
         // Arrange
         var tableName = GetName();
-        var inputDefinition = PgTestData.GetEmpty(("public", tableName));
+        var inputDefinition = PgTestData.GetEmpty(("public", tableName, false));
         inputDefinition.Header.Identity = new Identity
         {
             Increment = 10,
@@ -22,7 +22,7 @@ public class PgCmdTests(
         };
         inputDefinition.Columns.Add(identityCol);
         inputDefinition.Columns.Add(new PostgresVarChar(2, "Name", true, 100));
-        await DbFixture.DropTable(("public", tableName));
+        await DbFixture.DropTable(("public", tableName, false));
 
         // Act
         List<long> identityValues;
@@ -31,11 +31,11 @@ public class PgCmdTests(
             await DbFixture.CreateTable(inputDefinition);
             await DbFixture.ExecuteNonQuery($"insert into {tableName} (Name) values ('Arve1')");
             await DbFixture.ExecuteNonQuery($"insert into {tableName} (Name) values ('Arve2')");
-            identityValues = (await DbFixture.SelectColumn<long>(("public", tableName), "agrtid")).ToList();
+            identityValues = (await DbFixture.SelectColumn<long>(("public", tableName, false), "agrtid")).ToList();
         }
         finally
         {
-            await DbFixture.DropTable(("public", tableName));
+            await DbFixture.DropTable(("public", tableName, false));
         }
 
         // Assert
@@ -49,7 +49,7 @@ public class PgCmdTests(
     {
         // Arrange
         var tableName = GetName();
-        var inputDefinition = PgTestData.GetEmpty(("public", tableName));
+        var inputDefinition = PgTestData.GetEmpty(("public", tableName, false));
         var defCol = new PostgresDecimal(2, "status", false, 32, 6)
         {
             DefaultConstraint = new DefaultDefinition
@@ -61,7 +61,7 @@ public class PgCmdTests(
         };
         inputDefinition.Columns.Add(new PostgresBigInt(1, "id", false));
         inputDefinition.Columns.Add(defCol);
-        await DbFixture.DropTable(("public", tableName));
+        await DbFixture.DropTable(("public", tableName, false));
 
         // Act
         List<decimal> statusValues;
@@ -69,11 +69,11 @@ public class PgCmdTests(
         {
             await DbFixture.PgCmd.CreateTableAsync(inputDefinition, CancellationToken.None);
             await DbFixture.ExecuteNonQuery($"insert into {tableName} (id) values (3)");
-            statusValues = (await DbFixture.SelectColumn<decimal>(("public", tableName), "status")).ToList();
+            statusValues = (await DbFixture.SelectColumn<decimal>(("public", tableName, false), "status")).ToList();
         }
         finally
         {
-            await DbFixture.DropTable(("public", tableName));
+            await DbFixture.DropTable(("public", tableName, false));
         }
 
         // Assert
@@ -85,7 +85,7 @@ public class PgCmdTests(
     public async Task TestCreateTable_When_PrimaryKey()
     {
         // Arrange
-        SchemaTableTuple st = ("public", GetName() + "_primary");
+        SchemaTableTuple st = ("public", GetName() + "_primary", false);
         var inputDefinition = GetParentTableDefinition(
             st, [
                 ("id", true),
@@ -120,9 +120,9 @@ public class PgCmdTests(
     public async Task TestCreateTable_When_ForeignKeysFromTwoTables()
     {
         // Arrange
-        SchemaTableTuple parent1 = ("public", GetName() + "_parent1");
-        SchemaTableTuple parent2 = ("public", GetName() + "_parent2");
-        SchemaTableTuple child = ("public", GetName() + "_child");
+        SchemaTableTuple parent1 = ("public", GetName() + "_parent1", false);
+        SchemaTableTuple parent2 = ("public", GetName() + "_parent2", false);
+        SchemaTableTuple child = ("public", GetName() + "_child", false);
         await DbFixture.DropTable(child);
         await DbFixture.DropTable(parent1);
         await DbFixture.DropTable(parent2);
@@ -184,8 +184,8 @@ public class PgCmdTests(
     public async Task TestCreateTable_When_ForeignKeyFromDifferentSchema()
     {
         // Arrange
-        SchemaTableTuple parent = (DatabaseFixture.TestSchemaName, GetName() + "_parent");
-        SchemaTableTuple child = ("public", GetName() + "_child");
+        SchemaTableTuple parent = (DatabaseFixture.TestSchemaName, GetName() + "_parent", false);
+        SchemaTableTuple child = ("public", GetName() + "_child", false);
         await DbFixture.DropTable(child);
         await DbFixture.DropTable(parent);
         var parentDef = GetParentTableDefinition(
@@ -228,8 +228,8 @@ public class PgCmdTests(
     public async Task TestCreateTable_When_CompositeForeignKey()
     {
         // Arrange
-        SchemaTableTuple parent = ("public", GetName() + "_parent");
-        SchemaTableTuple child = ("public", GetName() + "_child");
+        SchemaTableTuple parent = ("public", GetName() + "_parent", false);
+        SchemaTableTuple child = ("public", GetName() + "_child", false);
         await DbFixture.DropTable(child);
         await DbFixture.DropTable(parent);
         var parent1TableDefinition = GetParentTableDefinition(
@@ -272,8 +272,8 @@ public class PgCmdTests(
     {
         // Arrange
         // Arrange
-        SchemaTableTuple parent = ("public", GetName() + "_parent");
-        SchemaTableTuple child = ("public", GetName() + "_child");
+        SchemaTableTuple parent = ("public", GetName() + "_parent", false);
+        SchemaTableTuple child = ("public", GetName() + "_child", false);
         await DbFixture.DropTable(child);
         await DbFixture.DropTable(parent);
         var parent1TableDefinition = GetParentTableDefinition(

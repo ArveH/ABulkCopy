@@ -10,7 +10,7 @@ public class SchemaWriterTests
 
     public SchemaWriterTests()
     {
-        _originalTableDefinition = MssTestData.GetEmpty(("dbo", TestTableName));
+        _originalTableDefinition = MssTestData.GetEmpty(("dbo", TestTableName, false));
         _mockFileSystem = new MockFileSystem();
         _mockFileSystem.AddDirectory(TestPath);
         _schemaWriter = new SchemaWriter(
@@ -28,13 +28,14 @@ public class SchemaWriterTests
         await _schemaWriter.WriteAsync(_originalTableDefinition, TestPath);
 
         // Assert
-        var jsonTxt = await _mockFileSystem.GetJsonSchemaText(TestPath, ("dbo", TestTableName));
+        var jsonTxt = await _mockFileSystem.GetJsonSchemaText(TestPath, ("dbo", TestTableName, false));
         jsonTxt.Squeeze().Should().ContainEquivalentOf((
             "\"Header\": {\r\n" +
             "    \"Id\": 1,\r\n" +
             "    \"Name\": \"TestTableForTestWrite\",\r\n" +
             "    \"Schema\": \"dbo\",\r\n" +
             "    \"Location\": \"default\",\r\n" +
+            "    \"IsCaseSensitive\": false,\r\n" +
             "    \"Identity\": null\r\n" +
             "}").Squeeze());
     }
@@ -53,13 +54,14 @@ public class SchemaWriterTests
         await _schemaWriter.WriteAsync(_originalTableDefinition, TestPath);
 
         // Assert
-        var jsonTxt = await _mockFileSystem.GetJsonSchemaText(TestPath, ("dbo", TestTableName));
+        var jsonTxt = await _mockFileSystem.GetJsonSchemaText(TestPath, ("dbo", TestTableName, false));
         jsonTxt.Squeeze().Should().ContainEquivalentOf((
             "\"Header\": {\r\n" +
             "    \"Id\": 1,\r\n" +
             "    \"Name\": \"TestTableForTestWrite\",\r\n" +
             "    \"Schema\": \"dbo\",\r\n" +
             "    \"Location\": \"default\",\r\n" +
+            "    \"IsCaseSensitive\": false,\r\n" +
             "    \"Identity\": {\r\n" +
             "        \"ColumnName\": null,\r\n" +
             "        \"Seed\": 1,\r\n" +
@@ -84,7 +86,7 @@ public class SchemaWriterTests
         await _schemaWriter.WriteAsync(_originalTableDefinition, TestPath);
 
         // Assert
-        return await _mockFileSystem.GetJsonSchemaText(TestPath, ("dbo", TestTableName));
+        return await _mockFileSystem.GetJsonSchemaText(TestPath, ("dbo", TestTableName, false));
     }
 
     [Fact]

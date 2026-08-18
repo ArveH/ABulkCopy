@@ -5,7 +5,7 @@ namespace ASqlServer.Tests;
 public class MssSchemaWriterTests
 {
     private const string TestPath = @"C:\testfiles";
-    private static SchemaTableTuple TestNames = ("dbo", "TestTableForTestWrite");
+    private static SchemaTableTuple TestNames = ("dbo", "TestTableForTestWrite", false);
     private readonly TableDefinition _originalTableDefinition;
     private readonly MockFileSystem _mockFileSystem;
     private readonly ISchemaWriter _schemaWriter;

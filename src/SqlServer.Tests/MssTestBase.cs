@@ -69,7 +69,7 @@ public abstract class MssTestBase
 
     public async Task DropTableAsync(string schema, string tableName)
     {
-        await DbFixture.MssCmd.DropTableAsync((schema, tableName), CancellationToken.None);
+        await DbFixture.MssCmd.DropTableAsync((schema, tableName, false), CancellationToken.None);
     }
     
     public async Task InsertIntoSingleColumnTableAsync(
@@ -99,12 +99,12 @@ public abstract class MssTestBase
 
     public async Task CreateIndexAsync(string tableName, IndexDefinition indexDefinition)
     {
-        await DbFixture.MssCmd.CreateIndexAsync(("dbo", tableName), indexDefinition, CancellationToken.None);
+        await DbFixture.MssCmd.CreateIndexAsync(("dbo", tableName, false), indexDefinition, CancellationToken.None);
     }
 
     public async Task DropIndexAsync(string tableName, string indexName)
     {
-        await DbFixture.MssCmd.DropIndexAsync(("dbo", tableName), indexName, CancellationToken.None);
+        await DbFixture.MssCmd.DropIndexAsync(("dbo", tableName, false), indexName, CancellationToken.None);
     }
 
     public async Task ExecuteNonQueryAsync(string sqlString)

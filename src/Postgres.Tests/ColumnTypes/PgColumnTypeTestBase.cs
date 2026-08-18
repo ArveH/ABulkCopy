@@ -53,7 +53,7 @@ public abstract class PgColumnTypeTestBase : PgTestBase
         string? expectedOutputCell = null)
     {
         // Arrange
-        SchemaTableTuple st = (DatabaseFixture.DefaultSchemaName, tableName);
+        SchemaTableTuple st = (DatabaseFixture.DefaultSchemaName, tableName, false);
         var tableDefinition = await CreateTableAndDataFileAsync(
             st, col, [ToRow(inputCell)]);
         try
@@ -118,7 +118,7 @@ public abstract class PgColumnTypeTestBase : PgTestBase
         await DataWriter.WriteAsync(
             tableDefinition, OutFolder, CancellationToken.None);
         return await FileHelper.FileSystem.GetJsonDataText(
-            OutFolder, (tableDefinition.Header.Schema, tableDefinition.Header.Name));
+            OutFolder, (tableDefinition.Header.Schema, tableDefinition.Header.Name, false));
     }
 
     protected static string ToRow(string? cell)

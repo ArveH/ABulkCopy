@@ -26,4 +26,4 @@ global using Testing.Shared;
 global using Testing.Shared.SqlServer;
 global using Xunit;
 global using Xunit.Abstractions;
-global using SchemaTableTuple = (string schemaName, string tableName);
+global using SchemaTableTuple = (string schemaName, string tableName, bool isCaseSensitive);

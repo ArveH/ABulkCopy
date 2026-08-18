@@ -43,7 +43,7 @@ public class TestByteA : PgColumnTypeTestBase
     {
         // Arrange: bytea values live in separate raw files, the data file
         // only holds the raw file name
-        SchemaTableTuple st = (DatabaseFixture.DefaultSchemaName, tableName);
+        SchemaTableTuple st = (DatabaseFixture.DefaultSchemaName, tableName, false);
         var col = new PostgresByteA(1, ColName, true);
         var inBlobPath = Path.Combine(
             FileHelper.DataFolder, st.GetFullName(), ColName, RawFileName);

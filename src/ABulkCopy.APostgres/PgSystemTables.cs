@@ -31,7 +31,7 @@ public class PgSystemTables : IPgSystemTables
             _logger.Information("Reading all tables");
 
             command.CommandText =
-            "SELECT table_schema, table_name\n" +
+            "SELECT table_schema, table_name, table_name != lower(table_name)\n" +
             "FROM information_schema.tables\n" +
             "WHERE table_type = 'BASE TABLE'\n" +
             schemaNames.PgAddSchemaFilter() +
@@ -42,7 +42,7 @@ public class PgSystemTables : IPgSystemTables
             _logger.Information("Reading tables where search string is '{SearchString}'", searchString);
 
             command.CommandText =
-                "SELECT table_schema, table_name\n" +
+                "SELECT table_schema, table_name, table_name != lower(table_name)\n" +
                 "FROM information_schema.tables\n" +
                 "WHERE table_type = 'BASE TABLE'\n" +
                 "   AND table_name ILIKE @SearchString\r\n" +
@@ -51,10 +51,10 @@ public class PgSystemTables : IPgSystemTables
             command.Parameters.AddWithValue("@SearchString", searchString);
         }
 
-        var fullNames = new List<(string, string)>();
+        var fullNames = new List<SchemaTableTuple>();
         await _rawCommand.ExecuteReaderAsync(command, reader =>
         {
-            fullNames.Add((reader.GetString(0), reader.GetString(1)));
+            fullNames.Add((reader.GetString(0), reader.GetString(1), reader.GetBoolean(2)));
         }, ct).ConfigureAwait(false);
 
         _logger.Information("Found {NumberOfTables} tables.", fullNames.Count);

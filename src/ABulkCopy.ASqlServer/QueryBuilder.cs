@@ -55,7 +55,7 @@ public class QueryBuilder : IQueryBuilder
         return _sb.ToString();
     }
 
-    public string CreateIndexStmt((string schemaName, string tableName) st, IndexDefinition indexDefinition)
+    public string CreateIndexStmt(SchemaTableTuple st, IndexDefinition indexDefinition)
     {
         throw new NotImplementedException();
     }

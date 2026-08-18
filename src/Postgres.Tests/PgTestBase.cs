@@ -108,7 +108,7 @@ public class PgTestBase
 
     protected async Task DropTableAsync(string schema, string tableName)
     {
-        await DbFixture.PgCmd.DropTableAsync((schema, tableName), CancellationToken.None);
+        await DbFixture.PgCmd.DropTableAsync((schema, tableName, false), CancellationToken.None);
     }
 
     protected async Task ExecuteNonQueryAsync(string sqlString)

@@ -146,7 +146,7 @@ public class PgDataReaderStringTests : PgDataReaderTestBase
         var tableName = GetName();
         var col = new PostgresVarChar(1, ColName, false, 10);
         var tableDefinition = await CreateTableAndDataFile(
-            ("public", tableName), 
+            ("public", tableName, false), 
             new() { col }, 
             new() {testVal});
         var dataReader = new PgDataReader(
@@ -160,7 +160,7 @@ public class PgDataReaderStringTests : PgDataReaderTestBase
 
         //Assert
         var colValue = await DbFixture.SelectScalar<string>(
-            ("public", tableName), col);
+            ("public", tableName, false), col);
         colValue.Should().Be(expectedVal);
     }
 }

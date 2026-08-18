@@ -210,7 +210,7 @@ public class PgTestGetIndexes : PgTestBase, IAsyncLifetime
     {
         await DropTableAsync(DatabaseFixture.DefaultSchemaName, _tableName);
 
-        var tableDef = PgTestData.GetEmpty((DatabaseFixture.DefaultSchemaName, _tableName));
+        var tableDef = PgTestData.GetEmpty((DatabaseFixture.DefaultSchemaName, _tableName, false));
         tableDef.Columns.Add(new PostgresInt(1, "col1", false));
         tableDef.Columns.Add(new PostgresInt(2, "col2", false));
         tableDef.Columns.Add(new PostgresInt(3, "col3", false));

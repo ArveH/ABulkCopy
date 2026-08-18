@@ -46,10 +46,10 @@ public class PgTestGetTableNamesSingleSchema(
     {
         var testTables = new List<SchemaTableTuple>
         {
-            new(DatabaseFixture.DefaultSchemaName, "T_" + guid + "1"),
-            new(DatabaseFixture.DefaultSchemaName, "T_" + guid + "2"),
-            new(DatabaseFixture.DefaultSchemaName, "T_" + guid + "3"),
-            new(DatabaseFixture.DefaultSchemaName, "T_MyNewData")
+            new(DatabaseFixture.DefaultSchemaName, "T_" + guid + "1", false),
+            new(DatabaseFixture.DefaultSchemaName, "T_" + guid + "2", false),
+            new(DatabaseFixture.DefaultSchemaName, "T_" + guid + "3", false),
+            new(DatabaseFixture.DefaultSchemaName, "T_MyNewData", false)
         };
         var tableNames = await CreateAndCleanupTablesAsync(testTables, async () =>
             (await PgSystemTables.GetFullTableNamesAsync(

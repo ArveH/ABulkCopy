@@ -62,10 +62,10 @@ public class MssSystemTables : ISystemTables
             command.Parameters.AddWithValue("@SearchString", searchString);
         }
 
-        var fullNames = new List<(string, string)>();
+        var fullNames = new List<SchemaTableTuple>();
         await _rawCommand.ExecuteReaderAsync(command, reader =>
         {
-            fullNames.Add((reader.GetString(0), reader.GetString(1)));
+            fullNames.Add((reader.GetString(0), reader.GetString(1), false));
         }, ct).ConfigureAwait(false);
 
         _logger.Information("Found {NumberOfTables} tables.", fullNames.Count);
@@ -287,7 +287,7 @@ public class MssSystemTables : ISystemTables
                 };
 
                 var indexColumns = await GetIndexColumnInfoAsync(
-                    (tableHeader.Schema, tableHeader.Name), index.Header, ct).ConfigureAwait(false);
+                    (tableHeader.Schema, tableHeader.Name, tableHeader.IsCaseSensitive), index.Header, ct).ConfigureAwait(false);
                 index.Columns.AddRange(indexColumns);
                 indexes.Add(index);
 
