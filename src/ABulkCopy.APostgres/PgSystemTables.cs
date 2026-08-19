@@ -209,9 +209,9 @@ public class PgSystemTables : IPgSystemTables
     }
 
     public async Task ResetIdentityAsync(
-        string tableName, string columnName, CancellationToken ct)
+        SchemaTableTuple st, string columnName, CancellationToken ct)
     {
-        var oid = await GetIdentityOidAsync(tableName, columnName, ct).ConfigureAwait(false);
+        var oid = await GetIdentityOidAsync(st, columnName, ct).ConfigureAwait(false);
         if (oid == null)
         {
             throw new SqlNullValueException("Sequence not found");
@@ -223,7 +223,9 @@ public class PgSystemTables : IPgSystemTables
         qb.Append("(select max(");
         qb.AppendIdentifier(columnName);
         qb.Append(") from ");
-        qb.AppendIdentifier(tableName);
+        qb.AppendIdentifier(st.schemaName);
+        qb.Append(".");
+        qb.AppendIdentifier(st.tableName, st.isCaseSensitive);
         qb.AppendLine(") )");
 
         await _rawCommand.ExecuteScalarAsync(qb.ToString(), ct);
@@ -359,17 +361,21 @@ public class PgSystemTables : IPgSystemTables
     }
 
     private async Task<uint?> GetIdentityOidAsync(
-        string tableName, string columnName, CancellationToken ct)
+        SchemaTableTuple st, string columnName, CancellationToken ct)
     {
-        var seqName = await GetOwnedSequenceNameAsync(tableName, columnName, ct).ConfigureAwait(false);
+        var seqName = await GetOwnedSequenceNameAsync(st, columnName, ct).ConfigureAwait(false);
         if (seqName == null)
         {
             return null;
         }
 
+        var relName = seqName.TrimSchema();
+        relName = relName.StartsWith('"')
+            ? relName.Trim('"')
+            : _identifier.AdjustForSystemTable(relName);
         var sqlString =
             $"select oid from pg_class where relkind = 'S' and " +
-            $"relname = '{_identifier.AdjustForSystemTable(seqName.TrimSchema())}'";
+            $"relname = '{relName}'";
         var oid = await _rawCommand.ExecuteScalarAsync(sqlString, ct).ConfigureAwait(false);
         if (oid == null || oid == DBNull.Value)
         {
@@ -381,16 +387,20 @@ public class PgSystemTables : IPgSystemTables
     }
 
     private async Task<string?> GetOwnedSequenceNameAsync(
-        string tableName, string columnName, CancellationToken ct)
+        SchemaTableTuple st, string columnName, CancellationToken ct)
     {
-        var sqlString = 
-            $"select pg_get_serial_sequence('{_identifier.AdjustForSystemTable(tableName)}', '{_identifier.AdjustForSystemTable(columnName)}')";
+        var tableRef = _identifier.AdjustForSystemTable(st.schemaName) + "." +
+                       (st.isCaseSensitive
+                           ? "\"" + st.tableName + "\""
+                           : _identifier.AdjustForSystemTable(st.tableName));
+        var sqlString =
+            $"select pg_get_serial_sequence('{tableRef}', '{_identifier.AdjustForSystemTable(columnName)}')";
 
         var seqName = await _rawCommand.ExecuteScalarAsync(sqlString, ct).ConfigureAwait(false);
         if (seqName == null || seqName == DBNull.Value)
         {
-            _logger.Error("Can't get sequence name for '{TableName}'.'{ColumnName}'",
-                tableName, columnName);
+            _logger.Error("Can't get sequence name for '{SchemaName}'.'{TableName}'.'{ColumnName}'",
+                st.schemaName, st.tableName, columnName);
             return null;
         }
 

@@ -88,7 +88,7 @@ public class DatabaseFixture : IAsyncLifetime
         if (addIfNotExists) sb.Append("if not exists ");
         sb.Append(identifier.Get(tableDefinition.Header.Schema));
         sb.Append(".");
-        sb.Append(identifier.Get(tableDefinition.Header.Name));
+        sb.Append(identifier.Get(tableDefinition.Header.Name, tableDefinition.Header.IsCaseSensitive));
         sb.AppendLine("(");
         var first = true;
         foreach (var column in tableDefinition.Columns)

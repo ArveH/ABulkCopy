@@ -11,7 +11,7 @@ public static class SchemaTableTupleExtensions
 
     public static string GetFullName(this SchemaTableTuple st, IIdentifier identifier)
     {
-        return identifier.Get(st.schemaName) + "." + identifier.Get(st.tableName);
+        return identifier.Get(st.schemaName) + "." + identifier.Get(st.tableName, st.isCaseSensitive);
     }
 
     public static string GetDataFileName(this SchemaTableTuple st)

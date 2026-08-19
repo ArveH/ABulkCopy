@@ -3,7 +3,7 @@
 public interface IPgSystemTables: ISystemTables
 {
     Task ResetIdentityAsync(
-        string tableName,
+        SchemaTableTuple st,
         string columnName,
         CancellationToken ct);
 }

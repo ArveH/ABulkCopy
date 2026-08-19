@@ -1,43 +1,47 @@
-﻿namespace Postgres.Tests.SystemTables;
+namespace Postgres.Tests.SystemTables;
 
 [Collection(nameof(DatabaseCollection))]
 public class PgTestResetIdentityColumn(DatabaseFixture dbFixture, ITestOutputHelper output)
     : PgTestBase(dbFixture, output)
 {
     [Theory]
-    [InlineData(20, 20)]
-    [InlineData(64, 20)]
-    [InlineData(20, 64)]
-    [InlineData(64, 64)]
-    public async Task TestResetIdentityColumn(int tableNameLength, int colNameLength)
+    [InlineData(20, 20, false)]
+    [InlineData(64, 20, false)]
+    [InlineData(20, 64, false)]
+    [InlineData(64, 64, false)]
+    [InlineData(20, 20, true)]
+    [InlineData(64, 64, true)]
+    public async Task TestResetIdentityColumn(int tableNameLength, int colNameLength, bool isCaseSensitive)
     {
-        var tableName = "tbl".PadRight(tableNameLength - 3, 'z');
+        var tableName = (isCaseSensitive ? "Tbl" : "tbl").PadRight(tableNameLength - 3, 'z');
         var colName = "col".PadRight(colNameLength - 3, 'z');
+        SchemaTableTuple st = ("public", tableName, isCaseSensitive);
+        var quotedTableName = isCaseSensitive ? $"\"{tableName}\"" : tableName;
         try
         {
             // Arrange
             var systemTables = CreatePgSystemTables();
-            await CreateTableWithIdentityColumn(tableName, colName, 100);
-            await DbFixture.ExecuteNonQuery($"insert into {tableName} (Name) values ('Arve3')");
+            await CreateTableWithIdentityColumn(st, quotedTableName, colName, 100);
+            await DbFixture.ExecuteNonQuery($"insert into {quotedTableName} (Name) values ('Arve3')");
 
             // Act
-            await systemTables.ResetIdentityAsync(tableName, colName, CancellationToken.None);
+            await systemTables.ResetIdentityAsync(st, colName, CancellationToken.None);
 
             // Assert
-            var identityValues = (await DbFixture.SelectColumn<long>(("public", tableName, false), colName)).ToList();
+            var identityValues = (await DbFixture.SelectColumn<long>(st, colName)).ToList();
             identityValues.Count.Should().Be(3);
             identityValues.Should().Contain(120);
         }
         finally
         {
-            await DbFixture.DropTable(("public", tableName, false));
+            await DbFixture.DropTable(st);
         }
     }
 
     private async Task CreateTableWithIdentityColumn(
-        string tableName, string colName, int seed)
+        SchemaTableTuple st, string quotedTableName, string colName, int seed)
     {
-        var inputDefinition = PgTestData.GetEmpty(("public", tableName, false));
+        var inputDefinition = PgTestData.GetEmpty(st);
         inputDefinition.Header.Identity = new Identity
         {
             Increment = 10,
@@ -49,9 +53,9 @@ public class PgTestResetIdentityColumn(DatabaseFixture dbFixture, ITestOutputHel
         };
         inputDefinition.Columns.Add(identityCol);
         inputDefinition.Columns.Add(new PostgresVarChar(2, "Name", true, 100));
-        await DbFixture.DropTable(("public", tableName, false));
+        await DbFixture.DropTable(st);
         await DbFixture.CreateTable(inputDefinition);
-        await DbFixture.ExecuteNonQuery($"insert into {tableName} (Name) values ('Arve1')");
-        await DbFixture.ExecuteNonQuery($"insert into {tableName} (Name) values ('Arve2')");
+        await DbFixture.ExecuteNonQuery($"insert into {quotedTableName} (Name) values ('Arve1')");
+        await DbFixture.ExecuteNonQuery($"insert into {quotedTableName} (Name) values ('Arve2')");
     }
 }
