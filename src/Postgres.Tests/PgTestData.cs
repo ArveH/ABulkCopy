@@ -11,7 +11,8 @@ public static class PgTestData
                 Id = 1,
                 Location = "default",
                 Name = st.tableName,
-                Schema = st.schemaName
+                Schema = st.schemaName,
+                IsCaseSensitive = st.isCaseSensitive
             },
             Data = new TableData { FileName = $"{st.schemaName}.{st.tableName}{Constants.DataSuffix}"}
         };

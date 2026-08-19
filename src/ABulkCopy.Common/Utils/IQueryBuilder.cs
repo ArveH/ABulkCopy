@@ -3,6 +3,7 @@
 public interface IQueryBuilder
 {
     void AppendIdentifier(string identifier);
+    void AppendIdentifier(string identifier, bool isCaseSensitive);
     void Append(string str);
     void AppendLine(string str);
     string ToString();

@@ -45,6 +45,35 @@ public class PgCmdTests(
     }
 
     [Fact]
+    public async Task TestCreateTable_When_CaseSensitiveName()
+    {
+        // Arrange
+        var tableName = GetName() + "_Cased";
+        SchemaTableTuple st = ("public", tableName, true);
+        var inputDefinition = PgTestData.GetEmpty(st);
+        inputDefinition.Columns.Add(new PostgresBigInt(1, "id", false));
+        await DbFixture.PgCmd.DropTableAsync(st, CancellationToken.None);
+
+        // Act
+        object? actualName;
+        try
+        {
+            await DbFixture.PgCmd.CreateTableAsync(inputDefinition, CancellationToken.None);
+            actualName = await DbFixture.PgRawCommand.ExecuteScalarAsync(
+                "select table_name from information_schema.tables " +
+                $"where table_schema = 'public' and table_name = '{tableName}'",
+                CancellationToken.None);
+        }
+        finally
+        {
+            await DbFixture.PgCmd.DropTableAsync(st, CancellationToken.None);
+        }
+
+        // Assert
+        actualName.Should().Be(tableName);
+    }
+
+    [Fact]
     public async Task TestCreateTable_When_DecimalDefault()
     {
         // Arrange
