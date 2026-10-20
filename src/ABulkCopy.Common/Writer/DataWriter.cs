@@ -29,20 +29,27 @@ public class DataWriter : IDataWriter
         var fileFullPath = Path.Combine(
             path, tableDefinition.Data.FileName);
         await using var streamWriter = _fileSystem.File.CreateText(fileFullPath);
-        await tableReader.PrepareReaderAsync(tableDefinition, ct).ConfigureAwait(false);
-        var rowCounter = 0;
-        while (await tableReader.ReadAsync(ct).ConfigureAwait(false))
+        try
         {
-            WriteRow(tableReader, tableDefinition, streamWriter, path, rowCounter);
-            await streamWriter.WriteLineAsync().ConfigureAwait(false);
-            rowCounter++;
-            if (ct.IsCancellationRequested)
+            await tableReader.PrepareReaderAsync(tableDefinition, ct).ConfigureAwait(false);
+            var rowCounter = 0;
+            while (await tableReader.ReadAsync(ct).ConfigureAwait(false))
             {
-                break;
+                WriteRow(tableReader, tableDefinition, streamWriter, path, rowCounter);
+                await streamWriter.WriteLineAsync().ConfigureAwait(false);
+                rowCounter++;
+                if (ct.IsCancellationRequested)
+                {
+                    break;
+                }
             }
-        }
 
-        return rowCounter;
+            return rowCounter;
+        }
+        finally
+        {
+            tableReader.Close();
+        }
     }
 
     private void AddDirectoriesForBlobs(TableDefinition tableDefinition, string path)

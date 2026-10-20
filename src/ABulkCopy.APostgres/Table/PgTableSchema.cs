@@ -1,0 +1,49 @@
+namespace ABulkCopy.APostgres.Table;
+
+public class PgTableSchema : ITableSchema
+{
+    private readonly IPgSystemTables _systemTables;
+    private readonly ILogger _logger;
+
+    public PgTableSchema(
+        IPgSystemTables systemTables,
+        ILogger logger)
+    {
+        _systemTables = systemTables;
+        _logger = logger.ForContext<PgTableSchema>();
+    }
+    
+    public async Task<TableDefinition?> GetTableInfoAsync(
+        SchemaTableTuple st, CancellationToken ct)
+    {
+        var (schemaName, tableName, isCaseSensitive) = st;
+        if (schemaName == string.Empty)
+        {
+            schemaName = "public";
+        }
+
+        var tableHeader = await _systemTables.GetTableHeaderAsync(
+            schemaName, tableName, ct).ConfigureAwait(false);
+        if (tableHeader == null)
+        {
+            _logger.Warning("Table {SchemaName}.{TableName} not found",
+                schemaName, tableName);
+            return null;
+        }
+        tableHeader.IsCaseSensitive = isCaseSensitive;
+        var columnInfo = await _systemTables.GetTableColumnInfoAsync(tableHeader, ct).ConfigureAwait(false);
+        var primaryKey = await _systemTables.GetPrimaryKeyAsync(tableHeader, ct).ConfigureAwait(false);
+        var foreignKeys = await _systemTables.GetForeignKeysAsync(tableHeader, ct).ConfigureAwait(false);
+        var indexes = await _systemTables.GetIndexesAsync(tableHeader, ct).ConfigureAwait(false);
+
+        return new TableDefinition(Rdbms.Mss)
+        {
+            Header = tableHeader,
+            Data = new TableData { FileName = $"{schemaName}.{tableName}{Constants.DataSuffix}"},
+            Columns = columnInfo.ToList(),
+            PrimaryKey = primaryKey,
+            ForeignKeys = foreignKeys.ToList(),
+            Indexes = indexes.ToList()
+        };
+    }
+}

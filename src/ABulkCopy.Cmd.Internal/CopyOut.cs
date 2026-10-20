@@ -3,16 +3,16 @@
 public class CopyOut : ICopyOut
 {
     private readonly IConfiguration _config;
-    private readonly IMssSystemTables _systemTables;
-    private readonly IMssTableSchema _tableSchema;
+    private readonly ISystemTables _systemTables;
+    private readonly ITableSchema _tableSchema;
     private readonly IDataWriter _dataWriter;
     private readonly ISchemaWriter _schemaWriter;
     private readonly ILogger _logger;
 
     public CopyOut(
         IConfiguration config,
-        IMssSystemTables systemTables,
-        IMssTableSchema tableSchema,
+        ISystemTables systemTables,
+        ITableSchema tableSchema,
         IDataWriter dataWriter,
         ISchemaWriter schemaWriter,
         ILogger logger)
@@ -33,16 +33,15 @@ public class CopyOut : ICopyOut
             _config.SafeGet(Constants.Config.SchemaFilter), 
             _config.SafeGet(Constants.Config.SearchFilter), 
             ct).ConfigureAwait(false)).ToList();
-        _logger.Information($"Copy out {{TableCount}} {"table".Plural(fullNames.Count)}...",
+        _logger.Information($"Copy out {{TableCount}} {TablePlural(fullNames)}...",
             fullNames.Count);
-        Console.WriteLine($"Copy out {fullNames.Count} {"table".Plural(fullNames.Count)}...");
+        Console.WriteLine($"Copy out {fullNames.Count} {TablePlural(fullNames)}...");
         var errors = 0;
-        await Parallel.ForEachAsync(fullNames, ct, async (fullName, _) =>
+        await Parallel.ForEachAsync(fullNames, ct, async (nameTuple, _) =>
         {
             if (!await CopyTableAsync(
-                    _config.Check(Constants.Config.Folder), 
-                    fullName.schemaName,
-                    fullName.tableName, 
+                    _config.Check(Constants.Config.Folder),
+                    nameTuple,
                     ct).ConfigureAwait(false))
             {
                 Interlocked.Increment(ref errors);
@@ -52,13 +51,13 @@ public class CopyOut : ICopyOut
 
         if (errors > 0)
         {
-            _logger.Warning($"Copy out {{TableCount}} {"table".Plural(fullNames.Count)} finished with {{Errors}} {"error".Plural(errors)}", 
+            _logger.Warning($"Copy out {{TableCount}} {TablePlural(fullNames)} finished with {{Errors}} {"error".Plural(errors)}", 
                 fullNames.Count, errors);
-            Console.WriteLine($"Copy out {fullNames.Count} {"table".Plural(fullNames.Count)} finished with {errors} {"error".Plural(errors)}");
+            Console.WriteLine($"Copy out {fullNames.Count} {TablePlural(fullNames)} finished with {errors} {"error".Plural(errors)}");
         }
         else
         {
-            _logger.Information($"Copy out {{TableCount}} {"table".Plural(fullNames.Count)} finished.", 
+            _logger.Information($"Copy out {{TableCount}} {TablePlural(fullNames)} finished.", 
                 fullNames.Count);
             Console.WriteLine($"Copy out {fullNames.Count} {"table".Plural(fullNames.Count)} finished.");
         }
@@ -67,15 +66,15 @@ public class CopyOut : ICopyOut
     }
 
     private async Task<bool> CopyTableAsync(
-        string folder, 
-        string schemaName,
-        string tableName, 
+        string folder,
+        SchemaTableTuple st,
         CancellationToken ct)
     {
+        var (schemaName, tableName, _) = st;
         try
         {
             // TODO: CancellationToken
-            var tabDef = await _tableSchema.GetTableInfoAsync(schemaName, tableName, ct)
+            var tabDef = await _tableSchema.GetTableInfoAsync(st, ct)
                 .ConfigureAwait(false);
             if (tabDef == null)
             {
@@ -98,5 +97,10 @@ public class CopyOut : ICopyOut
             Console.WriteLine($"Copy out from table '{schemaName}.{tableName}' failed");
             return false;
         }
+    }
+    
+    private static string TablePlural(List<SchemaTableTuple> fullNames)
+    {
+        return "table".Plural(fullNames.Count);
     }
 }

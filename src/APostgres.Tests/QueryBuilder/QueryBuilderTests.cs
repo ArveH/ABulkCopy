@@ -76,7 +76,7 @@ public class QueryBuilderTests
 
     private TableDefinition GetTableDefinition()
     {
-        var tableDef = MssTestData.GetEmpty(("dbo", TableName));
+        var tableDef = MssTestData.GetEmpty(("dbo", TableName, false));
         tableDef.Columns.Add(new SqlServerInt(1, ColName, false));
         tableDef.Columns.Add(new SqlServerInt(1, FKName, false));
         tableDef.PrimaryKey = new PrimaryKey

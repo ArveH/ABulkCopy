@@ -10,7 +10,7 @@ public class PgCmdTests(
     {
         // Arrange
         var tableName = GetName();
-        var inputDefinition = PgTestData.GetEmpty(("public", tableName));
+        var inputDefinition = PgTestData.GetEmpty(("public", tableName, false));
         inputDefinition.Header.Identity = new Identity
         {
             Increment = 10,
@@ -22,20 +22,20 @@ public class PgCmdTests(
         };
         inputDefinition.Columns.Add(identityCol);
         inputDefinition.Columns.Add(new PostgresVarChar(2, "Name", true, 100));
-        await DbFixture.DropTable(("public", tableName));
+        await DbFixture.DropTable(("public", tableName, false));
 
         // Act
         List<long> identityValues;
         try
         {
             await DbFixture.CreateTable(inputDefinition);
-            await DbFixture.ExecuteNonQuery($"insert into \"{tableName}\" (\"Name\") values ('Arve1')");
-            await DbFixture.ExecuteNonQuery($"insert into \"{tableName}\" (\"Name\") values ('Arve2')");
-            identityValues = (await DbFixture.SelectColumn<long>(("public", tableName), "agrtid")).ToList();
+            await DbFixture.ExecuteNonQuery($"insert into {tableName} (Name) values ('Arve1')");
+            await DbFixture.ExecuteNonQuery($"insert into {tableName} (Name) values ('Arve2')");
+            identityValues = (await DbFixture.SelectColumn<long>(("public", tableName, false), "agrtid")).ToList();
         }
         finally
         {
-            await DbFixture.DropTable(("public", tableName));
+            await DbFixture.DropTable(("public", tableName, false));
         }
 
         // Assert
@@ -45,11 +45,40 @@ public class PgCmdTests(
     }
 
     [Fact]
+    public async Task TestCreateTable_When_CaseSensitiveName()
+    {
+        // Arrange
+        var tableName = GetName() + "_Cased";
+        SchemaTableTuple st = ("public", tableName, true);
+        var inputDefinition = PgTestData.GetEmpty(st);
+        inputDefinition.Columns.Add(new PostgresBigInt(1, "id", false));
+        await DbFixture.PgCmd.DropTableAsync(st, CancellationToken.None);
+
+        // Act
+        object? actualName;
+        try
+        {
+            await DbFixture.PgCmd.CreateTableAsync(inputDefinition, CancellationToken.None);
+            actualName = await DbFixture.PgRawCommand.ExecuteScalarAsync(
+                "select table_name from information_schema.tables " +
+                $"where table_schema = 'public' and table_name = '{tableName}'",
+                CancellationToken.None);
+        }
+        finally
+        {
+            await DbFixture.PgCmd.DropTableAsync(st, CancellationToken.None);
+        }
+
+        // Assert
+        actualName.Should().Be(tableName);
+    }
+
+    [Fact]
     public async Task TestCreateTable_When_DecimalDefault()
     {
         // Arrange
         var tableName = GetName();
-        var inputDefinition = PgTestData.GetEmpty(("public", tableName));
+        var inputDefinition = PgTestData.GetEmpty(("public", tableName, false));
         var defCol = new PostgresDecimal(2, "status", false, 32, 6)
         {
             DefaultConstraint = new DefaultDefinition
@@ -61,21 +90,19 @@ public class PgCmdTests(
         };
         inputDefinition.Columns.Add(new PostgresBigInt(1, "id", false));
         inputDefinition.Columns.Add(defCol);
-        await DbFixture.DropTable(("public", tableName));
-        var pgCmd = GetPgCmd();
-        var cts = new CancellationTokenSource();
+        await DbFixture.DropTable(("public", tableName, false));
 
         // Act
         List<decimal> statusValues;
         try
         {
-            await pgCmd.CreateTableAsync(inputDefinition, cts.Token);
-            await DbFixture.ExecuteNonQuery($"insert into \"{tableName}\" (id) values (3)");
-            statusValues = (await DbFixture.SelectColumn<decimal>(("public", tableName), "status")).ToList();
+            await DbFixture.PgCmd.CreateTableAsync(inputDefinition, CancellationToken.None);
+            await DbFixture.ExecuteNonQuery($"insert into {tableName} (id) values (3)");
+            statusValues = (await DbFixture.SelectColumn<decimal>(("public", tableName, false), "status")).ToList();
         }
         finally
         {
-            await DbFixture.DropTable(("public", tableName));
+            await DbFixture.DropTable(("public", tableName, false));
         }
 
         // Assert
@@ -87,29 +114,26 @@ public class PgCmdTests(
     public async Task TestCreateTable_When_PrimaryKey()
     {
         // Arrange
-        SchemaTableTuple st = ("public", GetName() + "_primary");
+        SchemaTableTuple st = ("public", GetName() + "_primary", false);
         var inputDefinition = GetParentTableDefinition(
-            st, new List<(string, bool)>
-            {
+            st, [
                 ("id", true),
                 ("col1", false),
                 ("col2", false)
-            });
+            ]);
         await DbFixture.DropTable(st);
-        var pgCmd = GetPgCmd();
-        var systemTables = GetPgSystemTables();
-        var cts = new CancellationTokenSource();
-
+        var systemTables = CreatePgSystemTables();
+       
         try
         {
-            await pgCmd.CreateTableAsync(inputDefinition, cts.Token);
+            await DbFixture.PgCmd.CreateTableAsync(inputDefinition, CancellationToken.None);
 
             // Act
             var pk = await systemTables.GetPrimaryKeyAsync(new TableHeader
             {
                 Name = st.tableName,
                 Schema = st.schemaName
-            }, cts.Token);
+            }, CancellationToken.None);
             pk.Should().NotBeNull();
             pk!.ColumnNames.Count.Should().Be(1);
             pk.ColumnNames[0].Name.Should().Be("id");
@@ -125,58 +149,57 @@ public class PgCmdTests(
     public async Task TestCreateTable_When_ForeignKeysFromTwoTables()
     {
         // Arrange
-        SchemaTableTuple parent1 = ("public", GetName() + "_parent1");
-        SchemaTableTuple parent2 = ("public", GetName() + "_parent2");
-        SchemaTableTuple child = ("public", GetName() + "_child");
+        SchemaTableTuple parent1 = ("public", GetName() + "_parent1", false);
+        SchemaTableTuple parent2 = ("public", GetName() + "_parent2", false);
+        SchemaTableTuple child = ("public", GetName() + "_child", false);
         await DbFixture.DropTable(child);
         await DbFixture.DropTable(parent1);
         await DbFixture.DropTable(parent2);
         var parent1TableDefinition = GetParentTableDefinition(
-            parent1, new List<(string, bool)>
-            {
+            parent1, [
                 ("Parent1Id", true),
                 ("col1", false),
-                ("col2", false),
-            });
-        var cts = new CancellationTokenSource();
-        var pgCmd = GetPgCmd();
-        await pgCmd.CreateTableAsync(parent1TableDefinition, cts.Token);
+                ("col2", false)
+            ]);
+        await DbFixture.PgCmd.CreateTableAsync(parent1TableDefinition, CancellationToken.None);
         var parent2TableDefinition = GetParentTableDefinition(
-            parent2, new List<(string, bool)>
-            {
+            parent2, [
                 ("Parent2Id", true),
                 ("col1", false),
-                ("col2", false),
-            });
-        await pgCmd.CreateTableAsync(parent2TableDefinition, cts.Token);
+                ("col2", false)
+            ]);
+        await DbFixture.PgCmd.CreateTableAsync(parent2TableDefinition, CancellationToken.None);
         var childTableDefinition = GetChildTableDefinition(
             child,
-            new List<(SchemaTableTuple, List<string>)>
-            {
+            [
                 (parent1, ["Parent1Id"]),
                 (parent2, ["Parent2Id"])
-            });
+            ]);
 
         try
         {
             // Act
-            await pgCmd.CreateTableAsync(childTableDefinition, cts.Token);
+            await DbFixture.PgCmd.CreateTableAsync(childTableDefinition, CancellationToken.None);
 
             // Assert
-            var systemTables = GetPgSystemTables();
+            var systemTables = CreatePgSystemTables();
             var fks = (await systemTables.GetForeignKeysAsync(new TableHeader
             {
                 Name = child.tableName,
                 Schema = child.schemaName
-            }, cts.Token)).ToList();
+            }, CancellationToken.None)).ToList();
             fks.Count.Should().Be(2, "because there should be 2 foreign keys");
-            fks.Select(k => k.TableReference).Should().Contain(
-                [parent1.tableName, parent2.tableName]);
-            fks.First(k => k.TableReference == parent1.tableName).ColumnNames.Count.Should().Be(1);
-            fks.First(k => k.TableReference == parent1.tableName).ColumnNames.First().Should().Be("Parent1Id");
-            fks.First(k => k.TableReference == parent2.tableName).ColumnNames.Count.Should().Be(1);
-            fks.First(k => k.TableReference == parent2.tableName).ColumnNames.First().Should().Be("Parent2Id");
-        }
+            fks.Select(k => k.TableReference.ToLower()).Should().BeEquivalentTo(
+                [parent1.tableName.ToLower(), parent2.tableName.ToLower()],
+                "because there should be 2 foreign keys");
+            fks.Count(k => k.TableReference.Equals(parent1.tableName, StringComparison.InvariantCultureIgnoreCase))
+                .Should().Be(1, $"because there should be a parent: {parent1.tableName}");
+            fks.First(k => k.TableReference.Equals(parent1.tableName, StringComparison.InvariantCultureIgnoreCase)).ColumnNames[0]
+                .Should().BeEquivalentTo("Parent1Id");
+            fks.Count(k => k.TableReference.Equals(parent2.tableName, StringComparison.InvariantCultureIgnoreCase))
+                .Should().Be(1, $"because there should be a parent: {parent2.tableName}");
+            fks.First(k => k.TableReference.Equals(parent2.tableName, StringComparison.InvariantCultureIgnoreCase)).ColumnNames[0]
+                .Should().BeEquivalentTo("Parent2Id");        }
         finally
         {
             await DbFixture.DropTable(child);
@@ -190,42 +213,37 @@ public class PgCmdTests(
     public async Task TestCreateTable_When_ForeignKeyFromDifferentSchema()
     {
         // Arrange
-        SchemaTableTuple parent = (DatabaseFixture.TestSchemaName, GetName() + "_parent");
-        SchemaTableTuple child = ("public", GetName() + "_child");
+        SchemaTableTuple parent = (DatabaseFixture.TestSchemaName, GetName() + "_parent", false);
+        SchemaTableTuple child = ("public", GetName() + "_child", false);
         await DbFixture.DropTable(child);
         await DbFixture.DropTable(parent);
         var parentDef = GetParentTableDefinition(
-            parent, new List<(string, bool)>
-            {
+            parent, [
                 ("ParentId", true),
                 ("col1", false)
-            });
-        var pgCmd = GetPgCmd();
-        await pgCmd.CreateTableAsync(parentDef, CancellationToken.None);
+            ]);
+        await DbFixture.PgCmd.CreateTableAsync(parentDef, CancellationToken.None);
         var childTableDefinition = GetChildTableDefinition(
             child,
-            new List<(SchemaTableTuple, List<string>)>
-            {
-                (parent, ["ParentId"])
-            });
+            [(parent, ["ParentId"])]);
 
         try
         {
             // Act
-            await pgCmd.CreateTableAsync(childTableDefinition, CancellationToken.None);
+            await DbFixture.PgCmd.CreateTableAsync(childTableDefinition, CancellationToken.None);
 
             // Assert
-            var systemTables = GetPgSystemTables();
+            var systemTables = CreatePgSystemTables();
             var fks = (await systemTables.GetForeignKeysAsync(new TableHeader
             {
                 Name = child.tableName,
                 Schema = child.schemaName
             }, CancellationToken.None)).ToList();
             fks.Count.Should().Be(1, "because there be a foreign keys");
-            fks.First().SchemaReference.Should().Be(parent.schemaName);
-            fks.First().TableReference.Should().Be(parent.tableName);
-            fks.First().ColumnNames.Count.Should().Be(1);
-            fks.First().ColumnNames.First().Should().Be("ParentId");
+            fks[0].SchemaReference.Should().BeEquivalentTo(parent.schemaName);
+            fks[0].TableReference.Should().BeEquivalentTo(parent.tableName);
+            fks[0].ColumnNames.Count.Should().Be(1);
+            fks[0].ColumnNames[0].Should().BeEquivalentTo("ParentId");
         }
         finally
         {
@@ -239,43 +257,37 @@ public class PgCmdTests(
     public async Task TestCreateTable_When_CompositeForeignKey()
     {
         // Arrange
-        SchemaTableTuple parent = ("public", GetName() + "_parent");
-        SchemaTableTuple child = ("public", GetName() + "_child");
+        SchemaTableTuple parent = ("public", GetName() + "_parent", false);
+        SchemaTableTuple child = ("public", GetName() + "_child", false);
         await DbFixture.DropTable(child);
         await DbFixture.DropTable(parent);
         var parent1TableDefinition = GetParentTableDefinition(
-            parent, new List<(string, bool)>
-            {
+            parent, [
                 ("Parent1Id", true),
                 ("col1", true),
-                ("col2", false),
-            });
-        var pgCmd = GetPgCmd();
-        var cts = new CancellationTokenSource();
-        await pgCmd.CreateTableAsync(parent1TableDefinition, cts.Token);
+                ("col2", false)
+            ]);
+        await DbFixture.PgCmd.CreateTableAsync(parent1TableDefinition, CancellationToken.None);
         var childTableDefinition = GetChildTableDefinition(
             child,
-            new List<(SchemaTableTuple, List<string>)>
-            {
-                (parent, ["Parent1Id", "col1"])
-            });
+            [(parent, ["Parent1Id", "col1"])]);
 
         try
         {
             // Act
-            await pgCmd.CreateTableAsync(childTableDefinition, cts.Token);
+            await DbFixture.PgCmd.CreateTableAsync(childTableDefinition, CancellationToken.None);
 
             // Assert
-            var systemTables = GetPgSystemTables();
+            var systemTables = CreatePgSystemTables();
             var fks = (await systemTables.GetForeignKeysAsync(new TableHeader
             {
                 Name = child.tableName,
                 Schema = child.schemaName
-            }, cts.Token)).ToList();
+            }, CancellationToken.None)).ToList();
             fks.Count.Should().Be(1, "because there should be 1 foreign key");
-            fks.First().TableReference.Should().Be(parent.tableName);
-            fks.First().ColumnReferences.Count.Should().Be(2);
-            fks.First().ColumnReferences.Should().Contain(new List<string> { "Parent1Id", "col1" });
+            fks[0].TableReference.Should().BeEquivalentTo(parent.tableName);
+            fks[0].ColumnReferences.Count.Should().Be(2);
+            fks[0].ColumnReferences.Should().BeEquivalentTo("parent1id", "col1");
         }
         finally
         {
@@ -289,43 +301,36 @@ public class PgCmdTests(
     {
         // Arrange
         // Arrange
-        SchemaTableTuple parent = ("public", GetName() + "_parent");
-        SchemaTableTuple child = ("public", GetName() + "_child");
+        SchemaTableTuple parent = ("public", GetName() + "_parent", false);
+        SchemaTableTuple child = ("public", GetName() + "_child", false);
         await DbFixture.DropTable(child);
         await DbFixture.DropTable(parent);
         var parent1TableDefinition = GetParentTableDefinition(
-            parent, new List<(string, bool)>
-            {
+            parent, [
                 ("Parent1Id", true),
                 ("col1", true),
-                ("col2", false),
-            });
-        var pgCmd = GetPgCmd();
-        var dbRawCommand = GetRawCommand();
-        var cts = new CancellationTokenSource();
-        await pgCmd.CreateTableAsync(parent1TableDefinition, cts.Token);
-        await dbRawCommand.ExecuteNonQueryAsync($"insert into \"{parent.tableName}\" (\"Parent1Id\", \"col1\", \"col2\") values (1, 1, 1)", cts.Token);
-        await dbRawCommand.ExecuteNonQueryAsync($"insert into \"{parent.tableName}\" (\"Parent1Id\", \"col1\", \"col2\") values (1, 2, 1)", cts.Token);
+                ("col2", false)
+            ]);
+        await DbFixture.PgCmd.CreateTableAsync(parent1TableDefinition, CancellationToken.None);
+        await DbFixture.PgRawCommand.ExecuteNonQueryAsync($"insert into {parent.tableName} (Parent1Id, col1, col2) values (1, 1, 1)", CancellationToken.None);
+        await DbFixture.PgRawCommand.ExecuteNonQueryAsync($"insert into {parent.tableName} (Parent1Id, col1, col2) values (1, 2, 1)", CancellationToken.None);
         var childTableDefinition = GetChildTableDefinition(
             child,
-            new List<(SchemaTableTuple, List<string>)>
-            {
-                (parent, ["Parent1Id", "col1"])
-            });
-        childTableDefinition.ForeignKeys.First().DeleteAction = DeleteAction.Cascade;
-        await pgCmd.CreateTableAsync(childTableDefinition, cts.Token);
-        await dbRawCommand.ExecuteNonQueryAsync($"insert into \"{child.tableName}\" (\"Id\", \"Parent1Id\", \"col1\") values (10, 1, 1)", cts.Token);
-        await dbRawCommand.ExecuteNonQueryAsync($"insert into \"{child.tableName}\" (\"Id\", \"Parent1Id\", \"col1\") values (11, 1, 2)", cts.Token);
-        var beforeCount = (long)(await dbRawCommand.ExecuteScalarAsync($"select count(*) from \"{child.tableName}\"", cts.Token) ?? 0);
+            [(parent, ["Parent1Id", "col1"])]);
+        childTableDefinition.ForeignKeys[0].DeleteAction = DeleteAction.Cascade;
+        await DbFixture.PgCmd.CreateTableAsync(childTableDefinition, CancellationToken.None);
+        await DbFixture.PgRawCommand.ExecuteNonQueryAsync($"insert into {child.tableName} (Id, Parent1Id, col1) values (10, 1, 1)", CancellationToken.None);
+        await DbFixture.PgRawCommand.ExecuteNonQueryAsync($"insert into {child.tableName} (Id, Parent1Id, col1) values (11, 1, 2)", CancellationToken.None);
+        var beforeCount = (long)(await DbFixture.PgRawCommand.ExecuteScalarAsync($"select count(*) from {child.tableName}", CancellationToken.None) ?? 0);
         beforeCount.Should().Be(2, "because child table has two rows before deleting from parent table");
 
         try
         {
             // Act
-            await dbRawCommand.ExecuteNonQueryAsync($"delete from \"{parent.tableName}\" where \"col1\" = 1", cts.Token);
+            await DbFixture.PgRawCommand.ExecuteNonQueryAsync($"delete from {parent.tableName} where col1 = 1", CancellationToken.None);
 
             // Assert
-            var afterCount = (long)(await dbRawCommand.ExecuteScalarAsync($"select count(*) from \"{child.tableName}\"", cts.Token) ?? 0);
+            var afterCount = (long)(await DbFixture.PgRawCommand.ExecuteScalarAsync($"select count(*) from {child.tableName}", CancellationToken.None) ?? 0);
             afterCount.Should().Be(1, "because 1 row from child table should be delete when deleting it's foreign key");
         }
         finally

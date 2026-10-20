@@ -19,7 +19,7 @@ public class SelectCreatorTests
         var selectStatement = TestCreate(1);
 
         // Assert
-        selectStatement.Should().Be("select [col1] from [dbo].[mytable]");
+        selectStatement.Should().Be("select \"col1\" from \"dbo\".\"mytable\"");
     }
 
     [Fact]
@@ -28,7 +28,7 @@ public class SelectCreatorTests
         var selectStatement = TestCreate(3);
 
         // Assert
-        selectStatement.Should().Be("select [col1], [col2], [col3] from [dbo].[mytable]");
+        selectStatement.Should().Be("select \"col1\", \"col2\", \"col3\" from \"dbo\".\"mytable\"");
     }
 
     [Fact]
@@ -61,7 +61,17 @@ public class SelectCreatorTests
                 new SqlServerNVarChar(i + 1, $"col{i + 1}", true, 20));
         }
 
-        ISelectCreator creator = new SelectCreator(_output);
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { Constants.Config.AddQuotes, "true" }
+            })
+            .Build();
+        var dbContextMock = new Mock<IDbContext>();
+        dbContextMock.Setup(x => x.Rdbms).Returns(Rdbms.Mss);
+        var identifier = new Identifier(config, dbContextMock.Object);
+
+        ISelectCreator creator = new SelectCreator(identifier, _output);
         return creator.CreateSelect(tableDefinition).ToLowerInvariant();
     }
 }

@@ -17,6 +17,9 @@ public class TableReaderFactory : ITableReaderFactory
     {
         if (dbContext.Rdbms == Rdbms.Mss)
             return new MssTableReader(_selectCreator, _logger) {ConnectionString = dbContext.ConnectionString};
+        
+        if (dbContext.Rdbms == Rdbms.Pg)
+            return new PgTableReader(_selectCreator, _logger) {ConnectionString = dbContext.ConnectionString};
 
         throw new NotSupportedException($"Rdbms {dbContext.Rdbms} is not supported");
     }

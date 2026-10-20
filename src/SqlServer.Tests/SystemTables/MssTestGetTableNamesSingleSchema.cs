@@ -46,10 +46,10 @@ public class MssTestGetTableNamesSingleSchema(
     {
         var testTables = new List<SchemaTableTuple>
         {
-            new("dbo", "T_" + guid + "1"),
-            new("dbo", "T_" + guid + "2"),
-            new("dbo", "T_" + guid + "3"),
-            new("dbo", "T_MyNewData")
+            new("dbo", "T_" + guid + "1", false),
+            new("dbo", "T_" + guid + "2", false),
+            new("dbo", "T_" + guid + "3", false),
+            new("dbo", "T_MyNewData", false)
         };
 
         var tableNames = await CreateAndCleanupTablesAsync(testTables, async () =>

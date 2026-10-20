@@ -146,7 +146,7 @@ public class PgDataReaderStringTests : PgDataReaderTestBase
         var tableName = GetName();
         var col = new PostgresVarChar(1, ColName, false, 10);
         var tableDefinition = await CreateTableAndDataFile(
-            ("public", tableName), 
+            ("public", tableName, false), 
             new() { col }, 
             new() {testVal});
         var dataReader = new PgDataReader(
@@ -154,14 +154,13 @@ public class PgDataReaderStringTests : PgDataReaderTestBase
             QBFactoryMock.Object,
             new DataFileReader(FileHelper.FileSystem, TestLogger),
             TestLogger);
-        var cts = new CancellationTokenSource();
 
         // Act
-        await dataReader.ReadAsync(FileHelper.DataFolder, tableDefinition, cts.Token, new InsertSettings {EmptyStringFlag = EmptyStringFlag.Single});
+        await dataReader.ReadAsync(FileHelper.DataFolder, tableDefinition, CancellationToken.None, new InsertSettings {EmptyStringFlag = EmptyStringFlag.Single});
 
         //Assert
         var colValue = await DbFixture.SelectScalar<string>(
-            ("public", tableName), col);
+            ("public", tableName, false), col);
         colValue.Should().Be(expectedVal);
     }
 }

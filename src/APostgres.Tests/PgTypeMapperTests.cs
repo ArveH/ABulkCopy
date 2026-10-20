@@ -42,7 +42,7 @@ public class PgTypeMapperTests : PgTestBase
             }
         };
 
-        TestConvert(GetName(), defCol, "timestamp with time zone", expected);
+        TestConvert(GetName(), defCol, "timestamptz", expected);
     }
 
     [Theory]
@@ -155,7 +155,7 @@ public class PgTypeMapperTests : PgTestBase
 
     private static TableDefinition GetTableDefinition(string tableName, IColumn defCol)
     {
-        var inputDefinition = MssTestData.GetEmpty(("dbo", tableName));
+        var inputDefinition = MssTestData.GetEmpty(("dbo", tableName, false));
 
         inputDefinition.Columns.Add(new SqlServerBigInt(1, "id", false));
         inputDefinition.Columns.Add(defCol);

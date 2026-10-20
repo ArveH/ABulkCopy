@@ -13,15 +13,16 @@ public interface IDbRawCommand
     Task<object?> ExecuteScalarAsync(
         string sqlString, 
         CancellationToken ct);
-    
-    Task<TReturn?> ExecuteQueryAsync<TReturn>(
-        string sqlString,
-        Func<IDbRawReader, Task<TReturn?>> func,
-        CancellationToken ct);
 
     Task<IEnumerable<TReturn>> ExecuteQueryAsync<TReturn>(
         string sqlString,
         Func<IDbRawReader, Task<IEnumerable<TReturn>>> func,
+        CancellationToken ct);
+    
+    Task<TReturn?> ExecuteQueryAsync<TReturn>(
+        string sqlString,
+        IEnumerable<(string name, object value)> parameters,
+        Func<IDbRawReader, Task<TReturn?>> func,
         CancellationToken ct);
     
     Task ExecuteReaderAsync(

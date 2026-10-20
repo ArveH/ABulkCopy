@@ -7,7 +7,7 @@ public abstract class MssTestBase
     protected readonly DatabaseFixture DbFixture;
     protected readonly ILogger TestLogger;
     protected readonly Microsoft.Extensions.Logging.ILoggerFactory TestLoggerFactory;
-    protected readonly IMssSystemTables MssSystemTables;
+    protected readonly ISystemTables MssSystemTables;
 
     protected MssTestBase(DatabaseFixture dbFixture, ITestOutputHelper output)
     {
@@ -26,20 +26,20 @@ public abstract class MssTestBase
         MssSystemTables = CreateMssSystemTables();
     }
 
-    private IMssSystemTables CreateMssSystemTables()
+    private ISystemTables CreateMssSystemTables()
     {
         var connectionString = DbFixture.TestConfiguration.GetConnectionString(Constants.Config.MssConnectionString);
         connectionString.Should()
             .NotBeNullOrWhiteSpace("because the connection string should be set");
         IMssColumnFactory colFactory = new MssColumnFactory();
-        IMssSystemTables systemTables = new MssSystemTables(
+        ISystemTables systemTables = new MssSystemTables(
             DbFixture.MssRawCommand,
             colFactory, 
             TestLogger);
         return systemTables;
     }
 
-    protected string GetName()
+    protected static string GetName()
     {
         var st = new StackTrace();
         // Frames:
@@ -69,7 +69,7 @@ public abstract class MssTestBase
 
     public async Task DropTableAsync(string schema, string tableName)
     {
-        await DbFixture.MssCmd.DropTableAsync((schema, tableName), CancellationToken.None);
+        await DbFixture.MssCmd.DropTableAsync((schema, tableName, false), CancellationToken.None);
     }
     
     public async Task InsertIntoSingleColumnTableAsync(
@@ -99,12 +99,12 @@ public abstract class MssTestBase
 
     public async Task CreateIndexAsync(string tableName, IndexDefinition indexDefinition)
     {
-        await DbFixture.MssCmd.CreateIndexAsync(("dbo", tableName), indexDefinition, CancellationToken.None);
+        await DbFixture.MssCmd.CreateIndexAsync(("dbo", tableName, false), indexDefinition, CancellationToken.None);
     }
 
     public async Task DropIndexAsync(string tableName, string indexName)
     {
-        await DbFixture.MssCmd.DropIndexAsync(("dbo", tableName), indexName, CancellationToken.None);
+        await DbFixture.MssCmd.DropIndexAsync(("dbo", tableName, false), indexName, CancellationToken.None);
     }
 
     public async Task ExecuteNonQueryAsync(string sqlString)

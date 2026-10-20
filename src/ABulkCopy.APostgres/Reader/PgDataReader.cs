@@ -125,7 +125,7 @@ public class PgDataReader : IADataReader, IDisposable
         qb.Append("COPY ");
         qb.AppendIdentifier(tableDefinition.Header.Schema);
         qb.Append(".");
-        qb.AppendIdentifier(tableDefinition.Header.Name);
+        qb.AppendIdentifier(tableDefinition.Header.Name, tableDefinition.Header.IsCaseSensitive);
         qb.Append(" (");
         var first = true;
         foreach (var column in tableDefinition.Columns)

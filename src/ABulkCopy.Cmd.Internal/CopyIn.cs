@@ -211,7 +211,7 @@ public class CopyIn : ICopyIn
         {
             try
             {
-                await _systemTables.ResetIdentityAsync(tableDefinition.GetFullName(), columnName, ct)
+                await _systemTables.ResetIdentityAsync(tableDefinition.GetNameTuple(), columnName, ct)
                     .ConfigureAwait(false);
                 _logger.Information("Reset auto generation for {TableName}.{ColumnName}",
                     tableDefinition.GetFullName(), columnName);

@@ -24,7 +24,7 @@ public class CopyMisc : CopyMssToPgBase
         await TestSingleTypeAsync(
             tableName, col, colValue.ToString(), "boolean");
 
-        await ValidateValueAsync(("public", tableName), true);
+        await ValidateValueAsync(("public", tableName, false), true);
     }
 
     [Fact]
@@ -38,7 +38,7 @@ public class CopyMisc : CopyMssToPgBase
         await TestSingleTypeAsync(
             tableName, col, colValue.ToString(), "smallint");
 
-        await ValidateValueAsync(("public", tableName), (short)colValue);
+        await ValidateValueAsync(("public", tableName, false), (short)colValue);
     }
 
     [Fact]
@@ -52,7 +52,7 @@ public class CopyMisc : CopyMssToPgBase
         await TestSingleTypeAsync(
             tableName, col, colValue.ToString(), "integer");
 
-        await ValidateValueAsync(("public", tableName), colValue);
+        await ValidateValueAsync(("public", tableName, false), colValue);
     }
 
     private void MapTo(string mapTo)

@@ -1,12 +1,12 @@
 ﻿namespace ABulkCopy.ASqlServer.Table;
 
-public class MssTableSchema : IMssTableSchema
+public class MssTableSchema : ITableSchema
 {
-    private readonly IMssSystemTables _systemTables;
+    private readonly ISystemTables _systemTables;
     private readonly ILogger _logger;
 
     public MssTableSchema(
-        IMssSystemTables systemTables,
+        ISystemTables systemTables,
         ILogger logger)
     {
         _systemTables = systemTables;
@@ -14,8 +14,9 @@ public class MssTableSchema : IMssTableSchema
     }
 
     public async Task<TableDefinition?> GetTableInfoAsync(
-        string schemaName, string tableName, CancellationToken ct)
+        SchemaTableTuple st, CancellationToken ct)
     {
+        var (schemaName, tableName, isCaseSensitive) = st;
         if (schemaName == string.Empty)
         {
             schemaName = "dbo";
@@ -25,10 +26,11 @@ public class MssTableSchema : IMssTableSchema
             schemaName, tableName, ct).ConfigureAwait(false);
         if (tableHeader == null)
         {
-            _logger.Warning("Table {SchemaName}.{TableName} not found", 
+            _logger.Warning("Table {SchemaName}.{TableName} not found",
                 schemaName, tableName);
             return null;
         }
+        tableHeader.IsCaseSensitive = isCaseSensitive;
         var columnInfo = await _systemTables.GetTableColumnInfoAsync(tableHeader, ct).ConfigureAwait(false);
         var primaryKey = await _systemTables.GetPrimaryKeyAsync(tableHeader, ct).ConfigureAwait(false);
         var foreignKeys = await _systemTables.GetForeignKeysAsync(tableHeader, ct).ConfigureAwait(false);

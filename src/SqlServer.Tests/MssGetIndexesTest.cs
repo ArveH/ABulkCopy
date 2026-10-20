@@ -75,7 +75,7 @@ public class MssGetIndexesTest : MssTestBase
 
     private async Task<TableHeader?> CreateTestTable()
     {
-        var tableDef = MssTestData.GetEmpty(("dbo", _testTableName));
+        var tableDef = MssTestData.GetEmpty(("dbo", _testTableName, false));
         tableDef.Columns.Add(new SqlServerInt(1, "Col1", false));
         tableDef.Columns.Add(new SqlServerInt(2, "Col2", false));
         tableDef.Columns.Add(new SqlServerInt(3, "Col3", false));
@@ -83,7 +83,7 @@ public class MssGetIndexesTest : MssTestBase
         return await MssSystemTables.GetTableHeaderAsync("dbo", _testTableName, _cts.Token);
     }
 
-    private async Task CreateIndex(int tableId, List<IndexColumn> columns)
+    private async Task CreateIndex(long tableId, List<IndexColumn> columns)
     {
         var indexDef = new IndexDefinition
         {

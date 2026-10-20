@@ -22,9 +22,9 @@ public class CopyDateTimes : CopyMssToPgBase
         MapAllDateTimesToTimestampTz();
 
         await TestSingleTypeAsync(
-            tableName, col, "'2024-11-26 11:00:00'", PgTypes.TimestampTz);
+            tableName, col, "'2024-11-26 11:00:00'", PgTypes.TimestampWithTimeZone);
 
-        var actualValue = await ValidateValueAsync(("public", tableName), colValue);
+        var actualValue = await ValidateValueAsync(("public", tableName, false), colValue);
         actualValue.Kind.Should().Be(DateTimeKind.Utc);
     }
 
@@ -37,9 +37,9 @@ public class CopyDateTimes : CopyMssToPgBase
         MapAllDateTimesToTimestampTz();
 
         await TestSingleTypeAsync(
-            tableName, col, "'2024-11-26 11:00:00'", PgTypes.TimestampTz);
+            tableName, col, "'2024-11-26 11:00:00'", PgTypes.TimestampWithTimeZone);
 
-        var actualValue = await ValidateValueAsync(("public", tableName), colValue);
+        var actualValue = await ValidateValueAsync(("public", tableName, false), colValue);
         actualValue.Kind.Should().Be(DateTimeKind.Utc);
     }
 
@@ -54,7 +54,7 @@ public class CopyDateTimes : CopyMssToPgBase
         await TestSingleTypeAsync(
             tableName, col, "'2024-11-26 11:00:00'", "timestamp without time zone");
 
-        var actualValue = await ValidateValueAsync(("public", tableName), colValue);
+        var actualValue = await ValidateValueAsync(("public", tableName, false), colValue);
         actualValue.Kind.Should().Be(DateTimeKind.Unspecified);
     }
 
@@ -69,7 +69,7 @@ public class CopyDateTimes : CopyMssToPgBase
         await TestSingleTypeAsync(
             tableName, col, "'2024-11-26 11:00:00'", "timestamp without time zone");
 
-        var actualValue = await ValidateValueAsync(("public", tableName), colValue);
+        var actualValue = await ValidateValueAsync(("public", tableName, false), colValue);
         actualValue.Kind.Should().Be(DateTimeKind.Unspecified);
     }
 
@@ -82,11 +82,11 @@ public class CopyDateTimes : CopyMssToPgBase
         MapAllDateTimesToTimestampTz();
 
         await TestSingleTypeAsync(
-            tableName, col, "'2024-11-26 11:00:00Z'", PgTypes.TimestampTz);
+            tableName, col, "'2024-11-26 11:00:00Z'", PgTypes.TimestampWithTimeZone);
 
         // NOTE: timestamp with time zone is returned as DateTime
         // TODO: Look into using the NodaTime package for Postgres
-        var actualValue = await ValidateValueAsync(("public", tableName), colValue.DateTime);
+        var actualValue = await ValidateValueAsync(("public", tableName, false), colValue.DateTime);
         actualValue.Kind.Should().Be(DateTimeKind.Utc);
     }
 

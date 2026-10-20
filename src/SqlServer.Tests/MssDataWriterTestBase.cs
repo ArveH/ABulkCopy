@@ -14,12 +14,16 @@ public abstract class MssDataWriterTestBase : MssTestBase
         : base(dbFixture, output)
     {
         TestTableName = tableName;
-        OriginalTableDefinition = MssTestData.GetEmpty(("dbo", tableName));
+        OriginalTableDefinition = MssTestData.GetEmpty(("dbo", tableName, false));
         MockFileSystem = new MockFileSystem();
         MockFileSystem.AddDirectory(TestPath);
         TestDataWriter = new DataWriter(
             DbFixture.MssDbContext,
-            new TableReaderFactoryForTest(new SelectCreator(TestLogger), TestLogger),
+            new TableReaderFactoryForTest(
+                new SelectCreator(
+                    new Identifier(DbFixture.TestConfiguration, DbFixture.MssDbContext),
+                    TestLogger),
+                TestLogger),
             MockFileSystem, TestLogger);
     }
 
@@ -31,22 +35,21 @@ public abstract class MssDataWriterTestBase : MssTestBase
         await CreateTableAsync(OriginalTableDefinition);
         await InsertIntoSingleColumnTableAsync(
             TestTableName, value, dbType);
-        var cts = new CancellationTokenSource();
-
+        
         // Act
         try
         {
             await TestDataWriter.WriteAsync(
                 OriginalTableDefinition,
                 TestPath,
-                cts.Token);
+                CancellationToken.None);
         }
         finally
         {
             await DropTableAsync(TestTableName);
         }
 
-        return await MockFileSystem.GetJsonDataText(TestPath, ("dbo", TestTableName));
+        return await MockFileSystem.GetJsonDataText(TestPath, ("dbo", TestTableName, false));
     }
 
     protected async Task TestWriteUsingType(IColumn col, object? value)

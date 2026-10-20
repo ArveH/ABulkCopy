@@ -20,7 +20,8 @@ Icon?@
 **/.idea/shelf/*
 **/.idea/dictionaries
 **/.idea/httpRequests/
-**/.idea/**/copilot.data.migration*.xml
+**/.idea/copilot*
+
 
 # Sensitive or high-churn files
 **/.idea/**/dataSources/
@@ -35,6 +36,7 @@ Icon?@
 **/.idea/**/*.iml
 **/.idea/**/contentModel.xml
 **/.idea/**/modules.xml
+**/.idea/**/copilotDiffState.xml
 
 # User-specific files
 *.rsuser

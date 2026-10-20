@@ -14,6 +14,6 @@ public class CopyNumbers(DatabaseFixture fixture, ITestOutputHelper output)
         await TestSingleTypeAsync(
             tableName, col, colValue.ToString(), "integer");
 
-        await ValidateValueAsync(("public", tableName), colValue);
+        await ValidateValueAsync(("public", tableName, false), colValue);
     }
 }

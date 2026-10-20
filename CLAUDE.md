@@ -111,6 +111,20 @@ Many flags only apply to one direction — check the `HelpText` in
 - Tests: xUnit + FluentAssertions + Moq + Testcontainers.
 - Versioning via GitVersion (`GitVersion.yml`); publish targets win-x64/linux-x64/linux-arm64/osx-arm64.
 
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked in GitHub Issues on ArveH/ABulkCopy (via `gh`). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The default triage labels, except that wontfix maps to the existing `wontfix :no_entry:` label. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: `GLOSSARY.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+
 ## Full docs
 
 External documentation: https://arveh.github.io/ABulkCopy.Docs/

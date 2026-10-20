@@ -41,7 +41,7 @@ public class CopyMssToPgBase : TestBase
             _output,
             DummyFileSystem);
         await CreateTableAsync(
-            ("dbo", tableName),
+            ("dbo", tableName, false),
             col,
             insertedValueAsString);
 

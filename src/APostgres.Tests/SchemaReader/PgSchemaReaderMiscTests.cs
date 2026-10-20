@@ -44,9 +44,8 @@ public class PgSchemaReaderMiscTests : PgSchemaReaderBase
         inputDefinition.Columns.Add(identityCol);
         FileHelper.CreateSingleColMssSchemaFile(inputDefinition);
 
-        var cts = new CancellationTokenSource();
         var tableDefinition = await SchemaReader.GetTableDefinitionAsync(
-            FileHelper.DataFolder, TestNames, cts.Token);
+            FileHelper.DataFolder, TestNames, CancellationToken.None);
 
         tableDefinition.Should().NotBeNull("because tableDefinition should not be null");
         tableDefinition.Header.Schema.Should().Be("public");

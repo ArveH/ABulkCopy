@@ -32,6 +32,11 @@ public class Identifier : IIdentifier
         return ShouldAddQuotes(name) ? "\"" + name + "\"" : name;
     }
 
+    public string Get(string name, bool isCaseSensitive)
+    {
+        return isCaseSensitive ? "\"" + name + "\"" : Get(name);
+    }
+
     private bool ShouldAddQuotes(string name)
     {
         return _rdbms == Rdbms.Mss || _addQuotes || _keywords.Contains(name);

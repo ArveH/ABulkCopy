@@ -15,6 +15,11 @@ public class QueryBuilder : IQueryBuilder
         _sb.Append(_identifier.Get(identifier));
     }
 
+    public void AppendIdentifier(string identifier, bool isCaseSensitive)
+    {
+        _sb.Append(_identifier.Get(identifier, isCaseSensitive));
+    }
+
     public void Append(string str) => _sb.Append(str);
     public void AppendLine(string str) => _sb.AppendLine(str);
     public override string ToString() => _sb.ToString();
@@ -25,7 +30,7 @@ public class QueryBuilder : IQueryBuilder
         if (addIfNotExists) Append("if not exists ");
         AppendIdentifier(tableDefinition.Header.Schema);
         Append(".");
-        AppendIdentifier(tableDefinition.Header.Name);
+        AppendIdentifier(tableDefinition.Header.Name, tableDefinition.Header.IsCaseSensitive);
         AppendLine(" (");
         AppendColumns(tableDefinition);
         AddPrimaryKeyClause(tableDefinition);
@@ -41,7 +46,7 @@ public class QueryBuilder : IQueryBuilder
         _sb.Append("drop table if exists ");
         AppendIdentifier(st.schemaName);
         _sb.Append(".");
-        AppendIdentifier(st.tableName);
+        AppendIdentifier(st.tableName, st.isCaseSensitive);
         _sb.Append(';');
         return _sb.ToString();
     }
@@ -56,7 +61,7 @@ public class QueryBuilder : IQueryBuilder
         Append("on ");
         AppendIdentifier(st.schemaName);
         Append(".");
-        AppendIdentifier(st.tableName);
+        AppendIdentifier(st.tableName, st.isCaseSensitive);
         AddIndexColumns(indexDefinition.Columns, true);
         if (indexDefinition.Columns.Any(c => c.IsIncluded))
         {

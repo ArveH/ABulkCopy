@@ -1,7 +1,4 @@
-﻿using ABulkCopy.APostgres.DbRaw;
-using ABulkCopy.ASqlServer.DbRaw;
-
-namespace ABulkCopy.Cmd.Internal.Config;
+﻿namespace ABulkCopy.Cmd.Internal.Config;
 
 public static class ServiceCollectionExtensions
 {
@@ -9,12 +6,12 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services)
     {
         services.AddSingleton<IDbContext, MssContext>();
-        services.AddSingleton<IMssSystemTables, MssSystemTables>();
+        services.AddSingleton<ISystemTables, MssSystemTables>();
+        services.AddSingleton<ITableSchema, MssTableSchema>();
         services.AddSingleton<IMssRawCommand, MssRawCommand>();
         services.AddSingleton<IMssRawFactory, MssRawFactory>();
         services.AddSingleton<IDbRawFactory, MssRawFactory>();
         services.AddSingleton<IMssCmd, MssCmd>();
-        services.AddSingleton<IMssTableSchema, MssTableSchema>();
         services.AddSingleton<IMssColumnFactory, MssColumnFactory>();
         services.AddSingleton<IQueryBuilderFactory, ASqlServer.QueryBuilderFactory>();
 
@@ -33,7 +30,9 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IDbRawCommand, PgRawCommand>();
         services.AddSingleton<ITypeConverter, PgTypeMapper>();
         services.AddSingleton<IPgColumnFactory, PgColumnFactory>();
+        services.AddSingleton<ISystemTables, PgSystemTables>();
         services.AddSingleton<IPgSystemTables, PgSystemTables>();
+        services.AddSingleton<ITableSchema, PgTableSchema>();
         services.AddTransient<IPgBulkCopy, PgBulkCopy>();
         services.AddSingleton<IPgParser, PgParser>();
         services.AddSingleton<ITokenFactory, TokenFactory>();

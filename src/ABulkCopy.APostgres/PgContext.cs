@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace ABulkCopy.APostgres;
 
-public class PgContext : IPgContext
+public sealed class PgContext : IPgContext
 {
     private readonly ILoggerFactory _loggerFactory;
     private readonly IConfiguration _config;
@@ -40,12 +40,11 @@ public class PgContext : IPgContext
     {
         get
         {
-            if (_dataSource is null)
-            {
-                var dataSourceBuilder = new NpgsqlDataSourceBuilder(ConnectionString);
-                dataSourceBuilder.UseLoggerFactory(_loggerFactory).EnableParameterLogging();
-                _dataSource = dataSourceBuilder.Build();
-            }
+            if (_dataSource is not null) return _dataSource;
+            
+            var dataSourceBuilder = new NpgsqlDataSourceBuilder(ConnectionString);
+            dataSourceBuilder.UseLoggerFactory(_loggerFactory).EnableParameterLogging();
+            _dataSource = dataSourceBuilder.Build();
             return _dataSource;
         }
     }

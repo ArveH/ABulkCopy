@@ -18,6 +18,8 @@ public static class StringExtensions
             PgTypes.DoublePrecision => NpgsqlDbType.Double,
             PgTypes.Decimal => NpgsqlDbType.Numeric,
             PgTypes.Numeric => NpgsqlDbType.Numeric,
+            PgTypes.Json => NpgsqlDbType.Json,
+            PgTypes.Jsonb => NpgsqlDbType.Jsonb,
             PgTypes.Money => NpgsqlDbType.Money,
             PgTypes.Real => NpgsqlDbType.Real,
             PgTypes.SmallInt => NpgsqlDbType.Smallint,

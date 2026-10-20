@@ -60,14 +60,14 @@ public class TestSchemas : TestBase
             _output,
             fileSystem);
 
-        await _fixture.MssCmd.DropTableAsync(("dbo", childName), CancellationToken.None);
-        await _fixture.MssCmd.DropTableAsync((DatabaseFixture.MssTestSchemaName, parentName), CancellationToken.None);
+        await _fixture.MssCmd.DropTableAsync(("dbo", childName, false), CancellationToken.None);
+        await _fixture.MssCmd.DropTableAsync((DatabaseFixture.MssTestSchemaName, parentName, false), CancellationToken.None);
         var parentDef = await CreateTableAsync(
-            (DatabaseFixture.MssTestSchemaName, parentName),
+            (DatabaseFixture.MssTestSchemaName, parentName, false),
             new SqlServerInt(101, "id", false),
             parentId);
         var childDef = await CreateChildTableAsync(
-            ("dbo", childName),
+            ("dbo", childName, false),
             new SqlServerInt(101, "id", false),
             parentDef,
             (parentId, childId));
@@ -85,15 +85,15 @@ public class TestSchemas : TestBase
         await AssertFilesExists(
             fileSystem, childDef.GetSchemaFileName(), childDef.Data.FileName);
         await ValidateValueAsync(
-            ("public", childDef.Header.Name),
+            ("public", childDef.Header.Name, false),
             childDef.Columns[0].Name,
             childId);
         await ValidateValueAsync(
-            ("public", childDef.Header.Name),
+            ("public", childDef.Header.Name, false),
             childDef.Columns[1].Name,
             parentId);
         await ValidateValueAsync(
-            (DatabaseFixture.PgTestSchemaName, parentDef.Header.Name),
+            (DatabaseFixture.PgTestSchemaName, parentDef.Header.Name, false),
             parentDef.Columns[0].Name,
             parentId);
     }
