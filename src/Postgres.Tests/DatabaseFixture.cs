@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging.Abstractions;
+using Npgsql;
 
 namespace Postgres.Tests;
 
@@ -68,15 +69,40 @@ public class DatabaseFixture : IAsyncLifetime
                     { Constants.Config.AddQuotes, "false" }
                 });
         }
-        _connectionString = Configuration.GetConnectionString(Constants.Config.PgConnectionString);
+        // Pin the session time zone so timestamptz values render the same locally and in CI
+        var csBuilder = new NpgsqlConnectionStringBuilder(
+            Configuration.GetConnectionString(Constants.Config.PgConnectionString))
+        {
+            Timezone = "UTC"
+        };
+        _connectionString = csBuilder.ConnectionString;
+        Configuration = new ConfigurationBuilder()
+            .AddConfiguration(Configuration)
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "ConnectionStrings:" + Constants.Config.PgConnectionString, _connectionString }
+            })
+            .Build();
         PgContext = new PgContext(new NullLoggerFactory(), Configuration);
 
         PgRawCommand = new PgRawCommand(PgContext, new PgRawFactory());
         await PgRawCommand.ExecuteNonQueryAsync($"CREATE SCHEMA IF NOT EXISTS {TestSchemaName}", CancellationToken.None);
+        await CreateCollationsAsync();
 
         PgCmd = new ABulkCopy.APostgres.PgCmd(PgRawCommand, new QueryBuilderFactory(GetIdentifier()));
     }
 
+
+    // Collations used by the tests and the sample mappings. A fresh container doesn't have them.
+    private async Task CreateCollationsAsync()
+    {
+        const string sql =
+            "CREATE COLLATION IF NOT EXISTS en_ci_ai (provider = 'icu', locale = 'en-u-ks-level1', deterministic = false);" +
+            "CREATE COLLATION IF NOT EXISTS en_ci_ai_like (provider = 'icu', locale = 'en-u-ks-level1', deterministic = true);" +
+            "CREATE COLLATION IF NOT EXISTS en_ci_as (provider = 'icu', locale = 'en-u-ks-level2', deterministic = false);" +
+            "CREATE COLLATION IF NOT EXISTS en_ci_as_like (provider = 'icu', locale = 'en-u-ks-level2', deterministic = true);";
+        await PgRawCommand.ExecuteNonQueryAsync(sql, CancellationToken.None);
+    }
 
     public async Task CreateTable(TableDefinition tableDefinition,
     bool addQuote = false,
