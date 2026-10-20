@@ -48,7 +48,7 @@ public class PgTestColumnInfo : PgTestBase
     [InlineData("smallint default 12", "12")]
     [InlineData("varchar(225) default ''", "''::character varying")]
     [InlineData("timestamptz default current_timestamp", "CURRENT_TIMESTAMP")]
-    [InlineData("timestamptz default 'Jan 01 1900'", "'1900-01-01 00:00:00+01'::timestamp with time zone")]
+    [InlineData("timestamptz default 'Jan 01 1900'", "'1900-01-01 00:00:00+00'::timestamp with time zone")]
     [InlineData("numeric(28,3) default 222.123", "222.123")]
     [InlineData("decimal(28,3) default 333.123", "333.123")]
     public async Task TestGetColumnInfo_When_DefaultValues(
